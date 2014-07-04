@@ -40,11 +40,6 @@ def expectany(stm, nbytes, name):
     print('{} is {}'.format(name, binascii.hexlify(data)))
     return data
 
-def expectlen(stm, expected, name):
-    actual = len(stm.read(expected))
-    if actual != expected:
-        raise RuntimeError('unexpected end of packet for {}, saw {}, expected {}'.format(name, actual, expected))
-
 def expectend(stm):
     if stm.tell() != len(stm.getvalue()):
         raise RuntimeError('only {} of {} bytes consumed'.format(stm.tell(), len(stm.getvalue())))
