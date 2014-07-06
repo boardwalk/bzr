@@ -32,11 +32,18 @@ impl DatFile {
         })
     }
 
+    /// Read a file by its identifier.
     pub fn read_file_by_id(&mut self, search_id: u32) -> IoResult<Vec<u8>> {
-        let loc = try!(self.find_file(search_id));
-        self.read_file_by_loc(loc)
+        let (loc, size) = try!(self.find_file(search_id));
+        let mut result = try!(self.read_file_by_loc(loc));
+        while result.len() > size { result.pop(); };
+        Ok(result)
     }
 
+    /// Read a file by its location.
+    ///
+    /// The size of the result is rounded up to the nearest sector size,
+    /// since the actual length is in the directory.
     pub fn read_file_by_loc(&mut self, loc: i64) -> IoResult<Vec<u8>> {
         let mut result = Vec::new();
         let mut next_loc = loc;
@@ -52,7 +59,7 @@ impl DatFile {
         Ok(result)
     }
 
-    pub fn find_file(&mut self, search_id: u32) -> IoResult<i64> {
+    pub fn find_file(&mut self, search_id: u32) -> IoResult<(i64, uint)> {
         let mut dir_loc = self.root_dir_loc;
         loop {
             let dir = try!(self.read_file_by_loc(dir_loc));
@@ -63,9 +70,10 @@ impl DatFile {
                 let offset = NUM_FILES_OFF + 1 + i * 6;
                 let id = words[offset + 1];
                 let loc = words[offset + 2] as i64;
+                let size = words[offset + 3] as uint;
 
                 if search_id > id { continue; }
-                if search_id == id { return Ok(loc); }
+                if search_id == id { return Ok((loc, size)); }
 
                 if words[0] == 0 {
                     return Err(IoError {
@@ -81,12 +89,13 @@ impl DatFile {
         }
     }
 
-    pub fn iterate_files(&mut self, f: |u32, i64|) -> IoResult<()> {
+    /// Calls `f` with the id, location, and size of each file. 
+    pub fn iterate_files(&mut self, f: |u32, i64, uint|) -> IoResult<()> {
         let dir_loc = self.root_dir_loc;
         self.inner_iterate_files(dir_loc, f)
     }
 
-    fn inner_iterate_files(&mut self, dir_loc: i64, f: |u32, i64|) -> IoResult<()> {
+    fn inner_iterate_files(&mut self, dir_loc: i64, f: |u32, i64, uint|) -> IoResult<()> {
         let dir = try!(self.read_file_by_loc(dir_loc));
         let words : &[u32] = unsafe { transmute(dir.as_slice()) };
         let num_files = words[NUM_FILES_OFF] as uint;
@@ -95,12 +104,13 @@ impl DatFile {
             let offset = NUM_FILES_OFF + 1 + i * 6;
             let id = words[offset + 1];
             let loc = words[offset + 2] as i64;
+            let size = words[offset + 3] as uint;
 
             if words[0] != 0 {
-                try!(self.inner_iterate_files(words[i] as i64, |id, loc| f(id, loc)));
+                try!(self.inner_iterate_files(words[i] as i64, |id, loc, size| f(id, loc, size)));
             }
 
-            f(id, loc);
+            f(id, loc, size);
         }
 
         Ok(())

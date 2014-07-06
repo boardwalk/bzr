@@ -6,7 +6,7 @@ pub mod datfile;
 
 fn ls_datfile(file: &str) -> IoResult<()> {
     let mut datfile = try!(DatFile::open(file));
-    try!(datfile.iterate_files(|id, _| println!("{:08x}", id)));
+    try!(datfile.iterate_files(|id, loc, size| println!("{:08x} {:08x} {}", id, loc, size)));
     Ok(())
 }
 
@@ -24,7 +24,6 @@ fn print_usage() {
 }
 
 fn main() {
-
     let args = std::os::args();
 
     if args.len() < 3 {
