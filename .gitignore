@@ -2,3 +2,8 @@
 *.dat
 *.raw
 *.txt
+/.ninja_deps
+/.ninja_log
+/build.ninja
+/obj
+/out
