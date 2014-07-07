@@ -2,8 +2,8 @@
 import argparse
 import ninja_syntax
 import os
-import subprocess
 import re
+import subprocess
 
 TOP_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -37,7 +37,7 @@ def includes(path):
 def pkgconfig(*args):
     popen_args = ['pkg-config']
     popen_args.extend(args)
-    return subprocess.check_output(popen_args).decode('utf-8')
+    return subprocess.check_output(popen_args).decode('utf-8').strip()
 
 def main():
     parser = argparse.ArgumentParser()
@@ -75,7 +75,6 @@ def main():
 
         n.rule('compile', '$cxx $cppflags $cxxflags -c $in -o $out')
         n.rule('link', linkcmd)
-        n.rule('strip', 'cp $in $out && strip -s $out')
 
         link_inputs = []
 
