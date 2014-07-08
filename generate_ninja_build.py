@@ -5,7 +5,7 @@ import os
 import subprocess
 import re
 
-TOP_DIR = os.path.dirname(os.path.realpath(__file__))
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 def uniq(inp):
     out = []
@@ -22,7 +22,9 @@ def uniq(inp):
 # super fantastically ghetto dependency discovery
 def includes(path):
     def collect(path, result):
-        with open(os.path.join(TOP_DIR, path)) as f:
+        if not os.path.exists(path):
+            return
+        with open(path) as f:
             for ln in f:
                 m = re.match(r'\s*#include "(.+)"', ln)
                 if m:
@@ -34,17 +36,15 @@ def includes(path):
     collect(path, result)
     return uniq(sorted(result))
 
-def pkgconfig(*args):
-    popen_args = ['pkg-config']
-    popen_args.extend(args)
-    return subprocess.check_output(popen_args).decode('utf-8')
+def execute(*args):
+    return subprocess.check_output(args).decode('utf-8').strip()
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--release', action='store_true', default=False)
     args = parser.parse_args()
 
-    with open(os.path.join(TOP_DIR, 'build.ninja'), 'w') as buildfile:
+    with open('build.ninja', 'w') as buildfile:
         n = ninja_syntax.Writer(buildfile)
         n.variable('cxx', 'g++')
 
@@ -60,8 +60,8 @@ def main():
         cxxflags += ' -Wno-unused-parameter' # annoying error when stubbing things out
         cxxflags += ' -std=c++11'
 
-        cxxflags += ' ' + pkgconfig('--libs', '--static', 'sfml-all')
-        ldflags += ' ' + pkgconfig('--libs', '--static', 'sfml-all')
+        cxxflags += ' ' + execute('sdl2-config', '--cflags')
+        ldflags += ' -framework OpenGL ' + execute('sdl2-config', '--libs')
 
         if args.release:
             cppflags += ' -O2'
@@ -76,10 +76,19 @@ def main():
         n.rule('compile', '$cxx $cppflags $cxxflags -c $in -o $out')
         n.rule('link', linkcmd)
         n.rule('strip', 'cp $in $out && strip -s $out')
+        n.rule('header', './make_include_file.py $in $out')
 
         link_inputs = []
 
-        for entry in os.listdir(os.path.join(TOP_DIR, 'src')):
+        for entry in os.listdir('shaders'):
+            name, ext = os.path.splitext(entry)
+            if ext != '.glsl':
+                continue
+            in_file = os.path.join('shaders', entry)
+            out_file = os.path.join('src', name + '.h')
+            n.build(out_file, 'header', in_file)
+
+        for entry in os.listdir('src'):
             name, ext = os.path.splitext(entry)
             if ext != '.cpp':
                 continue
@@ -89,7 +98,7 @@ def main():
             link_inputs.append(out_file)
 
         n.build(os.path.join('out', 'bzr'), 'link', link_inputs)
+        n.default(os.path.join('out', 'bzr'))
 
 if __name__ == '__main__':
     main()
-
