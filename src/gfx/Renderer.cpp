@@ -131,8 +131,10 @@ void Renderer::render()
     SDL_GL_SwapWindow(_window);
 }
 
-static GLuint initShader(GLenum type, const GLchar* source, const GLint length)
+static GLuint initShader(GLenum type, const GLchar* source)
 {
+    GLint length = strlen(source);
+
     GLuint shader;
     CHECK_GL(shader = glCreateShader(type));
     CHECK_GL(glShaderSource(shader, 1, &source, &length));
@@ -158,10 +160,8 @@ static GLuint initShader(GLenum type, const GLchar* source, const GLint length)
 
 void Renderer::initProgram()
 {
-    auto vertexShader = initShader(GL_VERTEX_SHADER, VertexShader,
-            sizeof(VertexShader)/sizeof(VertexShader[0]));
-    auto fragmentShader = initShader(GL_FRAGMENT_SHADER, FragmentShader,
-            sizeof(FragmentShader)/sizeof(FragmentShader[0]));
+    auto vertexShader = initShader(GL_VERTEX_SHADER, VertexShader);
+    auto fragmentShader = initShader(GL_FRAGMENT_SHADER, FragmentShader);
 
     CHECK_GL(_program = glCreateProgram());
     CHECK_GL(glAttachShader(_program, vertexShader));
