@@ -22,7 +22,7 @@ public:
 
 static void CheckGL()
 {
-    GLenum e = glGetError();
+    auto e = glGetError();
 
     if(e != GL_NO_ERROR)
     {
@@ -74,7 +74,7 @@ void perspectiveMatrix(GLfloat fovy, GLfloat aspect, GLfloat zNear, GLfloat zFar
 {
    memset(m, 0, sizeof(GLfloat) * 16);
 
-   auto f = 1.0 / tan(fovy * PI / 360.0f);
+   auto f = 1.0f / tan(fovy * PI / 360.0f);
    m[0] = f / aspect;
    m[5] = f;
    m[10] = (zFar + zNear) / (zFar - zNear); // negated!
@@ -95,13 +95,13 @@ void Renderer::init()
     GLfloat modelMat[16];
     identityMatrix(modelMat);
 
-    GLint projectionLoc = glGetUniformLocation(_program, "projection");
+    auto projectionLoc = glGetUniformLocation(_program, "projection");
     CHECK_GL(glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projectionMat));
 
-    GLint viewLoc = glGetUniformLocation(_program, "view");
+    auto viewLoc = glGetUniformLocation(_program, "view");
     CHECK_GL(glUniformMatrix4fv(viewLoc, 1, GL_FALSE, viewMat));
 
-    GLint modelLoc = glGetUniformLocation(_program, "model");
+    auto modelLoc = glGetUniformLocation(_program, "model");
     CHECK_GL(glUniformMatrix4fv(modelLoc, 1, GL_FALSE, modelMat));
 }
 
@@ -142,8 +142,8 @@ static GLuint initShader(GLenum type, const GLchar* source, const GLint length)
 
 void Renderer::initProgram()
 {
-    GLuint vertexShader = initShader(GL_VERTEX_SHADER, VertexShader, sizeof(VertexShader)/sizeof(VertexShader[0]));
-    GLuint fragmentShader = initShader(GL_FRAGMENT_SHADER, FragmentShader, sizeof(FragmentShader)/sizeof(FragmentShader[0]));
+    auto vertexShader = initShader(GL_VERTEX_SHADER, VertexShader, sizeof(VertexShader)/sizeof(VertexShader[0]));
+    auto fragmentShader = initShader(GL_FRAGMENT_SHADER, FragmentShader, sizeof(FragmentShader)/sizeof(FragmentShader[0]));
 
     CHECK_GL(_program = glCreateProgram());
     CHECK_GL(glAttachShader(_program, vertexShader));
