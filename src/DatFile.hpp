@@ -9,7 +9,7 @@ using namespace std;
 class DatFileError : public runtime_error
 {
 public:
-    DatFileError(const std::string& msg) : runtime_error(msg) { }
+    DatFileError(const string& msg) : runtime_error(msg) { }
 };
 
 class DatFile
