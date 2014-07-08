@@ -7,13 +7,18 @@
 #include "VertexShader.h"
 #include "FragmentShader.h"
 
-#define CHECK_GL(stmt) { stmt; CheckGL(); }
+static const GLfloat PI = 3.14159265359;
 
 class GLError : public runtime_error
 {
 public:
     GLError(const string& msg) : runtime_error(msg) { }
 };
+
+#ifndef NDEBUG
+#define CHECK_GL(stmt) stmt
+#else
+#define CHECK_GL(stmt) { stmt; CheckGL(); }
 
 static void CheckGL()
 {
@@ -27,6 +32,7 @@ static void CheckGL()
         throw GLError(buf);
     }
 }
+#endif
 
 class Renderer
 {
@@ -38,11 +44,65 @@ public:
 private:
     void initProgram();
     void cleanupProgram();
+
+    GLuint _program;
 };
+
+void identityMatrix(GLfloat mat[16])
+{
+    memset(mat, 0, sizeof(GLfloat) * 16);
+
+    mat[0] = 1.0f;
+    mat[5] = 1.0f;
+    mat[10] = 1.0f;
+    mat[15] = 1.0f;
+}
+
+//
+// on coordinates
+// our coordinate system is:
+// +x goes right
+// +y goes up
+// +z goes into the screen
+// this is "left handed"
+// gluPerspective traditionally transforms "right handed" (+z out of the screen)
+// to the "left handed" used by normalized device coordinates by flipping the z-axis.
+// we don't do this.
+// http://www.songho.ca/opengl/gl_projectionmatrix.html
+//
+void perspectiveMatrix(GLfloat fovy, GLfloat aspect, GLfloat zNear, GLfloat zFar, GLfloat m[16])
+{
+   memset(m, 0, sizeof(GLfloat) * 16);
+
+   auto f = 1.0 / tan(fovy * PI / 360.0f);
+   m[0] = f / aspect;
+   m[5] = f;
+   m[10] = (zFar + zNear) / (zFar - zNear); // negated!
+   m[11] = 1.0f; // negated!
+   m[14] = -(2.0f * zFar * zNear) / (zFar - zNear);
+}
 
 void Renderer::init()
 {
     initProgram();
+
+    GLfloat projectionMat[16];
+    perspectiveMatrix(90.0f, 800.0/600.0f, 0.1f, 1000.0f, projectionMat);
+
+    GLfloat viewMat[16];
+    identityMatrix(viewMat);
+
+    GLfloat modelMat[16];
+    identityMatrix(modelMat);
+
+    GLint projectionLoc = glGetUniformLocation(_program, "projection");
+    CHECK_GL(glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projectionMat));
+
+    GLint viewLoc = glGetUniformLocation(_program, "view");
+    CHECK_GL(glUniformMatrix4fv(viewLoc, 1, GL_FALSE, viewMat));
+
+    GLint modelLoc = glGetUniformLocation(_program, "model");
+    CHECK_GL(glUniformMatrix4fv(modelLoc, 1, GL_FALSE, modelMat));
 }
 
 void Renderer::cleanup()
@@ -85,31 +145,30 @@ void Renderer::initProgram()
     GLuint vertexShader = initShader(GL_VERTEX_SHADER, VertexShader, sizeof(VertexShader)/sizeof(VertexShader[0]));
     GLuint fragmentShader = initShader(GL_FRAGMENT_SHADER, FragmentShader, sizeof(FragmentShader)/sizeof(FragmentShader[0]));
 
-    GLuint program;
-    CHECK_GL(program = glCreateProgram());
-    CHECK_GL(glAttachShader(program, vertexShader));
-    CHECK_GL(glAttachShader(program, fragmentShader));
-    CHECK_GL(glLinkProgram(program));
+    CHECK_GL(_program = glCreateProgram());
+    CHECK_GL(glAttachShader(_program, vertexShader));
+    CHECK_GL(glAttachShader(_program, fragmentShader));
+    CHECK_GL(glLinkProgram(_program));
 
     GLint success = GL_FALSE;
-    CHECK_GL(glGetProgramiv(program, GL_LINK_STATUS, &success));
+    CHECK_GL(glGetProgramiv(_program, GL_LINK_STATUS, &success));
 
     if(!success)
     {
         GLint logLength;
-        CHECK_GL(glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength));
+        CHECK_GL(glGetProgramiv(_program, GL_INFO_LOG_LENGTH, &logLength));
 
         vector<GLchar> log(logLength);
-        CHECK_GL(glGetProgramInfoLog(program, logLength, &logLength, log.data()));
+        CHECK_GL(glGetProgramInfoLog(_program, logLength, &logLength, log.data()));
 
         string logStr(log.data(), logLength);
         throw GLError(logStr);
     }
 
-    CHECK_GL(glUseProgram(program));
+    CHECK_GL(glUseProgram(_program));
     CHECK_GL(glDeleteShader(vertexShader));
     CHECK_GL(glDeleteShader(fragmentShader));
-    CHECK_GL(glDeleteProgram(program));
+    CHECK_GL(glDeleteProgram(_program));
 }
 
 void Renderer::cleanupProgram()
