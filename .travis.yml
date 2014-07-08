@@ -8,3 +8,5 @@ before_install:
 script:
     - ./make_ninja_build.py
     - ninja
+notifications:
+    irc: "irc.sorcery.net#bzrdev"
