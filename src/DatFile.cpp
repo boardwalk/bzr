@@ -60,7 +60,7 @@ DatFile::DatFile(const string& path) :
         throw runtime_error("Dat file header has bad magic number");
     }
 
-    _blockSize = header.blockSize - sizeof(uint32_t); // exclude next sector position
+    _blockSize = header.blockSize - sizeof(uint32_t); // exclude next block position
     _rootPosition = header.rootPosition;
 }
 
