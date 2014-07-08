@@ -55,6 +55,7 @@ def change_top_dir(path, new_top_dir):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--release', action='store_true', default=False)
+    parser.add_argument('--headless', action='store_true', default=False)
     args = parser.parse_args()
 
     with open('build.ninja', 'w') as buildfile:
@@ -89,6 +90,9 @@ def main():
             linkcmd += ' && strip -s $out'
         else:
             cppflags += ' -g'
+
+        if args.headless:
+            cxxflags += ' -DHEADLESS'
 
         n.variable('cppflags', cppflags)
         n.variable('cxxflags', cxxflags)

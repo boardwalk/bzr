@@ -2,7 +2,7 @@
 #include "util.h"
 #include <SDL.h>
 
-Game::Game() : _running(false)
+Game::Game() : _running(true)
 {
     if(SDL_Init(SDL_INIT_TIMER) < 0)
     {
