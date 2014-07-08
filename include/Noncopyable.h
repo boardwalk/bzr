@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BZR_NONCOPYABLE_H
+#define BZR_NONCOPYABLE_H
 
 class Noncopyable
 {
@@ -10,3 +11,4 @@ private:
     Noncopyable& operator=(const Noncopyable&);
 };
 
+#endif

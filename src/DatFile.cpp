@@ -52,12 +52,12 @@ DatFile::DatFile(const string& path) :
 
     if(!_fs.good())
     {
-        throw DatFileError("Could not read dat file header");
+        throw runtime_error("Could not read dat file header");
     }
 
     if(header.magicNumber != HEADER_MAGIC_NUMBER)
     {
-        throw DatFileError("Dat file header has bad magic number");
+        throw runtime_error("Dat file header has bad magic number");
     }
 
     _blockSize = header.blockSize - sizeof(uint32_t); // exclude next sector position
@@ -78,7 +78,7 @@ vector<uint8_t> DatFile::read(uint32_t id) const
 
         if(node->nodeCount > MAX_NODE_COUNT)
         {
-            throw DatFileError("Node has bad node count");
+            throw runtime_error("Node has bad node count");
         }
 
         for(auto i = 0u; i < node->nodeCount; i++)
@@ -120,7 +120,7 @@ vector<uint8_t> DatFile::readBlocks(uint32_t position) const
 
         if(!_fs.good())
         {
-            throw DatFileError("Failed to read block");
+            throw runtime_error("Failed to read block");
         }
     }
 

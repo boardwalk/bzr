@@ -1,16 +1,9 @@
-#pragma once
+#ifndef BZR_DATFILE_H
+#define BZR_DATFILE_H
+
 #include <fstream>
-#include <stdexcept>
 #include <string>
 #include <vector>
-
-using namespace std;
-
-class DatFileError : public runtime_error
-{
-public:
-    DatFileError(const string& msg) : runtime_error(msg) { }
-};
 
 class DatFile
 {
@@ -32,3 +25,4 @@ private:
     uint32_t _rootPosition;
 };
 
+#endif

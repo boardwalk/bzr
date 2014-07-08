@@ -1,5 +1,5 @@
-#ifndef BZR_GAME_HPP
-#define BZR_GAME_HPP
+#ifndef BZR_GAME_H
+#define BZR_GAME_H
 
 #include "gfx/Renderer.h"
 

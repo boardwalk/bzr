@@ -1,5 +1,5 @@
-#ifndef BZR_UTIL_HPP
-#define BZR_UTIL_HPP
+#ifndef BZR_UTIL_H
+#define BZR_UTIL_H
 
 void throwSDLError();
 

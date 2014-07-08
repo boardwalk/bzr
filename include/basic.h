@@ -1,5 +1,5 @@
-#ifndef BZR_BASIC_HPP
-#define BZR_BASIC_HPP
+#ifndef BZR_BASIC_H
+#define BZR_BASIC_H
 
 #include <memory>
 
