@@ -1,6 +1,7 @@
 #include "Game.h"
 #include <cstdio>
 #include <cstdlib>
+#include <stdexcept>
 #include <memory>
 
 int main()

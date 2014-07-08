@@ -1,6 +1,7 @@
 #include "gfx/Renderer.h"
 #include "util.h"
 #include <SDL.h>
+#include <string>
 #include <vector>
 
 #include "gfx/shaders/VertexShader.glsl.h"

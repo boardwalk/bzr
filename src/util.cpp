@@ -1,6 +1,7 @@
 #include "util.h"
 #include <SDL.h>
 #include <stdexcept>
+#include <string>
 
 using namespace std;
 
