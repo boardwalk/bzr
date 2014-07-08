@@ -37,11 +37,11 @@ void Game::run()
                     _running = false;
                     break;
             }
-
-#ifndef HEADLESS
-            _renderer->render();
-#endif
         }
+        
+#ifndef HEADLESS
+        _renderer->render();
+#endif
     }
 }
 
