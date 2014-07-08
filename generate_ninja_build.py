@@ -4,6 +4,7 @@ import ninja_syntax
 import os
 import re
 import subprocess
+import sys
 
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
@@ -61,7 +62,12 @@ def main():
         cxxflags += ' -std=c++11'
 
         cxxflags += ' ' + execute('sdl2-config', '--cflags')
-        ldflags += ' -framework OpenGL ' + execute('sdl2-config', '--libs')
+        ldflags += ' ' + execute('sdl2-config', '--libs')
+
+        if sys.platform == 'darwin':
+            ldflags += ' -framework OpenGL'
+        elif sys.platform.startswith('linux'):
+            ldflags += ' -lGL'
 
         if args.release:
             cppflags += ' -O2'

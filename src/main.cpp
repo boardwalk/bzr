@@ -1,3 +1,4 @@
+#define GL_GLEXT_PROTOTYPES
 #include "DatFile.hpp"
 #include <SDL.h>
 #include <SDL_opengl.h>
@@ -48,7 +49,7 @@ private:
     GLuint _program;
 };
 
-void identityMatrix(GLfloat mat[16])
+static void identityMatrix(GLfloat mat[16])
 {
     memset(mat, 0, sizeof(GLfloat) * 16);
 
@@ -70,7 +71,7 @@ void identityMatrix(GLfloat mat[16])
 // we don't do this.
 // http://www.songho.ca/opengl/gl_projectionmatrix.html
 //
-void perspectiveMatrix(GLfloat fovy, GLfloat aspect, GLfloat zNear, GLfloat zFar, GLfloat m[16])
+static void perspectiveMatrix(GLfloat fovy, GLfloat aspect, GLfloat zNear, GLfloat zFar, GLfloat m[16])
 {
    memset(m, 0, sizeof(GLfloat) * 16);
 
