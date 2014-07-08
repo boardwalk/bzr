@@ -1,4 +1,4 @@
-#include "DatFile.hpp"
+#include "DatFile.h"
 
 #ifdef __GNUC__
 #define PACK(decl) decl __attribute__((__packed__))

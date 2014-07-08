@@ -2,6 +2,7 @@
 *.dat
 *.raw
 *.txt
+/include/gfx/shaders
 /.ninja_deps
 /.ninja_log
 /build.ninja
