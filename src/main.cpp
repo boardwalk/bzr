@@ -7,8 +7,7 @@ int main()
 {
     try
     {
-        // may be too large for the stack
-        make_unique<Game>()->run();
+        Game().run();
     }
     catch(const runtime_error& e)
     {
