@@ -11,9 +11,9 @@ static const GLfloat PI = 3.14159265359;
 
 static const GLfloat vertices[] =
 {
-    0.0f, 1.0f, 0.0f, 1.0f,
-    -1.0f, -1.0f, 0.0f, 1.0f,
-    1.0f, -1.0f, 0.0f, 1.0f
+    0.0f, 1.0f, 3.0f, 1.0f,
+    -1.0f, -1.0f, 3.0f, 1.0f,
+    1.0f, -1.0f, 3.0f, 1.0f
 };
 
 void identityMatrix(GLfloat mat[16])
@@ -154,24 +154,29 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     CHECK_GL(glEnable(GL_DEPTH_TEST));
     CHECK_GL(glClearColor(0.0f, 0.0, 0.5f, 1.0f));
 
-    //GLfloat projectionMat[16];
-    //perspectiveMatrix(90.0f, 800.0/600.0f, 0.1f, 1000.0f, projectionMat);
-    //identityMatrix(projectionMat);
+    _program = createProgram(VertexShader, FragmentShader);
+    CHECK_GL(glUseProgram(_program));
 
-    //GLfloat viewMat[16];
-    //identityMatrix(viewMat);
+    GLfloat projectionMat[16];
+    perspectiveMatrix(90.0f, 800.0/600.0f, 0.1f, 1000.0f, projectionMat);
 
-    //GLfloat modelMat[16];
-    //identityMatrix(modelMat);
+    GLfloat viewMat[16];
+    identityMatrix(viewMat);
 
-    //auto projectionLoc = glGetUniformLocation(_program, "projection");
-    //CHECK_GL(glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projectionMat));
+    GLfloat modelMat[16];
+    identityMatrix(modelMat);
 
-    //auto viewLoc = glGetUniformLocation(_program, "view");
-    //CHECK_GL(glUniformMatrix4fv(viewLoc, 1, GL_FALSE, viewMat));
+    GLuint projectionLoc;
+    CHECK_GL(projectionLoc = glGetUniformLocation(_program, "projection"));
+    CHECK_GL(glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projectionMat));
 
-    //auto modelLoc = glGetUniformLocation(_program, "model");
-    //CHECK_GL(glUniformMatrix4fv(modelLoc, 1, GL_FALSE, modelMat));
+    GLuint viewLoc;
+    CHECK_GL(viewLoc = glGetUniformLocation(_program, "view"));
+    CHECK_GL(glUniformMatrix4fv(viewLoc, 1, GL_FALSE, viewMat));
+
+    GLuint modelLoc;
+    CHECK_GL(modelLoc = glGetUniformLocation(_program, "model"));
+    CHECK_GL(glUniformMatrix4fv(modelLoc, 1, GL_FALSE, modelMat));
 
     GLuint vertexArray;
     CHECK_GL(glGenVertexArrays(1, &vertexArray));
@@ -182,13 +187,11 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     CHECK_GL(glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW));
     CHECK_GL(glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr));
     CHECK_GL(glEnableVertexAttribArray(0));
-    
-    _program = createProgram(VertexShader, FragmentShader);
-    CHECK_GL(glUseProgram(_program));
 }
 
 Renderer::~Renderer()
 {
+    // TODO delete VAO
     CHECK_GL(glUseProgram(0));
     CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
 
