@@ -9,7 +9,14 @@
 
 static const GLfloat PI = 3.14159265359;
 
-static void identityMatrix(GLfloat mat[16])
+static const GLfloat vertices[] =
+{
+    0.0f, 1.0f, 0.0f, 1.0f,
+    -1.0f, -1.0f, 0.0f, 1.0f,
+    1.0f, -1.0f, 0.0f, 1.0f
+};
+
+void identityMatrix(GLfloat mat[16])
 {
     memset(mat, 0, sizeof(GLfloat) * 16);
 
@@ -31,7 +38,7 @@ static void identityMatrix(GLfloat mat[16])
 // we don't do this.
 // http://www.songho.ca/opengl/gl_projectionmatrix.html
 //
-static void perspectiveMatrix(GLfloat fovy, GLfloat aspect, GLfloat zNear, GLfloat zFar, GLfloat m[16])
+void perspectiveMatrix(GLfloat fovy, GLfloat aspect, GLfloat zNear, GLfloat zFar, GLfloat m[16])
 {
    memset(m, 0, sizeof(GLfloat) * 16);
 
@@ -56,8 +63,66 @@ void checkGL()
     }
 }
 
-Renderer::Renderer() :
-    _videoInit(false), _window(nullptr), _context(nullptr)
+static GLuint createShader(GLenum type, const GLchar* source)
+{
+    GLint length = strlen(source);
+
+    GLuint shader;
+    CHECK_GL(shader = glCreateShader(type));
+    CHECK_GL(glShaderSource(shader, 1, &source, &length));
+    CHECK_GL(glCompileShader(shader));
+
+    GLint success = GL_FALSE;
+    CHECK_GL(glGetShaderiv(shader, GL_COMPILE_STATUS, &success));
+
+    if(!success)
+    {
+        GLint logLength;
+        CHECK_GL(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength));
+
+        vector<GLchar> log(logLength);
+        CHECK_GL(glGetShaderInfoLog(shader, logLength, &logLength, log.data()));
+
+        string logStr(log.data(), logLength);
+        throw runtime_error(logStr);
+    }
+
+    return shader;
+}
+
+static GLuint createProgram(const GLchar* vertexSource, const GLchar* fragmentSource)
+{
+    auto vertexShader = createShader(GL_VERTEX_SHADER, VertexShader);
+    auto fragmentShader = createShader(GL_FRAGMENT_SHADER, FragmentShader);
+
+    GLuint program;
+    CHECK_GL(program = glCreateProgram());
+    CHECK_GL(glAttachShader(program, vertexShader));
+    CHECK_GL(glAttachShader(program, fragmentShader));
+    CHECK_GL(glLinkProgram(program));
+
+    GLint success = GL_FALSE;
+    CHECK_GL(glGetProgramiv(program, GL_LINK_STATUS, &success));
+
+    if(!success)
+    {
+        GLint logLength;
+        CHECK_GL(glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength));
+
+        vector<GLchar> log(logLength);
+        CHECK_GL(glGetProgramInfoLog(program, logLength, &logLength, log.data()));
+
+        string logStr(log.data(), logLength);
+        throw runtime_error(logStr);
+    }
+
+    CHECK_GL(glDeleteShader(vertexShader));
+    CHECK_GL(glDeleteShader(fragmentShader));
+
+    return program;
+}
+
+Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 {
     if(SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
     {
@@ -85,30 +150,50 @@ Renderer::Renderer() :
         throwSDLError();
     }
 
-    initProgram();
+    SDL_GL_SetSwapInterval(1); // vsync
+    CHECK_GL(glEnable(GL_DEPTH_TEST));
+    CHECK_GL(glClearColor(0.0f, 0.0, 0.5f, 1.0f));
 
-    GLfloat projectionMat[16];
-    perspectiveMatrix(90.0f, 800.0/600.0f, 0.1f, 1000.0f, projectionMat);
+    //GLfloat projectionMat[16];
+    //perspectiveMatrix(90.0f, 800.0/600.0f, 0.1f, 1000.0f, projectionMat);
+    //identityMatrix(projectionMat);
 
-    GLfloat viewMat[16];
-    identityMatrix(viewMat);
+    //GLfloat viewMat[16];
+    //identityMatrix(viewMat);
 
-    GLfloat modelMat[16];
-    identityMatrix(modelMat);
+    //GLfloat modelMat[16];
+    //identityMatrix(modelMat);
 
-    auto projectionLoc = glGetUniformLocation(_program, "projection");
-    CHECK_GL(glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projectionMat));
+    //auto projectionLoc = glGetUniformLocation(_program, "projection");
+    //CHECK_GL(glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projectionMat));
 
-    auto viewLoc = glGetUniformLocation(_program, "view");
-    CHECK_GL(glUniformMatrix4fv(viewLoc, 1, GL_FALSE, viewMat));
+    //auto viewLoc = glGetUniformLocation(_program, "view");
+    //CHECK_GL(glUniformMatrix4fv(viewLoc, 1, GL_FALSE, viewMat));
 
-    auto modelLoc = glGetUniformLocation(_program, "model");
-    CHECK_GL(glUniformMatrix4fv(modelLoc, 1, GL_FALSE, modelMat));
+    //auto modelLoc = glGetUniformLocation(_program, "model");
+    //CHECK_GL(glUniformMatrix4fv(modelLoc, 1, GL_FALSE, modelMat));
+
+    GLuint vertexArray;
+    CHECK_GL(glGenVertexArrays(1, &vertexArray));
+    CHECK_GL(glBindVertexArray(vertexArray));
+
+    CHECK_GL(glGenBuffers(1, &_buffer));
+    CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, _buffer));
+    CHECK_GL(glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW));
+    CHECK_GL(glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr));
+    CHECK_GL(glEnableVertexAttribArray(0));
+    
+    _program = createProgram(VertexShader, FragmentShader);
+    CHECK_GL(glUseProgram(_program));
 }
 
 Renderer::~Renderer()
 {
-    cleanupProgram();
+    CHECK_GL(glUseProgram(0));
+    CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+
+    CHECK_GL(glDeleteProgram(_program));
+    CHECK_GL(glDeleteBuffers(1, & _buffer));
 
     if(_context != nullptr)
     {
@@ -128,70 +213,7 @@ Renderer::~Renderer()
 
 void Renderer::render()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+    CHECK_GL(glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(vertices[0]) / 4));
     SDL_GL_SwapWindow(_window);
 }
-
-static GLuint initShader(GLenum type, const GLchar* source)
-{
-    GLint length = strlen(source);
-
-    GLuint shader;
-    CHECK_GL(shader = glCreateShader(type));
-    CHECK_GL(glShaderSource(shader, 1, &source, &length));
-    CHECK_GL(glCompileShader(shader));
-
-    GLint success = GL_FALSE;
-    CHECK_GL(glGetShaderiv(shader, GL_COMPILE_STATUS, &success));
-
-    if(!success)
-    {
-        GLint logLength;
-        CHECK_GL(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength));
-
-        vector<GLchar> log(logLength);
-        CHECK_GL(glGetShaderInfoLog(shader, logLength, &logLength, log.data()));
-
-        string logStr(log.data(), logLength);
-        throw runtime_error(logStr);
-    }
-
-    return shader;
-}
-
-void Renderer::initProgram()
-{
-    auto vertexShader = initShader(GL_VERTEX_SHADER, VertexShader);
-    auto fragmentShader = initShader(GL_FRAGMENT_SHADER, FragmentShader);
-
-    CHECK_GL(_program = glCreateProgram());
-    CHECK_GL(glAttachShader(_program, vertexShader));
-    CHECK_GL(glAttachShader(_program, fragmentShader));
-    CHECK_GL(glLinkProgram(_program));
-
-    GLint success = GL_FALSE;
-    CHECK_GL(glGetProgramiv(_program, GL_LINK_STATUS, &success));
-
-    if(!success)
-    {
-        GLint logLength;
-        CHECK_GL(glGetProgramiv(_program, GL_INFO_LOG_LENGTH, &logLength));
-
-        vector<GLchar> log(logLength);
-        CHECK_GL(glGetProgramInfoLog(_program, logLength, &logLength, log.data()));
-
-        string logStr(log.data(), logLength);
-        throw runtime_error(logStr);
-    }
-
-    CHECK_GL(glUseProgram(_program));
-    CHECK_GL(glDeleteShader(vertexShader));
-    CHECK_GL(glDeleteShader(fragmentShader));
-    CHECK_GL(glDeleteProgram(_program));
-}
-
-void Renderer::cleanupProgram()
-{
-    CHECK_GL(glUseProgram(0));
-}
-
