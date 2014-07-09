@@ -1,21 +1,18 @@
 #ifndef BZR_DATFILE_H
 #define BZR_DATFILE_H
 
+#include "Noncopyable.h"
 #include <fstream>
 #include <string>
 #include <vector>
 
-class DatFile
+class DatFile : Noncopyable
 {
 public:
     DatFile(const string& path);
     ~DatFile();
 
     vector<uint8_t> read(uint32_t id) const;
-
-    // noncopyable
-    DatFile(const DatFile&) = delete;
-    DatFile& operator=(const DatFile&) = delete;
 
 private:
     vector<uint8_t> readBlocks(uint32_t position) const;

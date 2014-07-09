@@ -3,13 +3,15 @@
 
 #include "Noncopyable.h"
 
+class Game;
+
 class Renderer : Noncopyable
 {
 public:
     Renderer();
     ~Renderer();
 
-    void render();
+    void render(const Game& game, double interp);
 
 private:
     bool _videoInit;

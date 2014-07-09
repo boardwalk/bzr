@@ -196,7 +196,7 @@ Renderer::~Renderer()
     }
 }
 
-void Renderer::render()
+void Renderer::render(const Game& game, double interp)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(vertices[0]) / 4);

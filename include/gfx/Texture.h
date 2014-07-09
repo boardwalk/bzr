@@ -14,6 +14,8 @@ public:
     Texture(const void* data, int width, int height, TextureFormat format);
     ~Texture();
 
+    void bind();
+
 private:
     GLuint _handle;
 };

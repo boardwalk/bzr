@@ -1,16 +1,23 @@
 #include "Game.h"
+#include "gfx/Renderer.h"
+#include "DatFile.h"
 #include "util.h"
 #include <SDL.h>
 
-Game::Game() : _running(true)
+static const double STEP_RATE = 60.0;
+
+Game::Game() : _done(false)
 {
+    _portalDat.reset(new DatFile("data/client_portal.dat"));
+    _cellDat.reset(new DatFile("data/client_cell_1.dat"));
+
     if(SDL_Init(SDL_INIT_TIMER) < 0)
     {
         throwSDLError();
     }
 
 #ifndef HEADLESS
-    _renderer = make_unique<Renderer>();
+    _renderer.reset(new Renderer());
 #endif
 }
 
@@ -25,23 +32,74 @@ Game::~Game()
 
 void Game::run()
 {
-    while(_running)
-    {
-        SDL_Event event;
+    uint64_t frequency = SDL_GetPerformanceFrequency();
+    uint64_t fixedStep = frequency / uint64_t(STEP_RATE);
+    uint64_t maxTotalDelta = fixedStep * 6;
+    uint64_t time = SDL_GetPerformanceCounter();
 
-        while(SDL_PollEvent(&event) != 0)
+    while(!_done)
+    {
+        uint64_t loopTime = SDL_GetPerformanceCounter();
+
+        if(loopTime > time + maxTotalDelta)
         {
-            switch(event.type)
-            {
-                case SDL_QUIT:
-                    _running = false;
-                    break;
-            }
+            time = loopTime - maxTotalDelta;
         }
-        
+
+        while(loopTime >= time + fixedStep)
+        {
+            handleEvents();
+            step(1.0 / STEP_RATE);
+            time += fixedStep;
+        }
+
 #ifndef HEADLESS
-        _renderer->render();
+        double interp = (double)(loopTime - time) / (double)frequency;
+        _renderer->render(*this, interp);
+#else
+        // simulate ~83 without game logic
+        SDL_Delay(12);
 #endif
     }
+}
+
+const DatFile& Game::portalDat() const
+{
+    return *_portalDat;
+}
+
+const DatFile& Game::cellDat() const
+{
+    return *_cellDat;
+}
+
+void Game::handleEvents()
+{
+    SDL_Event event;
+
+    while(SDL_PollEvent(&event) != 0)
+    {
+        switch(event.type)
+        {
+            case SDL_QUIT:
+                _done = true;
+                break;
+
+            case SDL_KEYDOWN:
+#ifdef WIN32
+                // SDL does not response normally to alt-f4 on Windows, so handle it ourselves
+                if(event.key.keysym == SDLK_F4 && (event.key.keysym.mod & KMOD_ALT) != 0)
+                {
+                    _done = true;
+                }
+#endif
+                break;
+        }
+    }
+}
+
+void Game::step(double dt)
+{
+    // TODO
 }
 

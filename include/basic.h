@@ -4,6 +4,8 @@
 #define GL_GLEXT_PROTOTYPES
 #include <SDL.h>
 #include <SDL_opengl.h>
+
+#include <cassert>
 #include <memory>
 
 using namespace std;
