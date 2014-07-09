@@ -21,9 +21,8 @@ Build dependencies:
 Runtime dependencies:
 
 * [SDL](https://www.libsdl.org/) 2.0+
-* Update to date [Asheron's Call data files](http://asheronscall.com/en/content/downloads)
+* Updated [Asheron's Call data files](http://asheronscall.com/en/content/downloads)
 
 ```sh
 $ ./make_ninja_build.py && ninja
 ```
-
