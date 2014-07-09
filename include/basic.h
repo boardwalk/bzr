@@ -1,6 +1,9 @@
 #ifndef BZR_BASIC_H
 #define BZR_BASIC_H
 
+#define GL_GLEXT_PROTOTYPES
+#include <SDL.h>
+#include <SDL_opengl.h>
 #include <memory>
 
 using namespace std;

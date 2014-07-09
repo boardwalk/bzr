@@ -86,7 +86,7 @@ def main():
             ldflags += ' -lGL'
 
         if args.release:
-            cppflags += ' -O2'
+            cppflags += ' -O2 -flto'
             linkcmd += ' && strip -s $out'
         else:
             cppflags += ' -g'

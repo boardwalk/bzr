@@ -50,38 +50,24 @@ void perspectiveMatrix(GLfloat fovy, GLfloat aspect, GLfloat zNear, GLfloat zFar
    m[14] = -(2.0f * zFar * zNear) / (zFar - zNear);
 }
 
-void checkGL()
-{
-    auto e = glGetError();
-
-    if(e != GL_NO_ERROR)
-    {
-        char buf[32];
-        sprintf(buf, "OpenGL error %08x", e);
-
-        throw runtime_error(buf);
-    }
-}
-
 static GLuint createShader(GLenum type, const GLchar* source)
 {
     GLint length = strlen(source);
 
-    GLuint shader;
-    CHECK_GL(shader = glCreateShader(type));
-    CHECK_GL(glShaderSource(shader, 1, &source, &length));
-    CHECK_GL(glCompileShader(shader));
+    auto shader = glCreateShader(type);
+    glShaderSource(shader, 1, &source, &length);
+    glCompileShader(shader);
 
     GLint success = GL_FALSE;
-    CHECK_GL(glGetShaderiv(shader, GL_COMPILE_STATUS, &success));
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 
     if(!success)
     {
         GLint logLength;
-        CHECK_GL(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength));
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
 
         vector<GLchar> log(logLength);
-        CHECK_GL(glGetShaderInfoLog(shader, logLength, &logLength, log.data()));
+        glGetShaderInfoLog(shader, logLength, &logLength, log.data());
 
         string logStr(log.data(), logLength);
         throw runtime_error(logStr);
@@ -95,29 +81,28 @@ static GLuint createProgram(const GLchar* vertexSource, const GLchar* fragmentSo
     auto vertexShader = createShader(GL_VERTEX_SHADER, VertexShader);
     auto fragmentShader = createShader(GL_FRAGMENT_SHADER, FragmentShader);
 
-    GLuint program;
-    CHECK_GL(program = glCreateProgram());
-    CHECK_GL(glAttachShader(program, vertexShader));
-    CHECK_GL(glAttachShader(program, fragmentShader));
-    CHECK_GL(glLinkProgram(program));
+    auto program = glCreateProgram();
+    glAttachShader(program, vertexShader);
+    glAttachShader(program, fragmentShader);
+    glLinkProgram(program);
 
     GLint success = GL_FALSE;
-    CHECK_GL(glGetProgramiv(program, GL_LINK_STATUS, &success));
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
 
     if(!success)
     {
         GLint logLength;
-        CHECK_GL(glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength));
+        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
 
         vector<GLchar> log(logLength);
-        CHECK_GL(glGetProgramInfoLog(program, logLength, &logLength, log.data()));
+        glGetProgramInfoLog(program, logLength, &logLength, log.data());
 
         string logStr(log.data(), logLength);
         throw runtime_error(logStr);
     }
 
-    CHECK_GL(glDeleteShader(vertexShader));
-    CHECK_GL(glDeleteShader(fragmentShader));
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
 
     return program;
 }
@@ -151,11 +136,11 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     }
 
     SDL_GL_SetSwapInterval(1); // vsync
-    CHECK_GL(glEnable(GL_DEPTH_TEST));
-    CHECK_GL(glClearColor(0.0f, 0.0, 0.5f, 1.0f));
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(0.0f, 0.0, 0.5f, 1.0f);
 
     _program = createProgram(VertexShader, FragmentShader);
-    CHECK_GL(glUseProgram(_program));
+    glUseProgram(_program);
 
     GLfloat projectionMat[16];
     perspectiveMatrix(90.0f, 800.0/600.0f, 0.1f, 1000.0f, projectionMat);
@@ -166,37 +151,34 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     GLfloat modelMat[16];
     identityMatrix(modelMat);
 
-    GLuint projectionLoc;
-    CHECK_GL(projectionLoc = glGetUniformLocation(_program, "projection"));
-    CHECK_GL(glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projectionMat));
+    auto projectionLoc = glGetUniformLocation(_program, "projection");
+    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projectionMat);
 
-    GLuint viewLoc;
-    CHECK_GL(viewLoc = glGetUniformLocation(_program, "view"));
-    CHECK_GL(glUniformMatrix4fv(viewLoc, 1, GL_FALSE, viewMat));
+    auto viewLoc = glGetUniformLocation(_program, "view");
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, viewMat);
 
-    GLuint modelLoc;
-    CHECK_GL(modelLoc = glGetUniformLocation(_program, "model"));
-    CHECK_GL(glUniformMatrix4fv(modelLoc, 1, GL_FALSE, modelMat));
+    auto modelLoc = glGetUniformLocation(_program, "model");
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, modelMat);
 
     GLuint vertexArray;
-    CHECK_GL(glGenVertexArrays(1, &vertexArray));
-    CHECK_GL(glBindVertexArray(vertexArray));
+    glGenVertexArrays(1, &vertexArray);
+    glBindVertexArray(vertexArray);
 
-    CHECK_GL(glGenBuffers(1, &_buffer));
-    CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, _buffer));
-    CHECK_GL(glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW));
-    CHECK_GL(glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr));
-    CHECK_GL(glEnableVertexAttribArray(0));
+    glGenBuffers(1, &_buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, _buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(0);
 }
 
 Renderer::~Renderer()
 {
     // TODO delete VAO
-    CHECK_GL(glUseProgram(0));
-    CHECK_GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    glUseProgram(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    CHECK_GL(glDeleteProgram(_program));
-    CHECK_GL(glDeleteBuffers(1, & _buffer));
+    glDeleteProgram(_program);
+    glDeleteBuffers(1, & _buffer);
 
     if(_context != nullptr)
     {
@@ -216,7 +198,8 @@ Renderer::~Renderer()
 
 void Renderer::render()
 {
-    CHECK_GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-    CHECK_GL(glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(vertices[0]) / 4));
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(vertices[0]) / 4);
     SDL_GL_SwapWindow(_window);
 }
+
