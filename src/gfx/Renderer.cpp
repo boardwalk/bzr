@@ -116,6 +116,11 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 
     _videoInit = true;
 
+#ifdef __APPLE__
+    // Apple's drivers don't support the compatibility profile on GL >v2.1
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+#endif
+
     _window = SDL_CreateWindow("Bael'Zharon's Respite",
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_OPENGL);
 
@@ -123,10 +128,6 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     {
         throwSDLError();
     }
-
-    // prevents us from using legacy features
-    // as well as allows access to higher versions of OpenGL on OS X
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
     _context = SDL_GL_CreateContext(_window);
 
