@@ -1,21 +1,27 @@
 #ifndef BZR_LANDBLOCK_H
 #define BZR_LANDBLOCK_H
 
-#include "math/Vec2.h"
+#include "IDestructable.h"
 #include "Noncopyable.h"
+#include "math/Vec2.h"
 
 class Landblock : Noncopyable
 {
 public:
     static const int GRID_SIZE = 9;
+    static const double SQUARE_SIZE;
+    static const double LANDBLOCK_SIZE;
 
     Landblock(const void* data, size_t length);
 
-    // get the height of the original mesh
+    const double* getSubdividedData() const;
+    size_t getSubdividedSize() const;
+
     double getOriginalHeight(Vec2 point) const;
     
-    // get the height of the subdivided mesh
     double getSubdividedHeight(Vec2 point) const;
+
+    unique_ptr<IDestructable>& renderData();
 
 private:
     PACK(struct RawData
@@ -31,9 +37,13 @@ private:
     void subdivideOnce();
 
     RawData _data;
+
     unique_ptr<double[]> _original;
+
     unique_ptr<double[]> _subdivided;
     int _nsubdivisions;
+
+    unique_ptr<IDestructable> _renderData;
 };
 
 #endif

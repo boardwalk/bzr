@@ -11,7 +11,7 @@ public:
     Renderer();
     ~Renderer();
 
-    void render(const Game& game, double interp);
+    void render(Game& game, double interp);
 
 private:
     bool _videoInit;

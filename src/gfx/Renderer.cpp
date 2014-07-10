@@ -1,4 +1,6 @@
 #include "gfx/Renderer.h"
+#include "gfx/LandblockRenderer.h"
+#include "Game.h"
 #include "util.h"
 #include <SDL.h>
 #include <string>
@@ -148,6 +150,7 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     SDL_GL_SetSwapInterval(1); // vsync
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.0f, 0.0, 0.5f, 1.0f);
+    glPrimitiveRestartIndex(0xffff);
 
     _program = createProgram(VertexShader, FragmentShader);
     glUseProgram(_program);
@@ -206,10 +209,22 @@ Renderer::~Renderer()
     }
 }
 
-void Renderer::render(const Game& game, double interp)
+void Renderer::render(Game& game, double interp)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(vertices[0]) / 4);
+    //glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(vertices[0]) / 4);
+
+    auto& landblock = game.landblock();
+    auto& renderData = landblock.renderData();
+
+    if(!renderData)
+    {
+        renderData.reset(new LandblockRenderer(landblock));
+    }
+
+    auto& landblockRenderer = (LandblockRenderer&)*renderData;
+    landblockRenderer.render();
+
     SDL_GL_SwapWindow(_window);
 }
 

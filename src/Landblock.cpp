@@ -1,19 +1,19 @@
 #include "Landblock.h"
 
-static const double SQUARE_SIZE = 24.0;
-static const double LANDBLOCK_SIZE = (Landblock::GRID_SIZE - 1) * SQUARE_SIZE;
+const double Landblock::SQUARE_SIZE = 24.0;
+const double Landblock::LANDBLOCK_SIZE = (Landblock::GRID_SIZE - 1) * Landblock::SQUARE_SIZE;
 
 static double getHeight(const double* data, size_t size, Vec2 point)
 {
-    assert(point.x >= 0.0 && point.x <= LANDBLOCK_SIZE);
-    assert(point.y >= 0.0 && point.y <= LANDBLOCK_SIZE);
+    assert(point.x >= 0.0 && point.x <= Landblock::LANDBLOCK_SIZE);
+    assert(point.y >= 0.0 && point.y <= Landblock::LANDBLOCK_SIZE);
 
     double intx;
-    auto fracx = modf(point.x / LANDBLOCK_SIZE * size, &intx);
+    auto fracx = modf(point.x / Landblock::LANDBLOCK_SIZE * size, &intx);
     auto x = (int)intx;
 
     double inty; 
-    auto fracy = modf(point.y / LANDBLOCK_SIZE * size, &inty);
+    auto fracy = modf(point.y / Landblock::LANDBLOCK_SIZE * size, &inty);
     auto y = (int)inty;
 
     // 4---3
@@ -75,6 +75,16 @@ Landblock::Landblock(const void* data, size_t length)
     subdivide(5);
 }
 
+const double* Landblock::getSubdividedData() const
+{
+    return _subdivided.get();
+}
+
+size_t Landblock::getSubdividedSize() const
+{
+    return GRID_SIZE * (1 << _nsubdivisions);
+}
+
 double Landblock::getOriginalHeight(Vec2 point) const
 {
     return getHeight(_original.get(), GRID_SIZE, point);
@@ -83,6 +93,11 @@ double Landblock::getOriginalHeight(Vec2 point) const
 double Landblock::getSubdividedHeight(Vec2 point) const
 {
     return getHeight(_subdivided.get(), GRID_SIZE * (1 << _nsubdivisions), point);
+}
+
+unique_ptr<IDestructable>& Landblock::renderData()
+{
+    return _renderData;
 }
 
 void Landblock::subdivide(int n)

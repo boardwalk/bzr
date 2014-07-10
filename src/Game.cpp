@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "Landblock.h"
 #include "gfx/Renderer.h"
 #include "DatFile.h"
 #include "util.h"
@@ -19,6 +20,9 @@ Game::Game() : _done(false)
 #ifndef HEADLESS
     _renderer.reset(new Renderer());
 #endif
+
+    auto landblockData = _cellDat->read(0x2343FFFF);
+    _landblock.reset(new Landblock(landblockData.data(), landblockData.size()));
 }
 
 Game::~Game()
@@ -71,6 +75,11 @@ const DatFile& Game::portalDat() const
 const DatFile& Game::cellDat() const
 {
     return *_cellDat;
+}
+
+Landblock& Game::landblock()
+{
+    return *_landblock;
 }
 
 void Game::handleEvents()
