@@ -71,11 +71,11 @@ def main():
 
             sdl_dir = os.path.expanduser(r'~\Documents\SDL2-2.0.3')
             clflags += r' /MD /I{}\include'.format(sdl_dir)
-            linkflags += r' /libpath:{}\lib\x64 OpenGL32.lib SDL2.lib SDL2main.lib'.format(sdl_dir)
+            linkflags += r' /libpath:{}\lib\x64 SDL2.lib SDL2main.lib'.format(sdl_dir)
 
             glew_dir = os.path.expanduser(r'~\Documents\glew-1.10.0')
             clflags += r' /I{}\include'.format(glew_dir)
-            linkflags += r' /libpath:{}\lib\Release\x64 glew32.lib'.format(glew_dir)
+            linkflags += r' /libpath:{}\lib\Release\x64 OpenGL32.lib glew32.lib'.format(glew_dir)
 
             if args.release:
                 clflags += ' /O2 /GL'
