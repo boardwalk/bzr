@@ -137,7 +137,10 @@ def main():
 
             if args.release:
                 cppflags += ' -O2 -flto'
-                linkcmd += ' && strip -s $out'
+                if sys.platform == 'darwin':
+                    linkcmd += ' && strip $out'
+                else:
+                    linkcmd += ' && strip -s $out'
             else:
                 cppflags += ' -g'
 
