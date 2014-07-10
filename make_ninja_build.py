@@ -104,7 +104,7 @@ def main():
             cxxflags = ''
             cppflags = ''
             ldflags = ''
-            linkcmd = 'g++ $cppflags $ldflags $in -o $out'
+            linkcmd = 'clang++ $cppflags $ldflags $in -o $out'
 
             cxxflags += ' -std=c++11'
             cxxflags += ' -Iinclude'
@@ -138,7 +138,7 @@ def main():
             n.variable('ldflags', ldflags)
             n.variable('appext', '')
 
-            n.rule('compile', 'g++ $cppflags $cxxflags -c $in -o $out')
+            n.rule('compile', 'clang++ $cppflags $cxxflags -c $in -o $out')
             n.rule('link', linkcmd)
             n.rule('header', './make_include_file.py $in $out')
 
