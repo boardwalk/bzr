@@ -66,32 +66,32 @@ def main():
         n = ninja_syntax.Writer(buildfile)
 
         if sys.platform == 'win32':
-            ccflags = ' /nologo /Iinclude /FIbasic.h /EHsc'
+            clflags = ' /nologo /Iinclude /FIbasic.h /EHsc'
             linkflags = ' /nologo /subsystem:WINDOWS'
 
             sdl_dir = os.path.expanduser(r'~\Documents\SDL2-2.0.3')
-            ccflags += r' /MD /I{}\include'.format(sdl_dir)
+            clflags += r' /MD /I{}\include'.format(sdl_dir)
             linkflags += r' /libpath:{}\lib\x64 OpenGL32.lib SDL2.lib SDL2main.lib'.format(sdl_dir)
 
             glew_dir = os.path.expanduser(r'~\Documents\glew-1.10.0')
-            ccflags += r' /I{}\include'.format(glew_dir)
+            clflags += r' /I{}\include'.format(glew_dir)
             linkflags += r' /libpath:{}\lib\Release\x64 glew32.lib'.format(glew_dir)
 
             if args.release:
-                ccflags += ' /O2 /GL'
+                clflags += ' /O2 /GL'
                 linkflags += ' /LTCG'
             else:
-                ccflags += r' /Zi /Fdout\bzr.pdb /FS'
+                clflags += r' /Zi /Fdout\bzr.pdb /FS'
                 linkflags += ' /DEBUG'
 
             if args.headless:
-                ccflags += ' /DHEADLESS'
+                clflags += ' /DHEADLESS'
             
-            n.variable('ccflags', ccflags)
+            n.variable('clflags', clflags)
             n.variable('linkflags', linkflags)
             n.variable('appext', '.exe')
 
-            n.rule('compile', 'cl $ccflags /c $in /Fo$out')
+            n.rule('compile', 'cl $clflags /c $in /Fo$out')
             n.rule('header', 'python make_include_file.py $in $out')
             n.rule('link', 'link $linkflags $in /out:$out')
             n.rule('copy', 'cmd /c copy $in $out')
