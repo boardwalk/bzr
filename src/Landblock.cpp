@@ -72,7 +72,7 @@ Landblock::Landblock(const void* data, size_t length)
     }
 
     // TODO arbitrary, make this configurable
-    subdivide(3);
+    subdivide(5);
 }
 
 double Landblock::getOriginalHeight(Vec2 point) const
@@ -129,10 +129,10 @@ void Landblock::subdivideOnce()
         for(auto x = 0; x < size; x++)
         {
             // copy original control point
-            newSubdivided[(x * 2) + (y * 2) * size] = _subdivided[x + y * size];
+            newSubdivided[(x * 2) + (y * 2) * newSize] = _subdivided[x + y * size];
 
             // add new face point
-            auto f1 = _subdivided[x + y * newSize];
+            auto f1 = _subdivided[x + y * size];
             auto f2 = _subdivided[min(x + 1, size - 1) + y * size];
             auto f3 = _subdivided[x + min(y + 1, size - 1) * size];
             auto f4 = _subdivided[min(x + 1, size - 1) + min(y + 1, size - 1) * size];
