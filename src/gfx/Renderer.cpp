@@ -135,6 +135,15 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
         throwSDLError();
     }
 
+#ifdef _MSC_VER
+	auto glewErr = glewInit();
+
+	if(glewErr != GLEW_OK)
+	{
+		throw runtime_error(string("Unable to initialize GLEW: ") + (const char*)glewGetErrorString(glewErr));
+	}
+#endif
+
     SDL_GL_SetSwapInterval(1); // vsync
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.0f, 0.0, 0.5f, 1.0f);

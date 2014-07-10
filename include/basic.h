@@ -1,9 +1,14 @@
 #ifndef BZR_BASIC_H
 #define BZR_BASIC_H
 
-#define GL_GLEXT_PROTOTYPES
 #include <SDL.h>
+
+#ifdef _MSC_VER
+#include <GL/glew.h>
+#else
+#define GL_GLEXT_PROTOTYPES
 #include <SDL_opengl.h>
+#endif
 
 #include <cassert>
 #include <memory>
@@ -17,4 +22,3 @@ unique_ptr<T> make_unique(Args&&... args)
 }
 
 #endif
-

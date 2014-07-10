@@ -1,10 +1,11 @@
 #include "Game.h"
+#include <SDL_main.h>
 #include <cstdio>
 #include <cstdlib>
 #include <stdexcept>
 #include <memory>
 
-int main()
+int main(int argc, char* argv[])
 {
     try
     {

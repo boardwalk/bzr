@@ -29,7 +29,11 @@ def includes(path):
             for ln in f:
                 m = re.match(r'\s*#include "(.+)"', ln)
                 if m:
-                    depend_path = os.path.join('include', m.group(1))
+                    depend_path = m.group(1)
+                    # this is super ghetto too, deal with it
+                    if sys.platform == 'win32':
+                        depend_path = depend_path.replace('/', '\\')
+                    depend_path = os.path.join('include', depend_path)
                     result.append(depend_path)
                     collect(depend_path, result)
 
@@ -60,47 +64,83 @@ def main():
 
     with open('build.ninja', 'w') as buildfile:
         n = ninja_syntax.Writer(buildfile)
-        n.variable('cxx', 'g++')
 
-        cxxflags = ''
-        cppflags = ''
-        ldflags = ''
-        linkcmd = '$cxx $cppflags $ldflags $in -o $out'
+        if sys.platform == 'win32':
+            ccflags = ' /nologo /Iinclude /FIbasic.h /EHsc'
+            linkflags = ' /nologo /subsystem:WINDOWS'
 
-        cxxflags += ' -std=c++11'
-        cxxflags += ' -Iinclude'
-        cxxflags += ' -include ' + os.path.join('include', 'basic.h')
+            sdl_dir = os.path.expanduser(r'~\Documents\SDL2-2.0.3')
+            ccflags += r' /MD /I{}\include'.format(sdl_dir)
+            linkflags += r' /libpath:{}\lib\x64 OpenGL32.lib SDL2.lib SDL2main.lib'.format(sdl_dir)
 
-        cxxflags += ' -Wall -Wextra -Wformat=2 -Wno-format-nonliteral -Wshadow'
-        cxxflags += ' -Wpointer-arith -Wcast-qual -Wno-missing-braces'
-        cxxflags += ' -Werror -pedantic-errors'
-        cxxflags += ' -Wstrict-aliasing=1'
-        cxxflags += ' -Wno-unused-parameter' # annoying error when stubbing things out
+            glew_dir = os.path.expanduser(r'~\Documents\glew-1.10.0')
+            ccflags += r' /I{}\include'.format(glew_dir)
+            linkflags += r' /libpath:{}\lib\Release\x64 glew32.lib'.format(glew_dir)
 
-        cxxflags += ' ' + execute('sdl2-config', '--cflags')
-        ldflags += ' ' + execute('sdl2-config', '--libs')
+            if args.release:
+                ccflags += ' /O2 /GL'
+                linkflags += ' /LTCG'
+            else:
+                ccflags += r' /Zi /Fdout\bzr.pdb /FS'
+                linkflags += ' /DEBUG'
 
-        if sys.platform == 'darwin':
-            ldflags += ' -framework OpenGL'
-        elif sys.platform.startswith('linux'):
-            ldflags += ' -lGL'
+            if args.headless:
+                ccflags += ' /DHEADLESS'
+            
+            n.variable('ccflags', ccflags)
+            n.variable('linkflags', linkflags)
+            n.variable('appext', '.exe')
 
-        if args.release:
-            cppflags += ' -O2 -flto'
-            linkcmd += ' && strip -s $out'
+            n.rule('compile', 'cl $ccflags /c $in /Fo$out')
+            n.rule('header', 'python make_include_file.py $in $out')
+            n.rule('link', 'link $linkflags $in /out:$out')
+            n.rule('copy', 'cmd /c copy $in $out')
+
+            n.build(r'out\SDL2.dll', 'copy', r'{}\lib\x64\SDL2.dll'.format(sdl_dir))
+            n.build(r'out\glew32.dll', 'copy', r'{}\bin\Release\x64\glew32.dll'.format(glew_dir))
+            
+            n.default(r'out\SDL2.dll out\glew32.dll')
         else:
-            cppflags += ' -g'
+            cxxflags = ''
+            cppflags = ''
+            ldflags = ''
+            linkcmd = 'g++ $cppflags $ldflags $in -o $out'
 
-        if args.headless:
-            cxxflags += ' -DHEADLESS'
+            cxxflags += ' -std=c++11'
+            cxxflags += ' -Iinclude'
+            cxxflags += ' -include ' + os.path.join('include', 'basic.h')
 
-        n.variable('cppflags', cppflags)
-        n.variable('cxxflags', cxxflags)
-        n.variable('ldflags', ldflags)
+            cxxflags += ' -Wall -Wextra -Wformat=2 -Wno-format-nonliteral -Wshadow'
+            cxxflags += ' -Wpointer-arith -Wcast-qual -Wno-missing-braces'
+            cxxflags += ' -Werror -pedantic-errors'
+            cxxflags += ' -Wstrict-aliasing=1'
+            cxxflags += ' -Wno-unused-parameter' # annoying error when stubbing things out
 
-        n.rule('compile', '$cxx $cppflags $cxxflags -c $in -o $out')
-        n.rule('link', linkcmd)
-        n.rule('header', './make_include_file.py $in $out')
+            cxxflags += ' ' + execute('sdl2-config', '--cflags')
+            ldflags += ' ' + execute('sdl2-config', '--libs')
+
+            if sys.platform == 'darwin':
+                ldflags += ' -framework OpenGL'
+            else:
+                ldflags += ' -lGL'
+
+            if args.release:
+                cppflags += ' -O2 -flto'
+                linkcmd += ' && strip -s $out'
+            else:
+                cppflags += ' -g'
+
+            if args.headless:
+                cxxflags += ' -DHEADLESS'
+
+            n.variable('cppflags', cppflags)
+            n.variable('cxxflags', cxxflags)
+            n.variable('ldflags', ldflags)
+            n.variable('appext', '')
+
+            n.rule('compile', 'g++ $cppflags $cxxflags -c $in -o $out')
+            n.rule('link', linkcmd)
+            n.rule('header', './make_include_file.py $in $out')
 
         link_inputs = []
 
@@ -116,8 +156,8 @@ def main():
                     n.build(out_file, 'compile', in_file, includes(in_file))
                     link_inputs.append(out_file)
 
-        n.build(os.path.join('out', 'bzr'), 'link', link_inputs)
-        n.default(os.path.join('out', 'bzr'))
+        n.build(os.path.join('out', 'bzr$appext'), 'link', link_inputs)
+        n.default(os.path.join('out', 'bzr$appext'))
 
 if __name__ == '__main__':
     main()
