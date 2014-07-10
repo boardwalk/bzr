@@ -14,12 +14,14 @@
 #include <memory>
 #include <stdexcept>
 
-using namespace std;
+#ifdef __GNUC__
+#define PACK(decl) decl __attribute__((__packed__))
+#elif _MSC_VER
+#define PACK(decl) __pragma(pack(push, 1)) decl __pragma(pack(pop))
+#else
+#error Implement PACK for this compiler.
+#endif
 
-template<typename T, typename... Args>
-unique_ptr<T> make_unique(Args&&... args)
-{
-    return unique_ptr<T>(new T(forward<Args>(args)...));
-}
+using namespace std;
 
 #endif

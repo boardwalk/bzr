@@ -6,17 +6,6 @@
 class Renderer;
 class DatFile;
 
-// These are really just stubs and will need to be fleshed out
-class Position
-{
-
-};
-
-class GameObject
-{
-    const Position& getPosition() const;
-};
-
 class Game : Noncopyable
 {
 public:

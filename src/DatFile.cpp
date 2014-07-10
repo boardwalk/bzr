@@ -1,13 +1,5 @@
 #include "DatFile.h"
 
-#ifdef __GNUC__
-#define PACK(decl) decl __attribute__((__packed__))
-#elif _MSC_VER
-#define PACK(decl) __pragma(pack(push, 1)) decl __pragma(pack(pop))
-#else
-#error Implement PACK for this compiler.
-#endif
-
 static const size_t HEADER_OFFSET = 0x140;
 static const uint32_t HEADER_MAGIC_NUMBER = 0x5442; // 'TB\0\0'
 static const int MAX_NODE_COUNT = 62;
