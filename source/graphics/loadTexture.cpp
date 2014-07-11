@@ -101,7 +101,7 @@ Texture loadTexture(uint32_t fileId)
     }
     else if(header->type == 0x35545844)
     {
-        decodedData = decodeDXT1(data, header->width, header->height);
+        decodedData = decodeDXT5(data, header->width, header->height);
         data = decodedData.data();
     }
 
