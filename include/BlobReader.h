@@ -8,7 +8,7 @@ public:
    {}
 
    template<class T>
-   const T* read(size_t count = 1)
+   const T* readPointer(size_t count = 1)
    {
       if(_position + sizeof(T) * count > _size)
       {

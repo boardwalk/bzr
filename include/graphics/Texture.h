@@ -17,7 +17,7 @@ public:
     ~Texture();
     Texture& operator=(Texture&& other);
 
-    void bind();
+    void bind(int i);
     void destroy();
 
 private:

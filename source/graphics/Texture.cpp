@@ -56,13 +56,14 @@ Texture& Texture::operator=(Texture&& other)
    return *this;
 }
 
-void Texture::bind()
+void Texture::bind(int i)
 {
-    if(_handle != 0)
+    if(_handle == 0)
     {
         throw runtime_error("Attempt to bind empty texture");
     }
 
+    glActiveTexture(GL_TEXTURE0 + i);
     glBindTexture(GL_TEXTURE_2D, _handle);
 }
 

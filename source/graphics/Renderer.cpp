@@ -150,8 +150,8 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     SDL_GL_SetSwapInterval(1); // vsync
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.0f, 0.0, 0.5f, 1.0f);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glEnable(GL_TEXTURE_2D);
     glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(0xffff);
 
@@ -183,6 +183,9 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     //glGenBuffers(1, &_buffer);
     //glBindBuffer(GL_ARRAY_BUFFER, _buffer);
     //glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    auto fragTexLocation = glGetUniformLocation(_program, "fragTex");
+    glUniform1i(fragTexLocation, 0); // corresponds to GL_TEXTURE_0
 }
 
 Renderer::~Renderer()

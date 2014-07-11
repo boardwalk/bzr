@@ -73,7 +73,7 @@ Landblock::Landblock(const void* data, size_t length)
     }
 
     // TODO arbitrary, make this configurable
-    subdivide(0);
+    subdivide(3);
 }
 
 const double* Landblock::getSubdividedData() const
