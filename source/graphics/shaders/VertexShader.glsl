@@ -7,11 +7,10 @@ uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
 
-varying vec2 fragTexCoord;
+smooth out vec2 fragTexCoord;
 
 void main()
 {
     gl_Position = projection * view * model * vec4(vert.x, vert.y, vert.z, 1.0);
     fragTexCoord = texCoord;
 }
-
