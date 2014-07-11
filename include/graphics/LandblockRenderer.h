@@ -1,6 +1,7 @@
-#ifndef BZR_GFX_LANDBLOCKRENDERER_H
-#define BZR_GFX_LANDBLOCKRENDERER_H
+#ifndef BZR_GRAPHICS_LANDBLOCKRENDERER_H
+#define BZR_GRAPHICS_LANDBLOCKRENDERER_H
 
+#include "graphics/Texture.h"
 #include "IDestructable.h"
 #include "Noncopyable.h"
 
@@ -18,6 +19,8 @@ private:
     GLuint _vertexBuffer;
     GLuint _indexBuffer;
     GLsizei _indexCount;
+
+    Texture _texture;
 };
 
 #endif

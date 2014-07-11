@@ -29,11 +29,14 @@ def includes(path):
             for ln in f:
                 m = re.match(r'\s*#include "(.+)"', ln)
                 if m:
-                    depend_path = m.group(1)
-                    # this is super ghetto too, deal with it
+                    base_depend_path = m.group(1)
+                    # our include directives use forward slashes, use backslash on windows
                     if sys.platform == 'win32':
-                        depend_path = depend_path.replace('/', '\\')
-                    depend_path = os.path.join('include', depend_path)
+                        base_depend_path = base_depend_path.replace('/', '\\')
+                    depend_path = os.path.join('include', base_depend_path)
+                    # if it doesn't exist in include, try build instead
+                    if not os.path.exists(depend_path):
+                        depend_path = os.path.join('build', base_depend_path)
                     result.append(depend_path)
                     collect(depend_path, result)
 
@@ -66,7 +69,7 @@ def main():
         n = ninja_syntax.Writer(buildfile)
 
         if sys.platform == 'win32':
-            clflags = ' /nologo /Iinclude /FIbasic.h /EHsc'
+            clflags = ' /nologo /Iinclude /Ibuild /FIbasic.h /EHsc'
             linkflags = ' /nologo'
 
             sdl_dir = os.path.expanduser(r'~\Documents\SDL2-2.0.3')
@@ -81,7 +84,7 @@ def main():
                 clflags += ' /O2 /GL'
                 linkflags += ' /LTCG'
             else:
-                clflags += r' /Zi /Fdout\bzr.pdb'
+                clflags += r' /Zi /Fdoutput\bzr.pdb'
                 # cl complains about write access to the PDB with parallel compilation on VS2013 without /FS
                 if os.environ['VisualStudioVersion'] == '12.0':
                    clflags += ' /FS'
@@ -104,10 +107,10 @@ def main():
             n.rule('link', 'link $linkflags $in /out:$out')
             n.rule('copy', 'cmd /c copy $in $out')
 
-            n.build(r'out\SDL2.dll', 'copy', r'{}\lib\x64\SDL2.dll'.format(sdl_dir))
-            n.build(r'out\glew32.dll', 'copy', r'{}\bin\Release\x64\glew32.dll'.format(glew_dir))
+            n.build(r'output\SDL2.dll', 'copy', r'{}\lib\x64\SDL2.dll'.format(sdl_dir))
+            n.build(r'output\glew32.dll', 'copy', r'{}\bin\Release\x64\glew32.dll'.format(glew_dir))
             
-            n.default(r'out\SDL2.dll out\glew32.dll')
+            n.default(r'output\SDL2.dll output\glew32.dll')
         else:
             cxxflags = ''
             cppflags = ''
@@ -115,7 +118,7 @@ def main():
             linkcmd = 'clang++ $cppflags $ldflags $in -o $out'
 
             cxxflags += ' -std=c++11'
-            cxxflags += ' -Iinclude'
+            cxxflags += ' -Iinclude -Ibuild'
             cxxflags += ' -include ' + os.path.join('include', 'basic.h')
 
             cxxflags += ' -Wall -Wextra -Wformat=2 -Wno-format-nonliteral -Wshadow'
@@ -152,20 +155,20 @@ def main():
 
         link_inputs = []
 
-        for dirpath, dirnames, filenames in os.walk('src'):
+        for dirpath, dirnames, filenames in os.walk('source'):
             for filename in filenames:
                 name, ext = os.path.splitext(filename)
                 in_file = os.path.join(dirpath, filename)
                 if ext == '.glsl':
-                    out_file = os.path.join(change_top_dir(dirpath, 'include'), filename + '.h')
+                    out_file = os.path.join(change_top_dir(dirpath, 'build'), filename + '.h')
                     n.build(out_file, 'header', in_file)
                 elif ext == '.cpp':
-                    out_file = os.path.join(change_top_dir(dirpath, 'obj'), name + '.o')
+                    out_file = os.path.join(change_top_dir(dirpath, 'build'), name + '.o')
                     n.build(out_file, 'compile', in_file, includes(in_file))
                     link_inputs.append(out_file)
 
-        n.build(os.path.join('out', 'bzr$appext'), 'link', link_inputs)
-        n.default(os.path.join('out', 'bzr$appext'))
+        n.build(os.path.join('output', 'bzr$appext'), 'link', link_inputs)
+        n.default(os.path.join('output', 'bzr$appext'))
 
 if __name__ == '__main__':
     main()

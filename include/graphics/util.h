@@ -1,5 +1,5 @@
-#ifndef BZR_GFX_UTIL_H
-#define BZR_GFX_UTIL_H
+#ifndef BZR_GRAPHICS_UTIL_H
+#define BZR_GRAPHICS_UTIL_H
 
 struct Mat4;
 

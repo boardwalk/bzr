@@ -1,7 +1,7 @@
-#include "gfx/Renderer.h"
-#include "gfx/LandblockRenderer.h"
-#include "gfx/util.h"
-#include "Game.h"
+#include "graphics/Renderer.h"
+#include "graphics/LandblockRenderer.h"
+#include "graphics/util.h"
+#include "Core.h"
 #include "Camera.h"
 #include "Landblock.h"
 #include "util.h"
@@ -9,8 +9,8 @@
 #include <string>
 #include <vector>
 
-#include "gfx/shaders/VertexShader.glsl.h"
-#include "gfx/shaders/FragmentShader.glsl.h"
+#include "graphics/shaders/VertexShader.glsl.h"
+#include "graphics/shaders/FragmentShader.glsl.h"
 
 static const GLfloat PI = 3.14159265359;
 
@@ -210,10 +210,10 @@ Renderer::~Renderer()
     }
 }
 
-void Renderer::render(Game& game, double interp)
+void Renderer::render(double interp)
 {
     auto viewLoc = glGetUniformLocation(_program, "view");
-    loadMat4ToUniform(game.camera().viewMatrix(), viewLoc);
+    loadMat4ToUniform(Core::get().camera().viewMatrix(), viewLoc);
 
     //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     //glEnableVertexAttribArray(0);
@@ -221,7 +221,7 @@ void Renderer::render(Game& game, double interp)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(vertices[0]) / 3);
 
-    auto& landblock = game.landblock();
+    auto& landblock = Core::get().landblock();
     auto& renderData = landblock.renderData();
 
     if(!renderData)
@@ -234,4 +234,3 @@ void Renderer::render(Game& game, double interp)
 
     SDL_GL_SwapWindow(_window);
 }
-

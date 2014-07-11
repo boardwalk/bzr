@@ -2,10 +2,8 @@
 *.dat
 *.raw
 *.txt
-/__pycache__
-/include/gfx/shaders
 /.ninja_deps
 /.ninja_log
 /build.ninja
-/obj
-/out
+/build
+/output

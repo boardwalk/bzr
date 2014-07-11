@@ -1,5 +1,5 @@
-#ifndef BZR_GAME_H
-#define BZR_GAME_H
+#ifndef BZR_CORE_H
+#define BZR_CORE_H
 
 #include "Noncopyable.h"
 
@@ -8,11 +8,14 @@ class Camera;
 class Landblock;
 class Renderer;
 
-class Game : Noncopyable
+class Core : Noncopyable
 {
 public:
-    Game();
-    ~Game();
+    ~Core();
+
+    static void init();
+    static void cleanup();
+    static Core& get();
 
     void run();
 
@@ -23,6 +26,8 @@ public:
     Landblock& landblock();
 
 private:
+    Core();
+
     void handleEvents();
     void step(double dt);
 

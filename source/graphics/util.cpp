@@ -1,4 +1,4 @@
-#include "util.h"
+#include "graphics/util.h"
 #include "math/Mat4.h"
 
 void loadMat4ToUniform(const Mat4& mat, GLint location)

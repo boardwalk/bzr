@@ -1,4 +1,4 @@
-#include "Game.h"
+#include "Core.h"
 #include <SDL_main.h>
 #include <cstdio>
 #include <cstdlib>
@@ -9,7 +9,9 @@ int main(int argc, char* argv[])
 {
     try
     {
-        Game().run();
+        Core::init();
+        Core::get().run();
+        Core::cleanup();
     }
     catch(const runtime_error& e)
     {

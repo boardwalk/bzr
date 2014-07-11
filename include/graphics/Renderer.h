@@ -1,9 +1,7 @@
-#ifndef BZR_RENDERER_H
-#define BZR_RENDERER_H
+#ifndef BZR_GRAPHICS_RENDERER_H
+#define BZR_GRAPHICS_RENDERER_H
 
 #include "Noncopyable.h"
-
-class Game;
 
 class Renderer : Noncopyable
 {
@@ -11,7 +9,7 @@ public:
     Renderer();
     ~Renderer();
 
-    void render(Game& game, double interp);
+    void render(double interp);
 
 private:
     bool _videoInit;

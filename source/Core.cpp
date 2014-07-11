@@ -1,14 +1,31 @@
-#include "Game.h"
+#include "Core.h"
 #include "Camera.h"
 #include "Landblock.h"
-#include "gfx/Renderer.h"
+#include "graphics/Renderer.h"
 #include "DatFile.h"
 #include "util.h"
 #include <SDL.h>
 
 static const double STEP_RATE = 60.0;
 
-Game::Game() : _done(false)
+static unique_ptr<Core> g_singleton;
+
+void Core::init()
+{
+    g_singleton.reset(new Core());
+}
+
+void Core::cleanup()
+{
+    g_singleton.reset();
+}
+
+Core& Core::get()
+{
+    return *g_singleton;
+}
+
+Core::Core() : _done(false)
 {
     _portalDat.reset(new DatFile("data/client_portal.dat"));
     _cellDat.reset(new DatFile("data/client_cell_1.dat"));
@@ -28,7 +45,7 @@ Game::Game() : _done(false)
     _landblock.reset(new Landblock(landblockData.data(), landblockData.size()));
 }
 
-Game::~Game()
+Core::~Core()
 {
     _landblock.reset();
 
@@ -39,7 +56,7 @@ Game::~Game()
     SDL_Quit();
 }
 
-void Game::run()
+void Core::run()
 {
     uint64_t frequency = SDL_GetPerformanceFrequency();
     uint64_t fixedStep = frequency / uint64_t(STEP_RATE);
@@ -64,7 +81,7 @@ void Game::run()
 
 #ifndef HEADLESS
         double interp = (double)(loopTime - time) / (double)frequency;
-        _renderer->render(*this, interp);
+        _renderer->render(interp);
 #else
         // simulate ~83 without game logic
         SDL_Delay(12);
@@ -72,28 +89,28 @@ void Game::run()
     }
 }
 
-const DatFile& Game::portalDat() const
+const DatFile& Core::portalDat() const
 {
     return *_portalDat;
 }
 
-const DatFile& Game::cellDat() const
+const DatFile& Core::cellDat() const
 {
     return *_cellDat;
 }
 
-const Camera& Game::camera() const
+const Camera& Core::camera() const
 {
     return *_camera;
 }
 
 // TOOD Temporary
-Landblock& Game::landblock()
+Landblock& Core::landblock()
 {
     return *_landblock;
 }
 
-void Game::handleEvents()
+void Core::handleEvents()
 {
     SDL_Event event;
 
@@ -118,7 +135,7 @@ void Game::handleEvents()
     }
 }
 
-void Game::step(double dt)
+void Core::step(double dt)
 {
     const Uint8* state = SDL_GetKeyboardState(nullptr);
 
