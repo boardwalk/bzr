@@ -123,8 +123,13 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 #endif
 
+    // TODO configurable
+    float fieldOfView = 90.0f;
+    int width = 800;
+    int height = 600;
+
     _window = SDL_CreateWindow("Bael'Zharon's Respite",
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_OPENGL);
+        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_OPENGL);
 
     if(_window == nullptr)
     {
@@ -150,8 +155,10 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     SDL_GL_SetSwapInterval(1); // vsync
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.0f, 0.0, 0.5f, 1.0f);
+
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glEnable(GL_TEXTURE_2D);
+
     glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(0xffff);
 
@@ -159,7 +166,7 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     glUseProgram(_program);
 
     GLfloat projectionMat[16];
-    perspectiveMatrix(90.0f, 800.0/600.0f, 0.1f, 1000.0f, projectionMat);
+    perspectiveMatrix(fieldOfView, float(width)/float(height), 0.1f, 1000.0f, projectionMat);
 
     //GLfloat viewMat[16];
     //identityMatrix(viewMat);
@@ -186,6 +193,33 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 
     auto fragTexLocation = glGetUniformLocation(_program, "fragTex");
     glUniform1i(fragTexLocation, 0); // corresponds to GL_TEXTURE_0
+
+    GLuint fbo;
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+    GLuint colorTex;
+    glGenTextures(1, &colorTex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, colorTex, 0);
+
+    GLuint normalTex;
+    glGenTextures(1, &normalTex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normalTex, 0);
+
+    GLuint depthTex;
+    glGenTextures(1, &depthTex);
+    glBindTexture(GL_TEXTURE_2D, depthTex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTex, 0);
+
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        throw runtime_error("Could not setup framebuffer");
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 Renderer::~Renderer()
@@ -215,6 +249,11 @@ Renderer::~Renderer()
 
 void Renderer::render(double interp)
 {
+    //GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+    //glDrawBuffers(2, buffers);
+
+    //glDrawBuffers(0, nullptr);
+
     auto viewLoc = glGetUniformLocation(_program, "view");
     loadMat4ToUniform(Core::get().camera().viewMatrix(), viewLoc);
 
