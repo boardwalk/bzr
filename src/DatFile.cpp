@@ -73,28 +73,29 @@ vector<uint8_t> DatFile::read(uint32_t id) const
             throw runtime_error("Node has bad node count");
         }
 
-        for(auto i = 0u; i < node->nodeCount; i++)
+        auto i = 0u;
+
+        for(; i < node->nodeCount; i++)
         {
-            auto& leafNode = node->leafNodes[i];
-
-            if(leafNode.id > id)
+            if(id <= node->leafNodes[i].id)
             {
-                if(node->internalNodes[0] == 0)
-                {
-                    return vector<uint8_t>();
-                }
-
-                nodePosition = node->internalNodes[i];
                 break;
             }
-
-            if(leafNode.id == id)
-            {
-                auto result = readBlocks(leafNode.position);
-                result.resize(leafNode.size);
-                return result;
-            }
         }
+
+        if(i < node->nodeCount && id == node->leafNodes[i].id)
+        {
+            auto result = readBlocks(node->leafNodes[i].position);
+            result.resize(node->leafNodes[i].size);
+            return result;
+        }
+
+        if(node->internalNodes[0] == 0)
+        {
+            return vector<uint8_t>();
+        }
+
+        nodePosition = node->internalNodes[i];
     }
 }
 

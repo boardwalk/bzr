@@ -10,7 +10,7 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
     auto data = landblock.getSubdividedData();
     auto size = landblock.getSubdividedSize();
 
-    vector<double> vertexData;
+    vector<float> vertexData;
 
     for(auto y = 0u; y < size; y++)
     {
@@ -28,7 +28,7 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
     // |\|\| ...
     // A-C-E
     // http://en.wikipedia.org/wiki/Triangle_strip
-
+    /*
     for(auto y = 0u; y < size - 1; y++)
     {
         if(y != 0)
@@ -49,16 +49,58 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
             indexData.push_back((x + 1) + (y + 1) * size);
         }
     }
+    */
+
+    for(auto y = 0u; y < size - 1; y++)
+    {
+        for(auto x = 0u; x < size - 1; x++)
+        {
+            // 4--3
+            // |  |
+            // 1--2
+            auto h1 = vertexData[x + y * size];
+            auto h2 = vertexData[(x + 1) + y * size];
+            auto h3 = vertexData[(x + 1) + y * (size + 1)];
+            auto h4 = vertexData[x + y * (size + 1)];
+
+            auto d13 = abs(h3 - h1);
+            auto d24 = abs(h4 - h2);
+
+            if(d13 > d24)
+            {
+                indexData.push_back(x + y * size); // 1
+                indexData.push_back((x + 1) + y * size); // 2
+                indexData.push_back((x + 1) + (y + 1) * size); // 3
+
+                indexData.push_back(x + y * size); // 1
+                indexData.push_back((x + 1) + (y + 1) * size); // 3
+                indexData.push_back(x + (y + 1) * size); // 4
+            }
+            else
+            {
+                indexData.push_back(x + y * size); // 1
+                indexData.push_back((x + 1) + y * size); // 2
+                indexData.push_back(x + (y + 1) * size); // 4
+
+                indexData.push_back((x + 1) + y * size); // 2
+                indexData.push_back((x + 1) + (y + 1) * size); // 3
+                indexData.push_back(x + (y + 1) * size); // 4
+            }
+        }
+    }
 
     assert(indexData.size() < 0xffff);
 
     glGenBuffers(1, &_vertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(double), vertexData.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(float), vertexData.data(), GL_STATIC_DRAW);
 
     glGenBuffers(1, &_indexBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexData.size() * sizeof(uint16_t), indexData.data(), GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(0);
 
     _indexCount = indexData.size();
 }
@@ -73,6 +115,7 @@ void LandblockRenderer::render()
 {
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
-    glDrawElements(GL_TRIANGLE_STRIP, _indexCount, GL_UNSIGNED_SHORT, nullptr);
+    //glDrawElements(GL_TRIANGLE_STRIP, _indexCount, GL_UNSIGNED_SHORT, nullptr);
+    glDrawElements(GL_TRIANGLES, _indexCount, GL_UNSIGNED_SHORT, nullptr);
 }
 

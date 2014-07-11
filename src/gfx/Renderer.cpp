@@ -1,6 +1,9 @@
 #include "gfx/Renderer.h"
 #include "gfx/LandblockRenderer.h"
+#include "gfx/util.h"
 #include "Game.h"
+#include "Camera.h"
+#include "Landblock.h"
 #include "util.h"
 #include <SDL.h>
 #include <string>
@@ -13,9 +16,9 @@ static const GLfloat PI = 3.14159265359;
 
 static const GLfloat vertices[] =
 {
-    0.0f, 1.0f, 3.0f, 1.0f,
-    -1.0f, -1.0f, 3.0f, 1.0f,
-    1.0f, -1.0f, 3.0f, 1.0f
+    0.0f, 1.0f, 3.0f,
+    -1.0f, -1.0f, 3.0f,
+    1.0f, -1.0f, 3.0f
 };
 
 void identityMatrix(GLfloat mat[16])
@@ -33,11 +36,8 @@ void identityMatrix(GLfloat mat[16])
 // our coordinate system is:
 // +x goes right
 // +y goes up
-// +z goes into the screen
-// this is "left handed"
-// gluPerspective traditionally transforms "right handed" (+z out of the screen)
-// to the "left handed" used by normalized device coordinates by flipping the z-axis.
-// we don't do this.
+// +z goes out of the screen
+// this is "right handed"
 // http://www.songho.ca/opengl/gl_projectionmatrix.html
 //
 void perspectiveMatrix(GLfloat fovy, GLfloat aspect, GLfloat zNear, GLfloat zFar, GLfloat m[16])
@@ -47,8 +47,8 @@ void perspectiveMatrix(GLfloat fovy, GLfloat aspect, GLfloat zNear, GLfloat zFar
    auto f = 1.0f / tan(fovy * PI / 360.0f);
    m[0] = f / aspect;
    m[5] = f;
-   m[10] = (zFar + zNear) / (zFar - zNear); // negated!
-   m[11] = 1.0f; // negated!
+   m[10] = -(zFar + zNear) / (zFar - zNear);
+   m[11] = -1.0f;
    m[14] = -(2.0f * zFar * zNear) / (zFar - zNear);
 }
 
@@ -150,6 +150,9 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     SDL_GL_SetSwapInterval(1); // vsync
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.0f, 0.0, 0.5f, 1.0f);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(0xffff);
 
     _program = createProgram(VertexShader, FragmentShader);
@@ -158,8 +161,8 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     GLfloat projectionMat[16];
     perspectiveMatrix(90.0f, 800.0/600.0f, 0.1f, 1000.0f, projectionMat);
 
-    GLfloat viewMat[16];
-    identityMatrix(viewMat);
+    //GLfloat viewMat[16];
+    //identityMatrix(viewMat);
 
     GLfloat modelMat[16];
     identityMatrix(modelMat);
@@ -167,8 +170,8 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     auto projectionLoc = glGetUniformLocation(_program, "projection");
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projectionMat);
 
-    auto viewLoc = glGetUniformLocation(_program, "view");
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, viewMat);
+    //auto viewLoc = glGetUniformLocation(_program, "view");
+    //glUniformMatrix4fv(viewLoc, 1, GL_FALSE, viewMat);
 
     auto modelLoc = glGetUniformLocation(_program, "model");
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, modelMat);
@@ -177,21 +180,19 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     glGenVertexArrays(1, &vertexArray);
     glBindVertexArray(vertexArray);
 
-    glGenBuffers(1, &_buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, _buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
-    glEnableVertexAttribArray(0);
+    //glGenBuffers(1, &_buffer);
+    //glBindBuffer(GL_ARRAY_BUFFER, _buffer);
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 }
 
 Renderer::~Renderer()
 {
     // TODO delete VAO
     glUseProgram(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    //glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glDeleteProgram(_program);
-    glDeleteBuffers(1, & _buffer);
+    //glDeleteBuffers(1, & _buffer);
 
     if(_context != nullptr)
     {
@@ -211,8 +212,14 @@ Renderer::~Renderer()
 
 void Renderer::render(Game& game, double interp)
 {
+    auto viewLoc = glGetUniformLocation(_program, "view");
+    loadMat4ToUniform(game.camera().viewMatrix(), viewLoc);
+
+    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    //glEnableVertexAttribArray(0);
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    //glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(vertices[0]) / 4);
+    //glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(vertices[0]) / 3);
 
     auto& landblock = game.landblock();
     auto& renderData = landblock.renderData();

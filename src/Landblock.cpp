@@ -1,4 +1,5 @@
 #include "Landblock.h"
+#include <algorithm>
 
 const double Landblock::SQUARE_SIZE = 24.0;
 const double Landblock::LANDBLOCK_SIZE = (Landblock::GRID_SIZE - 1) * Landblock::SQUARE_SIZE;
@@ -72,7 +73,7 @@ Landblock::Landblock(const void* data, size_t length)
     }
 
     // TODO arbitrary, make this configurable
-    subdivide(5);
+    subdivide(0);
 }
 
 const double* Landblock::getSubdividedData() const

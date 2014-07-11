@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "Camera.h"
 #include "Landblock.h"
 #include "gfx/Renderer.h"
 #include "DatFile.h"
@@ -17,16 +18,20 @@ Game::Game() : _done(false)
         throwSDLError();
     }
 
+    _camera.reset(new Camera());
+
 #ifndef HEADLESS
     _renderer.reset(new Renderer());
 #endif
 
-    auto landblockData = _cellDat->read(0x2343FFFF);
+    auto landblockData = _cellDat->read(0xD955FFFF);
     _landblock.reset(new Landblock(landblockData.data(), landblockData.size()));
 }
 
 Game::~Game()
 {
+    _landblock.reset();
+
 #ifndef HEADLESS
     _renderer.reset();
 #endif
@@ -77,6 +82,12 @@ const DatFile& Game::cellDat() const
     return *_cellDat;
 }
 
+const Camera& Game::camera() const
+{
+    return *_camera;
+}
+
+// TOOD Temporary
 Landblock& Game::landblock()
 {
     return *_landblock;
@@ -109,6 +120,64 @@ void Game::handleEvents()
 
 void Game::step(double dt)
 {
-    // TODO
+    const Uint8* state = SDL_GetKeyboardState(nullptr);
+
+    auto lx = 0.0;
+    auto ly = 0.0;
+
+    if(state[SDL_SCANCODE_LEFT])
+    {
+        lx -= dt;
+    }
+
+    if(state[SDL_SCANCODE_RIGHT])
+    {
+        lx += dt;
+    }
+
+    if(state[SDL_SCANCODE_DOWN])
+    {
+        ly -= dt;
+    }
+
+    if(state[SDL_SCANCODE_UP])
+    {
+        ly += dt;
+    }
+
+    if(lx != 0.0 || ly != 0.0)
+    {
+        _camera->look(lx, ly);
+    }
+
+    auto mx = 0.0;
+    auto my = 0.0;
+
+    if(state[SDL_SCANCODE_A])
+    {
+        mx -= dt;
+    }
+
+    if(state[SDL_SCANCODE_D])
+    {
+        mx += dt;
+    }
+
+    if(state[SDL_SCANCODE_S])
+    {
+        my -= dt;
+    }
+
+    if(state[SDL_SCANCODE_W])
+    {
+        my += dt;
+    }
+
+    if(mx != 0 || my != 0)
+    {
+        _camera->move(mx, my);
+    }
+
+    _camera->step(dt);
 }
 
