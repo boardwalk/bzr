@@ -1,9 +1,9 @@
-*.pcap
-*.dat
-*.raw
-*.txt
 /.ninja_deps
 /.ninja_log
+/data/client_cell_1.dat
+/data/client_highres.dat
+/data/client_local_English.dat
+/data/client_portal.dat
 /build.ninja
 /build
 /output
