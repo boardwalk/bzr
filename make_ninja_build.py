@@ -67,7 +67,7 @@ def main():
 
         if sys.platform == 'win32':
             clflags = ' /nologo /Iinclude /FIbasic.h /EHsc'
-            linkflags = ' /nologo /subsystem:WINDOWS'
+            linkflags = ' /nologo'
 
             sdl_dir = os.path.expanduser(r'~\Documents\SDL2-2.0.3')
             clflags += r' /MD /I{}\include'.format(sdl_dir)
@@ -86,6 +86,11 @@ def main():
                 if os.environ['VisualStudioVersion'] == '12.0':
                    clflags += ' /FS'
                 linkflags += ' /DEBUG'
+
+            if args.release and not args.headless:
+               linkflags += ' /subsystem:WINDOWS'
+            else:
+               linkflags += ' /subsystem:CONSOLE'
 
             if args.headless:
                 clflags += ' /DHEADLESS'
