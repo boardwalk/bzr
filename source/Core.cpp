@@ -29,6 +29,7 @@ Core::Core() : _done(false)
 {
     _portalDat.reset(new DatFile("data/client_portal.dat"));
     _cellDat.reset(new DatFile("data/client_cell_1.dat"));
+    _highresDat.reset(new DatFile("data/client_highres.dat"));
 
     if(SDL_Init(SDL_INIT_TIMER) < 0)
     {
@@ -97,6 +98,11 @@ const DatFile& Core::portalDat() const
 const DatFile& Core::cellDat() const
 {
     return *_cellDat;
+}
+
+const DatFile& Core::highresDat() const
+{
+    return *_highresDat;
 }
 
 const Camera& Core::camera() const

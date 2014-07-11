@@ -21,6 +21,8 @@ public:
 
     const DatFile& portalDat() const;
     const DatFile& cellDat() const;
+    const DatFile& highresDat() const;
+
     const Camera& camera() const;
 
     Landblock& landblock();
@@ -34,6 +36,7 @@ private:
     bool _done;
     unique_ptr<DatFile> _portalDat;
     unique_ptr<DatFile> _cellDat;
+    unique_ptr<DatFile> _highresDat;
     unique_ptr<Camera> _camera;
     // obviously we'll want more than one at some point
     unique_ptr<Landblock> _landblock;

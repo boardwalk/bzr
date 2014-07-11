@@ -6,15 +6,13 @@
 class Texture : Noncopyable
 {
 public:
-    enum TextureFormat
+    enum Format
     {
         BGR24, BGRA32, RGB24, A8
     };
 
-    static Texture fromBlob(const void* blob, size_t size);
-
     Texture();
-    Texture(TextureFormat format, const void* data, int width, int height);
+    Texture(Format format, const void* data, int width, int height);
     Texture(Texture&& other);
     ~Texture();
     Texture& operator=(Texture&& other);
