@@ -194,36 +194,13 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     auto fragTexLocation = glGetUniformLocation(_program, "fragTex");
     glUniform1i(fragTexLocation, 0); // corresponds to GL_TEXTURE_0
 
-    GLuint fbo;
-    glGenFramebuffers(1, &fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-    GLuint colorTex;
-    glGenTextures(1, &colorTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-    glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, colorTex, 0);
-
-    GLuint normalTex;
-    glGenTextures(1, &normalTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normalTex, 0);
-
-    GLuint depthTex;
-    glGenTextures(1, &depthTex);
-    glBindTexture(GL_TEXTURE_2D, depthTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTex, 0);
-
-    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    {
-        throw runtime_error("Could not setup framebuffer");
-    }
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    initFramebuffer(width, height);
 }
 
 Renderer::~Renderer()
 {
+    cleanupFramebuffer();
+    
     // TODO delete VAO
     glUseProgram(0);
     //glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -275,4 +252,46 @@ void Renderer::render(double interp)
     landblockRenderer.render();
 
     SDL_GL_SwapWindow(_window);
+}
+
+void Renderer::initFramebuffer(int width, int height)
+{
+    glGenFramebuffers(1, &_framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
+
+    GLuint colorTex;
+    glGenTextures(1, &_colorTexture);
+    glBindTexture(GL_TEXTURE_2D, _colorTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, _colorTexture, 0);
+
+    GLuint normalTex;
+    glGenTextures(1, &_normalTexture);
+    glBindTexture(GL_TEXTURE_2D, _normalTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, _normalTexture, 0);
+
+    GLuint depthTex;
+    glGenTextures(1, &_depthTexture);
+    glBindTexture(GL_TEXTURE_2D, _depthTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTex, 0);
+
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        throw runtime_error("Could not setup framebuffer");
+    }
+
+    GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+    glDrawBuffers(2, buffers);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Renderer::cleanupFramebuffer()
+{
+    glDeleteFramebuffers(1, &_framebuffer);
+    glDeleteTextures(1, &_colorTexture);
+    glDeleteTextures(1, &_normalTexture);
+    glDeleteTextures(1, &_depthTexture);
 }
