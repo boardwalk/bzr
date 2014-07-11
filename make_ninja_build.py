@@ -81,7 +81,10 @@ def main():
                 clflags += ' /O2 /GL'
                 linkflags += ' /LTCG'
             else:
-                clflags += r' /Zi /Fdout\bzr.pdb /FS'
+                clflags += r' /Zi /Fdout\bzr.pdb'
+                # cl complains about write access to the PDB with parallel compilation on VS2013 without /FS
+                if os.environ['VisualStudioVersion'] == '12.0':
+                   clflags += ' /FS'
                 linkflags += ' /DEBUG'
 
             if args.headless:
