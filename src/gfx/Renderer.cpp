@@ -14,12 +14,12 @@
 
 static const GLfloat PI = 3.14159265359;
 
-static const GLfloat vertices[] =
-{
-    0.0f, 1.0f, 3.0f,
-    -1.0f, -1.0f, 3.0f,
-    1.0f, -1.0f, 3.0f
-};
+//static const GLfloat vertices[] =
+//{
+//    0.0f, 1.0f, 3.0f,
+//    -1.0f, -1.0f, 3.0f,
+//    1.0f, -1.0f, 3.0f
+//};
 
 void identityMatrix(GLfloat mat[16])
 {

@@ -19,7 +19,7 @@ private:
     SDL_GLContext _context;
 
     GLuint _program;
-    GLuint _buffer;
+    //GLuint _buffer;
 };
 
 #endif

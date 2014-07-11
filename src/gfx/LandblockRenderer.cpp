@@ -63,8 +63,8 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
             auto h3 = vertexData[(x + 1) + y * (size + 1)];
             auto h4 = vertexData[x + y * (size + 1)];
 
-            auto d13 = abs(h3 - h1);
-            auto d24 = abs(h4 - h2);
+            auto d13 = fabs(h3 - h1);
+            auto d24 = fabs(h4 - h2);
 
             if(d13 > d24)
             {
