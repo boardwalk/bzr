@@ -12,103 +12,6 @@
 #include "graphics/shaders/VertexShader.glsl.h"
 #include "graphics/shaders/FragmentShader.glsl.h"
 
-static const GLfloat PI = 3.14159265359;
-
-//static const GLfloat vertices[] =
-//{
-//    0.0f, 1.0f, 3.0f,
-//    -1.0f, -1.0f, 3.0f,
-//    1.0f, -1.0f, 3.0f
-//};
-
-void identityMatrix(GLfloat mat[16])
-{
-    memset(mat, 0, sizeof(GLfloat) * 16);
-
-    mat[0] = 1.0f;
-    mat[5] = 1.0f;
-    mat[10] = 1.0f;
-    mat[15] = 1.0f;
-}
-
-//
-// on coordinates
-// our coordinate system is:
-// +x goes right
-// +y goes up
-// +z goes out of the screen
-// this is "right handed"
-// http://www.songho.ca/opengl/gl_projectionmatrix.html
-//
-void perspectiveMatrix(GLfloat fovy, GLfloat aspect, GLfloat zNear, GLfloat zFar, GLfloat m[16])
-{
-   memset(m, 0, sizeof(GLfloat) * 16);
-
-   auto f = 1.0f / tan(fovy * PI / 360.0f);
-   m[0] = f / aspect;
-   m[5] = f;
-   m[10] = -(zFar + zNear) / (zFar - zNear);
-   m[11] = -1.0f;
-   m[14] = -(2.0f * zFar * zNear) / (zFar - zNear);
-}
-
-static GLuint createShader(GLenum type, const GLchar* source)
-{
-    GLint length = strlen(source);
-
-    auto shader = glCreateShader(type);
-    glShaderSource(shader, 1, &source, &length);
-    glCompileShader(shader);
-
-    GLint success = GL_FALSE;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-
-    if(!success)
-    {
-        GLint logLength;
-        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
-
-        vector<GLchar> log(logLength);
-        glGetShaderInfoLog(shader, logLength, &logLength, log.data());
-
-        string logStr(log.data(), logLength);
-        throw runtime_error(logStr);
-    }
-
-    return shader;
-}
-
-static GLuint createProgram(const GLchar* vertexSource, const GLchar* fragmentSource)
-{
-    auto vertexShader = createShader(GL_VERTEX_SHADER, VertexShader);
-    auto fragmentShader = createShader(GL_FRAGMENT_SHADER, FragmentShader);
-
-    auto program = glCreateProgram();
-    glAttachShader(program, vertexShader);
-    glAttachShader(program, fragmentShader);
-    glLinkProgram(program);
-
-    GLint success = GL_FALSE;
-    glGetProgramiv(program, GL_LINK_STATUS, &success);
-
-    if(!success)
-    {
-        GLint logLength;
-        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
-
-        vector<GLchar> log(logLength);
-        glGetProgramInfoLog(program, logLength, &logLength, log.data());
-
-        string logStr(log.data(), logLength);
-        throw runtime_error(logStr);
-    }
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    return program;
-}
-
 Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 {
     if(SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
@@ -162,37 +65,27 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(0xffff);
 
-    _program = createProgram(VertexShader, FragmentShader);
-    glUseProgram(_program);
+    _program.create(VertexShader, FragmentShader);
+    _program.use();
 
-    GLfloat projectionMat[16];
-    perspectiveMatrix(fieldOfView, float(width)/float(height), 0.1f, 1000.0f, projectionMat);
+    Mat4 projectionMat;
+    projectionMat.makePerspective(fieldOfView, double(width)/double(height), 0.1, 1000.0);
 
-    //GLfloat viewMat[16];
-    //identityMatrix(viewMat);
+    Mat4 modelMat;
+    modelMat.makeIdentity();
 
-    GLfloat modelMat[16];
-    identityMatrix(modelMat);
+    auto projectionLoc = _program.getUniform("projection");
+    loadMat4ToUniform(projectionMat, projectionLoc);
 
-    auto projectionLoc = glGetUniformLocation(_program, "projection");
-    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projectionMat);
+    auto modelLoc = _program.getUniform("model");
+    loadMat4ToUniform(modelMat, modelLoc);
 
-    //auto viewLoc = glGetUniformLocation(_program, "view");
-    //glUniformMatrix4fv(viewLoc, 1, GL_FALSE, viewMat);
-
-    auto modelLoc = glGetUniformLocation(_program, "model");
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, modelMat);
+    auto fragTexLocation = _program.getUniform("fragTex");
+    glUniform1i(fragTexLocation, 0); // corresponds to GL_TEXTURE_0
 
     GLuint vertexArray;
     glGenVertexArrays(1, &vertexArray);
     glBindVertexArray(vertexArray);
-
-    //glGenBuffers(1, &_buffer);
-    //glBindBuffer(GL_ARRAY_BUFFER, _buffer);
-    //glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    auto fragTexLocation = glGetUniformLocation(_program, "fragTex");
-    glUniform1i(fragTexLocation, 0); // corresponds to GL_TEXTURE_0
 
     initFramebuffer(width, height);
 }
@@ -202,10 +95,10 @@ Renderer::~Renderer()
     cleanupFramebuffer();
     
     // TODO delete VAO
-    glUseProgram(0);
+    // unuse program
     //glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glDeleteProgram(_program);
+    _program.destroy();
     //glDeleteBuffers(1, & _buffer);
 
     if(_context != nullptr)
@@ -226,20 +119,14 @@ Renderer::~Renderer()
 
 void Renderer::render(double interp)
 {
-    //GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-    //glDrawBuffers(2, buffers);
-
-    //glDrawBuffers(0, nullptr);
-
-    auto viewLoc = glGetUniformLocation(_program, "view");
+    auto viewLoc = _program.getUniform("view");
     loadMat4ToUniform(Core::get().camera().viewMatrix(), viewLoc);
 
-    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    //glEnableVertexAttribArray(0);
+    // xx
+    //glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    //glDrawArrays(GL_TRIANGLES, 0, sizeof(vertices) / sizeof(vertices[0]) / 3);
-
+ 
     auto& landblock = Core::get().landblock();
     auto& renderData = landblock.renderData();
 
@@ -251,6 +138,12 @@ void Renderer::render(double interp)
     auto& landblockRenderer = (LandblockRenderer&)*renderData;
     landblockRenderer.render();
 
+    // xx
+    //glBindFramebuffer(GL_READ_FRAMEBUFFER, _framebuffer);
+    //glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    //glBlitFramebuffer(0, 0, 800, 600, 0, 0, 800, 600, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     SDL_GL_SwapWindow(_window);
 }
 
@@ -259,23 +152,20 @@ void Renderer::initFramebuffer(int width, int height)
     glGenFramebuffers(1, &_framebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
 
-    GLuint colorTex;
     glGenTextures(1, &_colorTexture);
     glBindTexture(GL_TEXTURE_2D, _colorTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, _colorTexture, 0);
 
-    GLuint normalTex;
     glGenTextures(1, &_normalTexture);
     glBindTexture(GL_TEXTURE_2D, _normalTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, _normalTexture, 0);
 
-    GLuint depthTex;
     glGenTextures(1, &_depthTexture);
     glBindTexture(GL_TEXTURE_2D, _depthTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTex, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _depthTexture, 0);
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     {

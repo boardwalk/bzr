@@ -2,6 +2,7 @@
 #define BZR_GRAPHICS_RENDERER_H
 
 #include "Noncopyable.h"
+#include "graphics/Program.h"
 
 class Renderer : Noncopyable
 {
@@ -19,8 +20,7 @@ private:
     SDL_Window* _window;
     SDL_GLContext _context;
 
-    GLuint _program;
-    //GLuint _buffer;
+    Program _program;
 
     GLuint _framebuffer;
     GLuint _colorTexture;
