@@ -25,4 +25,3 @@ void loadMat4ToUniform(const Mat4& mat, GLint location)
 
     glUniformMatrix4fv(location, 1, GL_FALSE, m);
 }
-

@@ -13,8 +13,12 @@ public:
     void render(double interp);
 
 private:
-    void initFramebuffer(int width, int height);
+    void initFramebuffer();
     void cleanupFramebuffer();
+
+    int _width;
+    int _height;
+    double _fieldOfView;
 
     bool _videoInit;
     SDL_Window* _window;

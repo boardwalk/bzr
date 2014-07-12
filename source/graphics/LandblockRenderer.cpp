@@ -1,5 +1,6 @@
 #include "graphics/LandblockRenderer.h"
 #include "graphics/loadTexture.h"
+#include "math/Vec3.h"
 #include "Landblock.h"
 #include <vector>
 
@@ -9,18 +10,51 @@
 LandblockRenderer::LandblockRenderer(const Landblock& landblock)
 {
     auto data = landblock.getSubdividedData();
-    auto size = landblock.getSubdividedSize();
+    auto size = (int)landblock.getSubdividedSize();
 
     vector<float> vertexData;
 
-    for(auto y = 0u; y < size; y++)
+    for(auto y = 0; y < size; y++)
     {
-        for(auto x = 0u; x < size; x++)
+        for(auto x = 0; x < size; x++)
         {
+            auto hc = data[x + y * size];
+            auto hw = data[max(x - 1, 0) + y * size];
+            auto he = data[min(x + 1, size - 1) + y * size];
+            auto hs = data[x + max(y - 1, 0) * size];
+            auto hn = data[x + min(y + 1, size - 1) * size];
+
+            double quadSize = Landblock::LANDBLOCK_SIZE / double(size - 1);
+
+            Vec3 ve(quadSize, 0.0, he - hc);
+            Vec3 vn(0.0, quadSize, hn - hc);
+            Vec3 vw(-quadSize, 0.0, hw - hc);
+            Vec3 vs(0.0, -quadSize, hs - hc);
+
+            auto nen = ve.cross(vn);
+            auto nnw = vn.cross(vw);
+            auto nws = vw.cross(vs);
+            auto nse = vs.cross(ve);
+
+            auto n = (nen + nnw + nws + nse).normalize();
+
+            //Vec3 we(Landblock::LANDBLOCK_SIZE / double(size - 1) * 2.0, 0.0, he - hw);
+            //Vec3 sn(0.0, Landblock::LANDBLOCK_SIZE / double(size - 1) * 2.0, hn - hs);
+            //auto n = we.cross(sn).normalize();
+
+            //printf("we:(%f, %f, %f) sn:(%f, %f, %f), n:(%f, %f, %f)\n",
+            //    we.x, we.y, we.z,
+            //    sn.x, sn.y, sn.z,
+            //    n.x, n.y, n.z);
+
             // x, y, z
             vertexData.push_back(double(x) / double(size - 1) * Landblock::LANDBLOCK_SIZE);
             vertexData.push_back(double(y) / double(size - 1) * Landblock::LANDBLOCK_SIZE);
             vertexData.push_back(data[x + y * size]);
+            // nx, ny, nz
+            vertexData.push_back(n.x);
+            vertexData.push_back(n.y);
+            vertexData.push_back(n.z);
             // s, t
             vertexData.push_back(double(x) / double(size - 1));
             vertexData.push_back(double(y) / double(size - 1));
@@ -33,7 +67,7 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
     // |\|\| ...
     // A-C-E
     // http://en.wikipedia.org/wiki/Triangle_strip
-    for(auto y = 0u; y < size - 1; y++)
+    for(auto y = 0; y < size - 1; y++)
     {
         if(y != 0)
         {
@@ -41,7 +75,7 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
             indexData.push_back(0xffff);
         }
 
-        auto x = 0u;
+        auto x = 0;
         
         // begin new triangle strip
         indexData.push_back(x + y * size);
@@ -64,14 +98,16 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
     _indexBuffer.bind(GL_ELEMENT_ARRAY_BUFFER);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexData.size() * sizeof(uint16_t), indexData.data(), GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, nullptr);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, nullptr);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid*)(sizeof(float) * 3));
+    //glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid*)(sizeof(float) * 6));
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
+    //glEnableVertexAttribArray(2);
 
     _indexCount = indexData.size();
 
-    _texture = loadTexture(0x0600383f);
+    //_texture = loadTexture(0x0600383f);
 }
 
 LandblockRenderer::~LandblockRenderer()
@@ -82,7 +118,7 @@ LandblockRenderer::~LandblockRenderer()
 
 void LandblockRenderer::render()
 {
-    _texture.bind(0);
+    //_texture.bind(0);
 
     _vertexBuffer.bind(GL_ARRAY_BUFFER);
     _indexBuffer.bind(GL_ELEMENT_ARRAY_BUFFER);

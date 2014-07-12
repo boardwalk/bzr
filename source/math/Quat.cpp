@@ -12,6 +12,6 @@ void Quat::makeFromYawPitchRoll(double yaw, double pitch, double roll)
 Vec3 operator*(const Quat& q, const Vec3& v)
 {
     // http://molecularmusings.wordpress.com/2013/05/24/a-faster-Quat-Vec3-multiplication/
-    auto t = 2.0 * cross(Vec3(q.x, q.y, q.z), v);
-    return v + q.w * t + cross(Vec3(q.x, q.y, q.z), t);
+    auto t = 2.0 * Vec3(q.x, q.y, q.z).cross(v);
+    return v + q.w * t + Vec3(q.x, q.y, q.z).cross(t);
 }

@@ -71,3 +71,21 @@ void Mat4::makePerspective(double fovy, double aspect, double zNear, double zFar
     m[11] = -1.0;
     m[14] = -(2.0 * zFar * zNear) / (zFar - zNear);
 }
+
+Mat4 operator*(const Mat4& a, const Mat4& b)
+{
+    Mat4 res;
+   
+    for(auto row = 0; row < 4; row++)
+    {
+        for(auto col = 0; col < 4; col++)
+        {
+            for(auto i = 0; i < 4; i++)
+            {
+                res.m[col * 4 + row] = res.m[col * 4  + row] + a.m[i * 4 + row] * b.m[col * 4 + i];
+            }
+        }
+    }
+
+    return res;
+}

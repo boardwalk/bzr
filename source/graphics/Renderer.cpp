@@ -1,6 +1,7 @@
 #include "graphics/Renderer.h"
 #include "graphics/LandblockRenderer.h"
 #include "graphics/util.h"
+#include "math/Mat3.h"
 #include "Camera.h"
 #include "Core.h"
 #include "Landblock.h"
@@ -24,12 +25,12 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 #endif
 
     // TODO configurable
-    float fieldOfView = 90.0f;
-    int width = 800;
-    int height = 600;
+    _width = 800;
+    _height = 600;
+    _fieldOfView = 90.0;
 
     _window = SDL_CreateWindow("Bael'Zharon's Respite",
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_OPENGL);
+        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height, SDL_WINDOW_OPENGL);
 
     if(_window == nullptr)
     {
@@ -57,7 +58,7 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     glClearColor(0.0f, 0.0, 0.5f, 1.0f);
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glEnable(GL_TEXTURE_2D);
+    //glEnable(GL_TEXTURE_2D);
 
     glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(0xffff);
@@ -65,26 +66,14 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     _program.create(VertexShader, FragmentShader);
     _program.use();
 
-    Mat4 projectionMat;
-    projectionMat.makePerspective(fieldOfView, double(width)/double(height), 0.1, 1000.0);
-
-    Mat4 modelMat;
-    modelMat.makeIdentity();
-
-    auto projectionLoc = _program.getUniform("projection");
-    loadMat4ToUniform(projectionMat, projectionLoc);
-
-    auto modelLoc = _program.getUniform("model");
-    loadMat4ToUniform(modelMat, modelLoc);
-
-    auto fragTexLocation = _program.getUniform("fragTex");
-    glUniform1i(fragTexLocation, 0); // corresponds to GL_TEXTURE_0
+    //auto fragTexLocation = _program.getUniform("fragTex");
+    //glUniform1i(fragTexLocation, 0); // corresponds to GL_TEXTURE_0
 
     GLuint vertexArray;
     glGenVertexArrays(1, &vertexArray);
     glBindVertexArray(vertexArray);
 
-    initFramebuffer(width, height);
+    initFramebuffer();
 }
 
 Renderer::~Renderer()
@@ -93,10 +82,9 @@ Renderer::~Renderer()
     
     // TODO delete VAO
     // unuse program
-    //glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // unuse buffer
 
     _program.destroy();
-    //glDeleteBuffers(1, & _buffer);
 
     if(_context != nullptr)
     {
@@ -116,8 +104,42 @@ Renderer::~Renderer()
 
 void Renderer::render(double interp)
 {
-    auto viewLoc = _program.getUniform("view");
-    loadMat4ToUniform(Core::get().camera().viewMatrix(), viewLoc);
+    // projection * view * model * vertex
+    Mat4 projectionMat;
+    projectionMat.makePerspective(_fieldOfView, double(_width)/double(_height), 0.1, 1000.0);
+
+    const Mat4& viewMat = Core::get().camera().viewMatrix();
+
+    Mat4 modelMat;
+    modelMat.makeIdentity();
+
+    // matrices for the vertex shader
+    auto normalMatrixLoc = _program.getUniform("normalMatrix");
+    loadMat3ToUniform(Mat3(viewMat * modelMat).inverse().transpose(), normalMatrixLoc);
+
+    auto modelViewMatrixLoc = _program.getUniform("modelViewMatrix");
+    loadMat4ToUniform(viewMat * modelMat, modelViewMatrixLoc);
+
+    auto modelViewProjectionLoc = _program.getUniform("modelViewProjectionMatrix");
+    loadMat4ToUniform(projectionMat * viewMat * modelMat, modelViewProjectionLoc);
+
+    // lighting parameters for the fragment shader
+    auto& lightPosition = Core::get().camera().position();
+    glUniform4f(_program.getUniform("lightPosition"), -lightPosition.x, -lightPosition.y, -lightPosition.z, 1.0);
+
+    Vec3 lightIntensity(1.0, 1.0, 1.0);
+    glUniform3f(_program.getUniform("lightIntensity"), lightIntensity.x, lightIntensity.y, lightIntensity.z);
+
+    Vec3 Kd(0.0, 0.0, 0.0);
+    glUniform3f(_program.getUniform("Kd"), Kd.x, Kd.y, Kd.z);
+
+    Vec3 Ka(0.3, 0.3, 0.3);
+    glUniform3f(_program.getUniform("Ka"), Ka.x, Ka.y, Ka.z);
+
+    Vec3 Ks(0.5, 0.5, 0.5);
+    glUniform3f(_program.getUniform("Ks"), Ks.x, Ks.y, Ks.z);
+
+    glUniform1f(_program.getUniform("shininess"), 3.0);
 
     // xx
     //glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
@@ -144,24 +166,24 @@ void Renderer::render(double interp)
     SDL_GL_SwapWindow(_window);
 }
 
-void Renderer::initFramebuffer(int width, int height)
+void Renderer::initFramebuffer()
 {
     glGenFramebuffers(1, &_framebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
 
     glGenTextures(1, &_colorTexture);
     glBindTexture(GL_TEXTURE_2D, _colorTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, _width, _height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, _colorTexture, 0);
 
     glGenTextures(1, &_normalTexture);
     glBindTexture(GL_TEXTURE_2D, _normalTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, _width, _height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, _normalTexture, 0);
 
     glGenTextures(1, &_depthTexture);
     glBindTexture(GL_TEXTURE_2D, _depthTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, _width, _height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _depthTexture, 0);
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)

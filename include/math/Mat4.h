@@ -16,4 +16,6 @@ struct Mat4
     double m[16];
 };
 
+Mat4 operator*(const Mat4& a, const Mat4& b);
+
 #endif

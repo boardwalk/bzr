@@ -5,7 +5,11 @@ struct Vec3
 {
     Vec3();
     Vec3(double vx, double vy, double vz);
-   
+
+    double magnitude() const;
+    Vec3 normalize() const;
+    Vec3 cross(const Vec3& v) const;
+
     double x;
     double y;
     double z;
@@ -14,6 +18,5 @@ struct Vec3
 Vec3 operator*(double a, const Vec3& b);
 Vec3 operator*(const Vec3& a, double b);
 Vec3 operator+(const Vec3& a, const Vec3& b);
-Vec3 cross(const Vec3& a, const Vec3& b);
 
 #endif

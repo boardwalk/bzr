@@ -3,7 +3,7 @@
 Camera::Camera()
 {
     _viewMatrix.makeIdentity();
-    _position = Vec3(-86, -78, -120);
+    _position = Vec3(-96, -96, -140);
 }
 
 void Camera::look(double dx, double dy)
@@ -31,4 +31,9 @@ void Camera::step(double dt)
 const Mat4& Camera::viewMatrix() const
 {
     return _viewMatrix;
+}
+
+const Vec3& Camera::position() const
+{
+    return _position;
 }

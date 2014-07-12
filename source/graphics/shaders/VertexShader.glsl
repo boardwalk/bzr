@@ -1,16 +1,18 @@
 #version 410
 
-layout(location = 0) in vec3 vert;
-layout(location = 1) in vec2 texCoord;
+layout(location = 0) in vec3 vertexPosition;
+layout(location = 1) in vec3 vertexNormal;
 
-uniform mat4 projection;
-uniform mat4 view;
-uniform mat4 model;
+uniform mat3 normalMatrix;
+uniform mat4 modelViewMatrix;
+uniform mat4 modelViewProjectionMatrix;
 
-smooth out vec2 fragTexCoord;
+out vec3 position;
+out vec3 normal;
 
 void main()
 {
-    gl_Position = projection * view * model * vec4(vert.x, vert.y, vert.z, 1.0);
-    fragTexCoord = texCoord;
+    position = vec3(modelViewMatrix * vec4(vertexPosition, 1.0));
+    normal = normalize(normalMatrix * vertexNormal);
+    gl_Position = modelViewProjectionMatrix * vec4(vertexPosition, 1.0);
 }

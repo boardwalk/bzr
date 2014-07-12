@@ -24,6 +24,7 @@ public:
     void step(double dt);
 
     const Mat4& viewMatrix() const;
+    const Vec3& position() const;
 
 private:
     Mat4 _viewMatrix;

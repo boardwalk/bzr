@@ -100,5 +100,13 @@ void Program::use()
 GLint Program::getUniform(const GLchar* name)
 {
     assert(_handle != 0);
-    return glGetUniformLocation(_handle, name);
+
+    auto loc = glGetUniformLocation(_handle, name);
+
+    if(loc < 0)
+    {
+        throw runtime_error("Uniform does not exist");
+    }
+
+    return loc;
 }
