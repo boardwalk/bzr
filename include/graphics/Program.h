@@ -1,8 +1,6 @@
 #ifndef BZR_GRAPHICS_PROGRAM_H
 #define BZR_GRAPHICS_PROGRAM_H
 
-#include "Noncopyable.h"
-
 class Program
 {
 public:

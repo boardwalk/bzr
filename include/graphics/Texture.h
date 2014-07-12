@@ -1,9 +1,7 @@
 #ifndef BZR_GRAPHICS_TEXTURE_H
 #define BZR_GRAPHICS_TEXTURE_H
 
-#include "Noncopyable.h"
-
-class Texture : Noncopyable
+class Texture
 {
 public:
     enum Format
