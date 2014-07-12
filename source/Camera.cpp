@@ -9,7 +9,7 @@ Camera::Camera()
 void Camera::look(double dx, double dy)
 {
     // TODO
-    _position.z += dx * 30.0;
+    _position.z += dy * 30.0;
 
     //printf("%f %f %f\n", _position.x, _position.y, _position.z);
 }
@@ -17,8 +17,8 @@ void Camera::look(double dx, double dy)
 void Camera::move(double dx, double dy)
 {
     // TODO
-    _position.x += dx * 30.0;
-    _position.y += dy * 30.0;
+    _position.x -= dx * 30.0;
+    _position.y -= dy * 30.0;
 
     //printf("%f %f %f\n", _position.x, _position.y, _position.z);
 }
