@@ -9,11 +9,11 @@ public:
     ~Program();
     Program& operator=(Program&& other);
 
-    void create(const char* vertexShader, const char* fragmentShader);
+    void create(const GLchar* vertexShader, const GLchar* fragmentShader);
     void destroy();
     
     void use();
-    GLint getUniform(const char* name);
+    GLint getUniform(const GLchar* name);
 
 private:
     GLuint _handle;

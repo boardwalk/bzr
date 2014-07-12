@@ -50,7 +50,7 @@ Program& Program::operator=(Program&& other)
     return *this;
 }
 
-void Program::create(const char* vertexShader, const char* fragmentShader)
+void Program::create(const GLchar* vertexShader, const GLchar* fragmentShader)
 {
     destroy();
     
@@ -96,7 +96,7 @@ void Program::use()
     glUseProgram(_handle);
 }
 
-GLint Program::getUniform(const char* name)
+GLint Program::getUniform(const GLchar* name)
 {
     assert(_handle != 0);
     return glGetUniformLocation(_handle, name);

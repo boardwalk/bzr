@@ -14,7 +14,7 @@ public:
     ~Texture();
     Texture& operator=(Texture&& other);
 
-    void create(Format format, const void* data, int width, int height);
+    void create(Format format, const GLvoid* data, int width, int height);
     void destroy();
 
     void bind(int i);

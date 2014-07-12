@@ -22,7 +22,7 @@ Texture& Texture::operator=(Texture&& other)
     return *this;
 }
 
-void Texture::create(Format format, const void* data, int width, int height)
+void Texture::create(Format format, const GLvoid* data, int width, int height)
 {
     destroy();
 

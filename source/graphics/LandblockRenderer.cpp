@@ -96,12 +96,12 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
 
     assert(indexData.size() < 0xffff);
 
-    glGenBuffers(1, &_vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+    _vertexBuffer.create();
+    _vertexBuffer.bind(GL_ARRAY_BUFFER);
     glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(float), vertexData.data(), GL_STATIC_DRAW);
 
-    glGenBuffers(1, &_indexBuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
+    _indexBuffer.create();
+    _indexBuffer.bind(GL_ELEMENT_ARRAY_BUFFER);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexData.size() * sizeof(uint16_t), indexData.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, nullptr);
@@ -116,16 +116,16 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
 
 LandblockRenderer::~LandblockRenderer()
 {
-    glDeleteBuffers(1, &_vertexBuffer);
-    glDeleteBuffers(1, &_indexBuffer);
+    _vertexBuffer.destroy();
+    _indexBuffer.destroy();
 }
 
 void LandblockRenderer::render()
 {
     _texture.bind(0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
+    _vertexBuffer.bind(GL_ARRAY_BUFFER);
+    _indexBuffer.bind(GL_ELEMENT_ARRAY_BUFFER);
     //glDrawElements(GL_TRIANGLE_STRIP, _indexCount, GL_UNSIGNED_SHORT, nullptr);
     glDrawElements(GL_TRIANGLES, _indexCount, GL_UNSIGNED_SHORT, nullptr);
 }

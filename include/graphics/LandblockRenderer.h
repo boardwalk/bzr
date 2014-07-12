@@ -1,6 +1,7 @@
 #ifndef BZR_GRAPHICS_LANDBLOCKRENDERER_H
 #define BZR_GRAPHICS_LANDBLOCKRENDERER_H
 
+#include "graphics/Buffer.h"
 #include "graphics/Texture.h"
 #include "IDestructable.h"
 #include "Noncopyable.h"
@@ -16,8 +17,8 @@ public:
     void render();
 
 private:
-    GLuint _vertexBuffer;
-    GLuint _indexBuffer;
+    Buffer _vertexBuffer;
+    Buffer _indexBuffer;
     GLsizei _indexCount;
 
     Texture _texture;
