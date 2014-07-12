@@ -51,34 +51,35 @@ Program& Program::operator=(Program&& other)
 }
 
 void Program::create(const GLchar* vertexShader, const GLchar* fragmentShader)
-{
-    destroy();
-    
+{    
     auto vertexShaderHandle = createShader(GL_VERTEX_SHADER, vertexShader);
     auto fragmentShaderHandle = createShader(GL_FRAGMENT_SHADER, fragmentShader);
 
-    _handle = glCreateProgram();
-    glAttachShader(_handle, vertexShaderHandle);
-    glAttachShader(_handle, fragmentShaderHandle);
-    glLinkProgram(_handle);
+    auto program = glCreateProgram();
+    glAttachShader(program, vertexShaderHandle);
+    glAttachShader(program, fragmentShaderHandle);
+    glLinkProgram(program);
 
     glDeleteShader(vertexShaderHandle);
     glDeleteShader(fragmentShaderHandle);
 
     GLint success = GL_FALSE;
-    glGetProgramiv(_handle, GL_LINK_STATUS, &success);
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
 
     if(!success)
     {
         GLint logLength;
-        glGetProgramiv(_handle, GL_INFO_LOG_LENGTH, &logLength);
+        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
 
         vector<GLchar> log(logLength);
-        glGetProgramInfoLog(_handle, logLength, &logLength, log.data());
+        glGetProgramInfoLog(program, logLength, &logLength, log.data());
 
         string logStr(log.data(), logLength);
         throw runtime_error(logStr);
-    }    
+    }
+
+    destroy();
+    _handle = program;
 }
 
 void Program::destroy()
