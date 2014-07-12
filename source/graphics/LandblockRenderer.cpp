@@ -18,12 +18,12 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
         for(auto x = 0u; x < size; x++)
         {
             // x, y, z
-            vertexData.push_back(double(x) / double(size) * Landblock::LANDBLOCK_SIZE);
-            vertexData.push_back(double(y) / double(size) * Landblock::LANDBLOCK_SIZE);
+            vertexData.push_back(double(x) / double(size - 1) * Landblock::LANDBLOCK_SIZE);
+            vertexData.push_back(double(y) / double(size - 1) * Landblock::LANDBLOCK_SIZE);
             vertexData.push_back(data[x + y * size]);
             // s, t
-            vertexData.push_back(double(x) / double(size));
-            vertexData.push_back(double(y) / double(size));
+            vertexData.push_back(double(x) / double(size - 1));
+            vertexData.push_back(double(y) / double(size - 1));
         }
     }
 
