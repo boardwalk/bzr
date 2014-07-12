@@ -5,7 +5,7 @@
 
 struct Quat
 {
-	void makeFromYawPitchRoll(double yaw, double pitch, double roll);
+    void makeFromYawPitchRoll(double yaw, double pitch, double roll);
 
     double w;
     double x;

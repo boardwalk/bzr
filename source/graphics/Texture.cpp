@@ -5,8 +5,8 @@ Texture::Texture() : _handle(0)
 
 Texture::Texture(Texture&& other)
 {
-   _handle = other._handle;
-   other._handle = 0;
+    _handle = other._handle;
+    other._handle = 0;
 }
 
 Texture::~Texture()
@@ -16,14 +16,16 @@ Texture::~Texture()
 
 Texture& Texture::operator=(Texture&& other)
 {
-   destroy();
-   _handle = other._handle;
-   other._handle = 0;
-   return *this;
+    destroy();
+    _handle = other._handle;
+    other._handle = 0;
+    return *this;
 }
 
 void Texture::create(Format format, const void* data, int width, int height)
 {
+    destroy();
+
     GLint glformat;
     GLint gltype;
 
@@ -58,11 +60,11 @@ void Texture::create(Format format, const void* data, int width, int height)
 
 void Texture::destroy()
 {
-   if(_handle != 0)
-   {
-      glDeleteTextures(1, &_handle);
-      _handle = 0;
-   }
+    if(_handle != 0)
+    {
+        glDeleteTextures(1, &_handle);
+        _handle = 0;
+    }
 }
 
 void Texture::bind(int i)

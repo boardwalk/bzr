@@ -3,8 +3,8 @@
 
 struct Vec2
 {
-   double x;
-   double y;
+    double x;
+    double y;
 };
 
 #endif

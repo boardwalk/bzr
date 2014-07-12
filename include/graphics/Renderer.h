@@ -1,8 +1,8 @@
 #ifndef BZR_GRAPHICS_RENDERER_H
 #define BZR_GRAPHICS_RENDERER_H
 
-#include "Noncopyable.h"
 #include "graphics/Program.h"
+#include "Noncopyable.h"
 
 class Renderer : Noncopyable
 {
@@ -13,8 +13,8 @@ public:
     void render(double interp);
 
 private:
-	void initFramebuffer(int width, int height);
-	void cleanupFramebuffer();
+    void initFramebuffer(int width, int height);
+    void cleanupFramebuffer();
 
     bool _videoInit;
     SDL_Window* _window;

@@ -7,31 +7,31 @@
 class Camera
 {
 public:
-	Camera();
+    Camera();
 
-	// -dx look left
-	// +dx look right
-	// -dy look down
-	// +dy look up
-	void look(double dx, double dy);
+    // -dx look left
+    // +dx look right
+    // -dy look down
+    // +dy look up
+    void look(double dx, double dy);
 
-	// -dx strafe left
-	// +dx strafe right
-	// -dy move back
-	// +dy move forward
-	void move(double dx, double dy);
+    // -dx strafe left
+    // +dx strafe right
+    // -dy move back
+    // +dy move forward
+    void move(double dx, double dy);
 
-	void step(double dt);
+    void step(double dt);
 
-	const Mat4& viewMatrix() const;
+    const Mat4& viewMatrix() const;
 
 private:
-	Mat4 _viewMatrix;
+    Mat4 _viewMatrix;
 
-	Vec3 _position;
-	//double _yaw;
-	//double _pitch;
-	//double _roll;
+    Vec3 _position;
+    //double _yaw;
+    //double _pitch;
+    //double _roll;
 };
 
 #endif

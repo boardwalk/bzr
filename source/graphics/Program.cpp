@@ -52,6 +52,8 @@ Program& Program::operator=(Program&& other)
 
 void Program::create(const char* vertexShader, const char* fragmentShader)
 {
+    destroy();
+    
     auto vertexShaderHandle = createShader(GL_VERTEX_SHADER, vertexShader);
     auto fragmentShaderHandle = createShader(GL_FRAGMENT_SHADER, fragmentShader);
 
