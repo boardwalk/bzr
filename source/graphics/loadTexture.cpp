@@ -105,6 +105,7 @@ Texture loadTexture(uint32_t fileId)
         data = decodedData.data();
     }
 
-    return Texture(format, data, header->width, header->height);
+    Texture texture;
+    texture.create(format, data, header->width, header->height);
+    return move(texture);
 }
-

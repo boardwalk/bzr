@@ -12,13 +12,14 @@ public:
     };
 
     Texture();
-    Texture(Format format, const void* data, int width, int height);
     Texture(Texture&& other);
     ~Texture();
     Texture& operator=(Texture&& other);
 
-    void bind(int i);
+    void create(Format format, const void* data, int width, int height);
     void destroy();
+
+    void bind(int i);
 
 private:
     GLuint _handle;

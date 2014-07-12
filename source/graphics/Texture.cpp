@@ -3,7 +3,26 @@
 Texture::Texture() : _handle(0)
 {}
 
-Texture::Texture(Format format, const void* data, int width, int height) : _handle(0)
+Texture::Texture(Texture&& other)
+{
+   _handle = other._handle;
+   other._handle = 0;
+}
+
+Texture::~Texture()
+{
+   destroy();
+}
+
+Texture& Texture::operator=(Texture&& other)
+{
+   destroy();
+   _handle = other._handle;
+   other._handle = 0;
+   return *this;
+}
+
+void Texture::create(Format format, const void* data, int width, int height)
 {
     GLint glformat;
     GLint gltype;
@@ -37,23 +56,13 @@ Texture::Texture(Format format, const void* data, int width, int height) : _hand
     glTexImage2D(GL_TEXTURE_2D, 0, glformat, width, height, 0, glformat, gltype, data);
 }
 
-Texture::Texture(Texture&& other)
+void Texture::destroy()
 {
-   _handle = other._handle;
-   other._handle = 0;
-}
-
-Texture::~Texture()
-{
-   destroy();
-}
-
-Texture& Texture::operator=(Texture&& other)
-{
-   destroy();
-   _handle = other._handle;
-   other._handle = 0;
-   return *this;
+   if(_handle != 0)
+   {
+      glDeleteTextures(1, &_handle);
+      _handle = 0;
+   }
 }
 
 void Texture::bind(int i)
@@ -66,13 +75,3 @@ void Texture::bind(int i)
     glActiveTexture(GL_TEXTURE0 + i);
     glBindTexture(GL_TEXTURE_2D, _handle);
 }
-
-void Texture::destroy()
-{
-   if(_handle != 0)
-   {
-      glDeleteTextures(1, &_handle);
-      _handle = 0;
-   }
-}
-

@@ -5,9 +5,6 @@
 #include "Camera.h"
 #include "Landblock.h"
 #include "util.h"
-#include <SDL.h>
-#include <string>
-#include <vector>
 
 #include "graphics/shaders/VertexShader.glsl.h"
 #include "graphics/shaders/FragmentShader.glsl.h"
