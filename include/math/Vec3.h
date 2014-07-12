@@ -3,12 +3,12 @@
 
 struct Vec3
 {
+   Vec3();
+   Vec3(double vx, double vy, double vz);
+   
    double x;
    double y;
    double z;
-
-   Vec3();
-   Vec3(double vx, double vy, double vz);
 };
 
 Vec3 operator*(double a, const Vec3& b);
