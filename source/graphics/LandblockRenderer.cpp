@@ -33,7 +33,6 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
     // |\|\| ...
     // A-C-E
     // http://en.wikipedia.org/wiki/Triangle_strip
-    /*
     for(auto y = 0u; y < size - 1; y++)
     {
         if(y != 0)
@@ -52,45 +51,6 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
         {
             indexData.push_back((x + 1) + y * size);
             indexData.push_back((x + 1) + (y + 1) * size);
-        }
-    }
-    */
-
-    for(auto y = 0u; y < size - 1; y++)
-    {
-        for(auto x = 0u; x < size - 1; x++)
-        {
-            // 4--3
-            // |  |
-            // 1--2
-            auto h1 = vertexData[x + y * size];
-            auto h2 = vertexData[(x + 1) + y * size];
-            auto h3 = vertexData[(x + 1) + y * (size + 1)];
-            auto h4 = vertexData[x + y * (size + 1)];
-
-            auto d13 = fabs(h3 - h1);
-            auto d24 = fabs(h4 - h2);
-
-            if(d13 > d24)
-            {
-                indexData.push_back(x + y * size); // 1
-                indexData.push_back((x + 1) + y * size); // 2
-                indexData.push_back((x + 1) + (y + 1) * size); // 3
-
-                indexData.push_back(x + y * size); // 1
-                indexData.push_back((x + 1) + (y + 1) * size); // 3
-                indexData.push_back(x + (y + 1) * size); // 4
-            }
-            else
-            {
-                indexData.push_back(x + y * size); // 1
-                indexData.push_back((x + 1) + y * size); // 2
-                indexData.push_back(x + (y + 1) * size); // 4
-
-                indexData.push_back((x + 1) + y * size); // 2
-                indexData.push_back((x + 1) + (y + 1) * size); // 3
-                indexData.push_back(x + (y + 1) * size); // 4
-            }
         }
     }
 
@@ -126,7 +86,5 @@ void LandblockRenderer::render()
 
     _vertexBuffer.bind(GL_ARRAY_BUFFER);
     _indexBuffer.bind(GL_ELEMENT_ARRAY_BUFFER);
-    //glDrawElements(GL_TRIANGLE_STRIP, _indexCount, GL_UNSIGNED_SHORT, nullptr);
-    glDrawElements(GL_TRIANGLES, _indexCount, GL_UNSIGNED_SHORT, nullptr);
+    glDrawElements(GL_TRIANGLE_STRIP, _indexCount, GL_UNSIGNED_SHORT, nullptr);
 }
-
