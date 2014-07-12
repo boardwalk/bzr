@@ -96,7 +96,7 @@ double Landblock::getSubdividedHeight(Vec2 point) const
     return getHeight(_subdivided.get(), GRID_SIZE * (1 << _nsubdivisions), point);
 }
 
-unique_ptr<IDestructable>& Landblock::renderData()
+unique_ptr<Destructable>& Landblock::renderData()
 {
     return _renderData;
 }

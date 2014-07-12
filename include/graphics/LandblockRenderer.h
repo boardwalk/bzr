@@ -3,12 +3,12 @@
 
 #include "graphics/Buffer.h"
 #include "graphics/Texture.h"
-#include "IDestructable.h"
+#include "Destructable.h"
 #include "Noncopyable.h"
 
 class Landblock;
 
-class LandblockRenderer : public IDestructable, Noncopyable
+class LandblockRenderer : public Destructable, Noncopyable
 {
 public:
     LandblockRenderer(const Landblock& landblock);

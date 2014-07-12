@@ -2,7 +2,7 @@
 #define BZR_LANDBLOCK_H
 
 #include "math/Vec2.h"
-#include "IDestructable.h"
+#include "Destructable.h"
 #include "Noncopyable.h"
 
 class Landblock : Noncopyable
@@ -21,7 +21,7 @@ public:
     
     double getSubdividedHeight(Vec2 point) const;
 
-    unique_ptr<IDestructable>& renderData();
+    unique_ptr<Destructable>& renderData();
 
 private:
     PACK(struct RawData
@@ -43,7 +43,7 @@ private:
     unique_ptr<double[]> _subdivided;
     int _nsubdivisions;
 
-    unique_ptr<IDestructable> _renderData;
+    unique_ptr<Destructable> _renderData;
 };
 
 #endif
