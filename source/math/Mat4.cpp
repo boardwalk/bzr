@@ -4,6 +4,11 @@
 
 static const double PI = 3.14159265359;
 
+Mat4::Mat4()
+{
+    memset(m, 0, sizeof(m));
+}
+
 void Mat4::makeIdentity()
 {
     memset(m, 0, sizeof(m));
@@ -55,7 +60,6 @@ void Mat4::makeRotation(const Quat& q)
 // this is "right handed"
 // http://www.songho.ca/opengl/gl_projectionmatrix.html
 //
-
 void Mat4::makePerspective(double fovy, double aspect, double zNear, double zFar)
 {
     memset(m, 0, sizeof(double) * 16);

@@ -6,6 +6,8 @@ struct Vec3;
 
 struct Mat4
 {
+    Mat4();
+
     void makeIdentity();
     void makeTranslation(const Vec3& v);
     void makeRotation(const Quat& q);
