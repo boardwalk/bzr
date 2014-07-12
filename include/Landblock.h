@@ -1,9 +1,9 @@
 #ifndef BZR_LANDBLOCK_H
 #define BZR_LANDBLOCK_H
 
+#include "math/Vec2.h"
 #include "IDestructable.h"
 #include "Noncopyable.h"
-#include "math/Vec2.h"
 
 class Landblock : Noncopyable
 {

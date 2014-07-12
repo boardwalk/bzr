@@ -7,7 +7,7 @@
 
 class Landblock;
 
-class LandblockRenderer : public IDestructable
+class LandblockRenderer : public IDestructable, Noncopyable
 {
 public:
     LandblockRenderer(const Landblock& landblock);

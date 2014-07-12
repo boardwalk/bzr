@@ -1,8 +1,8 @@
 #include "graphics/Renderer.h"
 #include "graphics/LandblockRenderer.h"
 #include "graphics/util.h"
-#include "Core.h"
 #include "Camera.h"
+#include "Core.h"
 #include "Landblock.h"
 #include "util.h"
 

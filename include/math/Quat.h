@@ -1,7 +1,7 @@
 #ifndef BZR_MATH_QUAT_H
 #define BZR_MATH_QUAT_H
 
-#include "math/Vec3.h"
+struct Vec3;
 
 struct Quat
 {

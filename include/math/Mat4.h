@@ -1,8 +1,8 @@
 #ifndef BZR_MATH_MAT4_H
 #define BZR_MATH_MAT4_H
 
-struct Vec3;
 struct Quat;
+struct Vec3;
 
 struct Mat4
 {

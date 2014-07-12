@@ -1,4 +1,5 @@
 #include "math/Quat.h"
+#include "math/Vec3.h"
 
 void Quat::makeFromYawPitchRoll(double yaw, double pitch, double roll)
 {

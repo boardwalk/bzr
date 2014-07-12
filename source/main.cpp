@@ -2,8 +2,8 @@
 #include <SDL_main.h>
 #include <cstdio>
 #include <cstdlib>
-#include <stdexcept>
 #include <memory>
+#include <stdexcept>
 
 int main(int argc, char* argv[])
 {

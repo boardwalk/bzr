@@ -1,8 +1,8 @@
 #ifndef BZR_CAMERA_H
 #define BZR_CAMERA_H
 
-#include "math/Vec3.h"
 #include "math/Mat4.h"
+#include "math/Vec3.h"
 
 class Camera
 {

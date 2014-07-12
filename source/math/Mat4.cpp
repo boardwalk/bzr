@@ -1,4 +1,5 @@
 #include "math/Mat4.h"
+#include "math/Vec3.h"
 #include "math/Quat.h"
 
 static const double PI = 3.14159265359;
