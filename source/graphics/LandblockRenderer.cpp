@@ -2,6 +2,7 @@
 #include "graphics/Image.h"
 #include "math/Vec3.h"
 #include "Landblock.h"
+#include <algorithm>
 #include <vector>
 
 // TODO We could only create one indexBuffer per subdivision level
