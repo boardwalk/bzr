@@ -102,9 +102,10 @@ def main():
             n.variable('linkflags', linkflags)
             n.variable('appext', '.exe')
 
-            n.rule('compile', 'cl $clflags /c $in /Fo$out')
-            n.rule('header', 'python make_include_file.py $in $out')
+            n.rule('c', 'cl $clflags /c $in /Fo$out')
+            n.rule('cxx', 'cl $clflags /c $in /Fo$out')
             n.rule('link', 'link $linkflags $in /out:$out')
+            n.rule('header', 'python make_include_file.py $in $out')
             n.rule('copy', 'cmd /c copy $in $out')
 
             n.build(r'output\SDL2.dll', 'copy', r'{}\lib\x64\SDL2.dll'.format(sdl_dir))
