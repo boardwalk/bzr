@@ -30,9 +30,10 @@ private:
     Mat4 _viewMatrix;
 
     Vec3 _position;
-    //double _yaw;
-    //double _pitch;
-    //double _roll;
+
+    double _yaw;
+    double _pitch;
+    double _roll;
 };
 
 #endif

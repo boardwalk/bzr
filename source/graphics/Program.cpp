@@ -105,7 +105,7 @@ GLint Program::getUniform(const GLchar* name)
 
     if(loc < 0)
     {
-        throw runtime_error("Uniform does not exist");
+        //throw runtime_error("Uniform does not exist");
     }
 
     return loc;

@@ -144,25 +144,22 @@ void Landblock::subdivideOnce()
     {
         for(auto x = 0; x < size; x++)
         {
-            // copy original control point
-            newSubdivided[(x * 2) + (y * 2) * newSize] = _subdivided[x + y * size];
-
-            // add new face point
-            auto f1 = _subdivided[x + y * size];
-            auto f2 = _subdivided[min(x + 1, size - 1) + y * size];
-            auto f3 = _subdivided[x + min(y + 1, size - 1) * size];
-            auto f4 = _subdivided[min(x + 1, size - 1) + min(y + 1, size - 1) * size];
-            newSubdivided[(x * 2 + 1) + (y * 2 + 1) * newSize] = (f1 + f2 + f3 + f4) / 4.0;
-
-            // add horizontal edge point
             auto h1 = _subdivided[x + y * size];
             auto h2 = _subdivided[min(x + 1, size - 1) + y * size];
+            auto h3 = _subdivided[min(x + 1, size - 1) + min(y + 1, size - 1) * size];
+            auto h4 = _subdivided[x + min(y + 1, size - 1) * size];
+
+            // copy original control point
+            newSubdivided[(x * 2) + (y * 2) * newSize] = h1;
+
+            // add horizontal edge point
             newSubdivided[(x * 2 + 1) + (y * 2) * newSize] = (h1 + h2) / 2.0;
 
             // add vertical edge point
-            auto v1 = _subdivided[x + y * size];
-            auto v2 = _subdivided[x + min(y + 1, size - 1) * size];
-            newSubdivided[(x * 2) + (y * 2 + 1) * newSize] = (v1 + v2) / 2.0;
+            newSubdivided[(x * 2) + (y * 2 + 1) * newSize] = (h1 + h4) / 2.0;
+
+            // add new face point
+            newSubdivided[(x * 2 + 1) + (y * 2 + 1) * newSize] = (h1 + h2 + h3 + h4) / 4.0;
         }
     }
 

@@ -112,22 +112,27 @@ def main():
             
             n.default(r'output\SDL2.dll output\glew32.dll')
         else:
+            # applied to 'c' rule only
+            cflags = ''
+            # applied to 'cxx' rule only
             cxxflags = ''
+            # applied to everything, including link
             cppflags = ''
             ldflags = ''
-            linkcmd = 'clang++ $cppflags $ldflags $in -o $out'
+            linkextra = ''
 
             cxxflags += ' -std=c++11'
-            cxxflags += ' -Iinclude -Ibuild'
-            cxxflags += ' -include ' + os.path.join('include', 'basic.h')
 
-            cxxflags += ' -Wall -Wextra -Wformat=2 -Wno-format-nonliteral -Wshadow'
-            cxxflags += ' -Wpointer-arith -Wcast-qual -Wno-missing-braces'
-            cxxflags += ' -Werror -pedantic-errors'
-            cxxflags += ' -Wstrict-aliasing=1'
-            cxxflags += ' -Wno-unused-parameter' # annoying error when stubbing things out
+            cppflags += ' -Iinclude -Ibuild'
+            cppflags += ' -include ' + os.path.join('include', 'basic.h')
 
-            cxxflags += ' ' + execute('sdl2-config', '--cflags')
+            cppflags += ' -Wall -Wextra -Wformat=2 -Wno-format-nonliteral -Wshadow'
+            cppflags += ' -Wpointer-arith -Wcast-qual -Wno-missing-braces'
+            cppflags += ' -Werror -pedantic-errors'
+            cppflags += ' -Wstrict-aliasing=1'
+            cppflags += ' -Wno-unused-parameter' # annoying error when stubbing things out
+
+            cppflags += ' ' + execute('sdl2-config', '--cflags')
             ldflags += ' ' + execute('sdl2-config', '--libs')
 
             if sys.platform == 'darwin':
@@ -138,9 +143,9 @@ def main():
             if args.release:
                 cppflags += ' -O2 -flto'
                 if sys.platform == 'darwin':
-                    linkcmd += ' && strip $out'
+                    linkextra = ' && strip $out'
                 else:
-                    linkcmd += ' && strip -s $out'
+                    linkextra = ' && strip -s $out'
             else:
                 cppflags += ' -g'
 
@@ -148,12 +153,14 @@ def main():
                 cxxflags += ' -DHEADLESS'
 
             n.variable('cppflags', cppflags)
+            n.variable('cflags', cflags)
             n.variable('cxxflags', cxxflags)
             n.variable('ldflags', ldflags)
             n.variable('appext', '')
 
-            n.rule('compile', 'clang++ $cppflags $cxxflags -c $in -o $out')
-            n.rule('link', linkcmd)
+            n.rule('c', 'clang $cppflags $cflags $flags -c $in -o $out')
+            n.rule('cxx', 'clang++ $cppflags $cxxflags -c $in -o $out')
+            n.rule('link', 'clang++ $cppflags $ldflags $in -o $out' + linkextra)
             n.rule('header', './make_include_file.py $in $out')
 
         link_inputs = []
@@ -162,12 +169,26 @@ def main():
             for filename in filenames:
                 name, ext = os.path.splitext(filename)
                 in_file = os.path.join(dirpath, filename)
+
                 if ext == '.glsl':
-                    out_file = os.path.join(change_top_dir(dirpath, 'build'), filename + '.h')
-                    n.build(out_file, 'header', in_file)
+                    buildrule = 'header'
+                    newext = '.glsl.h'
+                    implicit = None
                 elif ext == '.cpp':
-                    out_file = os.path.join(change_top_dir(dirpath, 'build'), name + '.o')
-                    n.build(out_file, 'compile', in_file, includes(in_file))
+                    buildrule = 'cxx'
+                    newext = '.o'
+                    implicit = includes(in_file)
+                elif ext == '.c':
+                    buildrule = 'c'
+                    newext = '.o'
+                    implicit = includes(in_file)
+                else:
+                    continue
+
+                out_file = os.path.join(change_top_dir(dirpath, 'build'), name + newext)
+                n.build(out_file, buildrule, in_file, implicit)
+
+                if ext == '.cpp' or ext == '.c':
                     link_inputs.append(out_file)
 
         n.build(os.path.join('output', 'bzr$appext'), 'link', link_inputs)

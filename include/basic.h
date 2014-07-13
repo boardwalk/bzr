@@ -10,10 +10,6 @@
 #include <SDL_opengl.h>
 #endif
 
-#include <cassert>
-#include <memory>
-#include <stdexcept>
-
 #ifdef __GNUC__
 #define PACK(decl) decl __attribute__((__packed__))
 #elif _MSC_VER
@@ -22,6 +18,12 @@
 #error Implement PACK for this compiler.
 #endif
 
+#ifdef __cplusplus
+#include <cassert>
+#include <memory>
+#include <stdexcept>
+
 using namespace std;
+#endif
 
 #endif

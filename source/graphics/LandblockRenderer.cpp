@@ -1,5 +1,5 @@
 #include "graphics/LandblockRenderer.h"
-#include "graphics/loadTexture.h"
+#include "graphics/Image.h"
 #include "math/Vec3.h"
 #include "Landblock.h"
 #include <vector>
@@ -56,8 +56,8 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
             vertexData.push_back(n.y);
             vertexData.push_back(n.z);
             // s, t
-            vertexData.push_back(double(x) / double(size - 1));
-            vertexData.push_back(double(y) / double(size - 1));
+            vertexData.push_back(double(x) / double(size - 1) * (Landblock::GRID_SIZE - 1));
+            vertexData.push_back(double(y) / double(size - 1) * (Landblock::GRID_SIZE - 1));
         }
     }
 
@@ -100,14 +100,18 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, nullptr);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid*)(sizeof(float) * 3));
-    //glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid*)(sizeof(float) * 6));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid*)(sizeof(float) * 6));
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
-    //glEnableVertexAttribArray(2);
+    glEnableVertexAttribArray(2);
 
     _indexCount = indexData.size();
 
-    //_texture = loadTexture(0x0600383f);
+    Image image;
+    image.load(0x0600383f);
+    //image.scale(2.0);
+    //image.blur(10);
+    _texture.create(image);
 }
 
 LandblockRenderer::~LandblockRenderer()
@@ -118,7 +122,7 @@ LandblockRenderer::~LandblockRenderer()
 
 void LandblockRenderer::render()
 {
-    //_texture.bind(0);
+    _texture.bind(0);
 
     _vertexBuffer.bind(GL_ARRAY_BUFFER);
     _indexBuffer.bind(GL_ELEMENT_ARRAY_BUFFER);

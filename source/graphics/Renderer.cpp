@@ -66,19 +66,19 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     _program.create(VertexShader, FragmentShader);
     _program.use();
 
-    //auto fragTexLocation = _program.getUniform("fragTex");
-    //glUniform1i(fragTexLocation, 0); // corresponds to GL_TEXTURE_0
+    auto fragTexLocation = _program.getUniform("fragTex");
+    glUniform1i(fragTexLocation, 0); // corresponds to GL_TEXTURE_0
 
     GLuint vertexArray;
     glGenVertexArrays(1, &vertexArray);
     glBindVertexArray(vertexArray);
 
-    initFramebuffer();
+    //initFramebuffer();
 }
 
 Renderer::~Renderer()
 {
-    cleanupFramebuffer();
+    //cleanupFramebuffer();
     
     // TODO delete VAO
     // unuse program
@@ -125,21 +125,21 @@ void Renderer::render(double interp)
 
     // lighting parameters for the fragment shader
     auto& lightPosition = Core::get().camera().position();
-    glUniform4f(_program.getUniform("lightPosition"), -lightPosition.x, -lightPosition.y, -lightPosition.z, 1.0);
+    glUniform4f(_program.getUniform("lightPosition"), lightPosition.x, lightPosition.y, lightPosition.z, 1.0);
 
     Vec3 lightIntensity(1.0, 1.0, 1.0);
     glUniform3f(_program.getUniform("lightIntensity"), lightIntensity.x, lightIntensity.y, lightIntensity.z);
 
-    Vec3 Kd(0.0, 0.0, 0.0);
+    Vec3 Kd(1.0, 1.0, 1.0);
     glUniform3f(_program.getUniform("Kd"), Kd.x, Kd.y, Kd.z);
 
-    Vec3 Ka(0.3, 0.3, 0.3);
+    Vec3 Ka(0.0, 0.0, 0.0);
     glUniform3f(_program.getUniform("Ka"), Ka.x, Ka.y, Ka.z);
 
-    Vec3 Ks(0.5, 0.5, 0.5);
+    Vec3 Ks(0.0, 0.0, 0.0);
     glUniform3f(_program.getUniform("Ks"), Ks.x, Ks.y, Ks.z);
 
-    glUniform1f(_program.getUniform("shininess"), 3.0);
+    glUniform1f(_program.getUniform("shininess"), 1.0);
 
     // xx
     //glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);

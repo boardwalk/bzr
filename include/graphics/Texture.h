@@ -1,20 +1,17 @@
 #ifndef BZR_GRAPHICS_TEXTURE_H
 #define BZR_GRAPHICS_TEXTURE_H
 
+class Image;
+
 class Texture
 {
 public:
-    enum Format
-    {
-        BGR24, BGRA32, RGB24, A8
-    };
-
     Texture();
     Texture(Texture&& other);
     ~Texture();
     Texture& operator=(Texture&& other);
 
-    void create(Format format, const GLvoid* data, int width, int height);
+    void create(const Image& image);
     void destroy();
 
     void bind(int i);

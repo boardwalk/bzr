@@ -1,4 +1,5 @@
 #include "graphics/Texture.h"
+#include "graphics/Image.h"
 
 Texture::Texture() : _handle(0)
 {}
@@ -22,32 +23,32 @@ Texture& Texture::operator=(Texture&& other)
     return *this;
 }
 
-void Texture::create(Format format, const GLvoid* data, int width, int height)
+void Texture::create(const Image& image)
 {
     destroy();
 
     GLint glformat;
     GLint gltype;
 
-    switch(format)
+    switch(image.format())
     {
-        case BGR24:
+        case Image::BGR24:
             glformat = GL_BGR;
             gltype = GL_UNSIGNED_BYTE;
             break;
-        case BGRA32:
+        case Image::BGRA32:
             glformat = GL_BGRA;
             gltype = GL_UNSIGNED_BYTE;
             break;
-        case RGB24:
+        case Image::RGB24:
             glformat = GL_RGB;
             gltype = GL_UNSIGNED_BYTE;
             break;
-        case A8:
+        case Image::A8:
             glformat = GL_ALPHA;
             gltype = GL_UNSIGNED_BYTE;
         default:
-            assert(!"Invalid TextureFormat");
+            assert(!"Invalid Image::Format");
             break;
     }
 
@@ -55,7 +56,7 @@ void Texture::create(Format format, const GLvoid* data, int width, int height)
     glBindTexture(GL_TEXTURE_2D, _handle);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, glformat, width, height, 0, glformat, gltype, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, glformat, image.width(), image.height(), 0, glformat, gltype, image.data());
 }
 
 void Texture::destroy()
