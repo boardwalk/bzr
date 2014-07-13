@@ -328,10 +328,13 @@ static void ctmf_helper(
         }
     }
 
-#if defined(__SSE2__) || defined(__MMX__)
-    _mm_empty();
+#if defined(__SSE2__)
     _mm_free(h_coarse);
     _mm_free(h_fine);
+#elif defined(__MMX__)
+    _mm_free(h_coarse);
+    _mm_free(h_fine);
+    _mm_empty();
 #else
     free(h_coarse);
     free(h_fine);
