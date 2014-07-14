@@ -24,8 +24,10 @@ private:
     void cleanupBlendTexture();
 
     Buffer _vertexBuffer;
-    Buffer _indexBuffer;
-    GLsizei _indexCount;
+    GLsizei _vertexCount;
+
+    //Buffer _indexBuffer;
+    //GLsizei _indexCount;
 
     GLuint _terrainTexture;
     GLuint _blendTexture;

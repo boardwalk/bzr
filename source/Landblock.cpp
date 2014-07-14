@@ -76,6 +76,21 @@ Landblock::Landblock(const void* data, size_t length)
     subdivide(4);
 }
 
+const Landblock::RawData& Landblock::getRawData() const
+{
+    return _data;
+}
+
+const double* Landblock::getOriginalData() const
+{
+    return _original.get();
+}
+
+size_t Landblock::getOriginalSize() const
+{
+    return GRID_SIZE;
+}
+
 const double* Landblock::getSubdividedData() const
 {
     return _subdivided.get();
@@ -110,6 +125,15 @@ int Landblock::getStyle(Vec2 point) const
 unique_ptr<Destructable>& Landblock::renderData()
 {
     return _renderData;
+}
+
+bool Landblock::splitNESW(int x, int y) const
+{
+    // credits to Akilla
+    uint32_t tx = ((_data.fileId >> 24) & 0xFF) * 8 + x;
+    uint32_t ty = ((_data.fileId >> 16) & 0xFF) * 8 + y;
+    uint32_t v = tx * ty * 0x0CCAC033 - tx * 0x421BE3BD + ty * 0x6C1AC587 - 0x519B8F25;
+    return v & 0x80000000;
 }
 
 void Landblock::subdivide(int n)

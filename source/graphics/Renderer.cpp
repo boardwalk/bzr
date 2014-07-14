@@ -7,8 +7,10 @@
 #include "Landblock.h"
 #include "util.h"
 
-#include "graphics/shaders/VertexShader.glsl.h"
-#include "graphics/shaders/FragmentShader.glsl.h"
+//#include "graphics/shaders/VertexShader.glsl.h"
+//#include "graphics/shaders/FragmentShader.glsl.h"
+#include "graphics/shaders/LandVertexShader.glsl.h"
+#include "graphics/shaders/LandFragmentShader.glsl.h"
 
 Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 {
@@ -65,8 +67,8 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(0xffff);
 
-    _program.create(VertexShader, FragmentShader);
-    _program.use();
+    //_program.create(VertexShader, FragmentShader);
+    _program.create(LandVertexShader, LandFragmentShader);
 
     auto terrainTexLocation = _program.getUniform("terrainTex");
     glUniform1i(terrainTexLocation, 0); // corresponds to GL_TEXTURE_0
@@ -109,6 +111,8 @@ Renderer::~Renderer()
 
 void Renderer::render(double interp)
 {
+    _program.use();
+
     // projection * view * model * vertex
     Mat4 projectionMat;
     projectionMat.makePerspective(_fieldOfView, double(_width)/double(_height), 0.1, 1000.0);
@@ -119,32 +123,32 @@ void Renderer::render(double interp)
     modelMat.makeIdentity();
 
     // matrices for the vertex shader
-    auto normalMatrixLoc = _program.getUniform("normalMatrix");
-    loadMat3ToUniform(Mat3(viewMat * modelMat).inverse().transpose(), normalMatrixLoc);
+    //auto normalMatrixLoc = _program.getUniform("normalMatrix");
+    //loadMat3ToUniform(Mat3(viewMat * modelMat).inverse().transpose(), normalMatrixLoc);
 
-    auto modelViewMatrixLoc = _program.getUniform("modelViewMatrix");
-    loadMat4ToUniform(viewMat * modelMat, modelViewMatrixLoc);
+    //auto modelViewMatrixLoc = _program.getUniform("modelViewMatrix");
+    //loadMat4ToUniform(viewMat * modelMat, modelViewMatrixLoc);
 
     auto modelViewProjectionLoc = _program.getUniform("modelViewProjectionMatrix");
     loadMat4ToUniform(projectionMat * viewMat * modelMat, modelViewProjectionLoc);
 
     // lighting parameters for the fragment shader
-    auto& lightPosition = Core::get().camera().position();
-    glUniform4f(_program.getUniform("lightPosition"), lightPosition.x, lightPosition.y, lightPosition.z, 1.0);
+    //auto& lightPosition = Core::get().camera().position();
+    //glUniform4f(_program.getUniform("lightPosition"), lightPosition.x, lightPosition.y, lightPosition.z, 1.0);
 
-    Vec3 lightIntensity(1.0, 1.0, 1.0);
-    glUniform3f(_program.getUniform("lightIntensity"), lightIntensity.x, lightIntensity.y, lightIntensity.z);
+    //Vec3 lightIntensity(1.0, 1.0, 1.0);
+    //glUniform3f(_program.getUniform("lightIntensity"), lightIntensity.x, lightIntensity.y, lightIntensity.z);
 
-    Vec3 Kd(1.0, 1.0, 1.0);
-    glUniform3f(_program.getUniform("Kd"), Kd.x, Kd.y, Kd.z);
+    //Vec3 Kd(1.0, 1.0, 1.0);
+    //glUniform3f(_program.getUniform("Kd"), Kd.x, Kd.y, Kd.z);
 
-    Vec3 Ka(0.0, 0.0, 0.0);
-    glUniform3f(_program.getUniform("Ka"), Ka.x, Ka.y, Ka.z);
+    //Vec3 Ka(0.0, 0.0, 0.0);
+    //glUniform3f(_program.getUniform("Ka"), Ka.x, Ka.y, Ka.z);
 
-    Vec3 Ks(0.0, 0.0, 0.0);
-    glUniform3f(_program.getUniform("Ks"), Ks.x, Ks.y, Ks.z);
+    //Vec3 Ks(0.0, 0.0, 0.0);
+    //glUniform3f(_program.getUniform("Ks"), Ks.x, Ks.y, Ks.z);
 
-    glUniform1f(_program.getUniform("shininess"), 1.0);
+    //glUniform1f(_program.getUniform("shininess"), 1.0);
 
     // xx
     //glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);

@@ -4,6 +4,8 @@ in vec3 position;
 in vec3 normal;
 in vec3 fragTexCoord;
 
+out vec4 fragColor;
+
 uniform vec4 lightPosition;
 uniform vec3 lightIntensity;
 uniform vec3 Kd;
@@ -13,8 +15,6 @@ uniform float shininess;
 
 uniform sampler2DArray terrainTex;
 uniform sampler2DArray blendTex;
-
-out vec4 fragColor;
 
 vec3 phong()
 {

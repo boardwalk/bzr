@@ -12,7 +12,21 @@ public:
     static const double SQUARE_SIZE;
     static const double LANDBLOCK_SIZE;
 
+    PACK(struct RawData
+    {
+        uint32_t fileId;
+        uint32_t flags;
+        uint16_t styles[GRID_SIZE][GRID_SIZE];
+        uint8_t heights[GRID_SIZE][GRID_SIZE];
+        uint8_t pad;
+    });
+
     Landblock(const void* data, size_t length);
+
+    const RawData& getRawData() const;
+
+    const double* getOriginalData() const;
+    size_t getOriginalSize() const;
 
     const double* getSubdividedData() const;
     size_t getSubdividedSize() const;
@@ -25,16 +39,9 @@ public:
 
     unique_ptr<Destructable>& renderData();
 
-private:
-    PACK(struct RawData
-    {
-        uint32_t fileid;
-        uint32_t flags;
-        uint16_t styles[GRID_SIZE][GRID_SIZE];
-        uint8_t heights[GRID_SIZE][GRID_SIZE];
-        uint8_t pad;
-    });
+    bool splitNESW(int x, int y) const;
 
+private:
     void subdivide(int n);
     void subdivideOnce();
 

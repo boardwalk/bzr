@@ -21,7 +21,8 @@ static GLuint createShader(GLenum type, const GLchar* source)
         vector<GLchar> log(logLength);
         glGetShaderInfoLog(shader, logLength, &logLength, log.data());
 
-        string logStr(log.data(), logLength);
+        string logStr("Failed to compile shader: ");
+        logStr.append(log.data(), logLength);
         throw runtime_error(logStr);
     }
 
@@ -74,7 +75,8 @@ void Program::create(const GLchar* vertexShader, const GLchar* fragmentShader)
         vector<GLchar> log(logLength);
         glGetProgramInfoLog(program, logLength, &logLength, log.data());
 
-        string logStr(log.data(), logLength);
+        string logStr("Failed to link program: ");
+        logStr.append(log.data(), logLength);
         throw runtime_error(logStr);
     }
 
