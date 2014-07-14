@@ -96,6 +96,17 @@ double Landblock::getSubdividedHeight(Vec2 point) const
     return getHeight(_subdivided.get(), GRID_SIZE * (1 << _nsubdivisions), point);
 }
 
+int Landblock::getStyle(Vec2 point) const
+{
+    assert(point.y >= 0.0 && point.y <= LANDBLOCK_SIZE);
+    assert(point.x >= 0.0 && point.x <= LANDBLOCK_SIZE);
+
+    int gridX = point.x / LANDBLOCK_SIZE * (GRID_SIZE - 1) + 0.5;
+    int gridY = point.y / LANDBLOCK_SIZE * (GRID_SIZE - 1) + 0.5;
+
+    return _data.styles[gridX][gridY];
+}
+
 unique_ptr<Destructable>& Landblock::renderData()
 {
     return _renderData;

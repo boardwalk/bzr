@@ -10,38 +10,37 @@
 
 static const uint32_t LANDSCAPE_TEXTURES[] =
 {
+    0x0600379a,
+    0x0600379f,
+    0x0600382a,
+    0x0600382c,
+    0x0600382e,
+    0x0600383b,
+    0x0600383d,
     0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f,
-    0x0600383f
+    0x0600384c,
+    0x0600388c,
+    0x06003794,
+    0x06003819,
+    0x06003821,
+    0x06003824,
+    0x06003826,
+    0x06003828,
+    0x06003830,
+    0x06003832,
+    0x06003833,
+    0x06003835,
+    0x06003837,
+    0x06003839,
+    0x06003843,
+    0x06003851,
+    0x06003853,
+    0x06003856,
+    0x06003858,
+    0x06003859,
+    0x06003891,
+    0x06003893,
+    0x06006284
 };
 
 static const int TERRAIN_ARRAY_SIZE = 256;
@@ -86,18 +85,15 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
 
             auto n = (nen + nnw + nws + nse).normalize();
 
-            //Vec3 we(Landblock::LANDBLOCK_SIZE / double(size - 1) * 2.0, 0.0, he - hw);
-            //Vec3 sn(0.0, Landblock::LANDBLOCK_SIZE / double(size - 1) * 2.0, hn - hs);
-            //auto n = we.cross(sn).normalize();
+            auto lx = double(x) / double(size - 1) * Landblock::LANDBLOCK_SIZE;
+            auto ly = double(y) / double(size - 1) * Landblock::LANDBLOCK_SIZE;
 
-            //printf("we:(%f, %f, %f) sn:(%f, %f, %f), n:(%f, %f, %f)\n",
-            //    we.x, we.y, we.z,
-            //    sn.x, sn.y, sn.z,
-            //    n.x, n.y, n.z);
+            //auto style = landblock.getStyle(Vec2(lx, ly));
+            //auto texIndex = (style >> 2) & 0x1F;
 
             // x, y, z
-            vertexData.push_back(double(x) / double(size - 1) * Landblock::LANDBLOCK_SIZE);
-            vertexData.push_back(double(y) / double(size - 1) * Landblock::LANDBLOCK_SIZE);
+            vertexData.push_back(lx);
+            vertexData.push_back(ly);
             vertexData.push_back(data[x + y * size]);
             // nx, ny, nz
             vertexData.push_back(n.x);
@@ -106,7 +102,7 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
             // tx, ty, tz
             vertexData.push_back(double(x) / double(size - 1) * (Landblock::GRID_SIZE - 1));
             vertexData.push_back(double(y) / double(size - 1) * (Landblock::GRID_SIZE - 1));
-            vertexData.push_back(0.0);
+            vertexData.push_back(4.0);
         }
     }
 
@@ -189,8 +185,6 @@ void LandblockRenderer::initTerrainTexture()
     // populate terrain texture 
     for(int i = 0; i < TERRAIN_ARRAY_DEPTH; i++)
     {
-        printf("loading %d\n", LANDSCAPE_TEXTURES[i]);
-
         Image image;
         image.load(LANDSCAPE_TEXTURES[i]);
 

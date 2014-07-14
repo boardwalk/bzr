@@ -21,6 +21,8 @@ public:
     
     double getSubdividedHeight(Vec2 point) const;
 
+    int getStyle(Vec2 point) const;
+
     unique_ptr<Destructable>& renderData();
 
 private:

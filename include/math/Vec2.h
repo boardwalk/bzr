@@ -3,6 +3,8 @@
 
 struct Vec2
 {
+	Vec2(double vx, double vy);
+	
     double x;
     double y;
 };
