@@ -1,0 +1,11 @@
+{
+	"folders":
+	[
+		{
+			"follow_symlinks": true,
+			"path": ".",
+            "folder_exclude_patterns": ["data", "build", "output"],
+            "file_exclude_patterns": [".ninja_deps", ".ninja_log", "build.ninja"]
+		}
+	]
+}
