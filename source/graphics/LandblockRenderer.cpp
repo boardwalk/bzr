@@ -10,7 +10,42 @@
 
 static const uint32_t LANDSCAPE_TEXTURES[] =
 {
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f,
+    0x0600383f
 };
+
+static const int TERRAIN_ARRAY_SIZE = 256;
+static const int TERRAIN_ARRAY_DEPTH = sizeof(LANDSCAPE_TEXTURES) / sizeof(LANDSCAPE_TEXTURES[0]);
 
 LandblockRenderer::LandblockRenderer(const Landblock& landblock)
 {
@@ -60,9 +95,10 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
             vertexData.push_back(n.x);
             vertexData.push_back(n.y);
             vertexData.push_back(n.z);
-            // s, t
+            // tx, ty, tz
             vertexData.push_back(double(x) / double(size - 1) * (Landblock::GRID_SIZE - 1));
             vertexData.push_back(double(y) / double(size - 1) * (Landblock::GRID_SIZE - 1));
+            vertexData.push_back(0.0);
         }
     }
 
@@ -103,38 +139,68 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
     _indexBuffer.bind(GL_ELEMENT_ARRAY_BUFFER);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexData.size() * sizeof(uint16_t), indexData.data(), GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, nullptr);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid*)(sizeof(float) * 3));
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (GLvoid*)(sizeof(float) * 6));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 9, nullptr);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 9, (GLvoid*)(sizeof(float) * 3));
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 9, (GLvoid*)(sizeof(float) * 6));
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
 
     _indexCount = indexData.size();
 
-    Image image;
-    image.load(0x0600383f);
-    //image.scale(2.0);
-    //image.blur(10);
-
-    //Image image2;
-    //image2.create(image.format(), image.width() * 2, image.height() * 2);
-    //image2.blit(image, 0, 0);
-
-    _texture.create(image);
+    initTerrainTexture();
 }
 
 LandblockRenderer::~LandblockRenderer()
 {
+    cleanupTerrainTexture();
+
     _vertexBuffer.destroy();
     _indexBuffer.destroy();
 }
 
 void LandblockRenderer::render()
 {
-    _texture.bind(0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, _terrainTexture);
 
     _vertexBuffer.bind(GL_ARRAY_BUFFER);
     _indexBuffer.bind(GL_ELEMENT_ARRAY_BUFFER);
     glDrawElements(GL_TRIANGLE_STRIP, _indexCount, GL_UNSIGNED_SHORT, nullptr);
+}
+
+void LandblockRenderer::initTerrainTexture()
+{
+    // allocate terrain texture
+    glGenTextures(1, &_terrainTexture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, _terrainTexture);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB8, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_DEPTH, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+
+    // populate terrain texture 
+    for(int i = 0; i < TERRAIN_ARRAY_DEPTH; i++)
+    {
+        printf("loading %d\n", LANDSCAPE_TEXTURES[i]);
+
+        Image image;
+        image.load(LANDSCAPE_TEXTURES[i]);
+
+        if(image.width() != TERRAIN_ARRAY_SIZE || image.height() != TERRAIN_ARRAY_SIZE)
+        {
+            throw runtime_error("Bad terrain image size");
+        }
+
+        if(image.format() != Image::RGB24)
+        {
+            throw runtime_error("Bad terrain image format");
+        }
+
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_SIZE, 1, GL_RGB, GL_UNSIGNED_BYTE, image.data());
+    }
+}
+
+void LandblockRenderer::cleanupTerrainTexture()
+{
+    glDeleteTextures(1, &_terrainTexture);
 }

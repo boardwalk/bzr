@@ -17,11 +17,14 @@ public:
     void render();
 
 private:
+    void initTerrainTexture();
+    void cleanupTerrainTexture();
+
     Buffer _vertexBuffer;
     Buffer _indexBuffer;
     GLsizei _indexCount;
 
-    Texture _texture;
+    GLuint _terrainTexture;
 };
 
 #endif

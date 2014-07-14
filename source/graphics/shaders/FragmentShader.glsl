@@ -2,7 +2,7 @@
 
 in vec3 position;
 in vec3 normal;
-in vec2 fragTexCoord;
+in vec3 fragTexCoord;
 
 uniform vec4 lightPosition;
 uniform vec3 lightIntensity;
@@ -10,7 +10,7 @@ uniform vec3 Kd;
 uniform vec3 Ka;
 uniform vec3 Ks;
 uniform float shininess;
-uniform sampler2D fragTex;
+uniform sampler2DArray fragTex;
 
 out vec4 fragColor;
 
