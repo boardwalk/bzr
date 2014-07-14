@@ -47,6 +47,14 @@ static const uint32_t LANDSCAPE_TEXTURES[] =
 static const int TERRAIN_ARRAY_SIZE = 256;
 static const int TERRAIN_ARRAY_DEPTH = sizeof(LANDSCAPE_TEXTURES) / sizeof(LANDSCAPE_TEXTURES[0]);
 
+// blend textures
+// 6d61 -- vertical, black to white, left of center
+// 6d6c -- top left corner, black, semi ragged
+// 6d6d -- top left corner, black, ragged
+// 6d60 -- top left corner, black, rounded
+// 37fd -- top left corner, black, puzzle piece
+// 6d30 -- vertical, black to white, very left of center, wavy
+
 LandblockRenderer::LandblockRenderer(const Landblock& landblock)
 {
     auto data = landblock.getSubdividedData();
