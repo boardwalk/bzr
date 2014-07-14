@@ -49,7 +49,9 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 
 	if(glewErr != GLEW_OK)
 	{
-		throw runtime_error(string("Unable to initialize GLEW: ") + (const char*)glewGetErrorString(glewErr));
+        string err("Unable to initialize GLEW: ");
+        err.append((const char*)glewGetErrorString(glewErr));
+        throw runtime_error(err);
 	}
 #endif
 
