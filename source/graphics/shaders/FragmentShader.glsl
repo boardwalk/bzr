@@ -10,7 +10,9 @@ uniform vec3 Kd;
 uniform vec3 Ka;
 uniform vec3 Ks;
 uniform float shininess;
-uniform sampler2DArray fragTex;
+
+uniform sampler2DArray terrainTex;
+uniform sampler2DArray blendTex;
 
 out vec4 fragColor;
 
@@ -42,7 +44,7 @@ vec4 hejl(in vec4 color) {
 void main()
 {
     // convert non-linear to linear
-    fragColor = pow(texture(fragTex, fragTexCoord), vec4(2.2));
+    fragColor = pow(texture(terrainTex, fragTexCoord), vec4(2.2));
 
     // apply lighting
     fragColor = vec4(phong(), 1.0) * fragColor;

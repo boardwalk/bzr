@@ -68,8 +68,11 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     _program.create(VertexShader, FragmentShader);
     _program.use();
 
-    auto fragTexLocation = _program.getUniform("fragTex");
-    glUniform1i(fragTexLocation, 0); // corresponds to GL_TEXTURE_0
+    auto terrainTexLocation = _program.getUniform("terrainTex");
+    glUniform1i(terrainTexLocation, 0); // corresponds to GL_TEXTURE_0
+
+    auto blendTexLocation = _program.getUniform("blendTex");
+    glUniform1i(blendTexLocation, 1);
 
     GLuint vertexArray;
     glGenVertexArrays(1, &vertexArray);

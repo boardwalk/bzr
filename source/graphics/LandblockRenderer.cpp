@@ -46,13 +46,17 @@ static const uint32_t LANDSCAPE_TEXTURES[] =
 static const int TERRAIN_ARRAY_SIZE = 256;
 static const int TERRAIN_ARRAY_DEPTH = sizeof(LANDSCAPE_TEXTURES) / sizeof(LANDSCAPE_TEXTURES[0]);
 
-// blend textures
-// 6d61 -- vertical, black to white, left of center
-// 6d6c -- top left corner, black, semi ragged
-// 6d6d -- top left corner, black, ragged
-// 6d60 -- top left corner, black, rounded
-// 37fd -- top left corner, black, puzzle piece
-// 6d30 -- vertical, black to white, very left of center, wavy
+static const uint32_t BLEND_TEXTURES[] =
+{
+    0x06006d61, // vertical, black to white, left of center
+    0x06006d6c, // top left corner, black, semi ragged
+    0x06006d6d, // top left corner, black, ragged
+    0x06006d60, // top left corner, black, rounded
+    0x06006d30  // vertical, black to white, very left of center, wavy
+};
+
+static const int BLEND_ARRAY_SIZE = 512;
+static const int BLEND_ARRAY_DEPTH = sizeof(BLEND_TEXTURES) / sizeof(BLEND_TEXTURES[0]);
 
 LandblockRenderer::LandblockRenderer(const Landblock& landblock)
 {
@@ -153,11 +157,13 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
     _indexCount = indexData.size();
 
     initTerrainTexture();
+    initBlendTexture();
 }
 
 LandblockRenderer::~LandblockRenderer()
 {
     cleanupTerrainTexture();
+    cleanupBlendTexture();
 
     _vertexBuffer.destroy();
     _indexBuffer.destroy();
@@ -167,6 +173,9 @@ void LandblockRenderer::render()
 {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, _terrainTexture);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, _blendTexture);
 
     _vertexBuffer.bind(GL_ARRAY_BUFFER);
     _indexBuffer.bind(GL_ELEMENT_ARRAY_BUFFER);
@@ -205,4 +214,38 @@ void LandblockRenderer::initTerrainTexture()
 void LandblockRenderer::cleanupTerrainTexture()
 {
     glDeleteTextures(1, &_terrainTexture);
+}
+
+void LandblockRenderer::initBlendTexture()
+{
+    // allocate terrain texture
+    glGenTextures(1, &_blendTexture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, _blendTexture);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_R8, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_DEPTH, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+
+    // populate terrain texture 
+    for(int i = 0; i < BLEND_ARRAY_DEPTH; i++)
+    {
+        Image image;
+        image.load(BLEND_TEXTURES[i]);
+
+        if(image.width() != BLEND_ARRAY_SIZE || image.height() != BLEND_ARRAY_SIZE)
+        {
+            throw runtime_error("Bad terrain image size");
+        }
+
+        if(image.format() != Image::A8)
+        {
+            throw runtime_error("Bad terrain image format");
+        }
+
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, BLEND_ARRAY_SIZE, BLEND_ARRAY_SIZE, 1, GL_RED, GL_UNSIGNED_BYTE, image.data());
+    }
+}
+
+void LandblockRenderer::cleanupBlendTexture()
+{
+    glDeleteTextures(1, &_blendTexture);
 }
