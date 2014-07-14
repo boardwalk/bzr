@@ -15,7 +15,10 @@ public:
     Image(Image&&);
     Image& operator=(Image&&);
 
+    void create(Format format, int width, int height);
     void load(uint32_t fileId);
+
+    void blit(const Image& image, int x, int y);
     void scale(float factor);
     void blur(int windowSize);
 
@@ -27,9 +30,9 @@ public:
 
 private:
     Format _format;
-    vector<uint8_t> _data;
     int _width;
     int _height;
+    vector<uint8_t> _data;
 };
 
 #endif

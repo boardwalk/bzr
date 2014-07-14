@@ -40,6 +40,15 @@ Image& Image::operator=(Image&& other)
     return *this;
 }
 
+void Image::create(Format format, int width, int height)
+{
+    _format = format;
+    _width = width;
+    _height = height;
+    _data.clear();
+    _data.resize(_width * _height * numChannels());
+}
+
 void Image::load(uint32_t fileId)
 {
     auto blob = Core::get().highresDat().read(fileId);
@@ -123,6 +132,28 @@ void Image::load(uint32_t fileId)
 
     _width = header->width;
     _height = header->height;
+}
+
+void Image::blit(const Image& image, int x, int y)
+{
+    if(_format != image._format)
+    {
+        throw runtime_error("Image format mismatch in blit");
+    }
+
+    if(x < 0 || x + image._width > _width || y < 0 || y + image._height > _height)
+    {
+        throw runtime_error("Image destination out of range");  
+    }
+
+    auto nchannels = numChannels();
+
+    for(int row = 0; row < image._height; row++)
+    {
+        memcpy(_data.data() + (x + (y + row) * _width) * nchannels,
+               image._data.data() + (row * image._width) * nchannels,
+               image._width * nchannels);
+    }
 }
 
 void Image::scale(float factor)

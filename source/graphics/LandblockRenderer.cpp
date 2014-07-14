@@ -8,6 +8,10 @@
 // TODO We could only create one indexBuffer per subdivision level
 // TODO We could generate the x and y of the vertex data in a shader
 
+static const uint32_t LANDSCAPE_TEXTURES[] =
+{
+};
+
 LandblockRenderer::LandblockRenderer(const Landblock& landblock)
 {
     auto data = landblock.getSubdividedData();
@@ -112,6 +116,11 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
     image.load(0x0600383f);
     //image.scale(2.0);
     //image.blur(10);
+
+    //Image image2;
+    //image2.create(image.format(), image.width() * 2, image.height() * 2);
+    //image2.blit(image, 0, 0);
+
     _texture.create(image);
 }
 
