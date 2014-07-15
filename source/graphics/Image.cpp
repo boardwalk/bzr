@@ -131,6 +131,17 @@ void Image::load(uint32_t fileId)
         _data.assign(data, data + header->dataSize);
     }
 
+    auto stride = header->width * bpp / 8;
+
+    vector<uint8_t> rowBuf(stride);
+
+    for(auto y = 0u; y < header->height / 2; y++)
+    {
+        memcpy(rowBuf.data(), _data.data() + y * stride, stride);
+        memcpy(_data.data() + stride * y, _data.data() + (header->height - y - 1) * stride, stride);
+        memcpy(_data.data() + (header->height - y - 1) * stride, rowBuf.data(), stride);
+    }
+
     _width = header->width;
     _height = header->height;
 }
