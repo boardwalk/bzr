@@ -22,7 +22,7 @@ private:
     void initProgram();
     void initTerrainTexture();
     void initBlendTexture();
-    void initOffsetTexture();
+    void initOffsetTexture(const Landblock& landblock);
 
     Program _program;
 
