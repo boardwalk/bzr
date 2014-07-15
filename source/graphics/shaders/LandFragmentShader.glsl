@@ -24,8 +24,7 @@ void main()
 	vec4 rc = texture(terrainTex, vec3(fragTerrainTexCoord.s, fragTerrainTexCoord.t, fragRoadTexNum));
 
 	// sample blend
-	vec4 a = texture(blendTex, vec3(fragTerrainTexCoord.s, fragTerrainTexCoord.t, 2));
+	vec4 a = texture(blendTex, vec3(fragTerrainTexCoord.s, fragTerrainTexCoord.t, fragBlendTexNum));
 
-	//fragColor = tc * bc + rc * (1.0 - bc);
-	fragColor = vec4(a.rrr, 1.0); //mix(tc, rc, a.r);
+	fragColor = mix(tc, rc, a.r);
 }

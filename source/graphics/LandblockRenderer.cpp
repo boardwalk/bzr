@@ -100,13 +100,13 @@ static const int TERRAIN_ARRAY_DEPTH = sizeof(LANDSCAPE_TEXTURES) / sizeof(LANDS
 
 static const uint32_t BLEND_TEXTURES[] =
 {
+    0x00000000, // special case, all black
+    0xFFFFFFFF,  // special case, all white
     0x06006d61, // vertical, black to white, left of center
     0x06006d6c, // top left corner, black, semi ragged
     0x06006d6d, // top left corner, black, ragged
     0x06006d60, // top left corner, black, rounded
-    0x06006d30, // vertical, black to white, very left of center, wavy
-    0x00000000, // special case, all black
-    0xFFFFFFFF  // special case, all white
+    0x06006d30 // vertical, black to white, very left of center, wavy
 };
 
 static const int BLEND_ARRAY_SIZE = 512;
@@ -163,7 +163,7 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
             auto r4 = R(0, 1);
 #undef R
 
-            auto road = data.styles[x][y] & 0x3;
+            //auto road = data.styles[x][y] & 0x3;
             //auto type = (data.styles[x][y] >> 10) & 0x1F;
             //auto vege = data.styles[x][y] & 0xFF;
 
@@ -187,17 +187,22 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
             // road texture number
             auto rp = 0x20;
             // blend texture number
-            auto bp = 3;
+            auto bp = 0;
 
-            if(r1 && r2 && r3 && r4)
+            if(!r1 && !r2 && !r3 && !r4)
+            {
+                // it's all nothing
+                bp = 0; // all black
+            }
+            else if(r1 && r2 && r3 && r4)
             {
                 // it's all road, baby
-                //bp = 6; // all white
+                bp = 1; // all white
             }
-            else if(r1 && r2 && !r3 && r4)
+            else
             {
-                // road above
-                //bp = 0; // verti
+                // FIXME
+                bp = 2;
             }
 
 // See LandVertexShader.glsl too see what these are
@@ -454,6 +459,8 @@ void LandblockRenderer::initBlendTexture()
     glGenTextures(1, &_blendTexture);
     glBindTexture(GL_TEXTURE_2D_ARRAY, _blendTexture);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);  // default is GL_NEAREST_MIPMAP_LINEAR
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_R8, BLEND_ARRAY_SIZE, BLEND_ARRAY_SIZE, BLEND_ARRAY_DEPTH, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
 
     // populate terrain texture 
@@ -469,8 +476,8 @@ void LandblockRenderer::initBlendTexture()
         }
         else if(BLEND_TEXTURES[i] == 0xFFFFFFFF)
         {
-            // TODO MAKE WHITE
             image.create(Image::A8, BLEND_ARRAY_SIZE, BLEND_ARRAY_SIZE);
+            image.fill(0xFF);
         }
         else
         {

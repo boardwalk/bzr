@@ -59,10 +59,9 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 
     SDL_GL_SetSwapInterval(1); // vsync
     glEnable(GL_DEPTH_TEST);
-    glClearColor(0.0f, 0.0, 0.5f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glEnable(GL_TEXTURE_2D);
 
     glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(0xffff);
@@ -71,6 +70,7 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 
     //_program.create(VertexShader, FragmentShader);
     _program.create(LandVertexShader, LandFragmentShader);
+    _program.use();
 
     auto terrainTexLocation = _program.getUniform("terrainTex");
     glUniform1i(terrainTexLocation, 0); // corresponds to GL_TEXTURE_0
@@ -113,8 +113,6 @@ Renderer::~Renderer()
 
 void Renderer::render(double interp)
 {
-    _program.use();
-
     // projection * view * model * vertex
     Mat4 projectionMat;
     projectionMat.makePerspective(_fieldOfView, double(_width)/double(_height), 0.1, 1000.0);
