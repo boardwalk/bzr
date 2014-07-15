@@ -189,17 +189,16 @@ void Image::scale(float factor)
             auto xOpposite = 1.0 - xDiff;
             auto yOpposite = 1.0 - yDiff;
 
-#define SRCPX(x, y, cn) (double)_data[(min(x, _width) + min(y, _height) * _width) * nchannels + cn]
+#define SRCPX(x, y, cn) (double)_data[(min(x, _width - 1) + min(y, _height - 1) * _width) * nchannels + cn]
 #define DSTPX(x, y, cn) newData[((x) + (y) * newWidth) * nchannels + cn]
-            DSTPX(dstX, dstY, 0) =
-                (SRCPX(srcX, srcY, 0) * xOpposite + SRCPX(srcX + 1, srcY, 0) * xDiff) * yOpposite +
-                (SRCPX(srcX, srcY + 1, 0) * xOpposite + SRCPX(srcX + 1, srcY + 1, 0) * xDiff) * yDiff;
-            DSTPX(dstX, dstY, 1) =
-                (SRCPX(srcX, srcY, 1) * xOpposite + SRCPX(srcX + 1, srcY, 1) * xDiff) * yOpposite +
-                (SRCPX(srcX, srcY + 1, 1) * xOpposite + SRCPX(srcX + 1, srcY + 1, 1) * xDiff) * yDiff;
-            DSTPX(dstX, dstY, 2) =
-                (SRCPX(srcX, srcY, 2) * xOpposite + SRCPX(srcX + 1, srcY, 2) * xDiff) * yOpposite +
-                (SRCPX(srcX, srcY + 1, 2) * xOpposite + SRCPX(srcX + 1, srcY + 1, 2) * xDiff) * yDiff;
+
+            for(auto c = 0; c < nchannels; c++)
+            {
+                DSTPX(dstX, dstY, c) =
+                    (SRCPX(srcX, srcY, c) * xOpposite + SRCPX(srcX + 1, srcY, c) * xDiff) * yOpposite +
+                    (SRCPX(srcX, srcY + 1, c) * xOpposite + SRCPX(srcX + 1, srcY + 1, c) * xDiff) * yDiff;
+            }
+
 #undef SRCPX
 #undef DSTPX
         }
