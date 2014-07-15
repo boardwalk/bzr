@@ -18,10 +18,8 @@ public:
 
 private:
     void initTerrainTexture();
-    void cleanupTerrainTexture();
-
     void initBlendTexture();
-    void cleanupBlendTexture();
+    void initOffsetTexture();
 
     Buffer _vertexBuffer;
     GLsizei _vertexCount;
@@ -31,6 +29,7 @@ private:
 
     GLuint _terrainTexture;
     GLuint _blendTexture;
+    GLuint _offsetTexture;
 };
 
 #endif

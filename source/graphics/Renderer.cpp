@@ -84,6 +84,9 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     auto blendTexLocation = _program.getUniform("blendTex");
     glUniform1i(blendTexLocation, 1);
 
+    auto offsetTexLocation = _program.getUniform("offsetTex");
+    glUniform1i(offsetTexLocation, 2);
+
     GLuint vertexArray;
     glGenVertexArrays(1, &vertexArray);
     glBindVertexArray(vertexArray);

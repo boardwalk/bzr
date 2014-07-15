@@ -289,6 +289,7 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
 
     initTerrainTexture();
     initBlendTexture();
+    initOffsetTexture();
 }
 
 /*
@@ -390,8 +391,9 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
 
 LandblockRenderer::~LandblockRenderer()
 {
-    cleanupTerrainTexture();
-    cleanupBlendTexture();
+    glDeleteTextures(1, &_terrainTexture);
+    glDeleteTextures(1, &_blendTexture);
+    glDeleteTextures(1, &_offsetTexture);
 
     _vertexBuffer.destroy();
 }
@@ -419,6 +421,9 @@ void LandblockRenderer::render()
 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D_ARRAY, _blendTexture);
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, _offsetTexture);
 
     //glDrawArrays(GL_TRIANGLES, 0, _vertexCount);
     glDrawArrays(GL_PATCHES, 0, _vertexCount);
@@ -486,11 +491,6 @@ void LandblockRenderer::initTerrainTexture()
     }
 }
 
-void LandblockRenderer::cleanupTerrainTexture()
-{
-    glDeleteTextures(1, &_terrainTexture);
-}
-
 void LandblockRenderer::initBlendTexture()
 {
     // allocate terrain texture
@@ -538,7 +538,12 @@ void LandblockRenderer::initBlendTexture()
     }
 }
 
-void LandblockRenderer::cleanupBlendTexture()
+void LandblockRenderer::initOffsetTexture()
 {
-    glDeleteTextures(1, &_blendTexture);
+    vector<uint16_t> offsetData(512 * 512, 0xFFFF);
+
+    glGenTextures(1, &_offsetTexture);
+    glBindTexture(GL_TEXTURE_2D, _offsetTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R16, 512, 512, 0, GL_RED, GL_UNSIGNED_SHORT, offsetData.data());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // default is GL_NEAREST_MIPMAP_LINEAR
 }

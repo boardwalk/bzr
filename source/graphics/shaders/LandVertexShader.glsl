@@ -16,8 +16,6 @@ out FragmentData
 	float blendTexNum;
 } fragData;
 
-uniform mat4 modelViewProjectionMatrix;
-
 void main()
 {
 	fragData.terrainTexCoord = terrainTexCoord;
@@ -26,5 +24,5 @@ void main()
 	fragData.roadTexNum = roadTexNum;
 	fragData.blendTexNum = blendTexNum;
 
-    gl_Position = modelViewProjectionMatrix * vec4(vertexPosition * vec3(24.0, 24.0, 2.0), 1.0);
+    gl_Position = vec4(vertexPosition * vec3(24.0, 24.0, 2.0), 1.0);
 }
