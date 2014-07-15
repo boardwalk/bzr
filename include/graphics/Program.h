@@ -9,11 +9,12 @@ public:
     ~Program();
     Program& operator=(Program&& other);
 
-    void create(const GLchar* vertexShader, const GLchar* fragmentShader);
-    void destroy();
-    
+    void create();
+    void attach(GLenum type, const GLchar* source);
+    void link();
     void use();
     GLint getUniform(const GLchar* name);
+    void destroy();
 
 private:
     GLuint _handle;

@@ -11,6 +11,8 @@
 //#include "graphics/shaders/FragmentShader.glsl.h"
 #include "graphics/shaders/LandVertexShader.glsl.h"
 #include "graphics/shaders/LandFragmentShader.glsl.h"
+#include "graphics/shaders/LandTessControlShader.glsl.h"
+#include "graphics/shaders/LandTessEvalShader.glsl.h"
 
 Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 {
@@ -68,8 +70,12 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // the default is 4
 
-    //_program.create(VertexShader, FragmentShader);
-    _program.create(LandVertexShader, LandFragmentShader);
+    _program.create();
+    _program.attach(GL_VERTEX_SHADER, LandVertexShader);
+    _program.attach(GL_TESS_CONTROL_SHADER, LandTessControlShader);
+    _program.attach(GL_TESS_EVALUATION_SHADER, LandTessEvalShader);
+    _program.attach(GL_FRAGMENT_SHADER, LandFragmentShader);
+    _program.link();
     _program.use();
 
     auto terrainTexLocation = _program.getUniform("terrainTex");

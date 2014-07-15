@@ -2,7 +2,35 @@
 #include <string>
 #include <vector>
 
-static GLuint createShader(GLenum type, const GLchar* source)
+Program::Program() : _handle(0)
+{}
+
+Program::Program(Program&& other)
+{
+    _handle = other._handle;
+    other._handle = 0;
+}
+
+Program::~Program()
+{
+    destroy();
+}
+
+Program& Program::operator=(Program&& other)
+{
+    destroy();
+    _handle = other._handle;
+    other._handle = 0;
+    return *this;
+}
+
+void Program::create()
+{
+    destroy();
+    _handle = glCreateProgram();
+}
+
+void Program::attach(GLenum type, const GLchar* source)
 {
     GLint length = strlen(source);
 
@@ -26,70 +54,28 @@ static GLuint createShader(GLenum type, const GLchar* source)
         throw runtime_error(err);
     }
 
-    return shader;
+    glAttachShader(_handle, shader);
+    glDeleteShader(shader);
 }
 
-Program::Program() : _handle(0)
-{}
-
-Program::Program(Program&& other)
+void Program::link()
 {
-    _handle = other._handle;
-    other._handle = 0;
-}
-
-Program::~Program()
-{
-    destroy();
-}
-
-Program& Program::operator=(Program&& other)
-{
-    destroy();
-    _handle = other._handle;
-    other._handle = 0;
-    return *this;
-}
-
-void Program::create(const GLchar* vertexShader, const GLchar* fragmentShader)
-{    
-    auto vertexShaderHandle = createShader(GL_VERTEX_SHADER, vertexShader);
-    auto fragmentShaderHandle = createShader(GL_FRAGMENT_SHADER, fragmentShader);
-
-    auto program = glCreateProgram();
-    glAttachShader(program, vertexShaderHandle);
-    glAttachShader(program, fragmentShaderHandle);
-    glLinkProgram(program);
-
-    glDeleteShader(vertexShaderHandle);
-    glDeleteShader(fragmentShaderHandle);
+    glLinkProgram(_handle);
 
     GLint success = GL_FALSE;
-    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    glGetProgramiv(_handle, GL_LINK_STATUS, &success);
 
     if(!success)
     {
         GLint logLength;
-        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLength);
+        glGetProgramiv(_handle, GL_INFO_LOG_LENGTH, &logLength);
 
         vector<GLchar> log(logLength);
-        glGetProgramInfoLog(program, logLength, &logLength, log.data());
+        glGetProgramInfoLog(_handle, logLength, &logLength, log.data());
 
         string err("Failed to link program: ");
         err.append(log.data(), logLength);
         throw runtime_error(err);
-    }
-
-    destroy();
-    _handle = program;
-}
-
-void Program::destroy()
-{
-    if(_handle != 0)
-    {
-        glDeleteProgram(_handle);
-        _handle = 0;
     }
 }
 
@@ -113,4 +99,13 @@ GLint Program::getUniform(const GLchar* name)
     }
 
     return loc;
+}
+
+void Program::destroy()
+{
+    if(_handle != 0)
+    {
+        glDeleteProgram(_handle);
+        _handle = 0;
+    }
 }

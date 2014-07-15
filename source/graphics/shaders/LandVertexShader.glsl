@@ -7,21 +7,24 @@ layout(location = 3) in vec4 terrainTexNum;
 layout(location = 4) in float roadTexNum;
 layout(location = 5) in float blendTexNum;
 
-out vec2 fragTerrainTexCoord;
-out vec2 fragBlendTexCoord;
-out vec4 fragTerrainTexNum;
-out float fragRoadTexNum;
-out float fragBlendTexNum;
+out FragmentData
+{
+	vec2 terrainTexCoord;
+	vec2 blendTexCoord;
+	vec4 terrainTexNum;
+	float roadTexNum;
+	float blendTexNum;
+} fragData;
 
 uniform mat4 modelViewProjectionMatrix;
 
 void main()
 {
-	fragTerrainTexCoord = terrainTexCoord;
-	fragBlendTexCoord = blendTexCoord;
-	fragTerrainTexNum = terrainTexNum;
-	fragRoadTexNum = roadTexNum;
-	fragBlendTexNum = blendTexNum;
+	fragData.terrainTexCoord = terrainTexCoord;
+	fragData.blendTexCoord = blendTexCoord;
+	fragData.terrainTexNum = terrainTexNum;
+	fragData.roadTexNum = roadTexNum;
+	fragData.blendTexNum = blendTexNum;
 
     gl_Position = modelViewProjectionMatrix * vec4(vertexPosition * vec3(24.0, 24.0, 2.0), 1.0);
 }

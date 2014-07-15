@@ -285,6 +285,8 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
     // 13 components per vertex
     _vertexCount = vertexData.size() / 13;
 
+    glPatchParameteri(GL_PATCH_VERTICES, 3); 
+
     initTerrainTexture();
     initBlendTexture();
 }
@@ -418,7 +420,8 @@ void LandblockRenderer::render()
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D_ARRAY, _blendTexture);
 
-    glDrawArrays(GL_TRIANGLES, 0, _vertexCount);
+    //glDrawArrays(GL_TRIANGLES, 0, _vertexCount);
+    glDrawArrays(GL_PATCHES, 0, _vertexCount);
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
