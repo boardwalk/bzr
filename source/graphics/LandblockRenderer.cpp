@@ -100,13 +100,17 @@ static const int TERRAIN_ARRAY_DEPTH = sizeof(LANDSCAPE_TEXTURES) / sizeof(LANDS
 
 static const uint32_t BLEND_TEXTURES[] =
 {
-    0x00000000, // special case, all black
-    0xFFFFFFFF,  // special case, all white
-    0x06006d61, // vertical, black to white, left of center
-    0x06006d6c, // top left corner, black, semi ragged
-    0x06006d6d, // top left corner, black, ragged
-    0x06006d60, // top left corner, black, rounded
-    0x06006d30 // vertical, black to white, very left of center, wavy
+    0xFFFFFFFF, // 0 special case, all white
+    0x00000000, // 1 special case, all black
+    0x06006d61, // 2 vertical, black to white, left of center
+    0x06006d6c, // 3 top left corner, black, semi ragged
+    0x06006d6d, // 4 top left corner, black, ragged
+    0x06006d60, // 5 top left corner, black, rounded
+    0x06006d30, // 6 vertical, black to white, very left of center, wavy
+    0x06006d37, // 7 small corner
+    0x06006d6b, // 8 big corner
+    0x06006d60, // 9 ??
+    0x06006d36  // A wavy diagonal
 };
 
 static const int BLEND_ARRAY_SIZE = 512;
@@ -143,9 +147,11 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
     {
         for(auto x = 0; x < Landblock::GRID_SIZE - 1; x++)
         {
-            // 4-3
-            // |X|
-            // 1-2
+            //   N
+            //  4-3
+            //W | | E
+            //  1-2
+            //   S
 
 #define T(dx, dy) (data.styles[x + (dx)][y + (dy)] >> 2) & 0x1F
             // terrain types
@@ -155,54 +161,79 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
             auto t4 = T(0, 1);
 #undef T
 
-#define R(dx, dy) data.styles[x + (dx)][y + (dy)] & 0x3
+#define R(dx, dy) (data.styles[x + (dx)][y + (dy)] & 0x3) != 0
             // roads
             auto r1 = R(0, 0);
             auto r2 = R(1, 0);
             auto r3 = R(1, 1);
             auto r4 = R(0, 1);
 #undef R
+            auto r = ((int)r1 << 12) | ((int)r2 << 8) | ((int)r3 << 4) | (int)r4;
 
-            //auto road = data.styles[x][y] & 0x3;
-            //auto type = (data.styles[x][y] >> 10) & 0x1F;
-            //auto vege = data.styles[x][y] & 0xFF;
-
-            //for(int i = 0; i < 16; i++)
-            //{
-            //    printf("%d", (data.styles[x][y] >> i) & 1);
-            //}
-            //printf("\n");
-
-            //auto a1 = data.styles[x][y];
-            //auto a2 = data.styles[x + 1][y];
-            //auto a3 = data.styles[x + 1][y + 1];
-            //auto a4 = data.styles[x][y + 1];
-            //printf("%02x\n", a1);//, a2, a3, a4);
-            //printf("%02x\n", road);//, type, vege);//, r2, r3, r4);
-
-            // mirror blend texture horizontally?
-            auto mhorz = false;
-            // mirror blend texture vertically?
-            auto mvert = false;
+            // flip blend texture north/south
+            auto flip = false;
+            // rotate blend texture 90 degree counterclockwise
+            auto rotate = false;
             // road texture number
             auto rp = 0x20;
             // blend texture number
             auto bp = 0;
+            auto scale = 4;
 
-            if(!r1 && !r2 && !r3 && !r4)
+            // TODO choose a random corner blend!
+
+            switch(r)
             {
-                // it's all nothing
-                bp = 0; // all black
-            }
-            else if(r1 && r2 && r3 && r4)
-            {
-                // it's all road, baby
-                bp = 1; // all white
-            }
-            else
-            {
-                // FIXME
-                bp = 2;
+                case 0x0000: // all ground
+                    bp = 0;
+                    break;
+                case 0x1111: // all road
+                    bp = 1;
+                    break;
+                case 0x1100: // south road
+                    bp = 2;
+                    rotate = true;
+                    break;
+                case 0x0011: // north road
+                    bp = 2;
+                    flip = true;
+                    rotate = true;
+                    break;
+                case 0x1001: // west road
+                    bp = 2; // NONE! FIXME!
+                    break;
+                case 0x0110: // east road
+                    bp = 2; // NONE! FIXME!
+                    break;
+                case 0x1000: // southwest corner
+                    bp = 3;
+                    break;
+                case 0x0100: // southeast corner
+                    bp = 3;
+                    rotate = true;
+                    break;
+                case 0x0010: // northeast corner
+                    bp = 4;
+                    flip = true;
+                    rotate = true;
+                    break;
+                case 0x0001: // northwest corner
+                    bp = 4;
+                    flip = true;
+                    break;
+                case 0x1010: // southwest/northeast diagonal
+                    bp = 10; // FIXME Where's the blend texture?
+                    scale = 1;
+                    break;
+                case 0x0101: // southeast/northwest diagonal
+                    bp = 10; // FIXME Where's the blend texture?
+                    flip = true;
+                    scale = 1;
+                    break;
+                default:
+                    printf("fancy nignoggin\n");
+                    bp = 0;
+                    break;
             }
 
 // See LandVertexShader.glsl too see what these are
@@ -212,8 +243,14 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
     vertexData.push_back(data.heights[x + (dx)][y + (dy)]); \
     vertexData.push_back(dx); \
     vertexData.push_back(dy); \
-    vertexData.push_back(mhorz ? 1 - (dx) : (dx)); \
-    vertexData.push_back(mvert ? 1 - (dy) : (dy)); \
+    if(rotate) { \
+        vertexData.push_back(scale * (flip ? 1 - (dy) : (dy))); \
+        vertexData.push_back(scale * (1 - (dx))); \
+    } \
+    else { \
+        vertexData.push_back(scale * (dx)); \
+        vertexData.push_back(scale * (flip ? 1 - (dy) : (dy))); \
+    } \
     vertexData.push_back(t1); \
     vertexData.push_back(t2); \
     vertexData.push_back(t3); \
@@ -239,8 +276,6 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
             }
 #undef V
         }
-
-        printf("\n");
     }
 
     _vertexBuffer.create();
@@ -468,8 +503,6 @@ void LandblockRenderer::initBlendTexture()
     {
         Image image;
 
-        printf("loading %08x\n", BLEND_TEXTURES[i]);
-
         if(BLEND_TEXTURES[i] == 0x00000000)
         {
             image.create(Image::A8, BLEND_ARRAY_SIZE, BLEND_ARRAY_SIZE);
@@ -482,11 +515,11 @@ void LandblockRenderer::initBlendTexture()
         else
         {
             image.load(BLEND_TEXTURES[i]);
-
-            printf("got image width=%d height=%d format=%d", image.width(), image.height(), image.format());
         }
 
-        //image.fill(0xFF);
+        // For both the corner and edge textures, we want to use s,t > 1 to repeat emptiness to make skinnier roads
+        // This flip allows us to do this
+        image.flipVertical();
 
         if(image.width() != BLEND_ARRAY_SIZE || image.height() != BLEND_ARRAY_SIZE)
         {

@@ -22,6 +22,7 @@ public:
     void scale(float factor);
     void blur(int windowSize);
     void fill(int value);
+    void flipVertical();
 
     Format format() const;
     int numChannels() const;

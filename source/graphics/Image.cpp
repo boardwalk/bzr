@@ -131,19 +131,11 @@ void Image::load(uint32_t fileId)
         _data.assign(data, data + header->dataSize);
     }
 
-    auto stride = header->width * bpp / 8;
-
-    vector<uint8_t> rowBuf(stride);
-
-    for(auto y = 0u; y < header->height / 2; y++)
-    {
-        memcpy(rowBuf.data(), _data.data() + y * stride, stride);
-        memcpy(_data.data() + stride * y, _data.data() + (header->height - y - 1) * stride, stride);
-        memcpy(_data.data() + (header->height - y - 1) * stride, rowBuf.data(), stride);
-    }
-
     _width = header->width;
     _height = header->height;
+
+    // OpenGL expects the first row to be the bottom row
+    flipVertical();
 }
 
 void Image::blit(const Image& image, int x, int y)
@@ -234,6 +226,20 @@ void Image::blur(int windowSize)
 void Image::fill(int value)
 {
     memset(_data.data(), value, _data.size());
+}
+
+void Image::flipVertical()
+{
+    auto stride = _width * numChannels();
+
+    vector<uint8_t> rowBuf(stride);
+
+    for(auto y = 0u; y < _height / 2; y++)
+    {
+        memcpy(rowBuf.data(), _data.data() + y * stride, stride);
+        memcpy(_data.data() + stride * y, _data.data() + (_height - y - 1) * stride, stride);
+        memcpy(_data.data() + (_height - y - 1) * stride, rowBuf.data(), stride);
+    }
 }
 
 Image::Format Image::format() const
