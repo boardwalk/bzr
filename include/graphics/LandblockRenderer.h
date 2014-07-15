@@ -2,11 +2,12 @@
 #define BZR_GRAPHICS_LANDBLOCKRENDERER_H
 
 #include "graphics/Buffer.h"
-#include "graphics/Texture.h"
+#include "graphics/Program.h"
 #include "Destructable.h"
 #include "Noncopyable.h"
 
 class Landblock;
+struct Mat4;
 
 class LandblockRenderer : public Destructable, Noncopyable
 {
@@ -14,18 +15,20 @@ public:
     LandblockRenderer(const Landblock& landblock);
     ~LandblockRenderer();
 
-    void render();
+    void render(const Mat4& transform);
 
 private:
+    void initVAO(const Landblock& landblock);
+    void initProgram();
     void initTerrainTexture();
     void initBlendTexture();
     void initOffsetTexture();
 
-    Buffer _vertexBuffer;
-    GLsizei _vertexCount;
+    Program _program;
 
-    //Buffer _indexBuffer;
-    //GLsizei _indexCount;
+    GLuint _vertexArray;
+    GLuint _vertexBuffer;
+    GLsizei _vertexCount;
 
     GLuint _terrainTexture;
     GLuint _blendTexture;

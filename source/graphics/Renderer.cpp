@@ -7,13 +7,6 @@
 #include "Landblock.h"
 #include "util.h"
 
-//#include "graphics/shaders/VertexShader.glsl.h"
-//#include "graphics/shaders/FragmentShader.glsl.h"
-#include "graphics/shaders/LandVertexShader.glsl.h"
-#include "graphics/shaders/LandFragmentShader.glsl.h"
-#include "graphics/shaders/LandTessControlShader.glsl.h"
-#include "graphics/shaders/LandTessEvalShader.glsl.h"
-
 Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 {
     if(SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
@@ -70,27 +63,6 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // the default is 4
 
-    _program.create();
-    _program.attach(GL_VERTEX_SHADER, LandVertexShader);
-    _program.attach(GL_TESS_CONTROL_SHADER, LandTessControlShader);
-    _program.attach(GL_TESS_EVALUATION_SHADER, LandTessEvalShader);
-    _program.attach(GL_FRAGMENT_SHADER, LandFragmentShader);
-    _program.link();
-    _program.use();
-
-    auto terrainTexLocation = _program.getUniform("terrainTex");
-    glUniform1i(terrainTexLocation, 0); // corresponds to GL_TEXTURE_0
-
-    auto blendTexLocation = _program.getUniform("blendTex");
-    glUniform1i(blendTexLocation, 1);
-
-    auto offsetTexLocation = _program.getUniform("offsetTex");
-    glUniform1i(offsetTexLocation, 2);
-
-    GLuint vertexArray;
-    glGenVertexArrays(1, &vertexArray);
-    glBindVertexArray(vertexArray);
-
     //initFramebuffer();
 }
 
@@ -101,8 +73,6 @@ Renderer::~Renderer()
     // TODO delete VAO
     // unuse program
     // unuse buffer
-
-    _program.destroy();
 
     if(_context != nullptr)
     {
@@ -131,6 +101,8 @@ void Renderer::render(double interp)
     Mat4 modelMat;
     modelMat.makeIdentity();
 
+    auto transform = projectionMat * viewMat * modelMat;
+
     // matrices for the vertex shader
     //auto normalMatrixLoc = _program.getUniform("normalMatrix");
     //loadMat3ToUniform(Mat3(viewMat * modelMat).inverse().transpose(), normalMatrixLoc);
@@ -138,8 +110,8 @@ void Renderer::render(double interp)
     //auto modelViewMatrixLoc = _program.getUniform("modelViewMatrix");
     //loadMat4ToUniform(viewMat * modelMat, modelViewMatrixLoc);
 
-    auto modelViewProjectionLoc = _program.getUniform("modelViewProjectionMatrix");
-    loadMat4ToUniform(projectionMat * viewMat * modelMat, modelViewProjectionLoc);
+    //auto modelViewProjectionLoc = _program.getUniform("modelViewProjectionMatrix");
+    //loadMat4ToUniform(projectionMat * viewMat * modelMat, modelViewProjectionLoc);
 
     // lighting parameters for the fragment shader
     //auto& lightPosition = Core::get().camera().position();
@@ -173,7 +145,7 @@ void Renderer::render(double interp)
     }
 
     auto& landblockRenderer = (LandblockRenderer&)*renderData;
-    landblockRenderer.render();
+    landblockRenderer.render(transform);
 
     // xx
     //glBindFramebuffer(GL_READ_FRAMEBUFFER, _framebuffer);

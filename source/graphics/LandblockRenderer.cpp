@@ -1,9 +1,15 @@
 #include "graphics/LandblockRenderer.h"
 #include "graphics/Image.h"
+#include "graphics/util.h"
 #include "math/Vec3.h"
 #include "Landblock.h"
 #include <algorithm>
 #include <vector>
+
+#include "graphics/shaders/LandVertexShader.glsl.h"
+#include "graphics/shaders/LandFragmentShader.glsl.h"
+#include "graphics/shaders/LandTessControlShader.glsl.h"
+#include "graphics/shaders/LandTessEvalShader.glsl.h"
 
 // TODO We could only create one indexBuffer per subdivision level
 // TODO We could generate the x and y of the vertex data in a shader
@@ -139,154 +145,8 @@ static const int BLEND_ARRAY_DEPTH = sizeof(BLEND_TEXTURES) / sizeof(BLEND_TEXTU
 
 LandblockRenderer::LandblockRenderer(const Landblock& landblock)
 {
-    auto& data = landblock.getRawData();
-
-    vector<uint8_t> vertexData;
-
-    for(auto y = 0; y < Landblock::GRID_SIZE - 1; y++)
-    {
-        for(auto x = 0; x < Landblock::GRID_SIZE - 1; x++)
-        {
-            //   N
-            //  4-3
-            //W | | E
-            //  1-2
-            //   S
-
-#define T(dx, dy) (data.styles[x + (dx)][y + (dy)] >> 2) & 0x1F
-            // terrain types
-            auto t1 = T(0, 0);
-            auto t2 = T(1, 0);
-            auto t3 = T(1, 1);
-            auto t4 = T(0, 1);
-#undef T
-
-#define R(dx, dy) (data.styles[x + (dx)][y + (dy)] & 0x3) != 0
-            // roads
-            auto r1 = R(0, 0);
-            auto r2 = R(1, 0);
-            auto r3 = R(1, 1);
-            auto r4 = R(0, 1);
-#undef R
-            auto r = ((int)r1 << 12) | ((int)r2 << 8) | ((int)r3 << 4) | (int)r4;
-
-            // flip blend texture north/south
-            auto flip = false;
-            // rotate blend texture 90 degree counterclockwise
-            auto rotate = false;
-            // road texture number
-            auto rp = 0x20;
-            // blend texture number
-            auto bp = 0;
-            auto scale = 4;
-
-            // TODO choose a random corner blend!
-
-            switch(r)
-            {
-                case 0x0000: // all ground
-                    bp = 0;
-                    break;
-                case 0x1111: // all road
-                    bp = 1;
-                    break;
-                case 0x1100: // south road
-                    bp = 2;
-                    rotate = true;
-                    break;
-                case 0x0011: // north road
-                    bp = 2;
-                    flip = true;
-                    rotate = true;
-                    break;
-                case 0x1001: // west road
-                    bp = 2; // NONE! FIXME!
-                    break;
-                case 0x0110: // east road
-                    bp = 2; // NONE! FIXME!
-                    break;
-                case 0x1000: // southwest corner
-                    bp = 3;
-                    break;
-                case 0x0100: // southeast corner
-                    bp = 3;
-                    rotate = true;
-                    break;
-                case 0x0010: // northeast corner
-                    bp = 4;
-                    flip = true;
-                    rotate = true;
-                    break;
-                case 0x0001: // northwest corner
-                    bp = 4;
-                    flip = true;
-                    break;
-                case 0x1010: // southwest/northeast diagonal
-                    bp = 10; // FIXME Where's the blend texture?
-                    scale = 1;
-                    break;
-                case 0x0101: // southeast/northwest diagonal
-                    bp = 10; // FIXME Where's the blend texture?
-                    flip = true;
-                    scale = 1;
-                    break;
-                default:
-                    printf("fancy nignoggin\n");
-                    bp = 0;
-                    break;
-            }
-
-// See LandVertexShader.glsl too see what these are
-#define V(dx, dy) \
-    vertexData.push_back(x + (dx)); \
-    vertexData.push_back(y + (dy)); \
-    vertexData.push_back(data.heights[x + (dx)][y + (dy)]); \
-    vertexData.push_back(dx); \
-    vertexData.push_back(dy); \
-    if(rotate) { \
-        vertexData.push_back(scale * (flip ? 1 - (dy) : (dy))); \
-        vertexData.push_back(scale * (1 - (dx))); \
-    } \
-    else { \
-        vertexData.push_back(scale * (dx)); \
-        vertexData.push_back(scale * (flip ? 1 - (dy) : (dy))); \
-    } \
-    vertexData.push_back(t1); \
-    vertexData.push_back(t2); \
-    vertexData.push_back(t3); \
-    vertexData.push_back(t4); \
-    vertexData.push_back(rp); \
-    vertexData.push_back(bp);
-
-            if(landblock.splitNESW(x, y))
-            {
-                // lower right triangle
-                V(0, 0) V(1, 0) V(1, 1)
-
-                // top left triangle
-                V(1, 1) V(0, 1) V(0, 0)
-            }
-            else
-            {
-                // lower left triangle
-                V(0, 0) V(1, 0) V(0, 1)
-
-                // top right triangle
-                V(1, 0) V(1, 1) V(0, 1)
-            }
-#undef V
-        }
-    }
-
-    _vertexBuffer.create();
-    _vertexBuffer.bind(GL_ARRAY_BUFFER);
-    glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(uint8_t), vertexData.data(), GL_STATIC_DRAW);
-
-    // 13 components per vertex
-    _vertexCount = vertexData.size() / 13;
-
-    glPatchParameteri(GL_PATCH_VERTICES, 3); 
-
+    initProgram();
+    initVAO(landblock);
     initTerrainTexture();
     initBlendTexture();
     initOffsetTexture();
@@ -391,16 +251,184 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
 
 LandblockRenderer::~LandblockRenderer()
 {
+    _program.destroy();
+    glDeleteVertexArrays(1, &_vertexArray);
+    glDeleteBuffers(1, &_vertexBuffer);
     glDeleteTextures(1, &_terrainTexture);
     glDeleteTextures(1, &_blendTexture);
     glDeleteTextures(1, &_offsetTexture);
-
-    _vertexBuffer.destroy();
 }
 
-void LandblockRenderer::render()
+void LandblockRenderer::render(const Mat4& transform)
 {
-    _vertexBuffer.bind(GL_ARRAY_BUFFER);
+    _program.use();
+
+    glBindVertexArray(_vertexArray);
+
+    loadMat4ToUniform(transform, _program.getUniform("modelViewProjectionMatrix"));
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, _terrainTexture);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, _blendTexture);
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, _offsetTexture);
+
+    glDrawArrays(GL_PATCHES, 0, _vertexCount);
+}
+
+void LandblockRenderer::initVAO(const Landblock& landblock)
+{
+    auto& data = landblock.getRawData();
+
+    vector<uint8_t> vertexData;
+
+    for(auto y = 0; y < Landblock::GRID_SIZE - 1; y++)
+    {
+        for(auto x = 0; x < Landblock::GRID_SIZE - 1; x++)
+        {
+            //   N
+            //  4-3
+            //W | | E
+            //  1-2
+            //   S
+
+#define T(dx, dy) (data.styles[x + (dx)][y + (dy)] >> 2) & 0x1F
+            // terrain types
+            auto t1 = T(0, 0);
+            auto t2 = T(1, 0);
+            auto t3 = T(1, 1);
+            auto t4 = T(0, 1);
+#undef T
+
+#define R(dx, dy) (data.styles[x + (dx)][y + (dy)] & 0x3) != 0
+            // roads
+            auto r1 = R(0, 0);
+            auto r2 = R(1, 0);
+            auto r3 = R(1, 1);
+            auto r4 = R(0, 1);
+#undef R
+            auto r = ((int)r1 << 12) | ((int)r2 << 8) | ((int)r3 << 4) | (int)r4;
+
+            // flip blend texture north/south
+            auto flip = false;
+            // rotate blend texture 90 degree counterclockwise
+            auto rotate = false;
+            // road texture number
+            auto rp = 0x20;
+            // blend texture number
+            auto bp = 0;
+            auto scale = 4;
+
+            // TODO choose a random corner blend!
+
+            switch(r)
+            {
+                case 0x0000: // all ground
+                    bp = 0;
+                    break;
+                case 0x1111: // all road
+                    bp = 1;
+                    break;
+                case 0x1100: // south road
+                    bp = 2;
+                    rotate = true;
+                    break;
+                case 0x0011: // north road
+                    bp = 2;
+                    flip = true;
+                    rotate = true;
+                    break;
+                case 0x1001: // west road
+                    bp = 2; // NONE! FIXME!
+                    break;
+                case 0x0110: // east road
+                    bp = 2; // NONE! FIXME!
+                    break;
+                case 0x1000: // southwest corner
+                    bp = 3;
+                    break;
+                case 0x0100: // southeast corner
+                    bp = 3;
+                    rotate = true;
+                    break;
+                case 0x0010: // northeast corner
+                    bp = 4;
+                    flip = true;
+                    rotate = true;
+                    break;
+                case 0x0001: // northwest corner
+                    bp = 4;
+                    flip = true;
+                    break;
+                case 0x1010: // southwest/northeast diagonal
+                    bp = 10; // FIXME better blend texture
+                    scale = 1;
+                    break;
+                case 0x0101: // southeast/northwest diagonal
+                    bp = 10; // FIXME better blend texture
+                    flip = true;
+                    scale = 1;
+                    break;
+                default:
+                    printf("fancy nignoggin\n");
+                    bp = 0;
+                    break;
+            }
+
+// See LandVertexShader.glsl too see what these are
+#define V(dx, dy) \
+    vertexData.push_back(x + (dx)); \
+    vertexData.push_back(y + (dy)); \
+    vertexData.push_back(data.heights[x + (dx)][y + (dy)]); \
+    vertexData.push_back(dx); \
+    vertexData.push_back(dy); \
+    if(rotate) { \
+        vertexData.push_back(scale * (flip ? 1 - (dy) : (dy))); \
+        vertexData.push_back(scale * (1 - (dx))); \
+    } \
+    else { \
+        vertexData.push_back(scale * (dx)); \
+        vertexData.push_back(scale * (flip ? 1 - (dy) : (dy))); \
+    } \
+    vertexData.push_back(t1); \
+    vertexData.push_back(t2); \
+    vertexData.push_back(t3); \
+    vertexData.push_back(t4); \
+    vertexData.push_back(rp); \
+    vertexData.push_back(bp);
+
+            if(landblock.splitNESW(x, y))
+            {
+                // lower right triangle
+                V(0, 0) V(1, 0) V(1, 1)
+
+                // top left triangle
+                V(1, 1) V(0, 1) V(0, 0)
+            }
+            else
+            {
+                // lower left triangle
+                V(0, 0) V(1, 0) V(0, 1)
+
+                // top right triangle
+                V(1, 0) V(1, 1) V(0, 1)
+            }
+#undef V
+        }
+    }
+
+    // 13 components per vertex
+    _vertexCount = vertexData.size() / 13;
+
+    glGenVertexArrays(1, &_vertexArray);
+    glBindVertexArray(_vertexArray);
+
+    glGenBuffers(1, &_vertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(uint8_t), vertexData.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uint8_t) * 13, nullptr);
     glVertexAttribPointer(1, 2, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uint8_t) * 13, (GLvoid*)(sizeof(uint8_t) * 3));
@@ -416,24 +444,28 @@ void LandblockRenderer::render()
     glEnableVertexAttribArray(4);
     glEnableVertexAttribArray(5);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, _terrainTexture);
+    glBindVertexArray(0);
+}
 
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, _blendTexture);
+void LandblockRenderer::initProgram()
+{
+    _program.create();
+    _program.attach(GL_VERTEX_SHADER, LandVertexShader);
+    _program.attach(GL_TESS_CONTROL_SHADER, LandTessControlShader);
+    _program.attach(GL_TESS_EVALUATION_SHADER, LandTessEvalShader);
+    _program.attach(GL_FRAGMENT_SHADER, LandFragmentShader);
+    _program.link();
 
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, _offsetTexture);
+    _program.use();
 
-    //glDrawArrays(GL_TRIANGLES, 0, _vertexCount);
-    glDrawArrays(GL_PATCHES, 0, _vertexCount);
+    auto terrainTexLocation = _program.getUniform("terrainTex");
+    glUniform1i(terrainTexLocation, 0); // corresponds to GL_TEXTURE_0
 
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
-    glDisableVertexAttribArray(2);
-    glDisableVertexAttribArray(3);
-    glDisableVertexAttribArray(4);
-    glDisableVertexAttribArray(5);
+    auto blendTexLocation = _program.getUniform("blendTex");
+    glUniform1i(blendTexLocation, 1);
+
+    auto offsetTexLocation = _program.getUniform("offsetTex");
+    glUniform1i(offsetTexLocation, 2);
 }
 
 void LandblockRenderer::initTerrainTexture()
@@ -540,7 +572,7 @@ void LandblockRenderer::initBlendTexture()
 
 void LandblockRenderer::initOffsetTexture()
 {
-    vector<uint16_t> offsetData(512 * 512, 0xFFFF);
+    vector<uint16_t> offsetData(512 * 512, 0);
 
     glGenTextures(1, &_offsetTexture);
     glBindTexture(GL_TEXTURE_2D, _offsetTexture);

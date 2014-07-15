@@ -24,8 +24,6 @@ private:
     SDL_Window* _window;
     SDL_GLContext _context;
 
-    Program _program;
-
     GLuint _framebuffer;
     GLuint _colorTexture;
     GLuint _normalTexture;
