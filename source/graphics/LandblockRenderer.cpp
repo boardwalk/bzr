@@ -10,40 +10,92 @@
 
 static const uint32_t LANDSCAPE_TEXTURES[] =
 {
-    0x0600379a,
-    0x0600379f,
-    0x0600382a,
-    0x0600382c,
-    0x0600382e,
-    0x0600383b,
-    0x0600383d,
-    0x0600383f,
-    0x0600384c,
-    0x0600388c,
-    0x06003794,
-    0x06003819,
-    0x06003821,
-    0x06003824,
-    0x06003826,
-    0x06003828,
-    0x06003830,
-    0x06003832,
-    0x06003833,
-    0x06003835,
-    0x06003837,
-    0x06003839,
-    0x06003843,
-    0x06003851,
-    0x06003853,
-    0x06003856,
-    0x06003858,
-    0x06003859,
-    0x06003891,
-    0x06003893,
-    0x06006284
+    0x00000000, // 0x00
+    0x00000000, // 0x01
+    0x00000000, // 0x02
+    0x06003794, // 0x03
+    0x00000000, // 0x04
+    0x00000000, // 0x05
+    0x00000000, // 0x06
+    0x00000000, // 0x07
+    0x00000000, // 0x08
+    0x00000000, // 0x09
+    0x00000000, // 0x0A
+    0x00000000, // 0x0B
+    0x00000000, // 0x0C
+    0x00000000, // 0x0D
+    0x00000000, // 0x0E
+    0x00000000, // 0x0F
+    0x00000000, // 0x10
+    0x00000000, // 0x11
+    0x00000000, // 0x12
+    0x00000000, // 0x13
+    0x00000000, // 0x14 
+    0x0600379a, // 0x15
+    0x00000000, // 0x16
+    0x00000000, // 0x17
+    0x00000000, // 0x18
+    0x00000000, // 0x19
+    0x00000000, // 0x1A
+    0x00000000, // 0x1B
+    0x00000000, // 0x1C
+    0x00000000, // 0x1D
+    0x00000000, // 0x1E
+    0x00000000, // 0x1F
+    // road textures below this line
+    0x06006d3f  // 0x20
 };
 
-static const int TERRAIN_ARRAY_SIZE = 256;
+// 6d3e
+// 6d49
+// 6d51
+// 6d06
+// 6d3d
+// 6d3f
+// 6d48
+// 6d46
+// 6d42
+// 6d41
+// 6d6f
+// 6d55
+// 6d40
+// 6d53
+// 6d44
+// 6d3c
+// 6d50
+// 6d4c
+// 6d45
+// 6bb5
+// 6f48
+// 6d54
+// 6d56
+// 6d4b
+// 6d43
+// 6810
+// 6844
+// 74d8
+// 6d4d
+// 680e
+// 6d4f
+// 6d4e
+// 6d6a
+// 6d4a
+// 6b9c
+// 6d47
+// ----
+// 74d9
+// 3824
+// 72b3
+// 3835
+// 382c
+// 3828
+// 382a
+// 72b2
+// 3821
+// ....
+
+
+static const int TERRAIN_ARRAY_SIZE = 512;
 static const int TERRAIN_ARRAY_DEPTH = sizeof(LANDSCAPE_TEXTURES) / sizeof(LANDSCAPE_TEXTURES[0]);
 
 static const uint32_t BLEND_TEXTURES[] =
@@ -53,8 +105,8 @@ static const uint32_t BLEND_TEXTURES[] =
     0x06006d6d, // top left corner, black, ragged
     0x06006d60, // top left corner, black, rounded
     0x06006d30, // vertical, black to white, very left of center, wavy
-    0x00000000 // special case, all black
-    0xFFFFFFFF, // special case, all white
+    0x00000000, // special case, all black
+    0xFFFFFFFF  // special case, all white
 };
 
 static const int BLEND_ARRAY_SIZE = 512;
@@ -103,14 +155,50 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
             auto t4 = T(0, 1);
 #undef T
 
-#define R(dx, dy) data.styles[x + (dx)][y + (dy)] & 0x2
-            // terrain types
+#define R(dx, dy) data.styles[x + (dx)][y + (dy)] & 0x3
+            // roads
             auto r1 = R(0, 0);
             auto r2 = R(1, 0);
             auto r3 = R(1, 1);
             auto r4 = R(0, 1);
 #undef R
 
+            auto road = data.styles[x][y] & 0x3;
+            //auto type = (data.styles[x][y] >> 10) & 0x1F;
+            //auto vege = data.styles[x][y] & 0xFF;
+
+            //for(int i = 0; i < 16; i++)
+            //{
+            //    printf("%d", (data.styles[x][y] >> i) & 1);
+            //}
+            //printf("\n");
+
+            //auto a1 = data.styles[x][y];
+            //auto a2 = data.styles[x + 1][y];
+            //auto a3 = data.styles[x + 1][y + 1];
+            //auto a4 = data.styles[x][y + 1];
+            //printf("%02x\n", a1);//, a2, a3, a4);
+            //printf("%02x\n", road);//, type, vege);//, r2, r3, r4);
+
+            // mirror blend texture horizontally?
+            auto mhorz = false;
+            // mirror blend texture vertically?
+            auto mvert = false;
+            // road texture number
+            auto rp = 0x20;
+            // blend texture number
+            auto bp = 3;
+
+            if(r1 && r2 && r3 && r4)
+            {
+                // it's all road, baby
+                //bp = 6; // all white
+            }
+            else if(r1 && r2 && !r3 && r4)
+            {
+                // road above
+                //bp = 0; // verti
+            }
 
 // See LandVertexShader.glsl too see what these are
 #define V(dx, dy) \
@@ -127,15 +215,6 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
     vertexData.push_back(t4); \
     vertexData.push_back(rp); \
     vertexData.push_back(bp);
-
-            // mirror blend texture horizontally?
-            auto mhorz = false;
-            // mirror blend texture vertically?
-            auto mvert = false;
-            // blend texture number
-            auto bp = 0;
-            // road texture number
-            auto rp = 0;
 
             if(landblock.splitNESW(x, y))
             {
@@ -155,6 +234,8 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
             }
 #undef V
         }
+
+        printf("\n");
     }
 
     _vertexBuffer.create();
@@ -271,17 +352,12 @@ LandblockRenderer::~LandblockRenderer()
     cleanupBlendTexture();
 
     _vertexBuffer.destroy();
-    //_indexBuffer.destroy();
 }
 
 void LandblockRenderer::render()
 {
     _vertexBuffer.bind(GL_ARRAY_BUFFER);
-    //_indexBuffer.bind(GL_ELEMENT_ARRAY_BUFFER);
 
-    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 9, nullptr);
-    //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 9, (GLvoid*)(sizeof(float) * 3));
-    //glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 9, (GLvoid*)(sizeof(float) * 6));
     glVertexAttribPointer(0, 3, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uint8_t) * 13, nullptr);
     glVertexAttribPointer(1, 2, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uint8_t) * 13, (GLvoid*)(sizeof(uint8_t) * 3));
     glVertexAttribPointer(2, 2, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uint8_t) * 13, (GLvoid*)(sizeof(uint8_t) * 5));
@@ -294,6 +370,7 @@ void LandblockRenderer::render()
     glEnableVertexAttribArray(2);
     glEnableVertexAttribArray(3);
     glEnableVertexAttribArray(4);
+    glEnableVertexAttribArray(5);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, _terrainTexture);
@@ -301,7 +378,6 @@ void LandblockRenderer::render()
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D_ARRAY, _blendTexture);
 
-    //glDrawElements(GL_TRIANGLE_STRIP, _indexCount, GL_UNSIGNED_SHORT, nullptr);
     glDrawArrays(GL_TRIANGLES, 0, _vertexCount);
 
     glDisableVertexAttribArray(0);
@@ -309,6 +385,7 @@ void LandblockRenderer::render()
     glDisableVertexAttribArray(2);
     glDisableVertexAttribArray(3);
     glDisableVertexAttribArray(4);
+    glDisableVertexAttribArray(5);
 }
 
 void LandblockRenderer::initTerrainTexture()
@@ -316,27 +393,53 @@ void LandblockRenderer::initTerrainTexture()
     // allocate terrain texture
     glGenTextures(1, &_terrainTexture);
     glBindTexture(GL_TEXTURE_2D_ARRAY, _terrainTexture);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // default is GL_NEAREST_MIPMAP_LINEAR
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB8, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_DEPTH, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 
     // populate terrain texture 
-    for(int i = 0; i < TERRAIN_ARRAY_DEPTH; i++)
+    for(auto i = 0; i < TERRAIN_ARRAY_DEPTH; i++)
     {
         Image image;
-        image.load(LANDSCAPE_TEXTURES[i]);
+
+        if(LANDSCAPE_TEXTURES[i] == 0x00000000)
+        {
+            image.create(Image::RGB24, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_SIZE);
+        }
+        else
+        {
+            image.load(LANDSCAPE_TEXTURES[i]);
+
+            if(image.width() == image.height() && image.width() * 2 == TERRAIN_ARRAY_SIZE)
+            {
+                image.scale(2.0);
+            }
+        }
 
         if(image.width() != TERRAIN_ARRAY_SIZE || image.height() != TERRAIN_ARRAY_SIZE)
         {
             throw runtime_error("Bad terrain image size");
         }
 
-        if(image.format() != Image::RGB24)
+        GLenum format;
+
+        if(image.format() == Image::RGB24)
+        {
+            format = GL_RGB;
+        }
+        else if(image.format() == Image::BGR24)
+        {
+            format = GL_BGR;
+        }
+        else if(image.format() == Image::BGRA32)
+        {
+            format = GL_BGRA;
+        }
+        else
         {
             throw runtime_error("Bad terrain image format");
         }
 
-        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_SIZE, 1, GL_RGB, GL_UNSIGNED_BYTE, image.data());
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_SIZE, 1, format, GL_UNSIGNED_BYTE, image.data());
     }
 }
 
@@ -350,20 +453,21 @@ void LandblockRenderer::initBlendTexture()
     // allocate terrain texture
     glGenTextures(1, &_blendTexture);
     glBindTexture(GL_TEXTURE_2D_ARRAY, _blendTexture);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_R8, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_DEPTH, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);  // default is GL_NEAREST_MIPMAP_LINEAR
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_R8, BLEND_ARRAY_SIZE, BLEND_ARRAY_SIZE, BLEND_ARRAY_DEPTH, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
 
     // populate terrain texture 
-    for(int i = 0; i < BLEND_ARRAY_DEPTH; i++)
+    for(auto i = 0; i < BLEND_ARRAY_DEPTH; i++)
     {
         Image image;
+
+        printf("loading %08x\n", BLEND_TEXTURES[i]);
 
         if(BLEND_TEXTURES[i] == 0x00000000)
         {
             image.create(Image::A8, BLEND_ARRAY_SIZE, BLEND_ARRAY_SIZE);
         }
-        else if(BLEND_TEXTURES[i] = 0xFFFFFFFF)
+        else if(BLEND_TEXTURES[i] == 0xFFFFFFFF)
         {
             // TODO MAKE WHITE
             image.create(Image::A8, BLEND_ARRAY_SIZE, BLEND_ARRAY_SIZE);
@@ -371,7 +475,11 @@ void LandblockRenderer::initBlendTexture()
         else
         {
             image.load(BLEND_TEXTURES[i]);
+
+            printf("got image width=%d height=%d format=%d", image.width(), image.height(), image.format());
         }
+
+        //image.fill(0xFF);
 
         if(image.width() != BLEND_ARRAY_SIZE || image.height() != BLEND_ARRAY_SIZE)
         {

@@ -13,14 +13,19 @@ uniform sampler2DArray blendTex;
 
 void main()
 {
-	// lower left
-	vec4 c1 = texture(terrainTex, vec3(fragTerrainTexCoord.s, fragTerrainTexCoord.t, fragTerrainTexNum.x)) * (1.0 - fragTerrainTexCoord.s) * (1.0 - fragTerrainTexCoord.t);
-	// lower right
-	vec4 c2 = texture(terrainTex, vec3(fragTerrainTexCoord.s, fragTerrainTexCoord.t, fragTerrainTexNum.y)) * fragTerrainTexCoord.s * (1.0 - fragTerrainTexCoord.t);
-	// upper right
-	vec4 c3 = texture(terrainTex, vec3(fragTerrainTexCoord.s, fragTerrainTexCoord.t, fragTerrainTexNum.z)) * fragTerrainTexCoord.s * fragTerrainTexCoord.t;
-	// upper left
-	vec4 c4 = texture(terrainTex, vec3(fragTerrainTexCoord.s, fragTerrainTexCoord.t, fragTerrainTexNum.w)) * (1.0 - fragTerrainTexCoord.s) * fragTerrainTexCoord.t;
+	// sample terrain lower left, lower right, upper right, upper left
+	vec4 tc1 = texture(terrainTex, vec3(fragTerrainTexCoord.s, fragTerrainTexCoord.t, fragTerrainTexNum.x)) * (1.0 - fragTerrainTexCoord.s) * (1.0 - fragTerrainTexCoord.t);
+	vec4 tc2 = texture(terrainTex, vec3(fragTerrainTexCoord.s, fragTerrainTexCoord.t, fragTerrainTexNum.y)) * fragTerrainTexCoord.s * (1.0 - fragTerrainTexCoord.t);
+	vec4 tc3 = texture(terrainTex, vec3(fragTerrainTexCoord.s, fragTerrainTexCoord.t, fragTerrainTexNum.z)) * fragTerrainTexCoord.s * fragTerrainTexCoord.t;
+	vec4 tc4 = texture(terrainTex, vec3(fragTerrainTexCoord.s, fragTerrainTexCoord.t, fragTerrainTexNum.w)) * (1.0 - fragTerrainTexCoord.s) * fragTerrainTexCoord.t;
+	vec4 tc = tc1 + tc2 + tc3 + tc4;
 
-	fragColor = c1 + c2 + c3 + c4;
+	// sample road
+	vec4 rc = texture(terrainTex, vec3(fragTerrainTexCoord.s, fragTerrainTexCoord.t, fragRoadTexNum));
+
+	// sample blend
+	vec4 a = texture(blendTex, vec3(fragTerrainTexCoord.s, fragTerrainTexCoord.t, 2));
+
+	//fragColor = tc * bc + rc * (1.0 - bc);
+	fragColor = vec4(a.rrr, 1.0); //mix(tc, rc, a.r);
 }

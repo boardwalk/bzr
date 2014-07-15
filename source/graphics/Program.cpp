@@ -21,9 +21,9 @@ static GLuint createShader(GLenum type, const GLchar* source)
         vector<GLchar> log(logLength);
         glGetShaderInfoLog(shader, logLength, &logLength, log.data());
 
-        string logStr("Failed to compile shader: ");
-        logStr.append(log.data(), logLength);
-        throw runtime_error(logStr);
+        string err("Failed to compile shader: ");
+        err.append(log.data(), logLength);
+        throw runtime_error(err);
     }
 
     return shader;
@@ -75,9 +75,9 @@ void Program::create(const GLchar* vertexShader, const GLchar* fragmentShader)
         vector<GLchar> log(logLength);
         glGetProgramInfoLog(program, logLength, &logLength, log.data());
 
-        string logStr("Failed to link program: ");
-        logStr.append(log.data(), logLength);
-        throw runtime_error(logStr);
+        string err("Failed to link program: ");
+        err.append(log.data(), logLength);
+        throw runtime_error(err);
     }
 
     destroy();
@@ -107,7 +107,9 @@ GLint Program::getUniform(const GLchar* name)
 
     if(loc < 0)
     {
-        //throw runtime_error("Uniform does not exist");
+        //string err("Uniform does not exist: ");
+        //err.append(name);
+        //throw runtime_error(err);
     }
 
     return loc;

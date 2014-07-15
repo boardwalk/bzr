@@ -21,6 +21,7 @@ public:
     void blit(const Image& image, int x, int y);
     void scale(float factor);
     void blur(int windowSize);
+    void fill(int value);
 
     Format format() const;
     int numChannels() const;

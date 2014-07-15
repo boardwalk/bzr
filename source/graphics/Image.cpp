@@ -3,6 +3,7 @@
 #include "BlobReader.h"
 #include "Core.h"
 #include "DatFile.h"
+#include <algorithm>
 
 PACK(struct TextureHeader
 {
@@ -164,9 +165,9 @@ void Image::scale(float factor)
     int newHeight = float(_height) * factor;
     int nchannels = numChannels();
 
-    printf("newWidth = %d\n", newWidth);
-    printf("newHeight = %d\n", newHeight);
-    printf("nchannels = %d\n", nchannels);
+    //printf("newWidth = %d\n", newWidth);
+    //printf("newHeight = %d\n", newHeight);
+    //printf("nchannels = %d\n", nchannels);
 
     vector<uint8_t> newData(newWidth * newHeight * nchannels);
 
@@ -188,7 +189,7 @@ void Image::scale(float factor)
             auto xOpposite = 1.0 - xDiff;
             auto yOpposite = 1.0 - yDiff;
 
-#define SRCPX(x, y, cn) (double)_data[((x) + (y) * _width) * nchannels + cn]
+#define SRCPX(x, y, cn) (double)_data[(min(x, _width) + min(y, _height) * _width) * nchannels + cn]
 #define DSTPX(x, y, cn) newData[((x) + (y) * newWidth) * nchannels + cn]
             DSTPX(dstX, dstY, 0) =
                 (SRCPX(srcX, srcY, 0) * xOpposite + SRCPX(srcX + 1, srcY, 0) * xDiff) * yOpposite +
@@ -218,6 +219,11 @@ void Image::blur(int windowSize)
     ctmf(_data.data(), newData.data(), _width, _height, stride, stride, windowSize, numChannels(), 512 * 1024);
 
     _data = move(newData);
+}
+
+void Image::fill(int value)
+{
+    memset(_data.data(), value, _data.size());
 }
 
 Image::Format Image::format() const

@@ -62,10 +62,12 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     glClearColor(0.0f, 0.0, 0.5f, 1.0f);
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    //glEnable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_2D);
 
     glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(0xffff);
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // the default is 4
 
     //_program.create(VertexShader, FragmentShader);
     _program.create(LandVertexShader, LandFragmentShader);
