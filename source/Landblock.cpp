@@ -148,8 +148,8 @@ void Landblock::buildOffsetMap()
     {
         for(auto sx = 0; sx < sampleSize; sx++)
         {
-            auto lx = double(sx) / double(sampleSize) * LANDBLOCK_SIZE;
-            auto ly = double(sy) / double(sampleSize) * LANDBLOCK_SIZE;
+            auto lx = double(sx) / double(sampleSize - 1) * LANDBLOCK_SIZE;
+            auto ly = double(sy) / double(sampleSize - 1) * LANDBLOCK_SIZE;
             sample[sx + sy * sampleSize] = getHeight(lx, ly);
         }
     }
@@ -165,8 +165,8 @@ void Landblock::buildOffsetMap()
     {
         for(auto ox = 0; ox < OFFSET_MAP_SIZE; ox++)
         {
-            auto sx = double(ox) / double(OFFSET_MAP_SIZE) * double(sampleSize);
-            auto sy = double(oy) / double(OFFSET_MAP_SIZE) * double(sampleSize);
+            auto sx = double(ox) / double(OFFSET_MAP_SIZE - 1) * double(sampleSize - 1);
+            auto sy = double(oy) / double(OFFSET_MAP_SIZE - 1) * double(sampleSize - 1);
 
             auto ix = (int)sx;
             auto iy = (int)sy;
@@ -184,10 +184,8 @@ void Landblock::buildOffsetMap()
                 }
             }
 
-            auto lx = double(ox) / double(OFFSET_MAP_SIZE) * LANDBLOCK_SIZE;
-            auto ly = double(oy) / double(OFFSET_MAP_SIZE) * LANDBLOCK_SIZE;
-
-            //(void)bicubic(p, fx, fy);
+            auto lx = double(ox) / double(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
+            auto ly = double(oy) / double(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
 
             double offset = bicubic(p, fx, fy) - getHeight(lx, ly);
 
@@ -209,7 +207,7 @@ void Landblock::buildOffsetMap()
         for(auto ox = 0; ox < OFFSET_MAP_SIZE; ox++)
         {
             double offset = resample[ox + oy * OFFSET_MAP_SIZE];
-            _offsetMap[ox + oy * OFFSET_MAP_SIZE] = (offset - _offsetMapBase) / _offsetMapScale * double(0xFFFF);
+            _offsetMap[ox + (OFFSET_MAP_SIZE - oy - 1) * OFFSET_MAP_SIZE] = (offset - _offsetMapBase) / _offsetMapScale * double(0xFFFF);
         }
     }
 }
