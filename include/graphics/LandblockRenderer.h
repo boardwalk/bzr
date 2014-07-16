@@ -15,7 +15,7 @@ public:
     LandblockRenderer(const Landblock& landblock);
     ~LandblockRenderer();
 
-    void render(const Mat4& transform);
+    void render(const Mat4& projection, const Mat4& modelView);
 
 private:
     void initVAO(const Landblock& landblock);

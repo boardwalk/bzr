@@ -127,7 +127,7 @@ static double bicubic(double p[4][4], double x, double y)
 
 void Landblock::buildHeightMap()
 {
-    static const int sampleSize = GRID_SIZE * 3;
+    static const int sampleSize = GRID_SIZE;
     vector<double> sample(sampleSize * sampleSize);
 
     for(auto sy = 0; sy < sampleSize; sy++)
@@ -170,10 +170,7 @@ void Landblock::buildHeightMap()
                 }
             }
 
-            auto lx = double(hx) / double(HEIGHT_MAP_SIZE - 1) * LANDBLOCK_SIZE;
-            auto ly = double(hy) / double(HEIGHT_MAP_SIZE - 1) * LANDBLOCK_SIZE;
-
-            double height = bicubic(p, fx, fy);
+            auto height = bicubic(p, fx, fy);
 
             minHeight = min(minHeight, height);
             maxHeight = max(maxHeight, height);

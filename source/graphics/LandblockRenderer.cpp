@@ -1,6 +1,8 @@
 #include "graphics/LandblockRenderer.h"
 #include "graphics/Image.h"
 #include "graphics/util.h"
+#include "math/Mat3.h"
+#include "math/Mat4.h"
 #include "math/Vec3.h"
 #include "Landblock.h"
 #include <algorithm>
@@ -259,13 +261,15 @@ LandblockRenderer::~LandblockRenderer()
     glDeleteTextures(1, &_heightTexture);
 }
 
-void LandblockRenderer::render(const Mat4& transform)
+void LandblockRenderer::render(const Mat4& projection, const Mat4& modelView)
 {
     _program.use();
 
     glBindVertexArray(_vertexArray);
 
-    loadMat4ToUniform(transform, _program.getUniform("modelViewProjectionMatrix"));
+    loadMat3ToUniform(Mat3(modelView).inverse().transpose(), _program.getUniform("normalMatrix"));
+    loadMat4ToUniform(modelView, _program.getUniform("modelViewMatrix"));
+    loadMat4ToUniform(projection * modelView, _program.getUniform("modelViewProjectionMatrix"));
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, _terrainTexture);
@@ -458,6 +462,7 @@ void LandblockRenderer::initProgram()
 
     _program.use();
 
+    // samplers
     auto terrainTexLocation = _program.getUniform("terrainTex");
     glUniform1i(terrainTexLocation, 0); // corresponds to GL_TEXTURE_0
 
@@ -466,6 +471,24 @@ void LandblockRenderer::initProgram()
 
     auto heightTexLocation = _program.getUniform("heightTex");
     glUniform1i(heightTexLocation, 2);
+
+    // lighting parameters
+    Vec3 lightPosition(96.0, 96.0, 50.0);
+    glUniform3f(_program.getUniform("lightPosition"), lightPosition.x, lightPosition.y, lightPosition.z);
+
+    Vec3 lightIntensity(1.0, 1.0, 1.0);
+    glUniform3f(_program.getUniform("lightIntensity"), lightIntensity.x, lightIntensity.y, lightIntensity.z);
+
+    Vec3 Kd(1.0, 1.0, 1.0);
+    glUniform3f(_program.getUniform("Kd"), Kd.x, Kd.y, Kd.z);
+
+    Vec3 Ka(0.3, 0.3, 0.3);
+    glUniform3f(_program.getUniform("Ka"), Ka.x, Ka.y, Ka.z);
+
+    Vec3 Ks(0.0, 0.0, 0.0);
+    glUniform3f(_program.getUniform("Ks"), Ks.x, Ks.y, Ks.z);
+
+    glUniform1f(_program.getUniform("shininess"), 1.0);
 }
 
 void LandblockRenderer::initTerrainTexture()

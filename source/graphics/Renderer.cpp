@@ -101,7 +101,7 @@ void Renderer::render(double interp)
     Mat4 modelMat;
     modelMat.makeIdentity();
 
-    auto transform = projectionMat * viewMat * modelMat;
+    //auto transform = projectionMat * viewMat * modelMat;
 
     // matrices for the vertex shader
     //auto normalMatrixLoc = _program.getUniform("normalMatrix");
@@ -145,7 +145,7 @@ void Renderer::render(double interp)
     }
 
     auto& landblockRenderer = (LandblockRenderer&)*renderData;
-    landblockRenderer.render(transform);
+    landblockRenderer.render(projectionMat, viewMat * modelMat);
 
     // xx
     //glBindFramebuffer(GL_READ_FRAMEBUFFER, _framebuffer);
