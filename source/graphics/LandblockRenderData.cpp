@@ -67,14 +67,14 @@ void LandblockRenderData::initVAO(const Landblock& landblock)
 #undef R
             auto r = ((int)r1 << 12) | ((int)r2 << 8) | ((int)r3 << 4) | (int)r4;
 
-            // flip blend texture north/south
-            auto flip = false;
-            // rotate blend texture 90 degree counterclockwise
-            auto rotate = false;
+            auto blendAngle = 0.0;
+
             // road texture number
             auto rp = 0x20;
+
             // blend texture number
             auto bp = 0;
+
             auto scale = 4;
 
             // TODO choose a random corner blend!
@@ -84,7 +84,7 @@ void LandblockRenderData::initVAO(const Landblock& landblock)
                 case 0x0000: // all ground
                     bp = 0;
                     break;
-                case 0x1111: // all road
+/*                case 0x1111: // all road
                     bp = 1;
                     break;
                 case 0x1100: // south road
@@ -97,12 +97,12 @@ void LandblockRenderData::initVAO(const Landblock& landblock)
                     rotate = true;
                     break;
                 case 0x1001: // west road
-                    bp = 2; // NONE! FIXME!
-                    break;
+                    bp = 2;
+                    break;*/
                 case 0x0110: // east road
-                    bp = 2; // NONE! FIXME!
+                    bp = 2;
                     break;
-                case 0x1000: // southwest corner
+/*                case 0x1000: // southwest corner
                     bp = 3;
                     break;
                 case 0x0100: // southeast corner
@@ -126,12 +126,15 @@ void LandblockRenderData::initVAO(const Landblock& landblock)
                     bp = 10; // FIXME better blend texture
                     flip = true;
                     scale = 1;
-                    break;
+                    break;*/
                 default:
                     printf("fancy nignoggin\n");
                     bp = 0;
                     break;
             }
+
+            auto blendCosine = cos(blendAngle / 180.0 * PI);
+            auto blendSine = sin(blendAngle / 180.0 * PI);
 
 // See LandVertexShader.glsl too see what these are
 #define V(dx, dy) \
@@ -139,14 +142,8 @@ void LandblockRenderData::initVAO(const Landblock& landblock)
     vertexData.push_back((y + (dy)) * 24); \
     vertexData.push_back(dx); \
     vertexData.push_back(dy); \
-    if(rotate) { \
-        vertexData.push_back(scale * (flip ? 1 - (dy) : (dy))); \
-        vertexData.push_back(scale * (1 - (dx))); \
-    } \
-    else { \
-        vertexData.push_back(scale * (dx)); \
-        vertexData.push_back(scale * (flip ? 1 - (dy) : (dy))); \
-    } \
+	vertexData.push_back((((dx) - 0.5) * blendCosine + ((dy) - 0.5) * blendSine) + 0.5); \
+	vertexData.push_back((-((dx) - 0.5) * blendSine + ((dy) - 0.5) * blendCosine) + 0.5); \
     vertexData.push_back(t1); \
     vertexData.push_back(t2); \
     vertexData.push_back(t3); \

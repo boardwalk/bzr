@@ -2,8 +2,6 @@
 #include "math/Vec3.h"
 #include "math/Quat.h"
 
-static const double PI = 3.14159265359;
-
 Mat4::Mat4()
 {
     memset(m, 0, sizeof(m));

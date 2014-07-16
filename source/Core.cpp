@@ -44,6 +44,9 @@ Core::Core() : _done(false)
 
     auto landblockData = _cellDat->read(0xD955FFFF);
     _landblock.reset(new Landblock(landblockData.data(), landblockData.size()));
+
+    auto landblockData2 = _cellDat->read(0xDA55FFFF);
+    _landblock2.reset(new Landblock(landblockData2.data(), landblockData2.size()));
 }
 
 Core::~Core()
@@ -114,6 +117,11 @@ const Camera& Core::camera() const
 Landblock& Core::landblock()
 {
     return *_landblock;
+}
+
+Landblock& Core::landblock2()
+{
+    return *_landblock2;
 }
 
 void Core::handleEvents()

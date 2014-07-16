@@ -26,6 +26,7 @@ public:
     const Camera& camera() const;
 
     Landblock& landblock();
+    Landblock& landblock2();
 
 private:
     Core();
@@ -40,6 +41,7 @@ private:
     unique_ptr<Camera> _camera;
     // obviously we'll want more than one at some point
     unique_ptr<Landblock> _landblock;
+    unique_ptr<Landblock> _landblock2;
 #ifndef HEADLESS
     unique_ptr<Renderer> _renderer;
 #endif

@@ -99,21 +99,39 @@ void Renderer::render(double interp)
 
     const Mat4& viewMat = Core::get().camera().viewMatrix();
 
-    Mat4 modelMat;
-    modelMat.makeIdentity();
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
- 
-    auto& landblock = Core::get().landblock();
-    auto& renderData = landblock.renderData();
 
-    if(!renderData)
     {
-        renderData.reset(new LandblockRenderData(landblock));
+        Mat4 modelMat;
+        modelMat.makeIdentity();
+
+        auto& landblock = Core::get().landblock();
+        auto& renderData = landblock.renderData();
+
+        if(!renderData)
+        {
+            renderData.reset(new LandblockRenderData(landblock));
+        }
+
+        auto& landblockRenderData = (LandblockRenderData&)*renderData;
+        _landblockRenderer->render(landblockRenderData, projectionMat, viewMat * modelMat);
     }
 
-    auto& landblockRenderData = (LandblockRenderData&)*renderData;
-    _landblockRenderer->render(landblockRenderData, projectionMat, viewMat * modelMat);
+    {
+        Mat4 modelMat;
+        modelMat.makeTranslation(Vec3(192.0, 0.0, 0.0));
+
+        auto& landblock = Core::get().landblock2();
+        auto& renderData = landblock.renderData();
+
+        if(!renderData)
+        {
+            renderData.reset(new LandblockRenderData(landblock));
+        }
+
+        auto& landblockRenderData = (LandblockRenderData&)*renderData;
+        _landblockRenderer->render(landblockRenderData, projectionMat, viewMat * modelMat);
+    }
 
     SDL_GL_SwapWindow(_window);
 }
