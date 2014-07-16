@@ -160,21 +160,16 @@ void Image::blit(const Image& image, int x, int y)
     }
 }
 
-void Image::scale(float factor)
+void Image::scale(int newWidth, int newHeight)
 {
-    assert(factor >= 1.0);
-
-    int newWidth = float(_width) * factor;
-    int newHeight = float(_height) * factor;
+    if(newWidth == _width && newHeight == _height)
+    {
+        return;
+    }
+    
     int nchannels = numChannels();
 
-    //printf("newWidth = %d\n", newWidth);
-    //printf("newHeight = %d\n", newHeight);
-    //printf("nchannels = %d\n", nchannels);
-
     vector<uint8_t> newData(newWidth * newHeight * nchannels);
-
-    //memset(newData.data(), 255, newData.size());
 
     for(auto dstY = 0; dstY < newHeight; dstY++)
     {

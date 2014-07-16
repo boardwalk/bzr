@@ -19,7 +19,7 @@ public:
     void load(uint32_t fileId);
 
     void blit(const Image& image, int x, int y);
-    void scale(float factor);
+    void scale(int newWidth, int newHeight);
     void blur(int windowSize);
     void fill(int value);
     void flipVertical();

@@ -22,8 +22,8 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 #endif
 
     // TODO configurable
-    _width = 800;
-    _height = 600;
+    _width = 1280;
+    _height = 960;
     _fieldOfView = 90.0;
 
     _window = SDL_CreateWindow("Bael'Zharon's Respite",
@@ -62,18 +62,10 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     glPrimitiveRestartIndex(0xffff);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // the default is 4
-
-    //initFramebuffer();
 }
 
 Renderer::~Renderer()
 {
-    //cleanupFramebuffer();
-    
-    // TODO delete VAO
-    // unuse program
-    // unuse buffer
-
     if(_context != nullptr)
     {
         SDL_GL_DeleteContext(_context);
@@ -101,39 +93,6 @@ void Renderer::render(double interp)
     Mat4 modelMat;
     modelMat.makeIdentity();
 
-    //auto transform = projectionMat * viewMat * modelMat;
-
-    // matrices for the vertex shader
-    //auto normalMatrixLoc = _program.getUniform("normalMatrix");
-    //loadMat3ToUniform(Mat3(viewMat * modelMat).inverse().transpose(), normalMatrixLoc);
-
-    //auto modelViewMatrixLoc = _program.getUniform("modelViewMatrix");
-    //loadMat4ToUniform(viewMat * modelMat, modelViewMatrixLoc);
-
-    //auto modelViewProjectionLoc = _program.getUniform("modelViewProjectionMatrix");
-    //loadMat4ToUniform(projectionMat * viewMat * modelMat, modelViewProjectionLoc);
-
-    // lighting parameters for the fragment shader
-    //auto& lightPosition = Core::get().camera().position();
-    //glUniform4f(_program.getUniform("lightPosition"), lightPosition.x, lightPosition.y, lightPosition.z, 1.0);
-
-    //Vec3 lightIntensity(1.0, 1.0, 1.0);
-    //glUniform3f(_program.getUniform("lightIntensity"), lightIntensity.x, lightIntensity.y, lightIntensity.z);
-
-    //Vec3 Kd(1.0, 1.0, 1.0);
-    //glUniform3f(_program.getUniform("Kd"), Kd.x, Kd.y, Kd.z);
-
-    //Vec3 Ka(0.0, 0.0, 0.0);
-    //glUniform3f(_program.getUniform("Ka"), Ka.x, Ka.y, Ka.z);
-
-    //Vec3 Ks(0.0, 0.0, 0.0);
-    //glUniform3f(_program.getUniform("Ks"), Ks.x, Ks.y, Ks.z);
-
-    //glUniform1f(_program.getUniform("shininess"), 1.0);
-
-    // xx
-    //glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
  
     auto& landblock = Core::get().landblock();
@@ -147,50 +106,5 @@ void Renderer::render(double interp)
     auto& landblockRenderer = (LandblockRenderer&)*renderData;
     landblockRenderer.render(projectionMat, viewMat * modelMat);
 
-    // xx
-    //glBindFramebuffer(GL_READ_FRAMEBUFFER, _framebuffer);
-    //glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    //glBlitFramebuffer(0, 0, 800, 600, 0, 0, 800, 600, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
     SDL_GL_SwapWindow(_window);
-}
-
-void Renderer::initFramebuffer()
-{
-    glGenFramebuffers(1, &_framebuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
-
-    glGenTextures(1, &_colorTexture);
-    glBindTexture(GL_TEXTURE_2D, _colorTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, _width, _height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, _colorTexture, 0);
-
-    glGenTextures(1, &_normalTexture);
-    glBindTexture(GL_TEXTURE_2D, _normalTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, _width, _height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, _normalTexture, 0);
-
-    glGenTextures(1, &_depthTexture);
-    glBindTexture(GL_TEXTURE_2D, _depthTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, _width, _height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _depthTexture, 0);
-
-    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    {
-        throw runtime_error("Could not setup framebuffer");
-    }
-
-    GLenum buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-    glDrawBuffers(2, buffers);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-void Renderer::cleanupFramebuffer()
-{
-    glDeleteFramebuffers(1, &_framebuffer);
-    glDeleteTextures(1, &_colorTexture);
-    glDeleteTextures(1, &_normalTexture);
-    glDeleteTextures(1, &_depthTexture);
 }
