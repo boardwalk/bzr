@@ -66,6 +66,8 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 
 Renderer::~Renderer()
 {
+    _landblockRenderer.reset();
+
     if(_context != nullptr)
     {
         SDL_GL_DeleteContext(_context);
@@ -84,6 +86,13 @@ Renderer::~Renderer()
 
 void Renderer::render(double interp)
 {
+    // we crash if this is in the ctor
+    // perhaps we need to pump events first?
+    if(!_landblockRenderer)
+    {
+        _landblockRenderer.reset(new LandblockRenderer());
+    }
+
     // projection * view * model * vertex
     Mat4 projectionMat;
     projectionMat.makePerspective(_fieldOfView, double(_width)/double(_height), 0.1, 1000.0);
@@ -100,11 +109,11 @@ void Renderer::render(double interp)
 
     if(!renderData)
     {
-        renderData.reset(new LandblockRenderer(landblock));
+        renderData.reset(new LandblockRenderData(landblock));
     }
 
-    auto& landblockRenderer = (LandblockRenderer&)*renderData;
-    landblockRenderer.render(projectionMat, viewMat * modelMat);
+    auto& landblockRenderData = (LandblockRenderData&)*renderData;
+    _landblockRenderer->render(landblockRenderData, projectionMat, viewMat * modelMat);
 
     SDL_GL_SwapWindow(_window);
 }

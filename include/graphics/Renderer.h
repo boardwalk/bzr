@@ -1,8 +1,9 @@
 #ifndef BZR_GRAPHICS_RENDERER_H
 #define BZR_GRAPHICS_RENDERER_H
 
-#include "graphics/Program.h"
 #include "Noncopyable.h"
+
+class LandblockRenderer;
 
 class Renderer : Noncopyable
 {
@@ -20,6 +21,8 @@ private:
     bool _videoInit;
     SDL_Window* _window;
     SDL_GLContext _context;
+
+   	unique_ptr<LandblockRenderer> _landblockRenderer;
 };
 
 #endif
