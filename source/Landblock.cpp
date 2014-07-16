@@ -13,7 +13,7 @@ Landblock::Landblock(const void* data, size_t length)
 
     memcpy(&_data, data, sizeof(_data));
 
-    buildOffsetMap();
+    buildHeightMap();
 }
 
 const Landblock::RawData& Landblock::getRawData() const
@@ -34,14 +34,14 @@ double Landblock::getHeight(double x, double y) const
     auto fy = modf(y / SQUARE_SIZE, &diy);
     auto iy = (int)diy;
 
-    auto w1 = 0.0;
-    auto w2 = 0.0;
-    auto w3 = 0.0;
-    auto w4 = 0.0;
+    double h1 = _data.heights[ix][iy] * 2.0;
+    double h2 = _data.heights[min(ix + 1, GRID_SIZE - 1)][iy] * 2.0;
+    double h3 = _data.heights[ix][min(iy + 1, GRID_SIZE - 1)] * 2.0;
+    double h4 = _data.heights[min(ix + 1, GRID_SIZE - 1)][min(iy + 1, GRID_SIZE - 1)] * 2.0;
 
     if(splitNESW(ix, iy))
     {
-        // 4---3
+        // 3---4
         // |\  |
         // | \ |
         // |  \|
@@ -49,21 +49,17 @@ double Landblock::getHeight(double x, double y) const
         if(fy > 1.0 - fx)
         {
             // upper right half
-            w2 = 1.0;
-            w3 = 1.0;
-            w4 = 1.0;
+            h1 = h2 - (h4 - h3);
         }
         else
         {
             // lower left half
-            w1 = 1.0;
-            w2 = 1.0;
-            w4 = 1.0;
+            h4 = h2 + (h3 - h1);
         }
     }
     else
     {
-        // 4---3
+        // 3---4
         // |  /|
         // | / |
         // |/  |
@@ -71,43 +67,33 @@ double Landblock::getHeight(double x, double y) const
         if(fy > fx)
         {
             // upper left half
-            w1 = 1.0;
-            w3 = 1.0;
-            w4 = 1.0;
+            h2 = h1 + (h4 - h3);
         }
         else
         {
             // lower right half
-            w1 = 1.0;
-            w2 = 1.0;
-            w3 = 1.0;
+            h3 = h4 - (h2 - h1);
         }
     }
 
-    return (w1 * _data.heights[ix][iy] * (1.0 - fx) * (1.0 - fy) +
-            w2 * _data.heights[ix + 1][iy] * fx * (1.0 - fy) +
-            w3 * _data.heights[ix + 1][iy + 1] * fx * fy +
-            w4 * _data.heights[ix][iy + 1] * (1.0 - fx) * fy) * 2.0;
+    auto hb = h1 * (1.0 - fx) + h2 * fx;
+    auto ht = h3 * (1.0 - fx) + h4 * fx;
+    return hb * (1.0 - fy) + ht * fy;
 }
 
-const uint16_t* Landblock::getOffsetMap() const
+const uint16_t* Landblock::getHeightMap() const
 {
-    return _offsetMap.data();
+    return _heightMap.data();
 }
 
-int Landblock::getOffsetMapSize() const
+double Landblock::getHeightMapBase() const
 {
-    return OFFSET_MAP_SIZE;
+    return _heightMapBase;
 }
 
-double Landblock::getOffsetMapBase() const
+double Landblock::getHeightMapScale() const
 {
-    return _offsetMapBase;
-}
-
-double Landblock::getOffsetMapScale() const
-{
-    return _offsetMapScale;
+    return _heightMapScale;
 }
 
 bool Landblock::splitNESW(int x, int y) const
@@ -139,9 +125,9 @@ static double bicubic(double p[4][4], double x, double y)
     return cubic(arr, x);
 }
 
-void Landblock::buildOffsetMap()
+void Landblock::buildHeightMap()
 {
-    static const int sampleSize = GRID_SIZE * 8;
+    static const int sampleSize = GRID_SIZE * 3;
     vector<double> sample(sampleSize * sampleSize);
 
     for(auto sy = 0; sy < sampleSize; sy++)
@@ -154,19 +140,19 @@ void Landblock::buildOffsetMap()
         }
     }
 
-    vector<double> resample(OFFSET_MAP_SIZE * OFFSET_MAP_SIZE);
+    vector<double> resample(HEIGHT_MAP_SIZE * HEIGHT_MAP_SIZE);
 
 #define CLAMP(x, l, h) min(max(x, l), h)
 
-    auto minOffset = numeric_limits<double>::max();
-    auto maxOffset = numeric_limits<double>::min();
+    auto minHeight = numeric_limits<double>::max();
+    auto maxHeight = numeric_limits<double>::min();
 
-    for(auto oy = 0; oy < OFFSET_MAP_SIZE; oy++)
+    for(auto hy = 0; hy < HEIGHT_MAP_SIZE; hy++)
     {
-        for(auto ox = 0; ox < OFFSET_MAP_SIZE; ox++)
+        for(auto hx = 0; hx < HEIGHT_MAP_SIZE; hx++)
         {
-            auto sx = double(ox) / double(OFFSET_MAP_SIZE - 1) * double(sampleSize - 1);
-            auto sy = double(oy) / double(OFFSET_MAP_SIZE - 1) * double(sampleSize - 1);
+            auto sx = double(hx) / double(HEIGHT_MAP_SIZE - 1) * double(sampleSize - 1);
+            auto sy = double(hy) / double(HEIGHT_MAP_SIZE - 1) * double(sampleSize - 1);
 
             auto ix = (int)sx;
             auto iy = (int)sy;
@@ -184,30 +170,30 @@ void Landblock::buildOffsetMap()
                 }
             }
 
-            auto lx = double(ox) / double(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
-            auto ly = double(oy) / double(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
+            auto lx = double(hx) / double(HEIGHT_MAP_SIZE - 1) * LANDBLOCK_SIZE;
+            auto ly = double(hy) / double(HEIGHT_MAP_SIZE - 1) * LANDBLOCK_SIZE;
 
-            double offset = bicubic(p, fx, fy) - getHeight(lx, ly);
+            double height = bicubic(p, fx, fy);
 
-            minOffset = min(minOffset, offset);
-            maxOffset = max(maxOffset, offset);
+            minHeight = min(minHeight, height);
+            maxHeight = max(maxHeight, height);
 
-            resample[ox + oy * OFFSET_MAP_SIZE] = offset;
+            resample[hx + hy * HEIGHT_MAP_SIZE] = height;
         }
     }
 
 #undef CLAMP
 
-    _offsetMap.resize(OFFSET_MAP_SIZE * OFFSET_MAP_SIZE);
-    _offsetMapBase = minOffset;
-    _offsetMapScale = maxOffset - minOffset;
+    _heightMap.resize(HEIGHT_MAP_SIZE * HEIGHT_MAP_SIZE);
+    _heightMapBase = minHeight;
+    _heightMapScale = maxHeight - minHeight;
 
-    for(auto oy = 0; oy < OFFSET_MAP_SIZE; oy++)
+    for(auto hy = 0; hy < HEIGHT_MAP_SIZE; hy++)
     {
-        for(auto ox = 0; ox < OFFSET_MAP_SIZE; ox++)
+        for(auto hx = 0; hx < HEIGHT_MAP_SIZE; hx++)
         {
-            double offset = resample[ox + oy * OFFSET_MAP_SIZE];
-            _offsetMap[ox + (OFFSET_MAP_SIZE - oy - 1) * OFFSET_MAP_SIZE] = (offset - _offsetMapBase) / _offsetMapScale * double(0xFFFF);
+            double height = resample[hx + hy * HEIGHT_MAP_SIZE];
+            _heightMap[hx + hy * HEIGHT_MAP_SIZE] = (height - _heightMapBase) / _heightMapScale * double(0xFFFF);
         }
     }
 }

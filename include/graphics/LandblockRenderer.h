@@ -22,7 +22,7 @@ private:
     void initProgram();
     void initTerrainTexture();
     void initBlendTexture();
-    void initOffsetTexture(const Landblock& landblock);
+    void initHeightTexture(const Landblock& landblock);
 
     Program _program;
 
@@ -32,7 +32,7 @@ private:
 
     GLuint _terrainTexture;
     GLuint _blendTexture;
-    GLuint _offsetTexture;
+    GLuint _heightTexture;
 };
 
 #endif

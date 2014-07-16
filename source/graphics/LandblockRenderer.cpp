@@ -149,7 +149,7 @@ LandblockRenderer::LandblockRenderer(const Landblock& landblock)
     initVAO(landblock);
     initTerrainTexture();
     initBlendTexture();
-    initOffsetTexture(landblock);
+    initHeightTexture(landblock);
 }
 
 /*
@@ -256,7 +256,7 @@ LandblockRenderer::~LandblockRenderer()
     glDeleteBuffers(1, &_vertexBuffer);
     glDeleteTextures(1, &_terrainTexture);
     glDeleteTextures(1, &_blendTexture);
-    glDeleteTextures(1, &_offsetTexture);
+    glDeleteTextures(1, &_heightTexture);
 }
 
 void LandblockRenderer::render(const Mat4& transform)
@@ -274,7 +274,7 @@ void LandblockRenderer::render(const Mat4& transform)
     glBindTexture(GL_TEXTURE_2D_ARRAY, _blendTexture);
 
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, _offsetTexture);
+    glBindTexture(GL_TEXTURE_2D, _heightTexture);
 
     glDrawArrays(GL_PATCHES, 0, _vertexCount);
 }
@@ -380,9 +380,8 @@ void LandblockRenderer::initVAO(const Landblock& landblock)
 
 // See LandVertexShader.glsl too see what these are
 #define V(dx, dy) \
-    vertexData.push_back(x + (dx)); \
-    vertexData.push_back(y + (dy)); \
-    vertexData.push_back(data.heights[x + (dx)][y + (dy)]); \
+    vertexData.push_back((x + (dx)) * 24); \
+    vertexData.push_back((y + (dy)) * 24); \
     vertexData.push_back(dx); \
     vertexData.push_back(dy); \
     if(rotate) { \
@@ -420,8 +419,9 @@ void LandblockRenderer::initVAO(const Landblock& landblock)
         }
     }
 
-    // 13 components per vertex
-    _vertexCount = vertexData.size() / 13;
+    static const int COMPONENTS_PER_VERTEX = 12;
+
+    _vertexCount = vertexData.size() / COMPONENTS_PER_VERTEX;
 
     glGenVertexArrays(1, &_vertexArray);
     glBindVertexArray(_vertexArray);
@@ -430,12 +430,12 @@ void LandblockRenderer::initVAO(const Landblock& landblock)
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(uint8_t), vertexData.data(), GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uint8_t) * 13, nullptr);
-    glVertexAttribPointer(1, 2, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uint8_t) * 13, (GLvoid*)(sizeof(uint8_t) * 3));
-    glVertexAttribPointer(2, 2, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uint8_t) * 13, (GLvoid*)(sizeof(uint8_t) * 5));
-    glVertexAttribPointer(3, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uint8_t) * 13, (GLvoid*)(sizeof(uint8_t) * 7));
-    glVertexAttribPointer(4, 1, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uint8_t) * 13, (GLvoid*)(sizeof(uint8_t) * 11));
-    glVertexAttribPointer(5, 1, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uint8_t) * 13, (GLvoid*)(sizeof(uint8_t) * 12));
+    glVertexAttribPointer(0, 2, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uint8_t) * COMPONENTS_PER_VERTEX, nullptr);
+    glVertexAttribPointer(1, 2, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uint8_t) * COMPONENTS_PER_VERTEX, (GLvoid*)(sizeof(uint8_t) * 2));
+    glVertexAttribPointer(2, 2, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uint8_t) * COMPONENTS_PER_VERTEX, (GLvoid*)(sizeof(uint8_t) * 4));
+    glVertexAttribPointer(3, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uint8_t) * COMPONENTS_PER_VERTEX, (GLvoid*)(sizeof(uint8_t) * 6));
+    glVertexAttribPointer(4, 1, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uint8_t) * COMPONENTS_PER_VERTEX, (GLvoid*)(sizeof(uint8_t) * 10));
+    glVertexAttribPointer(5, 1, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uint8_t) * COMPONENTS_PER_VERTEX, (GLvoid*)(sizeof(uint8_t) * 11));
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
@@ -464,8 +464,8 @@ void LandblockRenderer::initProgram()
     auto blendTexLocation = _program.getUniform("blendTex");
     glUniform1i(blendTexLocation, 1);
 
-    auto offsetTexLocation = _program.getUniform("offsetTex");
-    glUniform1i(offsetTexLocation, 2);
+    auto heightTexLocation = _program.getUniform("heightTex");
+    glUniform1i(heightTexLocation, 2);
 }
 
 void LandblockRenderer::initTerrainTexture()
@@ -570,16 +570,18 @@ void LandblockRenderer::initBlendTexture()
     }
 }
 
-void LandblockRenderer::initOffsetTexture(const Landblock& landblock)
+void LandblockRenderer::initHeightTexture(const Landblock& landblock)
 {
-    glGenTextures(1, &_offsetTexture);
-    glBindTexture(GL_TEXTURE_2D, _offsetTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R16, Landblock::OFFSET_MAP_SIZE, Landblock::OFFSET_MAP_SIZE, 0, GL_RED, GL_UNSIGNED_SHORT, landblock.getOffsetMap());
+    glGenTextures(1, &_heightTexture);
+    glBindTexture(GL_TEXTURE_2D, _heightTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R16, Landblock::HEIGHT_MAP_SIZE, Landblock::HEIGHT_MAP_SIZE, 0, GL_RED, GL_UNSIGNED_SHORT, landblock.getHeightMap());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // default is GL_NEAREST_MIPMAP_LINEAR
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    auto offsetBaseLoc = _program.getUniform("offsetBase");
-    glUniform1f(offsetBaseLoc, landblock.getOffsetMapBase());
+    auto heightBaseLoc = _program.getUniform("heightBase");
+    glUniform1f(heightBaseLoc, landblock.getHeightMapBase());
 
-    auto offsetScaleLoc = _program.getUniform("offsetScale");
-    glUniform1f(offsetScaleLoc, landblock.getOffsetMapScale());
+    auto heightScaleLoc = _program.getUniform("heightScale");
+    glUniform1f(heightScaleLoc, landblock.getHeightMapScale());
 }

@@ -24,11 +24,11 @@ void main()
 {
     if(gl_InvocationID == 0)
     {
-        gl_TessLevelOuter[0] = 5.0;
-        gl_TessLevelOuter[1] = 5.0;
-        gl_TessLevelOuter[2] = 5.0;
-        gl_TessLevelInner[0] = 5.0;
-        gl_TessLevelInner[1] = 5.0;
+        gl_TessLevelOuter[0] = 10.0;
+        gl_TessLevelOuter[1] = 10.0;
+        gl_TessLevelOuter[2] = 10.0;
+        gl_TessLevelInner[0] = 10.0;
+        gl_TessLevelInner[1] = 10.0;
     }
 
     outData[gl_InvocationID].terrainTexCoord = inData[gl_InvocationID].terrainTexCoord;
