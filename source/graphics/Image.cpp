@@ -234,7 +234,7 @@ void Image::flipVertical()
 
     vector<uint8_t> rowBuf(stride);
 
-    for(auto y = 0u; y < _height / 2; y++)
+    for(auto y = 0; y < _height / 2; y++)
     {
         memcpy(rowBuf.data(), _data.data() + y * stride, stride);
         memcpy(_data.data() + stride * y, _data.data() + (_height - y - 1) * stride, stride);

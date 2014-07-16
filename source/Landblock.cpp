@@ -4,55 +4,6 @@
 const double Landblock::SQUARE_SIZE = 24.0;
 const double Landblock::LANDBLOCK_SIZE = (Landblock::GRID_SIZE - 1) * Landblock::SQUARE_SIZE;
 
-static double getHeight(const double* data, size_t size, Vec2 point)
-{
-    assert(point.x >= 0.0 && point.x <= Landblock::LANDBLOCK_SIZE);
-    assert(point.y >= 0.0 && point.y <= Landblock::LANDBLOCK_SIZE);
-
-    double intx;
-    auto fracx = modf(point.x / Landblock::LANDBLOCK_SIZE * size, &intx);
-    auto x = (int)intx;
-
-    double inty; 
-    auto fracy = modf(point.y / Landblock::LANDBLOCK_SIZE * size, &inty);
-    auto y = (int)inty;
-
-    // 4---3
-    // |  /|
-    // | / |
-    // |/  |
-    // 1---2
-    // or:
-    // 4---3
-    // |\  |
-    // | \ |
-    // |  \|
-    // 1---2
-    // we'll assume the first for now
-
-    auto h1 = data[x + y * size];
-    auto h2 = data[(x + 1) + y * size];
-    auto h3 = data[(x + 1) + (y + 1) * size];
-    auto h4 = data[x + (y + 1) * size];
-
-    if(fracy > fracx)
-    {
-        // upper left half
-        return
-            h1 * (1.0 - fracx) * (1.0 - fracy) +
-            h3 * fracx * fracy +
-            h4 * (1.0 - fracx) * fracy;
-    }
-    else
-    {
-        // lower right half
-        return
-            h1 * (1.0 - fracx) * (1.0 - fracy) +
-            h2 * fracx * (1.0 - fracy) +
-            h3 * fracx * fracy;
-    }
-}
-
 Landblock::Landblock(const void* data, size_t length)
 {
     if(length != sizeof(RawData))
@@ -62,18 +13,7 @@ Landblock::Landblock(const void* data, size_t length)
 
     memcpy(&_data, data, sizeof(_data));
 
-    _original.reset(new double[GRID_SIZE * GRID_SIZE]);
-
-    for(auto x = 0; x < GRID_SIZE; x++)
-    {
-        for(auto y = 0; y < GRID_SIZE; y++)
-        {
-            _original[x + y * GRID_SIZE] = _data.heights[x][y] * 2.0;
-        }
-    }
-
-    // TODO arbitrary, make this configurable
-    subdivide(4);
+    buildOffsetMap();
 }
 
 const Landblock::RawData& Landblock::getRawData() const
@@ -81,50 +21,93 @@ const Landblock::RawData& Landblock::getRawData() const
     return _data;
 }
 
-const double* Landblock::getOriginalData() const
+double Landblock::getHeight(double x, double y) const
 {
-    return _original.get();
+    assert(x >= 0.0 && x <= LANDBLOCK_SIZE);
+    assert(y >= 0.0 && y <= LANDBLOCK_SIZE);
+
+    double dix;
+    auto fx = modf(x / SQUARE_SIZE, &dix);
+    auto ix = (int)dix;
+
+    double diy; 
+    auto fy = modf(y / SQUARE_SIZE, &diy);
+    auto iy = (int)diy;
+
+    auto w1 = 0.0;
+    auto w2 = 0.0;
+    auto w3 = 0.0;
+    auto w4 = 0.0;
+
+    if(splitNESW(ix, iy))
+    {
+        // 4---3
+        // |\  |
+        // | \ |
+        // |  \|
+        // 1---2
+        if(fy > 1.0 - fx)
+        {
+            // upper right half
+            w2 = 1.0;
+            w3 = 1.0;
+            w4 = 1.0;
+        }
+        else
+        {
+            // lower left half
+            w1 = 1.0;
+            w2 = 1.0;
+            w4 = 1.0;
+        }
+    }
+    else
+    {
+        // 4---3
+        // |  /|
+        // | / |
+        // |/  |
+        // 1---2
+        if(fy > fx)
+        {
+            // upper left half
+            w1 = 1.0;
+            w3 = 1.0;
+            w4 = 1.0;
+        }
+        else
+        {
+            // lower right half
+            w1 = 1.0;
+            w2 = 1.0;
+            w3 = 1.0;
+        }
+    }
+
+    return (w1 * _data.heights[ix][iy] * (1.0 - fx) * (1.0 - fy) +
+            w2 * _data.heights[ix + 1][iy] * fx * (1.0 - fy) +
+            w3 * _data.heights[ix + 1][iy + 1] * fx * fy +
+            w4 * _data.heights[ix][iy + 1] * (1.0 - fx) * fy) * 2.0;
 }
 
-size_t Landblock::getOriginalSize() const
+const uint16_t* Landblock::getOffsetMap() const
 {
-    return GRID_SIZE;
+    return _offsetMap.data();
 }
 
-const double* Landblock::getSubdividedData() const
+int Landblock::getOffsetMapSize() const
 {
-    return _subdivided.get();
+    return OFFSET_MAP_SIZE;
 }
 
-size_t Landblock::getSubdividedSize() const
+double Landblock::getOffsetMapBase() const
 {
-    return GRID_SIZE * (1 << _nsubdivisions);
+    return _offsetMapBase;
 }
 
-double Landblock::getOriginalHeight(Vec2 point) const
+double Landblock::getOffsetMapScale() const
 {
-    return getHeight(_original.get(), GRID_SIZE, point);
-}
-
-double Landblock::getSubdividedHeight(Vec2 point) const
-{
-    return getHeight(_subdivided.get(), GRID_SIZE * (1 << _nsubdivisions), point);
-}
-
-int Landblock::getStyle(Vec2 point) const
-{
-    assert(point.y >= 0.0 && point.y <= LANDBLOCK_SIZE);
-    assert(point.x >= 0.0 && point.x <= LANDBLOCK_SIZE);
-
-    int gridX = point.x / LANDBLOCK_SIZE * (GRID_SIZE - 1) + 0.5;
-    int gridY = point.y / LANDBLOCK_SIZE * (GRID_SIZE - 1) + 0.5;
-
-    return _data.styles[gridX][gridY];
-}
-
-unique_ptr<Destructable>& Landblock::renderData()
-{
-    return _renderData;
+    return _offsetMapScale;
 }
 
 bool Landblock::splitNESW(int x, int y) const
@@ -136,95 +119,97 @@ bool Landblock::splitNESW(int x, int y) const
     return v & 0x80000000;
 }
 
-void Landblock::subdivide(int n)
+unique_ptr<Destructable>& Landblock::renderData()
 {
-    _nsubdivisions = 0;
-    _subdivided.reset(new double[GRID_SIZE * GRID_SIZE]);
-    memcpy(_subdivided.get(), _original.get(), sizeof(double) * GRID_SIZE * GRID_SIZE);
-
-    while(_nsubdivisions < n)
-    {
-        subdivideOnce();
-    }
+    return _renderData;
 }
 
-// | / | / | / | /
-// 3 - x - x - x -
-// | / | / | / | /
-// 2 - x - x - x -
-// | / | / | / | /
-// 1 - x - x - x -
-// | / | / | / | /
-// 0 - 1 - 2 - 3 -
-
-// 8x8
-// 4x4 original points
-// 4x4 face points
-// 4x4 horizontal edge points
-// 4x4 vertical edge points
-
-//
-// Implements Catmull-Clark subdivision for landblock geometry
-// Unfortunately we'd need the neighbor landblocks to not fudge the edges
-// We'll see how this looks
-// http://www.rorydriscoll.com/2008/08/01/catmull-clark-subdivision-the-basics/
-//
-void Landblock::subdivideOnce()
+static double cubic(double p[4], double x)
 {
-    auto size = GRID_SIZE * (1 << _nsubdivisions);
-    auto newSize = size * 2;
-    unique_ptr<double[]> newSubdivided(new double[newSize * newSize]);
+    return p[1] + 0.5 * x * (p[2] - p[0] + x * (2.0 * p[0] - 5.0 * p[1] + 4.0 * p[2] - p[3] + x * (3.0 * (p[1] - p[2]) + p[3] - p[0])));
+}
 
-    for(auto y = 0; y < size; y++)
+static double bicubic(double p[4][4], double x, double y)
+{
+    double arr[4];
+    arr[0] = cubic(p[0], y);
+    arr[1] = cubic(p[1], y);
+    arr[2] = cubic(p[2], y);
+    arr[3] = cubic(p[3], y);
+    return cubic(arr, x);
+}
+
+void Landblock::buildOffsetMap()
+{
+    static const int sampleSize = GRID_SIZE * 8;
+    vector<double> sample(sampleSize * sampleSize);
+
+    for(auto sy = 0; sy < sampleSize; sy++)
     {
-        for(auto x = 0; x < size; x++)
+        for(auto sx = 0; sx < sampleSize; sx++)
         {
-            auto h1 = _subdivided[x + y * size];
-            auto h2 = _subdivided[min(x + 1, size - 1) + y * size];
-            auto h3 = _subdivided[min(x + 1, size - 1) + min(y + 1, size - 1) * size];
-            auto h4 = _subdivided[x + min(y + 1, size - 1) * size];
-
-            // copy original control point
-            newSubdivided[(x * 2) + (y * 2) * newSize] = h1;
-
-            // add horizontal edge point
-            newSubdivided[(x * 2 + 1) + (y * 2) * newSize] = (h1 + h2) / 2.0;
-
-            // add vertical edge point
-            newSubdivided[(x * 2) + (y * 2 + 1) * newSize] = (h1 + h4) / 2.0;
-
-            // add new face point
-            newSubdivided[(x * 2 + 1) + (y * 2 + 1) * newSize] = (h1 + h2 + h3 + h4) / 4.0;
+            auto lx = double(sx) / double(sampleSize) * LANDBLOCK_SIZE;
+            auto ly = double(sy) / double(sampleSize) * LANDBLOCK_SIZE;
+            sample[sx + sy * sampleSize] = getHeight(lx, ly);
         }
     }
 
-    for(auto y = 0; y < newSize; y += 2)
+    vector<double> resample(OFFSET_MAP_SIZE * OFFSET_MAP_SIZE);
+
+#define CLAMP(x, l, h) min(max(x, l), h)
+
+    auto minOffset = numeric_limits<double>::max();
+    auto maxOffset = numeric_limits<double>::min();
+
+    for(auto oy = 0; oy < OFFSET_MAP_SIZE; oy++)
     {
-        for(auto x = 0; x < newSize; x += 2)
+        for(auto ox = 0; ox < OFFSET_MAP_SIZE; ox++)
         {
-            // average adjacent face points
-            auto f1 = newSubdivided[max(x - 1, 0) + max(y - 1, 0) * newSize];
-            auto f2 = newSubdivided[min(x + 1, newSize - 1) + max(y - 1, 0) * newSize];
-            auto f3 = newSubdivided[min(x + 1, newSize - 1) + min(y + 1, newSize - 1) * newSize];
-            auto f4 = newSubdivided[max(x - 1, 0) + min(y + 1, newSize - 1) * newSize];
-            auto f = (f1 + f2 + f3 + f4) / 4.0;
+            auto sx = double(ox) / double(OFFSET_MAP_SIZE) * double(sampleSize);
+            auto sy = double(oy) / double(OFFSET_MAP_SIZE) * double(sampleSize);
 
-            // average adjacent edge points
-            auto e1 = newSubdivided[max(x - 1, 0) + y * newSize];
-            auto e2 = newSubdivided[min(x + 1, newSize - 1) + y * newSize];
-            auto e3 = newSubdivided[x + max(y - 1, 0) * newSize];
-            auto e4 = newSubdivided[x + min(y + 1, newSize - 1) * newSize];
-            auto e = (e1 + e2 + e3 + e4) / 4.0;
+            auto ix = (int)sx;
+            auto iy = (int)sy;
 
-            // grab existing control point
-            auto c = newSubdivided[x + y * newSize];
+            auto fx = sx - ix;
+            auto fy = sy - iy;
 
-            // update control point
-            newSubdivided[x + y * newSize] = f / 4.0 + e / 2.0 + c / 4.0;
+            double p[4][4];
+
+            for(auto py = 0; py < 4; py++)
+            {
+                for(auto px = 0; px < 4; px++)
+                {
+                    p[px][py] = sample[CLAMP(ix + px - 1, 0, sampleSize - 1) + CLAMP(iy + py - 1, 0, sampleSize - 1) * sampleSize];
+                }
+            }
+
+            auto lx = double(ox) / double(OFFSET_MAP_SIZE) * LANDBLOCK_SIZE;
+            auto ly = double(oy) / double(OFFSET_MAP_SIZE) * LANDBLOCK_SIZE;
+
+            //(void)bicubic(p, fx, fy);
+
+            double offset = bicubic(p, fx, fy) - getHeight(lx, ly);
+
+            minOffset = min(minOffset, offset);
+            maxOffset = max(maxOffset, offset);
+
+            resample[ox + oy * OFFSET_MAP_SIZE] = offset;
         }
     }
 
-    _subdivided = move(newSubdivided);
-    _nsubdivisions++;
-}
+#undef CLAMP
 
+    _offsetMap.resize(OFFSET_MAP_SIZE * OFFSET_MAP_SIZE);
+    _offsetMapBase = minOffset;
+    _offsetMapScale = maxOffset - minOffset;
+
+    for(auto oy = 0; oy < OFFSET_MAP_SIZE; oy++)
+    {
+        for(auto ox = 0; ox < OFFSET_MAP_SIZE; ox++)
+        {
+            double offset = resample[ox + oy * OFFSET_MAP_SIZE];
+            _offsetMap[ox + oy * OFFSET_MAP_SIZE] = (offset - _offsetMapBase) / _offsetMapScale * double(0xFFFF);
+        }
+    }
+}

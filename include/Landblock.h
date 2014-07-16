@@ -1,9 +1,9 @@
 #ifndef BZR_LANDBLOCK_H
 #define BZR_LANDBLOCK_H
 
-#include "math/Vec2.h"
 #include "Destructable.h"
 #include "Noncopyable.h"
+#include <vector>
 
 class Landblock : Noncopyable
 {
@@ -11,6 +11,7 @@ public:
     static const int GRID_SIZE = 9;
     static const double SQUARE_SIZE;
     static const double LANDBLOCK_SIZE;
+    static const int OFFSET_MAP_SIZE = 512;
 
     PACK(struct RawData
     {
@@ -25,32 +26,25 @@ public:
 
     const RawData& getRawData() const;
 
-    const double* getOriginalData() const;
-    size_t getOriginalSize() const;
+    double getHeight(double x, double y) const;
 
-    const double* getSubdividedData() const;
-    size_t getSubdividedSize() const;
-
-    double getOriginalHeight(Vec2 point) const;
-    
-    double getSubdividedHeight(Vec2 point) const;
-
-    int getStyle(Vec2 point) const;
-
-    unique_ptr<Destructable>& renderData();
+    const uint16_t* getOffsetMap() const;
+    int getOffsetMapSize() const;
+    double getOffsetMapBase() const;
+    double getOffsetMapScale() const;
 
     bool splitNESW(int x, int y) const;
 
+    unique_ptr<Destructable>& renderData();
+
 private:
-    void subdivide(int n);
-    void subdivideOnce();
+    void buildOffsetMap();
 
     RawData _data;
 
-    unique_ptr<double[]> _original;
-
-    unique_ptr<double[]> _subdivided;
-    int _nsubdivisions;
+    vector<uint16_t> _offsetMap;
+    double _offsetMapBase;
+    double _offsetMapScale;
 
     unique_ptr<Destructable> _renderData;
 };

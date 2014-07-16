@@ -22,6 +22,8 @@ out FragmentData
 
 uniform mat4 modelViewProjectionMatrix;
 uniform sampler2D offsetTex;
+uniform float offsetBase;
+uniform float offsetScale;
 
 void main()
 {
@@ -43,7 +45,7 @@ void main()
 				    gl_in[1].gl_Position * gl_TessCoord.y +
 				    gl_in[2].gl_Position * gl_TessCoord.z;
 
-	float offset = texture(offsetTex, modelPos.xy / 192.0).r * 24.0 - 12.0;
+	float offset = offsetBase + texture(offsetTex, modelPos.xy / 192.0).r * offsetScale;
 
     gl_Position = modelViewProjectionMatrix * (modelPos + vec4(0.0, 0.0, offset, 0.0));
 }

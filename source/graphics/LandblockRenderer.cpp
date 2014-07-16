@@ -122,8 +122,6 @@ static const uint32_t BLEND_TEXTURES[] =
 static const int BLEND_ARRAY_SIZE = 512;
 static const int BLEND_ARRAY_DEPTH = sizeof(BLEND_TEXTURES) / sizeof(BLEND_TEXTURES[0]);
 
-static const int OFFSET_TEXTURE_SIZE = 512;
-
 //
 // each landblock visual consists of a standard vertex buffer containing a 8x8x2 triangle list:
 // x, y, z -- vertex
@@ -574,21 +572,14 @@ void LandblockRenderer::initBlendTexture()
 
 void LandblockRenderer::initOffsetTexture(const Landblock& landblock)
 {
-    vector<uint16_t> offsetData(OFFSET_TEXTURE_SIZE * OFFSET_TEXTURE_SIZE, 0);
-
-    /*for(auto y = 0; y < OFFSET_TEXTURE_SIZE; y++)
-    {
-        for(auto x = 0; x < OFFSET_TEXTURE_SIZE; x++)
-        {
-            auto pos = Vec2(double(x) / double(OFFSET_TEXTURE_SIZE) * Landblock::LANDBLOCK_SIZE, double(y) / double(OFFSET_TEXTURE_SIZE) * Landblock::LANDBLOCK_SIZE);
-            auto offset = landblock.getSubdividedHeight(pos) - landblock.getOriginalHeight(pos);
-            offset = max(min(offset / 24.0 + 0.5, 1.0), 0.0) * double(0xFFFF);
-            offsetData[x + (OFFSET_TEXTURE_SIZE - y - 1) * OFFSET_TEXTURE_SIZE] = offset;
-        }
-    }*/
-
     glGenTextures(1, &_offsetTexture);
     glBindTexture(GL_TEXTURE_2D, _offsetTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R16, OFFSET_TEXTURE_SIZE, OFFSET_TEXTURE_SIZE, 0, GL_RED, GL_UNSIGNED_SHORT, offsetData.data());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R16, Landblock::OFFSET_MAP_SIZE, Landblock::OFFSET_MAP_SIZE, 0, GL_RED, GL_UNSIGNED_SHORT, landblock.getOffsetMap());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // default is GL_NEAREST_MIPMAP_LINEAR
+
+    auto offsetBaseLoc = _program.getUniform("offsetBase");
+    glUniform1f(offsetBaseLoc, landblock.getOffsetMapBase());
+
+    auto offsetScaleLoc = _program.getUniform("offsetScale");
+    glUniform1f(offsetScaleLoc, landblock.getOffsetMapScale());
 }
