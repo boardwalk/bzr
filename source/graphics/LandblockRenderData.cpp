@@ -1,5 +1,6 @@
 #include "graphics/LandblockRenderData.h"
 #include "graphics/Program.h"
+#include "math/Vec2.h"
 #include "Landblock.h"
 
 LandblockRenderData::LandblockRenderData(const Landblock& landblock)
@@ -32,6 +33,15 @@ void LandblockRenderData::bind(Program& program)
 GLsizei LandblockRenderData::vertexCount() const
 {
 	return _vertexCount;
+}
+
+static Vec2 rotateTexCoord(Vec2 tc, double deg)
+{
+    auto cosine = cos(deg / 180.0 * PI);
+    auto sine = sin(deg / 180.0 * PI);
+    return Vec2(
+        (tc.x - 0.5) * cosine - (tc.y - 0.5) * sine + 0.5,
+        (tc.x - 0.5) * sine + (tc.y - 0.5) * cosine + 0.5);
 }
 
 void LandblockRenderData::initVAO(const Landblock& landblock)
@@ -75,7 +85,7 @@ void LandblockRenderData::initVAO(const Landblock& landblock)
             // blend texture number
             auto bp = 0;
 
-            auto scale = 4;
+            auto scale = 3.0;
 
             // TODO choose a random corner blend!
 
@@ -84,57 +94,70 @@ void LandblockRenderData::initVAO(const Landblock& landblock)
                 case 0x0000: // all ground
                     bp = 0;
                     break;
-/*                case 0x1111: // all road
+                case 0x1111: // all road
                     bp = 1;
                     break;
                 case 0x1100: // south road
                     bp = 2;
-                    rotate = true;
+                    blendAngle = 270.0;
                     break;
                 case 0x0011: // north road
                     bp = 2;
-                    flip = true;
-                    rotate = true;
+                    blendAngle = 90.0;
                     break;
                 case 0x1001: // west road
                     bp = 2;
-                    break;*/
+                    blendAngle = 0.0;
+                    break;
                 case 0x0110: // east road
+                    blendAngle = 180.0;
                     bp = 2;
                     break;
-/*                case 0x1000: // southwest corner
+                case 0x1000: // southwest corner
                     bp = 3;
+                    blendAngle = 0.0;
                     break;
                 case 0x0100: // southeast corner
                     bp = 3;
-                    rotate = true;
+                    blendAngle = 270.0;
                     break;
                 case 0x0010: // northeast corner
                     bp = 4;
-                    flip = true;
-                    rotate = true;
+                    blendAngle = 180.0;
                     break;
                 case 0x0001: // northwest corner
                     bp = 4;
-                    flip = true;
+                    blendAngle = 90.0;
                     break;
                 case 0x1010: // southwest/northeast diagonal
-                    bp = 10; // FIXME better blend texture
-                    scale = 1;
+                    bp = 10;
+                    scale = 1.0;
                     break;
                 case 0x0101: // southeast/northwest diagonal
-                    bp = 10; // FIXME better blend texture
-                    flip = true;
-                    scale = 1;
-                    break;*/
+                    bp = 10;
+                    blendAngle = 90.0;
+                    scale = 1.0;
+                    break;
+                case 0x1110:
+                    //printf("lower right road\n");
+                    bp = 3;
+                    break;
+                case 0x0111:
+                    //printf("upper right road\n");
+                    bp = 3;
+                    break;
+                case 0x1011:
+                    //printf("upper left road\n");
+                    bp = 3;
+                    break;
+                case 0x1101:
+                    //printf("upper right road\n");
+                    bp = 3;
+                    break;
                 default:
-                    printf("fancy nignoggin\n");
-                    bp = 0;
+                    assert(false);
                     break;
             }
-
-            auto blendCosine = cos(blendAngle / 180.0 * PI);
-            auto blendSine = sin(blendAngle / 180.0 * PI);
 
 // See LandVertexShader.glsl too see what these are
 #define V(dx, dy) \
@@ -142,8 +165,11 @@ void LandblockRenderData::initVAO(const Landblock& landblock)
     vertexData.push_back((y + (dy)) * 24); \
     vertexData.push_back(dx); \
     vertexData.push_back(dy); \
-	vertexData.push_back((((dx) - 0.5) * blendCosine + ((dy) - 0.5) * blendSine) + 0.5); \
-	vertexData.push_back((-((dx) - 0.5) * blendSine + ((dy) - 0.5) * blendCosine) + 0.5); \
+    { \
+        auto tcr = rotateTexCoord(Vec2(dx, dy), blendAngle); \
+        vertexData.push_back(scale * nearbyint(tcr.x)); \
+        vertexData.push_back(scale * nearbyint(tcr.y)); \
+    } \
     vertexData.push_back(t1); \
     vertexData.push_back(t2); \
     vertexData.push_back(t3); \

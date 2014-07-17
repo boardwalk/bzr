@@ -1,8 +1,8 @@
 #include "Core.h"
-#include "Camera.h"
-#include "Landblock.h"
 #include "graphics/Renderer.h"
+#include "Camera.h"
 #include "DatFile.h"
+#include "LandblockManager.h"
 #include "util.h"
 #include <SDL.h>
 
@@ -10,14 +10,13 @@ static const double STEP_RATE = 60.0;
 
 static unique_ptr<Core> g_singleton;
 
-void Core::init()
+void Core::go()
 {
+    assert(!g_singleton);
     g_singleton.reset(new Core());
-}
-
-void Core::cleanup()
-{
-    g_singleton.reset();
+    g_singleton->init();
+    g_singleton->run();
+    g_singleton->cleanup();
 }
 
 Core& Core::get()
@@ -26,36 +25,39 @@ Core& Core::get()
 }
 
 Core::Core() : _done(false)
-{
-    _portalDat.reset(new DatFile("data/client_portal.dat"));
-    _cellDat.reset(new DatFile("data/client_cell_1.dat"));
-    _highresDat.reset(new DatFile("data/client_highres.dat"));
+{}
 
+void Core::init()
+{
     if(SDL_Init(SDL_INIT_TIMER) < 0)
     {
         throwSDLError();
     }
 
+    _portalDat.reset(new DatFile("data/client_portal.dat"));
+    _cellDat.reset(new DatFile("data/client_cell_1.dat"));
+    _highresDat.reset(new DatFile("data/client_highres.dat"));
+
+    _landblockManager.reset(new LandblockManager());
     _camera.reset(new Camera());
 
 #ifndef HEADLESS
     _renderer.reset(new Renderer());
 #endif
-
-    auto landblockData = _cellDat->read(0xD955FFFF);
-    _landblock.reset(new Landblock(landblockData.data(), landblockData.size()));
-
-    auto landblockData2 = _cellDat->read(0xDA55FFFF);
-    _landblock2.reset(new Landblock(landblockData2.data(), landblockData2.size()));
 }
 
-Core::~Core()
+void Core::cleanup()
 {
-    _landblock.reset();
-
 #ifndef HEADLESS
     _renderer.reset();
 #endif
+
+    _camera.reset();
+    _landblockManager.reset();
+
+    _portalDat.reset();
+    _cellDat.reset();
+    _highresDat.reset();
 
     SDL_Quit();
 }
@@ -108,20 +110,14 @@ const DatFile& Core::highresDat() const
     return *_highresDat;
 }
 
+LandblockManager& Core::landblockManager()
+{
+    return *_landblockManager;
+}
+
 const Camera& Core::camera() const
 {
     return *_camera;
-}
-
-// TOOD Temporary
-Landblock& Core::landblock()
-{
-    return *_landblock;
-}
-
-Landblock& Core::landblock2()
-{
-    return *_landblock2;
 }
 
 void Core::handleEvents()
@@ -211,4 +207,3 @@ void Core::step(double dt)
 
     _camera->step(dt);
 }
-

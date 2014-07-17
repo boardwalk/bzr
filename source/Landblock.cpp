@@ -16,6 +16,15 @@ Landblock::Landblock(const void* data, size_t length)
     buildHeightMap();
 }
 
+Landblock::Landblock(Landblock&& other)
+{
+    _data = other._data;
+    _heightMap = move(other._heightMap);
+    _heightMapBase = other._heightMapBase;
+    _heightMapScale = other._heightMapScale;
+    _renderData = move(other._renderData);
+}
+
 const Landblock::RawData& Landblock::getRawData() const
 {
     return _data;

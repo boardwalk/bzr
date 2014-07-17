@@ -4,17 +4,15 @@
 #include "math/Mat3.h"
 #include "math/Mat4.h"
 #include "math/Vec3.h"
-#include "Landblock.h"
+#include "Core.h"
+#include "LandblockManager.h"
 #include <algorithm>
 #include <vector>
 
 #include "graphics/shaders/LandVertexShader.glsl.h"
-#include "graphics/shaders/LandFragmentShader.glsl.h"
 #include "graphics/shaders/LandTessControlShader.glsl.h"
 #include "graphics/shaders/LandTessEvalShader.glsl.h"
-
-// TODO We could only create one indexBuffer per subdivision level
-// TODO We could generate the x and y of the vertex data in a shader
+#include "graphics/shaders/LandFragmentShader.glsl.h"
 
 static const uint32_t LANDSCAPE_TEXTURES[] =
 {
@@ -116,7 +114,7 @@ static const uint32_t BLEND_TEXTURES[] =
     0x06006d30, // 6 vertical, black to white, very left of center, wavy
     0x06006d37, // 7 small corner
     0x06006d6b, // 8 big corner
-    0x06006d60, // 9 ??
+    0x06006d60, // 9 big corner
     0x06006d36  // A wavy diagonal
 };
 
@@ -137,13 +135,9 @@ LandblockRenderer::~LandblockRenderer()
     glDeleteTextures(1, &_blendTexture);
 }
 
-void LandblockRenderer::render(LandblockRenderData& renderData, const Mat4& projection, const Mat4& modelView)
+void LandblockRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 {
     _program.use();
-
-    loadMat3ToUniform(Mat3(modelView).inverse().transpose(), _program.getUniform("normalMatrix"));
-    loadMat4ToUniform(modelView, _program.getUniform("modelViewMatrix"));
-    loadMat4ToUniform(projection * modelView, _program.getUniform("modelViewProjectionMatrix"));
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, _terrainTexture);
@@ -151,9 +145,36 @@ void LandblockRenderer::render(LandblockRenderData& renderData, const Mat4& proj
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D_ARRAY, _blendTexture);
 
-    renderData.bind(_program);
+    auto& landblockManager = Core::get().landblockManager();
 
-    glDrawArrays(GL_PATCHES, 0, renderData.vertexCount());
+    for(auto it = landblockManager.begin(); it != landblockManager.end(); ++it)
+    {
+        auto dx = it->first.x() - landblockManager.getCenter().x();
+        auto dy = it->first.y() - landblockManager.getCenter().y();
+
+        Mat4 modelMat;
+        modelMat.makeTranslation(Vec3(dx * 192.0, dy * 192.0, 0.0));
+
+        auto modelViewMat = viewMat * modelMat;
+        auto modelViewProjectionMat = projectionMat * modelViewMat;
+
+        loadMat3ToUniform(Mat3(modelViewMat).inverse().transpose(), _program.getUniform("normalMatrix"));
+        loadMat4ToUniform(modelViewMat, _program.getUniform("modelViewMatrix"));
+        loadMat4ToUniform(modelViewProjectionMat, _program.getUniform("modelViewProjectionMatrix"));
+
+        auto& renderData = it->second.renderData();
+
+        if(!renderData)
+        {
+            renderData.reset(new LandblockRenderData(it->second));
+        }
+
+        auto& landblockRenderData = *(LandblockRenderData*)renderData.get();
+
+        landblockRenderData.bind(_program);
+
+        glDrawArrays(GL_PATCHES, 0, landblockRenderData.vertexCount());
+    }
 }
 
 void LandblockRenderer::initProgram()

@@ -2,16 +2,13 @@
 #include <SDL_main.h>
 #include <cstdio>
 #include <cstdlib>
-#include <memory>
 #include <stdexcept>
 
 int main(int argc, char* argv[])
 {
     try
     {
-        Core::init();
-        Core::get().run();
-        Core::cleanup();
+        Core::go();
     }
     catch(const runtime_error& e)
     {

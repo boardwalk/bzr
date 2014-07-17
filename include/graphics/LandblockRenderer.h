@@ -16,7 +16,7 @@ public:
     LandblockRenderer();
     ~LandblockRenderer();
 
-    void render(LandblockRenderData& renderData, const Mat4& projection, const Mat4& modelView);
+    void render(const Mat4& projectionMat, const Mat4& viewMat);
 
 private:
     void initProgram();

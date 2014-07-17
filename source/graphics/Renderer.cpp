@@ -62,6 +62,8 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     glPrimitiveRestartIndex(0xffff);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // the default is 4
+
+    _landblockRenderer.reset(new LandblockRenderer());
 }
 
 Renderer::~Renderer()
@@ -86,13 +88,6 @@ Renderer::~Renderer()
 
 void Renderer::render(double interp)
 {
-    // we crash if this is in the ctor
-    // perhaps we need to pump events first?
-    if(!_landblockRenderer)
-    {
-        _landblockRenderer.reset(new LandblockRenderer());
-    }
-
     // projection * view * model * vertex
     Mat4 projectionMat;
     projectionMat.makePerspective(_fieldOfView, double(_width)/double(_height), 0.1, 1000.0);
@@ -101,37 +96,7 @@ void Renderer::render(double interp)
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    {
-        Mat4 modelMat;
-        modelMat.makeIdentity();
-
-        auto& landblock = Core::get().landblock();
-        auto& renderData = landblock.renderData();
-
-        if(!renderData)
-        {
-            renderData.reset(new LandblockRenderData(landblock));
-        }
-
-        auto& landblockRenderData = (LandblockRenderData&)*renderData;
-        _landblockRenderer->render(landblockRenderData, projectionMat, viewMat * modelMat);
-    }
-
-    {
-        Mat4 modelMat;
-        modelMat.makeTranslation(Vec3(192.0, 0.0, 0.0));
-
-        auto& landblock = Core::get().landblock2();
-        auto& renderData = landblock.renderData();
-
-        if(!renderData)
-        {
-            renderData.reset(new LandblockRenderData(landblock));
-        }
-
-        auto& landblockRenderData = (LandblockRenderData&)*renderData;
-        _landblockRenderer->render(landblockRenderData, projectionMat, viewMat * modelMat);
-    }
+    _landblockRenderer->render(projectionMat, viewMat);
 
     SDL_GL_SwapWindow(_window);
 }

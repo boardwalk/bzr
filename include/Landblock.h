@@ -1,6 +1,7 @@
 #ifndef BZR_LANDBLOCK_H
 #define BZR_LANDBLOCK_H
 
+#include "LandblockId.h"
 #include "Destructable.h"
 #include "Noncopyable.h"
 #include <vector>
@@ -11,7 +12,7 @@ public:
     static const int GRID_SIZE = 9;
     static const double SQUARE_SIZE;
     static const double LANDBLOCK_SIZE;
-    static const int HEIGHT_MAP_SIZE = 1024;
+    static const int HEIGHT_MAP_SIZE = 64;
 
     PACK(struct RawData
     {
@@ -23,6 +24,7 @@ public:
     });
 
     Landblock(const void* data, size_t length);
+    Landblock(Landblock&& other);
 
     const RawData& getRawData() const;
 
