@@ -93,9 +93,10 @@ GLint Program::getUniform(const GLchar* name)
 
     if(loc < 0)
     {
-        string err("Uniform does not exist: ");
-        err.append(name);
-        throw runtime_error(err);
+        //string err("Uniform does not exist: ");
+        //err.append(name);
+        //throw runtime_error(err);
+        //puts(err.c_str());
     }
 
     return loc;

@@ -23,10 +23,12 @@ public:
 
     void step(double dt);
 
+    const Mat4& rotationMatrix() const;
     const Mat4& viewMatrix() const;
     const Vec3& position() const;
 
 private:
+    Mat4 _rotationMatrix;
     Mat4 _viewMatrix;
 
     Vec3 _position;

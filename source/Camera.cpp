@@ -31,15 +31,18 @@ void Camera::move(double dx, double dy)
 
 void Camera::step(double dt)
 {
-    _viewMatrix.makeTranslation(-_position);
-
     Quat q;
     q.makeFromYawPitchRoll(_yaw, _pitch, _roll);
 
-    Mat4 rotationMatrix;
-    rotationMatrix.makeRotation(q);
+    _rotationMatrix.makeRotation(q);
 
-    _viewMatrix = rotationMatrix * _viewMatrix;
+    _viewMatrix.makeTranslation(-_position);
+    _viewMatrix = _rotationMatrix * _viewMatrix;
+}
+
+const Mat4& Camera::rotationMatrix() const
+{
+    return _rotationMatrix;
 }
 
 const Mat4& Camera::viewMatrix() const

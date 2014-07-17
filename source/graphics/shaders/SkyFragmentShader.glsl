@@ -8,6 +8,6 @@ uniform samplerCube cubeTex;
 
 void main()
 {
-    fragColor = vec4(1.0, 1.0, 1.0, 1.0); //texture(cubeTex, texCoord);
+    fragColor = texture(cubeTex, texCoord);
 }
 

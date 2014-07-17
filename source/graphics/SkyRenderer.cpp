@@ -1,6 +1,9 @@
 #include "graphics\SkyRenderer.h"
 #include "graphics\util.h"
+#include "graphics\Image.h"
 #include "math\Mat4.h"
+#include "Camera.h"
+#include "Core.h"
 #include <vector>
 
 #include "graphics/shaders/SkyVertexShader.glsl.h"
@@ -25,7 +28,11 @@ void SkyRenderer::render(const Mat4& projMat, const Mat4& viewMat)
 {
     _program.use();
 
-    loadMat4ToUniform(projMat * viewMat, _program.getUniform("modelViewProjectionMatrix"));
+    //auto& rotationMat = Core::get().camera().rotationMatrix();
+    Mat4 rotationMat;
+    rotationMat.makeIdentity();
+
+    loadMat4ToUniform(rotationMat, _program.getUniform("rotationMatrix"));
 
     glBindVertexArray(_vertexArray);
 
@@ -49,6 +56,7 @@ void SkyRenderer::initProgram()
 
 void SkyRenderer::initGeometry()
 {
+    /*
     static float VERTEX_DATA[] =
     {
         // -x face
@@ -105,6 +113,16 @@ void SkyRenderer::initGeometry()
         -0.5, -0.5, +0.5,
         +0.5, +0.5, +0.5
     };
+    */
+    static float VERTEX_DATA[] =
+    {
+        -0.9, -0.9,  0.9,
+         0.9, -0.9,  0.9,
+        -0.9,  0.9,  0.9,
+         0.9,  0.9,  0.9,
+        -0.9,  0.9,  0.9,
+         0.9, -0.9,  0.9
+    };
 
     static const int COMPONENTS_PER_VERTEX = 3;
 
@@ -146,8 +164,11 @@ void SkyRenderer::initTexture()
 
     for(int i = 0; i < NUM_FACES; i++)
     {
-        vector<uint8_t> data(128 * 128 * 3, double(i) / sizeof(NUM_FACES) * 0xA0 + 0x5F);
-        glTexImage2D(FACES[i], 0, GL_RGB8, 128, 128, 0, GL_RGB, GL_UNSIGNED_BYTE, data.data());
+        //vector<uint8_t> data(128 * 128 * 3, double(i) / sizeof(NUM_FACES - 1) * 0xA0 + 0x5F);
+        Image image;
+        image.load(0x06006d06);
+
+        glTexImage2D(FACES[i], 0, GL_RGBA8, 512, 512, 0, GL_BGRA, GL_UNSIGNED_BYTE, image.data());
     }
 }
 
