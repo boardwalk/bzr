@@ -8,8 +8,8 @@
 class LandblockManager : Noncopyable
 {
 public:
-	using container_type = unordered_map<LandblockId, Landblock>;
-	using iterator = container_type::iterator;
+	typedef unordered_map<LandblockId, Landblock> container_type;
+	typedef container_type::iterator iterator;
 
 	LandblockManager();
 

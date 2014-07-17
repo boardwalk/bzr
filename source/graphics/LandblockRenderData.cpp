@@ -167,8 +167,8 @@ void LandblockRenderData::initVAO(const Landblock& landblock)
     vertexData.push_back(dy); \
     { \
         auto tcr = rotateTexCoord(Vec2(dx, dy), blendAngle); \
-        vertexData.push_back(scale * nearbyint(tcr.x)); \
-        vertexData.push_back(scale * nearbyint(tcr.y)); \
+        vertexData.push_back(scale * tcr.x + 0.5); /* ghetto rounding */ \
+        vertexData.push_back(scale * tcr.y + 0.5); /* ghetto rounding */ \
     } \
     vertexData.push_back(t1); \
     vertexData.push_back(t2); \
