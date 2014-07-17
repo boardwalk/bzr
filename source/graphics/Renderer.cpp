@@ -22,6 +22,10 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     // Apple's drivers don't support the compatibility profile on GL >v2.1
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 #endif
+    
+    // Enable 16x MSAA
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 16);
 
     // TODO configurable
     _width = 1024;
