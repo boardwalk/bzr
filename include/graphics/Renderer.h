@@ -3,6 +3,7 @@
 
 #include "Noncopyable.h"
 
+class SkyRenderer;
 class LandblockRenderer;
 
 class Renderer : Noncopyable
@@ -22,7 +23,8 @@ private:
     SDL_Window* _window;
     SDL_GLContext _context;
 
-   	unique_ptr<LandblockRenderer> _landblockRenderer;
+    unique_ptr<SkyRenderer> _skyRenderer;
+    unique_ptr<LandblockRenderer> _landblockRenderer;
 };
 
 #endif

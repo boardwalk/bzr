@@ -2,6 +2,7 @@
 #define BZR_MATH_MAT3_H
 
 struct Mat4;
+struct Vec3;
 
 struct Mat3
 {
@@ -13,5 +14,7 @@ struct Mat3
 
     double m[9];
 };
+
+Vec3 operator*(const Mat3& mat, const Vec3& vec);
 
 #endif

@@ -1,5 +1,7 @@
 #include "graphics/Renderer.h"
 #include "graphics/LandblockRenderer.h"
+#include "graphics/SkyRenderer.h"
+//#include "graphics/SkyModel.h"
 #include "graphics/util.h"
 #include "math/Mat3.h"
 #include "Camera.h"
@@ -63,12 +65,33 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // the default is 4
 
+    _skyRenderer.reset(new SkyRenderer());
     _landblockRenderer.reset(new LandblockRenderer());
+
+    /*SkyModel model;
+
+    SkyModel::Params params;
+    params.dt = 180.0;
+    params.tm = 0.5;
+    params.lng = 0.0;
+    params.lat = 0.0;
+    params.tu = 0.0;
+    model.prepare(params);
+
+    for(auto theta = -PI; theta < PI; theta += PI / 5.0)
+    {
+        for(auto phi = -PI; phi < PI; phi += PI / 5.0)
+        {
+            auto c = model.getColor(theta, phi);
+            printf("%+3.2f %+3.2f: %.2f %.2f %.2f\n", theta, phi, c.x, c.y, c.z);
+        }
+    }*/
 }
 
 Renderer::~Renderer()
 {
     _landblockRenderer.reset();
+    _skyRenderer.reset();
 
     if(_context != nullptr)
     {
@@ -96,7 +119,8 @@ void Renderer::render(double interp)
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    _landblockRenderer->render(projectionMat, viewMat);
+    _skyRenderer->render(projectionMat, viewMat);
+//    _landblockRenderer->render(projectionMat, viewMat);
 
     SDL_GL_SwapWindow(_window);
 }

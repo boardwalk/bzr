@@ -1,5 +1,6 @@
 #include "math/Mat3.h"
 #include "math/Mat4.h"
+#include "math/Vec3.h"
 
 Mat3::Mat3()
 {
@@ -71,3 +72,15 @@ Mat3 Mat3::transpose() const
 
     return r;
 }
+
+Vec3 operator*(const Mat3& mat, const Vec3& vec)
+{
+    Vec3 res;
+
+    res.x = vec.x * mat.m[0] + vec.y * mat.m[3] + vec.z * mat.m[6];
+    res.y = vec.x * mat.m[1] + vec.y * mat.m[4] + vec.z * mat.m[7];
+    res.z = vec.x * mat.m[2] + vec.y * mat.m[5] + vec.z * mat.m[8];
+
+    return res;
+}
+

@@ -4,9 +4,9 @@
 Camera::Camera()
 {
     _viewMatrix.makeIdentity();
-    _position = Vec3(88.5, 22.5, 125);
+    //_position = Vec3(88.5, 22.5, 125);
     _yaw = 0.0;
-    _pitch = -0.26666;
+    _pitch = 0.0;//-0.26666;
     _roll = 0.0;
 }
 

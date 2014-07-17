@@ -10,7 +10,7 @@
 class Landblock;
 struct Mat4;
 
-class LandblockRenderer : public Noncopyable
+class LandblockRenderer : Noncopyable
 {
 public:
     LandblockRenderer();

@@ -221,8 +221,6 @@ void LandblockRenderData::initVAO(const Landblock& landblock)
     glEnableVertexAttribArray(3);
     glEnableVertexAttribArray(4);
     glEnableVertexAttribArray(5);
-
-    glBindVertexArray(0);
 }
 
 void LandblockRenderData::initHeightTexture(const Landblock& landblock)
