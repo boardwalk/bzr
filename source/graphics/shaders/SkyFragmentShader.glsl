@@ -10,4 +10,3 @@ void main()
 {
     fragColor = texture(cubeTex, texCoord);
 }
-

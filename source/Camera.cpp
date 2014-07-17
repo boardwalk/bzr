@@ -3,10 +3,9 @@
 
 Camera::Camera()
 {
-    _viewMatrix.makeIdentity();
-    //_position = Vec3(88.5, 22.5, 125);
+    _position = Vec3(88.5, 22.5, 125);
     _yaw = 0.0;
-    _pitch = 0.0;//-0.26666;
+    _pitch = -0.26666;
     _roll = 0.0;
 }
 
@@ -17,7 +16,7 @@ void Camera::look(double dx, double dy)
     
     _position.z -= dy * 30.0;
 
-    printf("position=%f %f %f, pitch=%f\n", _position.x, _position.y, _position.z, _pitch);
+    //printf("position=%f %f %f, pitch=%f\n", _position.x, _position.y, _position.z, _pitch);
 }
 
 void Camera::move(double dx, double dy)

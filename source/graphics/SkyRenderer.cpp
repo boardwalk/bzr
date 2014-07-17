@@ -1,7 +1,6 @@
-#include "graphics\SkyRenderer.h"
-#include "graphics\util.h"
-#include "graphics\Image.h"
-#include "math\Mat4.h"
+#include "graphics/SkyRenderer.h"
+#include "graphics/util.h"
+#include "math/Mat4.h"
 #include "Camera.h"
 #include "Core.h"
 #include <vector>
@@ -28,22 +27,19 @@ void SkyRenderer::render(const Mat4& projMat, const Mat4& viewMat)
 {
     _program.use();
 
-    //auto& rotationMat = Core::get().camera().rotationMatrix();
-    Mat4 rotationMat;
-    rotationMat.makeIdentity();
-
-    loadMat4ToUniform(rotationMat, _program.getUniform("rotationMatrix"));
+    auto& rotationMat = Core::get().camera().rotationMatrix();
+    loadMat4ToUniform(rotationMat, _program.getUniform("rotationMat"));
 
     glBindVertexArray(_vertexArray);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, _texture);
 
-    //glDisable(GL_DEPTH_TEST);
+    glDisable(GL_DEPTH_TEST);
 
     glDrawArrays(GL_TRIANGLES, 0, _vertexCount);
 
-    //glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
 }
 
 void SkyRenderer::initProgram()
@@ -56,75 +52,17 @@ void SkyRenderer::initProgram()
 
 void SkyRenderer::initGeometry()
 {
-    /*
     static float VERTEX_DATA[] =
     {
-        // -x face
-        -0.5, -0.5, -0.5,
-        -0.5, +0.5, -0.5,
-        -0.5, -0.5, +0.5,
-
-        -0.5, +0.5, +0.5,
-        -0.5, -0.5, +0.5,
-        -0.5, +0.5, -0.5,
-
-        // +x face
-        +0.5, +0.5, -0.5,
-        +0.5, -0.5, -0.5,
-        +0.5, +0.5, +0.5,
-
-        +0.5, -0.5, +0.5,
-        +0.5, +0.5, +0.5,
-        +0.5, -0.5, -0.5,
-
-        // -y face
-        +0.5, -0.5, -0.5,
-        -0.5, -0.5, -0.5,
-        +0.5, -0.5, +0.5,
-
-        -0.5, -0.5, +0.5,
-        +0.5, -0.5, +0.5,
-        -0.5, -0.5, -0.5,
-
-        // +y face
-        -0.5, +0.5, -0.5,
-        +0.5, +0.5, -0.5,
-        -0.5, +0.5, +0.5,
-
-        +0.5, +0.5, +0.5,
-        +0.5, +0.5, -0.5,
-        -0.5, +0.5, +0.5,
-
-        // -z face
-        -0.5, -0.5, -0.5,
-        +0.5, -0.5, -0.5,
-        -0.5, +0.5, -0.5,
-
-        +0.5, +0.5, -0.5,
-        -0.5, +0.5, -0.5,
-        +0.5, -0.5, -0.5,
-
-        // +z face
-        -0.5, +0.5, +0.5,
-        +0.5, +0.5, +0.5,
-        -0.5, -0.5, +0.5,
-
-        +0.5, -0.5, +0.5,
-        -0.5, -0.5, +0.5,
-        +0.5, +0.5, +0.5
-    };
-    */
-    static float VERTEX_DATA[] =
-    {
-        -0.9, -0.9,  0.9,
-         0.9, -0.9,  0.9,
-        -0.9,  0.9,  0.9,
-         0.9,  0.9,  0.9,
-        -0.9,  0.9,  0.9,
-         0.9, -0.9,  0.9
+        -1.0, -1.0,
+         1.0, -1.0,
+        -1.0,  1.0,
+         1.0,  1.0,
+        -1.0,  1.0,
+         1.0, -1.0
     };
 
-    static const int COMPONENTS_PER_VERTEX = 3;
+    static const int COMPONENTS_PER_VERTEX = 2;
 
     _vertexCount = sizeof(VERTEX_DATA) / sizeof(VERTEX_DATA[0]) / COMPONENTS_PER_VERTEX;
 
@@ -135,7 +73,7 @@ void SkyRenderer::initGeometry()
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(VERTEX_DATA), VERTEX_DATA, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * COMPONENTS_PER_VERTEX, nullptr);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * COMPONENTS_PER_VERTEX, nullptr);
 
     glEnableVertexAttribArray(0);
 }
@@ -164,11 +102,12 @@ void SkyRenderer::initTexture()
 
     for(int i = 0; i < NUM_FACES; i++)
     {
-        //vector<uint8_t> data(128 * 128 * 3, double(i) / sizeof(NUM_FACES - 1) * 0xA0 + 0x5F);
-        Image image;
-        image.load(0x06006d06);
+        vector<uint8_t> pixel;
+        pixel.push_back(0xCC);
+        pixel.push_back(0xE6);
+        pixel.push_back(0xE6);
 
-        glTexImage2D(FACES[i], 0, GL_RGBA8, 512, 512, 0, GL_BGRA, GL_UNSIGNED_BYTE, image.data());
+        glTexImage2D(FACES[i], 0, GL_RGB8, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, pixel.data());
     }
 }
 

@@ -24,8 +24,8 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 #endif
 
     // TODO configurable
-    _width = 1280;
-    _height = 960;
+    _width = 1024;
+    _height = 768;
     _fieldOfView = 90.0;
 
     _window = SDL_CreateWindow("Bael'Zharon's Respite",
@@ -59,9 +59,6 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-    glEnable(GL_PRIMITIVE_RESTART);
-    glPrimitiveRestartIndex(0xffff);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // the default is 4
 
@@ -117,10 +114,10 @@ void Renderer::render(double interp)
 
     const Mat4& viewMat = Core::get().camera().viewMatrix();
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT);
 
     _skyRenderer->render(projectionMat, viewMat);
-//    _landblockRenderer->render(projectionMat, viewMat);
+    _landblockRenderer->render(projectionMat, viewMat);
 
     SDL_GL_SwapWindow(_window);
 }
