@@ -18,7 +18,7 @@ public:
     GLsizei vertexCount() const;
 
 private:
-    void initVAO(const Landblock& landblock);
+    void initGeometry(const Landblock& landblock);
     void initHeightTexture(const Landblock& landblock);
 
     GLuint _vertexArray;

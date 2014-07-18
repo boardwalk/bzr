@@ -5,7 +5,7 @@
 
 LandblockRenderData::LandblockRenderData(const Landblock& landblock)
 {
-    initVAO(landblock);
+    initGeometry(landblock);
     initHeightTexture(landblock);
 }
 
@@ -44,7 +44,7 @@ static Vec2 rotateTexCoord(Vec2 tc, double deg)
         (tc.x - 0.5) * sine + (tc.y - 0.5) * cosine + 0.5);
 }
 
-void LandblockRenderData::initVAO(const Landblock& landblock)
+void LandblockRenderData::initGeometry(const Landblock& landblock)
 {
     auto& data = landblock.getRawData();
 
