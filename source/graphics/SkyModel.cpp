@@ -1,5 +1,6 @@
 #include "graphics/SkyModel.h"
 #include "math/Mat3.h"
+#include <algorithm>
 
 // A Practical Analytic Model for Daylight
 // A. J. Preetham et al
@@ -75,10 +76,18 @@ void SkyModel::prepare(const Params& p)
 
 Vec3 SkyModel::getColor(double theta, double phi)
 {
-    auto gamma = 0.0; // this is the angle between theta_s, phi_s and theta, phi
+    // this is the angle between theta_s, phi_s and theta, phi
+    auto gamma = cos(theta - _theta_s) * sin(phi) * sin(_phi_s) + cos(phi) * cos(_phi_s);
+
     auto x = F(_coeffs_x, theta, gamma) / F(_coeffs_x, 0.0, _theta_s) * _x_z;
     auto y = F(_coeffs_y, theta, gamma) / F(_coeffs_y, 0.0, _theta_s) * _y_z;
     auto Y = F(_coeffs_Y, theta, gamma) / F(_coeffs_Y, 0.0, _theta_s) * _Y_z;
+
+    // Y is luminance in kilo candela/m^2 (aka kilo nit)
+    // we need to scale it to [0-1] using the "white point", where it becomes relative luminance
+    // we also seem to get negative values. abs seems to give a good result *shrug*
+    static const auto whitePoint = 35.0;
+    Y = min(abs(Y) / whitePoint, 1.0);
 
     // convert xyY to XYZ
     // http://www.brucelindbloom.com/index.html?Equations.html

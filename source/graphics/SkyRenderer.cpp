@@ -1,12 +1,17 @@
 #include "graphics/SkyRenderer.h"
+#include "graphics/SkyModel.h"
 #include "graphics/util.h"
+#include "math/Mat3.h"
 #include "math/Mat4.h"
 #include "Camera.h"
 #include "Core.h"
 #include <vector>
+#include <fstream>
 
 #include "graphics/shaders/SkyVertexShader.glsl.h"
 #include "graphics/shaders/SkyFragmentShader.glsl.h"
+
+static const int CUBE_SIZE = 128;
 
 SkyRenderer::SkyRenderer()
 {
@@ -29,6 +34,12 @@ void SkyRenderer::render(const Mat4& projMat, const Mat4& viewMat)
 
     auto& rotationMat = Core::get().camera().rotationMatrix();
     loadMat4ToUniform(rotationMat, _program.getUniform("rotationMat"));
+
+    loadMat4ToUniform(projMat, _program.getUniform("projectionMat"));
+
+    loadMat4ToUniform(viewMat, _program.getUniform("viewMat"));
+
+    loadMat3ToUniform(Mat3(viewMat).inverse().transpose(), _program.getUniform("normalMat"));
 
     glBindVertexArray(_vertexArray);
 
@@ -100,14 +111,75 @@ void SkyRenderer::initTexture()
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    for(int i = 0; i < NUM_FACES; i++)
-    {
-        vector<uint8_t> pixel;
-        pixel.push_back(0xCC);
-        pixel.push_back(0xE6);
-        pixel.push_back(0xE6);
+    SkyModel model;
 
-        glTexImage2D(FACES[i], 0, GL_RGB8, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, pixel.data());
+    SkyModel::Params params;
+    params.dt = 180.0;
+    params.tm = 0.5;
+    params.lng = 0.0;
+    params.lat = 0.0;
+    params.tu = 0.0;
+    model.prepare(params);
+
+    vector<uint8_t> data(CUBE_SIZE * CUBE_SIZE * 3);
+
+    for(int face = 0; face < NUM_FACES; face++)
+    {
+        for(auto j = 0; j < CUBE_SIZE; j++)
+        {
+            for(auto i = 0; i < CUBE_SIZE; i++)
+            {
+                // scale to cube face
+                auto fi = double(i) / double(CUBE_SIZE - 1) * 2.0;
+                auto fj = double(j) / double(CUBE_SIZE - 1) * 2.0;
+
+                // find point on the cube we're mapping
+                Vec3 cp;
+
+                switch(face)
+                {
+                    case 0: cp = Vec3(2.0,      fi,       fj      ); break; // +X
+                    case 1: cp = Vec3(0.0,      fi,       fj      ); break; // -X
+                    case 2: cp = Vec3(fi,       2.0,      fj      ); break; // +Y
+                    case 3: cp = Vec3(fi,       0.0,      fj      ); break; // -Y
+                    case 4: cp = Vec3(fi,       fj,       2.0     ); break; // +Z
+                    case 5: cp = Vec3(fi,       fj,       0.0     ); break; // -Z
+                }
+
+                cp = cp - Vec3(1.0, 1.0, 1.0);
+
+                // map cube to sphere
+                // http://mathproofs.blogspot.com/2005/07/mapping-cube-to-sphere.html
+                Vec3 sp;
+
+                sp.x = cp.x * sqrt(1.0 - cp.y * cp.y / 2.0 - cp.z * cp.z / 2.0 + cp.y * cp.y * cp.z * cp.z / 3.0);
+                sp.y = cp.y * sqrt(1.0 - cp.z * cp.z / 2.0 - cp.x * cp.x / 2.0 + cp.z * cp.z * cp.x * cp.x / 3.0);
+                sp.z = cp.z * sqrt(1.0 - cp.x * cp.x / 2.0 - cp.y * cp.y / 2.0 + cp.x * cp.x * cp.y * cp.y / 3.0);
+
+                // convert cartesian to spherical
+                // http://en.wikipedia.org/wiki/Spherical_coordinate_system#Cartesian_coordinates
+                auto theta = acos(sp.z / sqrt(sp.x * sp.x + sp.y * sp.y + sp.z * sp.z));
+                auto phi = atan2(sp.y, sp.x);
+
+                // compute and store color
+                auto color = model.getColor(theta, phi);
+                data[(i + j * CUBE_SIZE) * 3] = color.x * 0xFF;
+                data[(i + j * CUBE_SIZE) * 3 + 1] = color.y * 0xFF;
+                data[(i + j * CUBE_SIZE) * 3 + 2] = color.z * 0xFF;
+            }
+        }
+
+        if(face != 0)
+        {
+            //memset(data.data(), 0, data.size());
+        }
+
+        char fname[32];
+        sprintf(fname, "skymodel_%d.dat", face);
+
+        fstream f(fname, ios_base::out|ios_base::binary);
+        f.write((char*)data.data(), data.size());
+
+        glTexImage2D(FACES[face], 0, GL_RGB8, CUBE_SIZE, CUBE_SIZE, 0, GL_RGB, GL_UNSIGNED_BYTE, data.data());
     }
 }
-

@@ -12,9 +12,10 @@ Camera::Camera()
 void Camera::look(double dx, double dy)
 {
     // TODO
-    _pitch += dx;
+    _pitch -= dy;
+    _yaw += dx;
     
-    _position.z -= dy * 30.0;
+    //_position.z -= dy * 30.0;
 
     //printf("position=%f %f %f, pitch=%f\n", _position.x, _position.y, _position.z, _pitch);
 }

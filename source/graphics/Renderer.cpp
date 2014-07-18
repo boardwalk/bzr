@@ -1,7 +1,6 @@
 #include "graphics/Renderer.h"
 #include "graphics/LandblockRenderer.h"
 #include "graphics/SkyRenderer.h"
-//#include "graphics/SkyModel.h"
 #include "graphics/util.h"
 #include "math/Mat3.h"
 #include "Camera.h"
@@ -22,7 +21,7 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     // Apple's drivers don't support the compatibility profile on GL >v2.1
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 #endif
-    
+
     // Enable 16x MSAA
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 16);
@@ -68,25 +67,6 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 
     _skyRenderer.reset(new SkyRenderer());
     _landblockRenderer.reset(new LandblockRenderer());
-
-    /*SkyModel model;
-
-    SkyModel::Params params;
-    params.dt = 180.0;
-    params.tm = 0.5;
-    params.lng = 0.0;
-    params.lat = 0.0;
-    params.tu = 0.0;
-    model.prepare(params);
-
-    for(auto theta = -PI; theta < PI; theta += PI / 5.0)
-    {
-        for(auto phi = -PI; phi < PI; phi += PI / 5.0)
-        {
-            auto c = model.getColor(theta, phi);
-            printf("%+3.2f %+3.2f: %.2f %.2f %.2f\n", theta, phi, c.x, c.y, c.z);
-        }
-    }*/
 }
 
 Renderer::~Renderer()

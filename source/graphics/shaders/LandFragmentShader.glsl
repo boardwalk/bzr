@@ -69,5 +69,5 @@ void main()
     // sample blend
     vec4 a = texture(blendTex, vec3(blendTexCoord.s, blendTexCoord.t, blendTexNum));
 
-    fragColor = hejl(mix(rc, tc, a.r) * vec4(phong(), 1.0));
+    fragColor = hejl(mix(rc, tc, a.r));// * vec4(phong(), 1.0));
 }
