@@ -32,14 +32,10 @@ void SkyRenderer::render(const Mat4& projMat, const Mat4& viewMat)
 {
     _program.use();
 
-    auto& rotationMat = Core::get().camera().rotationMatrix();
+    Mat4 rotationMat;
+    rotationMat.makeRotation(Core::get().camera().rotationQuat().conjugate());
+
     loadMat4ToUniform(rotationMat, _program.getUniform("rotationMat"));
-
-    loadMat4ToUniform(projMat, _program.getUniform("projectionMat"));
-
-    loadMat4ToUniform(viewMat, _program.getUniform("viewMat"));
-
-    loadMat3ToUniform(Mat3(viewMat).inverse().transpose(), _program.getUniform("normalMat"));
 
     glBindVertexArray(_vertexArray);
 

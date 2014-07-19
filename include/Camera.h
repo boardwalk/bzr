@@ -3,6 +3,7 @@
 
 #include "math/Mat4.h"
 #include "math/Vec3.h"
+#include "math/Quat.h"
 
 class Camera
 {
@@ -23,12 +24,12 @@ public:
 
     void step(double dt);
 
-    const Mat4& rotationMatrix() const;
+    const Quat& rotationQuat() const;
     const Mat4& viewMatrix() const;
     const Vec3& position() const;
 
 private:
-    Mat4 _rotationMatrix;
+    Quat _rotationQuat;
     Mat4 _viewMatrix;
 
     Vec3 _position;

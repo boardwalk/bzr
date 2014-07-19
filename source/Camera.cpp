@@ -1,48 +1,52 @@
 #include "Camera.h"
 #include "math/Quat.h"
+#include <algorithm>
+
+static const auto FT_PER_SECOND = 70.0;
 
 Camera::Camera()
 {
     _position = Vec3(88.5, 22.5, 125);
     _yaw = 0.0;
-    _pitch = -0.26666;
+    _pitch = 0.26666;
     _roll = 0.0;
 }
 
 void Camera::look(double dx, double dy)
 {
-    // TODO
-    _pitch -= dy;
-    _yaw += dx;
-    
-    //_position.z -= dy * 30.0;
-
-    //printf("position=%f %f %f, pitch=%f\n", _position.x, _position.y, _position.z, _pitch);
+    _pitch = fmod(_pitch - dy, 2.0 * PI);
+    _yaw = fmod(_yaw + dx, 2.0 * PI);
 }
 
 void Camera::move(double dx, double dy)
 {
-    // TODO
-    _position.x += dx * 30.0;
-    _position.y += dy * 30.0;
-
-    //printf("%f %f %f\n", _position.x, _position.y, _position.z);
+    Vec3 dp(dx * FT_PER_SECOND, 0.0, -dy * FT_PER_SECOND);
+    _position = _position +_rotationQuat.conjugate() * dp;
 }
 
 void Camera::step(double dt)
 {
-    Quat q;
-    q.makeFromYawPitchRoll(_yaw, _pitch, _roll);
+    Quat initialPitchQuat;
+    initialPitchQuat.makeFromYawPitchRoll(0.0, -PI / 4.0, 0.0);
 
-    _rotationMatrix.makeRotation(q);
+    Quat yawQuat;
+    yawQuat.makeFromYawPitchRoll(_yaw, 0.0, 0.0);
+
+    Quat pitchQuat;
+    pitchQuat.makeFromYawPitchRoll(0.0, _pitch, 0.0);
+
+    _rotationQuat = pitchQuat * yawQuat * initialPitchQuat;
+
+    Mat4 rotationMatrix;
+    rotationMatrix.makeRotation(_rotationQuat);
 
     _viewMatrix.makeTranslation(-_position);
-    _viewMatrix = _rotationMatrix * _viewMatrix;
+    _viewMatrix = rotationMatrix * _viewMatrix;
 }
 
-const Mat4& Camera::rotationMatrix() const
+const Quat& Camera::rotationQuat() const
 {
-    return _rotationMatrix;
+    return _rotationQuat;
 }
 
 const Mat4& Camera::viewMatrix() const
