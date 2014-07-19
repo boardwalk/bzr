@@ -8,6 +8,7 @@
 #include "LandblockManager.h"
 #include <algorithm>
 #include <vector>
+#include <set>
 
 #include "graphics/shaders/LandVertexShader.glsl.h"
 #include "graphics/shaders/LandTessControlShader.glsl.h"
@@ -16,27 +17,27 @@
 
 static const uint32_t LANDSCAPE_TEXTURES[] =
 {
-    0x00000000, // 0x00
-    0x00000000, // 0x01
+    0x06006d6f, // 0x00
+    0x06006d49, // 0x01
     0x00000000, // 0x02
     0x06006d06, // 0x03
     0x00000000, // 0x04
     0x00000000, // 0x05
     0x00000000, // 0x06
-    0x00000000, // 0x07
+    0x06006d46, // 0x07
     0x00000000, // 0x08
-    0x00000000, // 0x09
+    0x06006d3c, // 0x09
     0x00000000, // 0x0A
-    0x00000000, // 0x0B
+    0x06006d44, // 0x0B
     0x00000000, // 0x0C
     0x00000000, // 0x0D
-    0x00000000, // 0x0E
+    0x06006d41, // 0x0E
     0x00000000, // 0x0F
-    0x00000000, // 0x10
+    0x06006d45, // 0x10
     0x00000000, // 0x11
-    0x00000000, // 0x12
+    0x06006d4f, // 0x12
     0x00000000, // 0x13
-    0x00000000, // 0x14 
+    0x06006d4e, // 0x14 
     0x06006d40, // 0x15
     0x00000000, // 0x16
     0x00000000, // 0x17
@@ -166,6 +167,34 @@ void LandblockRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 
         if(!renderData)
         {
+            set<int> unknownTypes;
+
+            for(auto x = 0; x < Landblock::GRID_SIZE; x++)
+            {
+                for(auto y = 0; y < Landblock::GRID_SIZE; y++)
+                {
+                    auto s = it->second.rawData().styles[x][y];
+                    auto terrainType = (s >> 2) & 0x1F;
+
+                    if(LANDSCAPE_TEXTURES[terrainType] == 0)
+                    {
+                        unknownTypes.insert(terrainType);
+                    }
+                }
+            }
+
+            if(!unknownTypes.empty())
+            {
+                printf("Unknown types:");
+
+                for(auto it = unknownTypes.begin(); it != unknownTypes.end(); ++it)
+                {
+                    printf(" %02x", *it);
+                }
+
+                printf("\n");
+            }
+
             renderData.reset(new LandblockRenderData(it->second));
         }
 
@@ -236,6 +265,7 @@ void LandblockRenderer::initTerrainTexture()
         if(LANDSCAPE_TEXTURES[i] == 0x00000000)
         {
             image.create(Image::RGB24, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_SIZE);
+            image.fill(0xFF);
         }
         else
         {

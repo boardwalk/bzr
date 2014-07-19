@@ -2,7 +2,7 @@
 #include "Core.h"
 #include "DatFile.h"
 
-LandblockManager::LandblockManager() : _center(0xD9, 0x55), _radius(3)
+LandblockManager::LandblockManager() : _center(0x31, 0xD6), _radius(8)
 {
 	load();
 }
@@ -11,6 +11,7 @@ void LandblockManager::setCenter(LandblockId center)
 {
 	if(center != _center)
 	{
+		printf("new center: %02x %02x\n", center.x(), center.y());
 		_center = center;
 		load();
 	}

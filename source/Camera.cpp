@@ -2,7 +2,7 @@
 #include "math/Quat.h"
 #include <algorithm>
 
-static const auto FT_PER_SECOND = 70.0;
+static const auto FT_PER_SECOND = 100.0;
 
 Camera::Camera()
 {
