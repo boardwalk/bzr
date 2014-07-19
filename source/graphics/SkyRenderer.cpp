@@ -18,6 +18,8 @@ SkyRenderer::SkyRenderer()
     initProgram();
     initGeometry();
     initTexture();
+
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 }
 
 SkyRenderer::~SkyRenderer()
@@ -114,35 +116,33 @@ void SkyRenderer::initTexture()
     params.tm = 0.5;
     params.lng = 0.0;
     params.lat = 0.0;
-    params.tu = 0.0;
+    params.tu = 5.0;
     model.prepare(params);
 
     vector<uint8_t> data(CUBE_SIZE * CUBE_SIZE * 3);
 
-    for(int face = 0; face < NUM_FACES; face++)
+    for(auto face = 0; face < NUM_FACES; face++)
     {
         for(auto j = 0; j < CUBE_SIZE; j++)
         {
             for(auto i = 0; i < CUBE_SIZE; i++)
             {
                 // scale to cube face
-                auto fi = double(i) / double(CUBE_SIZE - 1) * 2.0;
-                auto fj = double(j) / double(CUBE_SIZE - 1) * 2.0;
+                auto fi = double(i) / double(CUBE_SIZE - 1) * 2.0 - 1.0;
+                auto fj = double(j) / double(CUBE_SIZE - 1) * 2.0 - 1.0;
 
                 // find point on the cube we're mapping
                 Vec3 cp;
 
                 switch(face)
                 {
-                    case 0: cp = Vec3(2.0,      fi,       fj      ); break; // +X
-                    case 1: cp = Vec3(0.0,      fi,       fj      ); break; // -X
-                    case 2: cp = Vec3(fi,       2.0,      fj      ); break; // +Y
-                    case 3: cp = Vec3(fi,       0.0,      fj      ); break; // -Y
-                    case 4: cp = Vec3(fi,       fj,       2.0     ); break; // +Z
-                    case 5: cp = Vec3(fi,       fj,       0.0     ); break; // -Z
+                    case 0: cp = Vec3( 1.0,  -fj,  -fi); break; // +X
+                    case 1: cp = Vec3(-1.0,  -fj,   fi); break; // -X
+                    case 2: cp = Vec3(  fi,  1.0,   fj); break; // +Y
+                    case 3: cp = Vec3(  fi, -1.0,  -fj); break; // -Y
+                    case 4: cp = Vec3(  fi,  -fj,  1.0); break; // +Z
+                    case 5: cp = Vec3( -fi,  -fj, -1.0); break; // -Z
                 }
-
-                cp = cp - Vec3(1.0, 1.0, 1.0);
 
                 // map cube to sphere
                 // http://mathproofs.blogspot.com/2005/07/mapping-cube-to-sphere.html
@@ -154,8 +154,9 @@ void SkyRenderer::initTexture()
 
                 // convert cartesian to spherical
                 // http://en.wikipedia.org/wiki/Spherical_coordinate_system#Cartesian_coordinates
+                // phi is ccw from -y, not ccw from +x
                 auto theta = acos(sp.z / sqrt(sp.x * sp.x + sp.y * sp.y + sp.z * sp.z));
-                auto phi = atan2(sp.y, sp.x);
+                auto phi = atan2(sp.x, -sp.y);
 
                 // compute and store color
                 auto color = model.getColor(theta, phi);
@@ -164,17 +165,6 @@ void SkyRenderer::initTexture()
                 data[(i + j * CUBE_SIZE) * 3 + 2] = color.z * 0xFF;
             }
         }
-
-        if(face != 0)
-        {
-            //memset(data.data(), 0, data.size());
-        }
-
-        char fname[32];
-        sprintf(fname, "skymodel_%d.dat", face);
-
-        fstream f(fname, ios_base::out|ios_base::binary);
-        f.write((char*)data.data(), data.size());
 
         glTexImage2D(FACES[face], 0, GL_RGB8, CUBE_SIZE, CUBE_SIZE, 0, GL_RGB, GL_UNSIGNED_BYTE, data.data());
     }

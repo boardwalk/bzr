@@ -31,6 +31,12 @@ void SkyModel::prepare(const Params& p)
     _phi_s = atan2(-cos(delta) * sin(PI * t / 12.0), (cos(l) * sin(delta) - sin(l) * cos(delta) * cos(PI * t / 12.0)));
 
     // calculate A B, C, D and E coefficients
+    _coeffs_Y[0] = 0.1787 * p.tu - 1.4630;
+    _coeffs_Y[1] = -0.3554 * p.tu + 0.4275;
+    _coeffs_Y[2] = -0.0227 * p.tu + 5.3251;
+    _coeffs_Y[3] = 0.1206 * p.tu - 2.5771;
+    _coeffs_Y[4] = -0.0670 * p.tu + 0.3703;
+
     _coeffs_x[0] = -0.0193 * p.tu - 0.2592;
     _coeffs_x[1] = -0.0665 * p.tu + 0.0008;
     _coeffs_x[2] = -0.0004 * p.tu + 0.2125;
@@ -43,11 +49,9 @@ void SkyModel::prepare(const Params& p)
     _coeffs_y[3] = -0.0441 * p.tu - 1.6537;
     _coeffs_y[4] = -0.0109 * p.tu + 0.0529;
 
-    _coeffs_Y[0] = 0.1787 * p.tu - 1.4630;
-    _coeffs_Y[1] = -0.3554 * p.tu + 0.4275;
-    _coeffs_Y[2] = -0.0227 * p.tu + 5.3251;
-    _coeffs_Y[3] = 0.1206 * p.tu - 2.5771;
-    _coeffs_Y[4] = -0.0670 * p.tu + 0.3703;
+    // calculate Y sub z
+    auto chi = (4.0 / 9.0 - p.tu / 120.0) * (PI - 2.0 * _theta_s);
+    _Y_z = (4.0453 * p.tu - 4.9710) * tan(chi) - 0.2155 * p.tu + 2.4192;
 
     auto tu_sq = p.tu * p.tu;
     auto theta_s_sq = _theta_s * _theta_s;
@@ -68,10 +72,6 @@ void SkyModel::prepare(const Params& p)
     c4 = p.tu * 0.00516 + 0.26688;
 
     _y_z = c1 * theta_s_cu + c2 * theta_s_sq + c3 * _theta_s + c4;
-
-    // calculate Y sub z
-    auto chi = (4.0 / 9.0 - p.tu / 120.0) * (PI - 2.0 * _theta_s);
-    _Y_z = (4.0453 * p.tu - 4.9710) * tan(chi) - 0.2155 * p.tu + 2.4192;
 }
 
 Vec3 SkyModel::getColor(double theta, double phi)
@@ -79,9 +79,9 @@ Vec3 SkyModel::getColor(double theta, double phi)
     // this is the angle between theta_s, phi_s and theta, phi
     auto gamma = cos(theta - _theta_s) * sin(phi) * sin(_phi_s) + cos(phi) * cos(_phi_s);
 
+    auto Y = F(_coeffs_Y, theta, gamma) / F(_coeffs_Y, 0.0, _theta_s) * _Y_z;
     auto x = F(_coeffs_x, theta, gamma) / F(_coeffs_x, 0.0, _theta_s) * _x_z;
     auto y = F(_coeffs_y, theta, gamma) / F(_coeffs_y, 0.0, _theta_s) * _y_z;
-    auto Y = F(_coeffs_Y, theta, gamma) / F(_coeffs_Y, 0.0, _theta_s) * _Y_z;
 
     // Y is luminance in kilo candela/m^2 (aka kilo nit)
     // we need to scale it to [0-1] using the "white point", where it becomes relative luminance
@@ -89,15 +89,15 @@ Vec3 SkyModel::getColor(double theta, double phi)
     static const auto whitePoint = 35.0;
     Y = min(abs(Y) / whitePoint, 1.0);
 
-    // convert xyY to XYZ
+    // convert Yxy to XYZ
     // http://www.brucelindbloom.com/index.html?Equations.html
     Vec3 XYZ;
 
     if(y != 0.0) // avoid divide by zero
     {
-        XYZ.x = x * Y / y;
+        XYZ.x = Y / y * x;
         XYZ.y = Y;
-        XYZ.z = (1.0 - x - y) * Y / y;
+        XYZ.z = Y / y * (1.0 - x - y);
     }
 
     // convert XYZ to sRGB
@@ -116,4 +116,3 @@ Vec3 SkyModel::getColor(double theta, double phi)
 
     return M * XYZ;
 }
-
