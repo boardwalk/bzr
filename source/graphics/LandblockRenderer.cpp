@@ -8,7 +8,6 @@
 #include "LandblockManager.h"
 #include <algorithm>
 #include <vector>
-#include <set>
 
 #include "graphics/shaders/LandVertexShader.glsl.h"
 #include "graphics/shaders/LandTessControlShader.glsl.h"
@@ -167,34 +166,6 @@ void LandblockRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 
         if(!renderData)
         {
-            set<int> unknownTypes;
-
-            for(auto x = 0; x < Landblock::GRID_SIZE; x++)
-            {
-                for(auto y = 0; y < Landblock::GRID_SIZE; y++)
-                {
-                    auto s = it->second.rawData().styles[x][y];
-                    auto terrainType = (s >> 2) & 0x1F;
-
-                    if(LANDSCAPE_TEXTURES[terrainType] == 0)
-                    {
-                        unknownTypes.insert(terrainType);
-                    }
-                }
-            }
-
-            if(!unknownTypes.empty())
-            {
-                printf("Unknown types:");
-
-                for(auto it = unknownTypes.begin(); it != unknownTypes.end(); ++it)
-                {
-                    printf(" %02x", *it);
-                }
-
-                printf("\n");
-            }
-
             renderData.reset(new LandblockRenderData(it->second));
         }
 
