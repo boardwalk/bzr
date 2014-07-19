@@ -205,5 +205,32 @@ void Core::step(double dt)
         _camera->move(mx, my);
     }
 
+    auto& position = _camera->position();    
+    auto id = _landblockManager->getCenter();
+
+    if(position.x < 0.0)
+    {
+        _camera->setPosition(Vec3(position.x + Landblock::LANDBLOCK_SIZE, position.y, position.z));
+        _landblockManager->setCenter(LandblockId(id.x() - 1, id.y()));
+    }
+
+    if(position.x >= Landblock::LANDBLOCK_SIZE)
+    {
+        _camera->setPosition(Vec3(position.x - Landblock::LANDBLOCK_SIZE, position.y, position.z));
+        _landblockManager->setCenter(LandblockId(id.x() + 1, id.y()));
+    }
+
+    if(position.y < 0.0)
+    {
+        _camera->setPosition(Vec3(position.x, position.y + Landblock::LANDBLOCK_SIZE, position.z));
+        _landblockManager->setCenter(LandblockId(id.x(), id.y() - 1));
+    }
+
+    if(position.y >= Landblock::LANDBLOCK_SIZE)
+    {
+        _camera->setPosition(Vec3(position.x, position.y - Landblock::LANDBLOCK_SIZE, position.z));
+        _landblockManager->setCenter(LandblockId(id.x(), id.y() + 1));
+    }
+
     _camera->step(dt);
 }

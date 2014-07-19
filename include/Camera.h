@@ -26,6 +26,7 @@ public:
 
     const Quat& rotationQuat() const;
     const Mat4& viewMatrix() const;
+    void setPosition(const Vec3& position);
     const Vec3& position() const;
 
 private:

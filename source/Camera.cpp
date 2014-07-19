@@ -54,6 +54,11 @@ const Mat4& Camera::viewMatrix() const
     return _viewMatrix;
 }
 
+void Camera::setPosition(const Vec3& position)
+{
+    _position = position;
+}
+
 const Vec3& Camera::position() const
 {
     return _position;
