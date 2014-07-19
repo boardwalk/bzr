@@ -23,7 +23,11 @@ private:
 namespace std
 {
 	template<>
+#ifdef __GLIBCXX__
+	class hash<LandblockId>
+#else
 	struct hash<LandblockId>
+#endif
 	{
 		size_t operator()(LandblockId id) const
 		{
