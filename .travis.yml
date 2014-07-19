@@ -1,10 +1,13 @@
 language: cpp
 compiler: clang
 before_install:
-    - echo "yes" | sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu `lsb_release -sc` main universe restricted multiverse"
-    - echo "yes" | sudo apt-add-repository ppa:openmw/openmw
-    - echo "yes" | sudo apt-add-repository ppa:saiarcot895/chromium-dev
+    - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+    - sudo add-apt-repository -y "deb http://archive.ubuntu.com/ubuntu `lsb_release -sc` main universe restricted multiverse"
+    - sudo apt-add-repository -y ppa:openmw/openmw
+    - sudo apt-add-repository -y ppa:saiarcot895/chromium-dev
     - sudo apt-get update -qq
+    # g++ 4.8 updates libstdc++
+    - sudo apt-get install -qq g++-4.8
     - sudo apt-get install -qq libsdl2-dev
     - sudo apt-get install -qq ninja-build
 script:
