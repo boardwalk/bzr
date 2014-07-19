@@ -16,7 +16,7 @@ void LandblockManager::setCenter(LandblockId center)
 	}
 }
 
-LandblockId LandblockManager::getCenter() const
+LandblockId LandblockManager::center() const
 {
 	return _center;
 }
@@ -47,7 +47,7 @@ void LandblockManager::load()
 	// cull existing landblocks
 	for(auto it = _data.begin(); it != _data.end(); /**/)
 	{
-		if(_center.squareDistance(it->first) > _radius * _radius)
+		if(_center.calcSquareDistance(it->first) > _radius * _radius)
 		{
 			it = _data.erase(it);
 		}
@@ -74,7 +74,7 @@ void LandblockManager::load()
 				continue;
 			}
 
-			if(_center.squareDistance(id) > _radius * _radius)
+			if(_center.calcSquareDistance(id) > _radius * _radius)
 			{
 				continue;
 			}

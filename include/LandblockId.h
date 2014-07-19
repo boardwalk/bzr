@@ -10,7 +10,7 @@ public:
 	int y() const;
 	uint32_t fileId() const;
 
-	int squareDistance(LandblockId other) const;
+	int calcSquareDistance(LandblockId other) const;
 
 	bool operator==(LandblockId other) const;
 	bool operator!=(LandblockId other) const;

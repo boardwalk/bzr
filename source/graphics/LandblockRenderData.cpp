@@ -46,7 +46,7 @@ static Vec2 rotateTexCoord(Vec2 tc, double deg)
 
 void LandblockRenderData::initGeometry(const Landblock& landblock)
 {
-    auto& data = landblock.getRawData();
+    auto& data = landblock.rawData();
 
     vector<uint8_t> vertexData;
 
@@ -177,7 +177,7 @@ void LandblockRenderData::initGeometry(const Landblock& landblock)
     vertexData.push_back(rp); \
     vertexData.push_back(bp);
 
-            if(landblock.splitNESW(x, y))
+            if(landblock.isSplitNESW(x, y))
             {
                 // lower right triangle
                 V(0, 0) V(1, 0) V(1, 1)
@@ -227,11 +227,11 @@ void LandblockRenderData::initHeightTexture(const Landblock& landblock)
 {
     glGenTextures(1, &_heightTexture);
     glBindTexture(GL_TEXTURE_2D, _heightTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R16, Landblock::HEIGHT_MAP_SIZE, Landblock::HEIGHT_MAP_SIZE, 0, GL_RED, GL_UNSIGNED_SHORT, landblock.getHeightMap());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R16, Landblock::HEIGHT_MAP_SIZE, Landblock::HEIGHT_MAP_SIZE, 0, GL_RED, GL_UNSIGNED_SHORT, landblock.heightMap());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // default is GL_NEAREST_MIPMAP_LINEAR
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    _heightBase = landblock.getHeightMapBase();
-    _heightScale = landblock.getHeightMapScale();
+    _heightBase = landblock.heightMapBase();
+    _heightScale = landblock.heightMapScale();
 }

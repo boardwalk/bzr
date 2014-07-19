@@ -18,7 +18,7 @@ uint32_t LandblockId::fileId() const
 	return (uint32_t)_x << 24 | (uint32_t)_y << 16 | 0xFFFF;
 }
 
-int LandblockId::squareDistance(LandblockId other) const
+int LandblockId::calcSquareDistance(LandblockId other) const
 {
 	auto dx = other.x() - x();
 	auto dy = other.y() - y();

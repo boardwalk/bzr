@@ -206,7 +206,7 @@ void Core::step(double dt)
     }
 
     auto& position = _camera->position();    
-    auto id = _landblockManager->getCenter();
+    auto id = _landblockManager->center();
 
     if(position.x < 0.0)
     {

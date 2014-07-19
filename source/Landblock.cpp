@@ -25,12 +25,12 @@ Landblock::Landblock(Landblock&& other)
     _renderData = move(other._renderData);
 }
 
-const Landblock::RawData& Landblock::getRawData() const
+const Landblock::RawData& Landblock::rawData() const
 {
     return _data;
 }
 
-double Landblock::getHeight(double x, double y) const
+double Landblock::calcHeight(double x, double y) const
 {
     assert(x >= 0.0 && x <= LANDBLOCK_SIZE);
     assert(y >= 0.0 && y <= LANDBLOCK_SIZE);
@@ -48,7 +48,7 @@ double Landblock::getHeight(double x, double y) const
     double h3 = _data.heights[ix][min(iy + 1, GRID_SIZE - 1)] * 2.0;
     double h4 = _data.heights[min(ix + 1, GRID_SIZE - 1)][min(iy + 1, GRID_SIZE - 1)] * 2.0;
 
-    if(splitNESW(ix, iy))
+    if(isSplitNESW(ix, iy))
     {
         // 3---4
         // |\  |
@@ -90,22 +90,22 @@ double Landblock::getHeight(double x, double y) const
     return hb * (1.0 - fy) + ht * fy;
 }
 
-const uint16_t* Landblock::getHeightMap() const
+const uint16_t* Landblock::heightMap() const
 {
     return _heightMap.data();
 }
 
-double Landblock::getHeightMapBase() const
+double Landblock::heightMapBase() const
 {
     return _heightMapBase;
 }
 
-double Landblock::getHeightMapScale() const
+double Landblock::heightMapScale() const
 {
     return _heightMapScale;
 }
 
-bool Landblock::splitNESW(int x, int y) const
+bool Landblock::isSplitNESW(int x, int y) const
 {
     // credits to Akilla
     uint32_t tx = ((_data.fileId >> 24) & 0xFF) * 8 + x;
@@ -145,7 +145,7 @@ void Landblock::buildHeightMap()
         {
             auto lx = double(sx) / double(sampleSize - 1) * LANDBLOCK_SIZE;
             auto ly = double(sy) / double(sampleSize - 1) * LANDBLOCK_SIZE;
-            sample[sx + sy * sampleSize] = getHeight(lx, ly);
+            sample[sx + sy * sampleSize] = calcHeight(lx, ly);
         }
     }
 

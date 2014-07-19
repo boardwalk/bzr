@@ -26,15 +26,15 @@ public:
     Landblock(const void* data, size_t length);
     Landblock(Landblock&& other);
 
-    const RawData& getRawData() const;
+    const RawData& rawData() const;
 
-    double getHeight(double x, double y) const;
+    double calcHeight(double x, double y) const;
 
-    const uint16_t* getHeightMap() const;
-    double getHeightMapBase() const;
-    double getHeightMapScale() const;
+    const uint16_t* heightMap() const;
+    double heightMapBase() const;
+    double heightMapScale() const;
 
-    bool splitNESW(int x, int y) const;
+    bool isSplitNESW(int x, int y) const;
 
     unique_ptr<Destructable>& renderData();
 

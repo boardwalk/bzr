@@ -14,7 +14,7 @@ public:
 	LandblockManager();
 
 	void setCenter(LandblockId center);
-	LandblockId getCenter() const;
+	LandblockId center() const;
 
 	void setRadius(int radius);
 

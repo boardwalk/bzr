@@ -149,8 +149,8 @@ void LandblockRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 
     for(auto it = landblockManager.begin(); it != landblockManager.end(); ++it)
     {
-        auto dx = it->first.x() - landblockManager.getCenter().x();
-        auto dy = it->first.y() - landblockManager.getCenter().y();
+        auto dx = it->first.x() - landblockManager.center().x();
+        auto dy = it->first.y() - landblockManager.center().y();
 
         Mat4 modelMat;
         modelMat.makeTranslation(Vec3(dx * 192.0, dy * 192.0, 0.0));
