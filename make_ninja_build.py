@@ -159,9 +159,9 @@ def main():
             n.variable('ldflags', ldflags)
             n.variable('appext', '')
 
-            n.rule('c', 'clang $cppflags $cflags $flags -c $in -o $out')
-            n.rule('cxx', 'clang++ $cppflags $cxxflags -c $in -o $out')
-            n.rule('link', 'clang++ $cppflags $ldflags $in -o $out' + linkextra)
+            n.rule('c', 'gcc $cppflags $cflags $flags -c $in -o $out')
+            n.rule('cxx', 'g++ $cppflags $cxxflags -c $in -o $out')
+            n.rule('link', 'g++ $cppflags $ldflags $in -o $out' + linkextra)
             n.rule('header', './make_include_file.py $in $out')
 
         link_inputs = []
