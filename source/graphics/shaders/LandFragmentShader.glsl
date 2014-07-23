@@ -5,10 +5,11 @@ in FragmentData
     vec3 position;
     vec3 normal;
     vec2 terrainTexCoord;
-    vec2 blendTexCoord;
-    flat vec4 terrainTexNum;
-    flat float roadTexNum;
-    flat float blendTexNum;
+    vec4 terrainInfo1;
+    vec4 terrainInfo2;
+    vec4 terrainInfo3;
+    vec4 terrainInfo4;
+    vec4 terrainInfo5;
 };
 
 out vec4 fragColor;
@@ -56,18 +57,20 @@ vec4 hejl(in vec4 color)
 
 void main()
 {
-    // sample terrain lower left, lower right, upper right, upper left
-    vec4 tc1 = linearize(texture(terrainTex, vec3(terrainTexCoord.s, terrainTexCoord.t, terrainTexNum.x))) * (1.0 - terrainTexCoord.s) * (1.0 - terrainTexCoord.t);
-    vec4 tc2 = linearize(texture(terrainTex, vec3(terrainTexCoord.s, terrainTexCoord.t, terrainTexNum.y))) * terrainTexCoord.s * (1.0 - terrainTexCoord.t);
-    vec4 tc3 = linearize(texture(terrainTex, vec3(terrainTexCoord.s, terrainTexCoord.t, terrainTexNum.z))) * terrainTexCoord.s * terrainTexCoord.t;
-    vec4 tc4 = linearize(texture(terrainTex, vec3(terrainTexCoord.s, terrainTexCoord.t, terrainTexNum.w))) * (1.0 - terrainTexCoord.s) * terrainTexCoord.t;
-    vec4 tc = tc1 + tc2 + tc3 + tc4;
+    vec4 tc1 = linearize(texture(terrainTex, vec3(terrainTexCoord.st, terrainInfo1.q)));
+    vec4 tc2 = linearize(texture(terrainTex, vec3(terrainTexCoord.st, terrainInfo2.q)));
+    vec4 tc3 = linearize(texture(terrainTex, vec3(terrainTexCoord.st, terrainInfo3.q)));
+    vec4 tc4 = linearize(texture(terrainTex, vec3(terrainTexCoord.st, terrainInfo4.q)));
+    vec4 tc5 = linearize(texture(terrainTex, vec3(terrainTexCoord.st, terrainInfo5.q)));
 
-    // sample road
-    vec4 rc = linearize(texture(terrainTex, vec3(terrainTexCoord.s, terrainTexCoord.t, roadTexNum)));
+    float ba2 = texture(blendTex, terrainInfo2.stp).r;
+    float ba3 = texture(blendTex, terrainInfo3.stp).r;
+    float ba4 = texture(blendTex, terrainInfo4.stp).r;
+    float ba5 = texture(blendTex, terrainInfo5.stp).r;
 
-    // sample blend
-    vec4 a = texture(blendTex, vec3(blendTexCoord.s, blendTexCoord.t, blendTexNum));
-
-    fragColor = hejl(mix(rc, tc, a.r));// * vec4(phong(), 1.0));
+    fragColor = mix(tc2, tc1, ba2);
+    fragColor = mix(tc3, fragColor, ba3);
+    fragColor = mix(tc4, fragColor, ba4);
+    fragColor = mix(tc5, fragColor, ba5);
+    fragColor = hejl(fragColor); // * vec4(phong(), 1.0));
 }

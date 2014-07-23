@@ -5,10 +5,11 @@ layout(triangles, fractional_even_spacing, ccw) in;
 in FragmentData
 {
     vec2 terrainTexCoord;
-    vec2 blendTexCoord;
-    vec4 terrainTexNum;
-    float roadTexNum;
-    float blendTexNum;
+    vec4 terrainInfo1;
+    vec4 terrainInfo2;
+    vec4 terrainInfo3;
+    vec4 terrainInfo4;
+    vec4 terrainInfo5;
 } inData[];
 
 out FragmentData
@@ -16,10 +17,11 @@ out FragmentData
     vec3 position;
     vec3 normal;
     vec2 terrainTexCoord;
-    vec2 blendTexCoord;
-    flat vec4 terrainTexNum;
-    flat float roadTexNum;
-    flat float blendTexNum;
+    vec4 terrainInfo1;
+    vec4 terrainInfo2;
+    vec4 terrainInfo3;
+    vec4 terrainInfo4;
+    vec4 terrainInfo5;
 } outData;
 
 uniform mat3 normalMatrix;
@@ -50,15 +52,23 @@ void main()
                               inData[1].terrainTexCoord * gl_TessCoord.y +
                               inData[2].terrainTexCoord * gl_TessCoord.z;
 
-    outData.blendTexCoord = inData[0].blendTexCoord * gl_TessCoord.x +
-                            inData[1].blendTexCoord * gl_TessCoord.y +
-                            inData[2].blendTexCoord * gl_TessCoord.z;
+    outData.terrainInfo1 = inData[0].terrainInfo1 * gl_TessCoord.x +
+                           inData[1].terrainInfo1 * gl_TessCoord.y +
+                           inData[2].terrainInfo1 * gl_TessCoord.z;
 
-    outData.terrainTexNum = inData[0].terrainTexNum;
+    outData.terrainInfo2 = inData[0].terrainInfo2 * gl_TessCoord.x +
+                           inData[1].terrainInfo2 * gl_TessCoord.y +
+                           inData[2].terrainInfo2 * gl_TessCoord.z;
 
-    outData.roadTexNum = inData[0].roadTexNum;
+    outData.terrainInfo3 = inData[0].terrainInfo3 * gl_TessCoord.x +
+                           inData[1].terrainInfo3 * gl_TessCoord.y +
+                           inData[2].terrainInfo3 * gl_TessCoord.z;
 
-    outData.blendTexNum = inData[0].blendTexNum;
+    outData.terrainInfo4 = inData[0].terrainInfo4 * gl_TessCoord.x +
+                           inData[1].terrainInfo4 * gl_TessCoord.y +
+                           inData[2].terrainInfo4 * gl_TessCoord.z;
 
-    
+    outData.terrainInfo5 = inData[0].terrainInfo5 * gl_TessCoord.x +
+                           inData[1].terrainInfo5 * gl_TessCoord.y +
+                           inData[2].terrainInfo5 * gl_TessCoord.z;
 }

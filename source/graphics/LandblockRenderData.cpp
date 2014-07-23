@@ -35,13 +35,16 @@ GLsizei LandblockRenderData::vertexCount() const
 	return _vertexCount;
 }
 
-static Vec2 rotateTexCoord(Vec2 tc, double deg)
+static void pushRotatedCoord(vector<uint8_t>& vertexData, double s, double t, int rotations)
 {
-    auto cosine = cos(deg / 180.0 * PI);
-    auto sine = sin(deg / 180.0 * PI);
-    return Vec2(
-        (tc.x - 0.5) * cosine - (tc.y - 0.5) * sine + 0.5,
-        (tc.x - 0.5) * sine + (tc.y - 0.5) * cosine + 0.5);
+    auto cosine = cos(PI / 180.0 * 90.0 * rotations);
+    auto sine = sin(PI / 180.0 * 90.0 * rotations);
+
+    auto ns = (s - 0.5) * cosine - (t - 0.5) * sine + 0.5;
+    auto nt = (s - 0.5) * sine + (t - 0.5) * cosine + 0.5;
+
+    vertexData.push_back(ns + 0.5);
+    vertexData.push_back(nt + 0.5);
 }
 
 void LandblockRenderData::initGeometry(const Landblock& landblock)
@@ -54,128 +57,109 @@ void LandblockRenderData::initGeometry(const Landblock& landblock)
     {
         for(auto x = 0; x < Landblock::GRID_SIZE - 1; x++)
         {
-            //   N
-            //  4-3
-            //W | | E
-            //  1-2
-            //   S
+            uint8_t terrain[4];
 
 #define T(dx, dy) (data.styles[x + (dx)][y + (dy)] >> 2) & 0x1F
-            // terrain types
-            auto t1 = T(0, 0);
-            auto t2 = T(1, 0);
-            auto t3 = T(1, 1);
-            auto t4 = T(0, 1);
+            terrain[0] = T(0, 0);
+            terrain[1] = T(1, 0);
+            terrain[2] = T(1, 1);
+            terrain[3] = T(0, 1);
 #undef T
 
-#define R(dx, dy) (data.styles[x + (dx)][y + (dy)] & 0x3) != 0
-            // roads
-            auto r1 = R(0, 0);
-            auto r2 = R(1, 0);
-            auto r3 = R(1, 1);
-            auto r4 = R(0, 1);
-#undef R
-            auto r = ((int)r1 << 12) | ((int)r2 << 8) | ((int)r3 << 4) | (int)r4;
+            uint32_t terrainDone = 0;
 
-            auto blendAngle = 0.0;
+            vector<uint8_t> textures;
+            vector<uint8_t> blendTextures;
+            vector<uint8_t> rotations;
 
-            // road texture number
-            auto rp = 0x20;
-
-            // blend texture number
-            auto bp = 0;
-
-            auto scale = 3.0;
-
-            // TODO choose a random corner blend!
-
-            switch(r)
+            for(auto i = 0; i < 4; i++)
             {
-                case 0x0000: // all ground
-                    bp = 0;
-                    break;
-                case 0x1111: // all road
-                    bp = 1;
-                    break;
-                case 0x1100: // south road
-                    bp = 2;
-                    blendAngle = 270.0;
-                    break;
-                case 0x0011: // north road
-                    bp = 2;
-                    blendAngle = 90.0;
-                    break;
-                case 0x1001: // west road
-                    bp = 2;
-                    blendAngle = 0.0;
-                    break;
-                case 0x0110: // east road
-                    blendAngle = 180.0;
-                    bp = 2;
-                    break;
-                case 0x1000: // southwest corner
-                    bp = 3;
-                    blendAngle = 0.0;
-                    break;
-                case 0x0100: // southeast corner
-                    bp = 3;
-                    blendAngle = 270.0;
-                    break;
-                case 0x0010: // northeast corner
-                    bp = 4;
-                    blendAngle = 180.0;
-                    break;
-                case 0x0001: // northwest corner
-                    bp = 4;
-                    blendAngle = 90.0;
-                    break;
-                case 0x1010: // southwest/northeast diagonal
-                    bp = 10;
-                    scale = 1.0;
-                    break;
-                case 0x0101: // southeast/northwest diagonal
-                    bp = 10;
-                    blendAngle = 90.0;
-                    scale = 1.0;
-                    break;
-                case 0x1110:
-                    //printf("lower right road\n");
-                    bp = 3;
-                    break;
-                case 0x0111:
-                    //printf("upper right road\n");
-                    bp = 3;
-                    break;
-                case 0x1011:
-                    //printf("upper left road\n");
-                    bp = 3;
-                    break;
-                case 0x1101:
-                    //printf("upper right road\n");
-                    bp = 3;
-                    break;
-                default:
-                    assert(false);
-                    break;
+                if(terrainDone & (1 << terrain[i]))
+                {
+                    continue;
+                }
+
+                terrainDone |= (1 << terrain[i]);
+
+                uint8_t bitfield = 0;
+
+                for(auto j = 0; j < 4; j++)
+                {
+                    if(terrain[j] == terrain[i])
+                    {
+                        bitfield |= (1 << j);
+                    }
+                }
+
+                // number of 90 degree ccw rotations
+                auto rotationCount = 0;
+                auto blendTex = 0xFF;
+
+                while(true)
+                {
+                    switch(bitfield)
+                    {
+                        case 0x1: // 0001
+                            blendTex = 8; // TODO
+                            break;
+                        case 0x3: // 0011
+                            blendTex = 2; // TODO
+                            break;
+                        case 0x5: // 0101
+                            blendTex = 0; // TODO
+                            break;
+                        case 0x7: // 0111
+                            blendTex = 0; // TODO
+                            break;
+                        case 0xF: // 1111
+                            blendTex = 1; // TODO
+                            break;
+                    }
+
+                    if(blendTex != 0xFF)
+                    {
+                        break;
+                    }
+
+                    bitfield = ((bitfield << 1) | (bitfield >> 3)) & 0xF;
+                    rotationCount++;
+                }
+
+                if(blendTex == 2) { rotationCount += 3; }
+
+                textures.push_back(terrain[i]);
+                blendTextures.push_back(blendTex);
+                rotations.push_back(rotationCount);
             }
 
-// See LandVertexShader.glsl too see what these are
+            while(textures.size() < 5)
+            {
+                textures.push_back(0);
+                blendTextures.push_back(0);
+                rotations.push_back(0);
+            }
+
+            // See LandVertexShader.glsl to see what these are
 #define V(dx, dy) \
     vertexData.push_back((x + (dx)) * 24); \
     vertexData.push_back((y + (dy)) * 24); \
     vertexData.push_back(dx); \
     vertexData.push_back(dy); \
-    { \
-        auto tcr = rotateTexCoord(Vec2(dx, dy), blendAngle); \
-        vertexData.push_back(scale * tcr.x + 0.5); /* ghetto rounding */ \
-        vertexData.push_back(scale * tcr.y + 0.5); /* ghetto rounding */ \
-    } \
-    vertexData.push_back(t1); \
-    vertexData.push_back(t2); \
-    vertexData.push_back(t3); \
-    vertexData.push_back(t4); \
-    vertexData.push_back(rp); \
-    vertexData.push_back(bp);
+    pushRotatedCoord(vertexData, dx, dy, rotations[0]); \
+    vertexData.push_back(blendTextures[0]); \
+    vertexData.push_back(textures[0]); \
+    pushRotatedCoord(vertexData, dx, dy, rotations[1]); \
+    vertexData.push_back(blendTextures[1]); \
+    vertexData.push_back(textures[1]); \
+    pushRotatedCoord(vertexData, dx, dy, rotations[2]); \
+    vertexData.push_back(blendTextures[2]); \
+    vertexData.push_back(textures[2]); \
+    pushRotatedCoord(vertexData, dx, dy, rotations[3]); \
+    vertexData.push_back(blendTextures[3]); \
+    vertexData.push_back(textures[3]); \
+    pushRotatedCoord(vertexData, dx, dy, rotations[4]); \
+    vertexData.push_back(blendTextures[4]); \
+    vertexData.push_back(textures[4]);
 
             if(landblock.isSplitNESW(x, y))
             {
@@ -197,7 +181,7 @@ void LandblockRenderData::initGeometry(const Landblock& landblock)
         }
     }
 
-    static const int COMPONENTS_PER_VERTEX = 12;
+    static const int COMPONENTS_PER_VERTEX = 24;
 
     _vertexCount = vertexData.size() / COMPONENTS_PER_VERTEX;
 
@@ -208,12 +192,13 @@ void LandblockRenderData::initGeometry(const Landblock& landblock)
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(uint8_t), vertexData.data(), GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 2, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uint8_t) * COMPONENTS_PER_VERTEX, nullptr);
-    glVertexAttribPointer(1, 2, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uint8_t) * COMPONENTS_PER_VERTEX, (GLvoid*)(sizeof(uint8_t) * 2));
-    glVertexAttribPointer(2, 2, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uint8_t) * COMPONENTS_PER_VERTEX, (GLvoid*)(sizeof(uint8_t) * 4));
-    glVertexAttribPointer(3, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uint8_t) * COMPONENTS_PER_VERTEX, (GLvoid*)(sizeof(uint8_t) * 6));
-    glVertexAttribPointer(4, 1, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uint8_t) * COMPONENTS_PER_VERTEX, (GLvoid*)(sizeof(uint8_t) * 10));
-    glVertexAttribPointer(5, 1, GL_UNSIGNED_BYTE, GL_FALSE, sizeof(uint8_t) * COMPONENTS_PER_VERTEX, (GLvoid*)(sizeof(uint8_t) * 11));
+    glVertexAttribPointer(0, 2, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), nullptr);
+    glVertexAttribPointer(1, 2, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), (GLvoid*)(sizeof(uint8_t) * 2));
+    glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), (GLvoid*)(sizeof(uint8_t) * 4));
+    glVertexAttribPointer(3, 4, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), (GLvoid*)(sizeof(uint8_t) * 8));
+    glVertexAttribPointer(4, 4, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), (GLvoid*)(sizeof(uint8_t) * 12));
+    glVertexAttribPointer(5, 4, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), (GLvoid*)(sizeof(uint8_t) * 16));
+    glVertexAttribPointer(6, 4, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), (GLvoid*)(sizeof(uint8_t) * 20));
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
@@ -221,6 +206,7 @@ void LandblockRenderData::initGeometry(const Landblock& landblock)
     glEnableVertexAttribArray(3);
     glEnableVertexAttribArray(4);
     glEnableVertexAttribArray(5);
+    glEnableVertexAttribArray(6);
 }
 
 void LandblockRenderData::initHeightTexture(const Landblock& landblock)
