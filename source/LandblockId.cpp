@@ -3,7 +3,7 @@
 LandblockId::LandblockId() : _x(0), _y(0)
 {}
 
-LandblockId::LandblockId(uint8_t x, uint8_t y) : _x(x), _y(y)
+LandblockId::LandblockId(uint8_t lx, uint8_t ly) : _x(lx), _y(ly)
 {}
 
 uint8_t LandblockId::x() const
@@ -30,10 +30,10 @@ int LandblockId::calcSquareDistance(LandblockId other) const
 
 bool LandblockId::operator==(LandblockId other) const
 {
-    return x() == other.x() && y() == other.y();
+    return _x == other._x && _y == other._y;
 }
 
 bool LandblockId::operator!=(LandblockId other) const
 {
-    return x() != other.x() || y() != other.y();
+    return _x != other._x || _y != other._y;
 }

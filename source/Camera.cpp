@@ -32,21 +32,21 @@ void Camera::step(double dt)
     (void)dt;
 }
 
-void Camera::setPosition(const Vec3& position)
+void Camera::setPosition(const Vec3& newPosition)
 {
-    _position = position;
+    _position = newPosition;
     updateViewMatrix();
 }
 
-void Camera::setHeadPosition(const Vec3& headPosition)
+void Camera::setHeadPosition(const Vec3& newHeadPosition)
 {
-    _headPosition = headPosition;
+    _headPosition = newHeadPosition;
     updateViewMatrix();
 }
 
-void Camera::setHeadOrientation(const Quat& headOrientation)
+void Camera::setHeadOrientation(const Quat& newHeadOrientation)
 {
-    _headOrientation = headOrientation;
+    _headOrientation = newHeadOrientation;
     updateRotationQuat();
 }
 

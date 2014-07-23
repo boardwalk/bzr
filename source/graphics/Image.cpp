@@ -48,11 +48,11 @@ Image& Image::operator=(Image&& other)
     return *this;
 }
 
-void Image::create(Format format, int width, int height)
+void Image::create(Format f, int w, int h)
 {
-    _format = format;
-    _width = width;
-    _height = height;
+    _format = f;
+    _width = w;
+    _height = h;
     _data.clear();
     _data.resize(_width * _height * numChannels());
 }
@@ -121,21 +121,21 @@ void Image::load(uint32_t fileId)
         throw runtime_error("Texture dataSize mismatch");
     }
 
-    auto data = reader.readPointer<uint8_t>(header->dataSize);
+    auto dataPointer = reader.readPointer<uint8_t>(header->dataSize);
 
     reader.assertEnd();
 
     if(header->type == 0x31545844)
     {
-        _data = decodeDXT1(data, header->width, header->height);
+        _data = decodeDXT1(dataPointer, header->width, header->height);
     }
     else if(header->type == 0x35545844)
     {
-        _data = decodeDXT5(data, header->width, header->height);
+        _data = decodeDXT5(dataPointer, header->width, header->height);
     }
     else
     {
-        _data.assign(data, data + header->dataSize);
+        _data.assign(dataPointer, dataPointer + header->dataSize);
     }
 
     _width = header->width;

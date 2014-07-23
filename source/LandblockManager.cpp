@@ -8,12 +8,12 @@ LandblockManager::LandblockManager()
     _radius = Core::get().config().getInt("LandblockManager.radius", 8);
 }
 
-void LandblockManager::setCenter(LandblockId center)
+void LandblockManager::setCenter(LandblockId c)
 {
-    if(center != _center)
+    if(c != _center)
     {
-        printf("new center: %02x %02x\n", center.x(), center.y());
-        _center = center;
+        printf("new center: %02x %02x\n", c.x(), c.y());
+        _center = c;
         load();
     }
 }
@@ -60,16 +60,6 @@ void LandblockManager::load()
         for(uint8_t y = _center.y() - sloppyRadius; y <= _center.y() + sloppyRadius; y++)
         {
             LandblockId id(x, y);
-
-            if(x < 0x00 || x > 0xFF)
-            {
-                continue;
-            }
-
-            if(y < 0x00 || y > 0xFF)
-            {
-                continue;
-            }
 
             if(_center.calcSquareDistance(id) > sloppyRadius * sloppyRadius)
             {

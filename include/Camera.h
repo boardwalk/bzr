@@ -24,9 +24,9 @@ public:
 
     void step(double dt);
 
-    void setPosition(const Vec3& position);
-    void setHeadPosition(const Vec3& headPosition);
-    void setHeadOrientation(const Quat& headOrientation);
+    void setPosition(const Vec3& newPosition);
+    void setHeadPosition(const Vec3& newHeadPosition);
+    void setHeadOrientation(const Quat& newHeadOrientation);
 
     const Vec3& position() const;
     const Quat& rotationQuat() const;

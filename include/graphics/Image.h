@@ -15,7 +15,7 @@ public:
     Image(Image&&);
     Image& operator=(Image&&);
 
-    void create(Format format, int width, int height);
+    void create(Format f, int w, int h);
     void load(uint32_t fileId);
 
     void blit(const Image& image, int x, int y);

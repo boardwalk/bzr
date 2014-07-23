@@ -5,7 +5,7 @@ class LandblockId
 {
 public:
     LandblockId();
-    LandblockId(uint8_t x, uint8_t y);
+    LandblockId(uint8_t lx, uint8_t ly);
 
     uint8_t x() const;
     uint8_t y() const;

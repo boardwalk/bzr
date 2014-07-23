@@ -161,6 +161,8 @@ def main():
             else:
                 ldflags += ' -lGL'
 
+            ldflags += ' -ljansson'
+
             if args.release:
                 cppflags += ' -O2 -flto'
                 if sys.platform == 'darwin':
