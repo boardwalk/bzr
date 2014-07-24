@@ -151,6 +151,9 @@ void LandblockRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
     auto cameraPosition = Core::get().camera().position();
     glUniform4f(_program.getUniform("cameraPosition"), cameraPosition.x, cameraPosition.y, cameraPosition.z, 1.0);
 
+    auto viewLightPosition = viewMat * _lightPosition;
+    glUniform3f(_program.getUniform("lightPosition"), viewLightPosition.x, viewLightPosition.y, viewLightPosition.z);
+
     for(auto it = landblockManager.begin(); it != landblockManager.end(); ++it)
     {
         auto dx = it->first.x() - landblockManager.center().x();
@@ -182,6 +185,11 @@ void LandblockRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
     }
 }
 
+void LandblockRenderer::setLightPosition(const Vec3& lightPosition)
+{
+    _lightPosition = lightPosition;
+}
+
 void LandblockRenderer::initProgram()
 {
     _program.create();
@@ -207,9 +215,6 @@ void LandblockRenderer::initProgram()
     glUniform1i(normalTexLocation, 3);
 
     // lighting parameters
-    Vec3 lightPosition(0.0, 0.0, 0.0); // in view coordinates, so this is centered at the camera!
-    glUniform3f(_program.getUniform("lightPosition"), lightPosition.x, lightPosition.y, lightPosition.z);
-
     Vec3 lightIntensity(1.0, 1.0, 1.0);
     glUniform3f(_program.getUniform("lightIntensity"), lightIntensity.x, lightIntensity.y, lightIntensity.z);
 

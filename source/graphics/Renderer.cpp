@@ -67,6 +67,7 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 
     _skyRenderer.reset(new SkyRenderer());
     _landblockRenderer.reset(new LandblockRenderer());
+    _landblockRenderer->setLightPosition(_skyRenderer->sunVector() * 1000.0);
 }
 
 Renderer::~Renderer()

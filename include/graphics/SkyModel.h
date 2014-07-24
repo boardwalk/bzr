@@ -35,9 +35,12 @@ public:
     void prepare(const Params& p);
 
     // theta is the zenith angle (angle from directly above)
-    // phi is the azimuth angle (angle from directly south)
+    // phi is the azimuth angle (ccw angle from directly south)
     // returns a normalized sRGB color value
     Vec3 getColor(double theta, double phi);
+
+    double thetaSun() const;
+    double phiSun() const;
 
 private:
     // zenith angle of the sun

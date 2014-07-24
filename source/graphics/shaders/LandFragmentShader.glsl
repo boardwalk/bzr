@@ -29,7 +29,7 @@ uniform float shininess;
 vec3 phong()
 {
     vec3 n = texture(normalTex, normalTexCoord).xyz - vec3(0.5);
-    n = normalize( normalMatrix * n );
+    n = normalize(normalMatrix * n);
     vec3 s = normalize(lightPosition - position);
     vec3 v = normalize(-position);
     vec3 h = normalize(v + s);

@@ -116,3 +116,13 @@ Vec3 SkyModel::getColor(double theta, double phi)
 
     return M * XYZ;
 }
+
+double SkyModel::thetaSun() const
+{
+    return _theta_s;
+}
+
+double SkyModel::phiSun() const
+{
+    return _phi_s;
+}
