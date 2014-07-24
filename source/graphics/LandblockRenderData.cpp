@@ -35,7 +35,7 @@ GLsizei LandblockRenderData::vertexCount() const
 	return _vertexCount;
 }
 
-static void pushRotatedCoord(vector<uint8_t>& vertexData, double s, double t, int rotations)
+static void pushRotatedCoord(vector<uint8_t>& vertexData, double s, double t, int rotations, int scale)
 {
     auto cosine = cos(PI / 180.0 * 90.0 * rotations);
     auto sine = sin(PI / 180.0 * 90.0 * rotations);
@@ -43,8 +43,8 @@ static void pushRotatedCoord(vector<uint8_t>& vertexData, double s, double t, in
     auto ns = (s - 0.5) * cosine - (t - 0.5) * sine + 0.5;
     auto nt = (s - 0.5) * sine + (t - 0.5) * cosine + 0.5;
 
-    vertexData.push_back(ns + 0.5);
-    vertexData.push_back(nt + 0.5);
+    vertexData.push_back(uint8_t(ns + 0.5) * scale);
+    vertexData.push_back(uint8_t(nt + 0.5) * scale);
 }
 
 void LandblockRenderData::initGeometry(const Landblock& landblock)
@@ -65,6 +65,15 @@ void LandblockRenderData::initGeometry(const Landblock& landblock)
             terrain[2] = T(1, 1);
             terrain[3] = T(0, 1);
 #undef T
+
+            uint8_t road[4];
+
+#define R(dx, dy) data.styles[x + (dx)][y + (dy)] & 0x3
+            road[0] = R(0, 0);
+            road[1] = R(1, 0);
+            road[2] = R(1, 1);
+            road[3] = R(0, 1);
+#undef R
 
             uint32_t terrainDone = 0;
 
@@ -94,25 +103,26 @@ void LandblockRenderData::initGeometry(const Landblock& landblock)
                 // number of 90 degree ccw rotations
                 auto rotationCount = 0;
                 auto blendTex = 0xFF;
+                auto invert = false;
 
                 while(true)
                 {
                     switch(bitfield)
                     {
                         case 0x1: // 0001
-                            blendTex = 8; // TODO
+                            blendTex = 8;
                             break;
-                        case 0x3: // 0011
-                            blendTex = 2; // TODO
+                        case 0x9: // 1001
+                            blendTex = 2;
                             break;
                         case 0x5: // 0101
                             blendTex = 0; // TODO
                             break;
-                        case 0x7: // 0111
-                            blendTex = 0; // TODO
+                        case 0xE: // 1110
+                            blendTex = 0x80 + 0x8;
                             break;
                         case 0xF: // 1111
-                            blendTex = 1; // TODO
+                            blendTex = 1;
                             break;
                     }
 
@@ -125,18 +135,71 @@ void LandblockRenderData::initGeometry(const Landblock& landblock)
                     rotationCount++;
                 }
 
-                if(blendTex == 2) { rotationCount += 3; }
-
                 textures.push_back(terrain[i]);
                 blendTextures.push_back(blendTex);
                 rotations.push_back(rotationCount);
             }
 
-            while(textures.size() < 5)
+            while(textures.size() < 4)
             {
                 textures.push_back(0);
                 blendTextures.push_back(0);
                 rotations.push_back(0);
+            }
+
+            uint32_t roadScale = 3;
+
+            {
+                uint8_t bitfield = 0;
+
+                for(auto j = 0; j < 4; j++)
+                {
+                    if(road[j])
+                    {
+                        bitfield |= (1 << j);
+                    }
+                }
+
+                auto rotationCount = 0;
+                auto blendTex = 0xFF;
+
+                while(true)
+                {
+                    switch(bitfield)
+                    {
+                        case 0x0: // 0000
+                            blendTex = 0;
+                            break;
+                        case 0x1: // 0001
+                            blendTex = 5;
+                            break;
+                        case 0x9: // 1001
+                            blendTex = 2;
+                            break;
+                        case 0x5: // 0101
+                            blendTex =  0xA;
+                            roadScale = 1;
+                            break;
+                        case 0xE: // 1110
+                            blendTex = 0x80 + 5;
+                            break;
+                        case 0xF: // 1111
+                            blendTex = 1;
+                            break;
+                    }
+
+                    if(blendTex != 0xFF)
+                    {
+                        break;
+                    }
+
+                    bitfield = ((bitfield << 1) | (bitfield >> 3)) & 0xF;
+                    rotationCount++;
+                }
+
+                textures.push_back(0x20);
+                blendTextures.push_back(blendTex);
+                rotations.push_back(rotationCount);
             }
 
             // See LandVertexShader.glsl to see what these are
@@ -145,19 +208,19 @@ void LandblockRenderData::initGeometry(const Landblock& landblock)
     vertexData.push_back((y + (dy)) * 24); \
     vertexData.push_back(dx); \
     vertexData.push_back(dy); \
-    pushRotatedCoord(vertexData, dx, dy, rotations[0]); \
+    pushRotatedCoord(vertexData, dx, dy, rotations[0], 1); \
     vertexData.push_back(blendTextures[0]); \
     vertexData.push_back(textures[0]); \
-    pushRotatedCoord(vertexData, dx, dy, rotations[1]); \
+    pushRotatedCoord(vertexData, dx, dy, rotations[1], 1); \
     vertexData.push_back(blendTextures[1]); \
     vertexData.push_back(textures[1]); \
-    pushRotatedCoord(vertexData, dx, dy, rotations[2]); \
+    pushRotatedCoord(vertexData, dx, dy, rotations[2], 1); \
     vertexData.push_back(blendTextures[2]); \
     vertexData.push_back(textures[2]); \
-    pushRotatedCoord(vertexData, dx, dy, rotations[3]); \
+    pushRotatedCoord(vertexData, dx, dy, rotations[3], 1); \
     vertexData.push_back(blendTextures[3]); \
     vertexData.push_back(textures[3]); \
-    pushRotatedCoord(vertexData, dx, dy, rotations[4]); \
+    pushRotatedCoord(vertexData, dx, dy, rotations[4], roadScale); \
     vertexData.push_back(blendTextures[4]); \
     vertexData.push_back(textures[4]);
 

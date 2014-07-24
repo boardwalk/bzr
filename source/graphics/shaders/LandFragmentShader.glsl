@@ -55,6 +55,14 @@ vec4 hejl(in vec4 color)
     return (x * (6.2 * x + 0.5)) / (x * (6.2 * x + 1.7) + 0.06);
 }
 
+float alpha(vec3 texCoord)
+{
+    vec3 realTexCoord = vec3(texCoord.s, texCoord.t, fract(texCoord.p / 128.0) * 128.0);
+    float a = texture(blendTex, realTexCoord).r;
+    float z = floor(texCoord.p / 128.0);
+    return a + z - 2.0 * a * z;
+}
+
 void main()
 {
     vec4 tc1 = linearize(texture(terrainTex, vec3(terrainTexCoord.st, terrainInfo1.q)));
@@ -63,10 +71,10 @@ void main()
     vec4 tc4 = linearize(texture(terrainTex, vec3(terrainTexCoord.st, terrainInfo4.q)));
     vec4 tc5 = linearize(texture(terrainTex, vec3(terrainTexCoord.st, terrainInfo5.q)));
 
-    float ba2 = texture(blendTex, terrainInfo2.stp).r;
-    float ba3 = texture(blendTex, terrainInfo3.stp).r;
-    float ba4 = texture(blendTex, terrainInfo4.stp).r;
-    float ba5 = texture(blendTex, terrainInfo5.stp).r;
+    float ba2 = alpha(terrainInfo2.stp);
+    float ba3 = alpha(terrainInfo3.stp);
+    float ba4 = alpha(terrainInfo4.stp);
+    float ba5 = alpha(terrainInfo5.stp);
 
     fragColor = mix(tc2, tc1, ba2);
     fragColor = mix(tc3, fragColor, ba3);
