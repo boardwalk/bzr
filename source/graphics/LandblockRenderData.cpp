@@ -103,7 +103,6 @@ void LandblockRenderData::initGeometry(const Landblock& landblock)
                 // number of 90 degree ccw rotations
                 auto rotationCount = 0;
                 auto blendTex = 0xFF;
-                auto invert = false;
 
                 while(true)
                 {
