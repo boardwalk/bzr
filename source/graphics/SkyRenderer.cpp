@@ -113,7 +113,7 @@ void SkyRenderer::initTexture()
 
     SkyModel::Params params;
     params.dt = 180.0;
-    params.tm = 0.5;
+    params.tm = 0.7;
     params.lng = 0.0;
     params.lat = 0.0;
     params.tu = 5.0;
@@ -169,11 +169,9 @@ void SkyRenderer::initTexture()
         glTexImage2D(FACES[face], 0, GL_RGB8, CUBE_SIZE, CUBE_SIZE, 0, GL_RGB, GL_UNSIGNED_BYTE, data.data());
     }
     
-    // TODO make sure this is correct
-    _sunVector.x = cos(model.thetaSun()) * cos(model.phiSun());
-    _sunVector.y = cos(model.thetaSun()) * sin(model.phiSun());
-    _sunVector.z = sin(model.thetaSun());
-    //printf("sun vector: %f %f %f\n", _sunVector.x, _sunVector.y, _sunVector.z);
+    _sunVector.x = sin(model.thetaSun()) * sin(model.phiSun());
+    _sunVector.y = -sin(model.thetaSun()) * cos(model.phiSun());
+    _sunVector.z = cos(model.thetaSun());
 }
 
 const Vec3& SkyRenderer::sunVector() const
