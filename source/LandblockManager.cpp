@@ -2,7 +2,7 @@
 #include "Core.h"
 #include "DatFile.h"
 
-LandblockManager::LandblockManager() : _center(0x31, 0xD6), _radius(8)
+LandblockManager::LandblockManager() : _center(0x31, 0xD6), _radius(3)
 {
 	load();
 }

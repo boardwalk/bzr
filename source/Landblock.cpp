@@ -13,15 +13,15 @@ Landblock::Landblock(const void* data, size_t length)
 
     memcpy(&_data, data, sizeof(_data));
 
-    buildHeightMap();
+    buildOffsetMap();
 }
 
 Landblock::Landblock(Landblock&& other)
 {
     _data = other._data;
-    _heightMap = move(other._heightMap);
-    _heightMapBase = other._heightMapBase;
-    _heightMapScale = other._heightMapScale;
+    _offsetMap = move(other._offsetMap);
+    _offsetMapBase = other._offsetMapBase;
+    _offsetMapScale = other._offsetMapScale;
     _renderData = move(other._renderData);
 }
 
@@ -90,19 +90,19 @@ double Landblock::calcHeight(double x, double y) const
     return hb * (1.0 - fy) + ht * fy;
 }
 
-const uint16_t* Landblock::heightMap() const
+const uint16_t* Landblock::offsetMap() const
 {
-    return _heightMap.data();
+    return _offsetMap.data();
 }
 
-double Landblock::heightMapBase() const
+double Landblock::offsetMapBase() const
 {
-    return _heightMapBase;
+    return _offsetMapBase;
 }
 
-double Landblock::heightMapScale() const
+double Landblock::offsetMapScale() const
 {
-    return _heightMapScale;
+    return _offsetMapScale;
 }
 
 bool Landblock::isSplitNESW(int x, int y) const
@@ -134,7 +134,7 @@ static double bicubic(double p[4][4], double x, double y)
     return cubic(arr, x);
 }
 
-void Landblock::buildHeightMap()
+void Landblock::buildOffsetMap()
 {
     static const int sampleSize = GRID_SIZE;
     vector<double> sample(sampleSize * sampleSize);
@@ -149,19 +149,19 @@ void Landblock::buildHeightMap()
         }
     }
 
-    vector<double> resample(HEIGHT_MAP_SIZE * HEIGHT_MAP_SIZE);
+    vector<double> resample(OFFSET_MAP_SIZE * OFFSET_MAP_SIZE);
 
 #define CLAMP(x, l, h) min(max(x, l), h)
 
-    auto minHeight = numeric_limits<double>::max();
-    auto maxHeight = numeric_limits<double>::min();
+    auto minOffset = numeric_limits<double>::max();
+    auto maxOffset = numeric_limits<double>::min();
 
-    for(auto hy = 0; hy < HEIGHT_MAP_SIZE; hy++)
+    for(auto oy = 0; oy < OFFSET_MAP_SIZE; oy++)
     {
-        for(auto hx = 0; hx < HEIGHT_MAP_SIZE; hx++)
+        for(auto ox = 0; ox < OFFSET_MAP_SIZE; ox++)
         {
-            auto sx = double(hx) / double(HEIGHT_MAP_SIZE - 1) * double(sampleSize - 1);
-            auto sy = double(hy) / double(HEIGHT_MAP_SIZE - 1) * double(sampleSize - 1);
+            auto sx = double(ox) / double(OFFSET_MAP_SIZE - 1) * double(sampleSize - 1);
+            auto sy = double(oy) / double(OFFSET_MAP_SIZE - 1) * double(sampleSize - 1);
 
             auto ix = (int)sx;
             auto iy = (int)sy;
@@ -179,27 +179,37 @@ void Landblock::buildHeightMap()
                 }
             }
 
-            auto height = bicubic(p, fx, fy);
+            auto lx = double(ox) / double(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
+            auto ly = double(oy) / double(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
 
-            minHeight = min(minHeight, height);
-            maxHeight = max(maxHeight, height);
+            auto offset = bicubic(p, fx, fy) - calcHeight(lx, ly);
 
-            resample[hx + hy * HEIGHT_MAP_SIZE] = height;
+            minOffset = min(minOffset, offset);
+            maxOffset = max(maxOffset, offset);
+
+            resample[ox + oy * OFFSET_MAP_SIZE] = offset;
         }
     }
 
 #undef CLAMP
 
-    _heightMap.resize(HEIGHT_MAP_SIZE * HEIGHT_MAP_SIZE);
-    _heightMapBase = minHeight;
-    _heightMapScale = maxHeight - minHeight;
+    _offsetMap.resize(OFFSET_MAP_SIZE * OFFSET_MAP_SIZE);
+    _offsetMapBase = minOffset;
+    _offsetMapScale = maxOffset - minOffset;
 
-    for(auto hy = 0; hy < HEIGHT_MAP_SIZE; hy++)
+    if(_offsetMapScale < 0.0001)
     {
-        for(auto hx = 0; hx < HEIGHT_MAP_SIZE; hx++)
+        memset(_offsetMap.data(), 0, _offsetMap.size() * sizeof(uint16_t));
+    }
+    else
+    {
+        for(auto oy = 0; oy < OFFSET_MAP_SIZE; oy++)
         {
-            double height = resample[hx + hy * HEIGHT_MAP_SIZE];
-            _heightMap[hx + hy * HEIGHT_MAP_SIZE] = (height - _heightMapBase) / _heightMapScale * double(0xFFFF);
+            for(auto ox = 0; ox < OFFSET_MAP_SIZE; ox++)
+            {
+                double offset = resample[ox + oy * OFFSET_MAP_SIZE];
+                _offsetMap[ox + oy * OFFSET_MAP_SIZE] = (offset - _offsetMapBase) / _offsetMapScale * double(0xFFFF);
+            }
         }
     }
 }

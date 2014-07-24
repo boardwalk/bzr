@@ -4,6 +4,7 @@
 #include "math/Mat3.h"
 #include "math/Mat4.h"
 #include "math/Vec3.h"
+#include "Camera.h"
 #include "Core.h"
 #include "LandblockManager.h"
 #include <algorithm>
@@ -147,6 +148,9 @@ void LandblockRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 
     auto& landblockManager = Core::get().landblockManager();
 
+    auto cameraPosition = Core::get().camera().position();
+    glUniform4f(_program.getUniform("cameraPosition"), cameraPosition.x, cameraPosition.y, cameraPosition.z, 1.0);
+
     for(auto it = landblockManager.begin(); it != landblockManager.end(); ++it)
     {
         auto dx = it->first.x() - landblockManager.center().x();
@@ -159,6 +163,7 @@ void LandblockRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
         auto modelViewProjectionMat = projectionMat * modelViewMat;
 
         loadMat3ToUniform(Mat3(modelViewMat).inverse().transpose(), _program.getUniform("normalMatrix"));
+        loadMat4ToUniform(modelMat, _program.getUniform("modelMatrix"));
         loadMat4ToUniform(modelViewMat, _program.getUniform("modelViewMatrix"));
         loadMat4ToUniform(modelViewProjectionMat, _program.getUniform("modelViewProjectionMatrix"));
 
@@ -195,8 +200,8 @@ void LandblockRenderer::initProgram()
     auto blendTexLocation = _program.getUniform("blendTex");
     glUniform1i(blendTexLocation, 1);
 
-    auto heightTexLocation = _program.getUniform("heightTex");
-    glUniform1i(heightTexLocation, 2);
+    auto offsetTexLocation = _program.getUniform("offsetTex");
+    glUniform1i(offsetTexLocation, 2);
 
     // lighting parameters
     Vec3 lightPosition(96.0, 96.0, 50.0);

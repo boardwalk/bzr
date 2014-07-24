@@ -28,9 +28,9 @@ uniform mat3 normalMatrix;
 uniform mat4 modelViewMatrix;
 uniform mat4 modelViewProjectionMatrix;
 
-uniform sampler2D heightTex;
-uniform float heightBase;
-uniform float heightScale;
+uniform sampler2D offsetTex;
+uniform float offsetBase;
+uniform float offsetScale;
 
 void main()
 {
@@ -38,11 +38,11 @@ void main()
                     gl_in[1].gl_Position * gl_TessCoord.y +
                     gl_in[2].gl_Position * gl_TessCoord.z;
 
-    float height = heightBase + texture(heightTex, modelPos.xy / 192.0).r * heightScale;
+    modelPos.z = modelPos.z + offsetBase + texture(offsetTex, modelPos.xy / 192.0).r * offsetScale;
 
-    gl_Position = modelViewProjectionMatrix * vec4(modelPos.xy, height, 1.0);
+    gl_Position = modelViewProjectionMatrix * modelPos;
 
-    outData.position = vec3(modelViewMatrix * vec4(modelPos.xy, height, 1.0));
+    outData.position = vec3(modelViewMatrix * modelPos);
 
     vec3 a = gl_in[1].gl_Position.xyz - gl_in[0].gl_Position.xyz;
     vec3 b = gl_in[2].gl_Position.xyz - gl_in[0].gl_Position.xyz;

@@ -22,15 +22,27 @@ out FragmentData
     vec4 terrainInfo5;
 } outData[];
 
+uniform mat4 modelMatrix;
+uniform vec4 cameraPosition;
+
+float GetTessLevel(float distance0, float distance1)
+{
+    float avgDistance = (distance0 + distance1) / 2.0;
+    return max(80.0 / pow(max(avgDistance, 1.0), 0.6), 1.0);
+}
+
 void main()
 {
     if(gl_InvocationID == 0)
     {
-        gl_TessLevelOuter[0] = 10.0;
-        gl_TessLevelOuter[1] = 10.0;
-        gl_TessLevelOuter[2] = 10.0;
-        gl_TessLevelInner[0] = 10.0;
-        gl_TessLevelInner[1] = 10.0;
+        float vertexDistance0 = distance(cameraPosition, modelMatrix * gl_in[0].gl_Position);
+        float vertexDistance1 = distance(cameraPosition, modelMatrix * gl_in[1].gl_Position);
+        float vertexDistance2 = distance(cameraPosition, modelMatrix * gl_in[2].gl_Position);
+
+        gl_TessLevelOuter[0] = GetTessLevel(vertexDistance1, vertexDistance2);
+        gl_TessLevelOuter[1] = GetTessLevel(vertexDistance2, vertexDistance0);
+        gl_TessLevelOuter[2] = GetTessLevel(vertexDistance0, vertexDistance1);
+        gl_TessLevelInner[0] = gl_TessLevelOuter[2];
     }
 
     outData[gl_InvocationID].terrainTexCoord = inData[gl_InvocationID].terrainTexCoord;

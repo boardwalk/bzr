@@ -1,6 +1,6 @@
 #version 410
 
-layout(location = 0) in vec2 vertexPosition;
+layout(location = 0) in vec3 vertexPosition;
 layout(location = 1) in vec2 terrainTexCoord;
 layout(location = 2) in vec4 terrainInfo1;
 layout(location = 3) in vec4 terrainInfo2;
@@ -27,5 +27,5 @@ void main()
     fragData.terrainInfo4 = terrainInfo4;
     fragData.terrainInfo5 = terrainInfo5;
 
-    gl_Position = vec4(vertexPosition, 0.0, 1.0);
+    gl_Position = vec4(vertexPosition, 1.0) * vec4(24.0, 24.0, 2.0, 1.0);
 }
