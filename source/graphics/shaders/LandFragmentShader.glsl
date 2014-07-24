@@ -3,7 +3,7 @@
 in FragmentData
 {
     vec3 position;
-    vec3 normal;
+    vec2 normalTexCoord;
     vec2 terrainTexCoord;
     vec4 terrainInfo1;
     vec4 terrainInfo2;
@@ -16,7 +16,9 @@ out vec4 fragColor;
 
 uniform sampler2DArray terrainTex;
 uniform sampler2DArray blendTex;
+uniform sampler2D normalTex;
 
+uniform mat3 normalMatrix;
 uniform vec3 lightPosition;
 uniform vec3 lightIntensity;
 uniform vec3 Kd;
@@ -26,7 +28,8 @@ uniform float shininess;
 
 vec3 phong()
 {
-    vec3 n = normalize(normal);
+    vec3 n = texture(normalTex, normalTexCoord).xyz - vec3(0.5);
+    n = normalize( normalMatrix * n );
     vec3 s = normalize(lightPosition - position);
     vec3 v = normalize(-position);
     vec3 h = normalize(v + s);
@@ -80,5 +83,5 @@ void main()
     fragColor = mix(tc3, fragColor, ba3);
     fragColor = mix(tc4, fragColor, ba4);
     fragColor = mix(tc5, fragColor, ba5);
-    fragColor = hejl(fragColor); // * vec4(phong(), 1.0));
+    fragColor = hejl(fragColor) * vec4(phong(), 1.0);
 }

@@ -1,4 +1,5 @@
 #include "Landblock.h"
+#include "math/Vec3.h"
 #include <algorithm>
 
 const double Landblock::SQUARE_SIZE = 24.0;
@@ -22,6 +23,7 @@ Landblock::Landblock(Landblock&& other)
     _offsetMap = move(other._offsetMap);
     _offsetMapBase = other._offsetMapBase;
     _offsetMapScale = other._offsetMapScale;
+    _normalMap = move(other._normalMap);
     _renderData = move(other._renderData);
 }
 
@@ -103,6 +105,11 @@ double Landblock::offsetMapBase() const
 double Landblock::offsetMapScale() const
 {
     return _offsetMapScale;
+}
+
+const uint8_t* Landblock::normalMap() const
+{
+    return _normalMap.data();
 }
 
 bool Landblock::isSplitNESW(int x, int y) const
@@ -212,4 +219,36 @@ void Landblock::buildOffsetMap()
             }
         }
     }
+
+    _normalMap.resize(OFFSET_MAP_SIZE * OFFSET_MAP_SIZE * 3);
+
+    for(auto oy = 0; oy < OFFSET_MAP_SIZE; oy++)
+    {
+        for(auto ox = 0; ox < OFFSET_MAP_SIZE; ox++)
+        {
+            auto ox1 = max(ox - 1, 0);
+            auto oy1 = max(oy - 1, 0);
+
+            auto ox2 = min(ox + 1, OFFSET_MAP_SIZE - 1);
+            auto oy2 = min(oy + 1, OFFSET_MAP_SIZE - 1);
+
+            auto lx1 = double(ox1) / double(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
+            auto lx2 = double(ox2) / double(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
+            auto ly1 = double(oy1) / double(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
+            auto ly2 = double(oy2) / double(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
+
+            double h1 = resample[ox1 + oy1 * OFFSET_MAP_SIZE] + calcHeight(lx1, ly1);
+            double h2 = resample[ox2 + oy1 * OFFSET_MAP_SIZE] + calcHeight(lx2, ly1);
+            double h3 = resample[ox1 + oy2 * OFFSET_MAP_SIZE] + calcHeight(lx1, ly2);
+
+            Vec3 a(lx2 - lx1, 0.0, h2 - h1);
+            Vec3 b(0.0, ly2 - ly1, h3 - h1);
+
+            auto n = a.cross(b).normalize() * 0.5 + Vec3(0.5, 0.5, 0.5);
+            _normalMap[(ox + oy * OFFSET_MAP_SIZE) * 3] = n.x * double(0xFF);
+            _normalMap[(ox + oy * OFFSET_MAP_SIZE) * 3 + 1] = n.y * double(0xFF);
+            _normalMap[(ox + oy * OFFSET_MAP_SIZE) * 3 + 2] = n.z * double(0xFF);
+        }
+    }
 }
+

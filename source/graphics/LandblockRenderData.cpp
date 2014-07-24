@@ -7,6 +7,7 @@ LandblockRenderData::LandblockRenderData(const Landblock& landblock)
 {
     initGeometry(landblock);
     initOffsetTexture(landblock);
+    initNormalTexture(landblock);
 }
 
 LandblockRenderData::~LandblockRenderData()
@@ -14,6 +15,7 @@ LandblockRenderData::~LandblockRenderData()
     glDeleteVertexArrays(1, &_vertexArray);
     glDeleteBuffers(1, &_vertexBuffer);
     glDeleteTextures(1, &_offsetTexture);
+    glDeleteTextures(1, &_normalTexture);
 }
 
 void LandblockRenderData::bind(Program& program)
@@ -22,6 +24,9 @@ void LandblockRenderData::bind(Program& program)
 
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, _offsetTexture);
+
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, _normalTexture);
 
     auto offsetBaseLoc = program.getUniform("offsetBase");
     glUniform1f(offsetBaseLoc, _offsetBase);
@@ -284,3 +289,14 @@ void LandblockRenderData::initOffsetTexture(const Landblock& landblock)
     _offsetBase = landblock.offsetMapBase();
     _offsetScale = landblock.offsetMapScale();
 }
+
+void LandblockRenderData::initNormalTexture(const Landblock& landblock)
+{
+    glGenTextures(1, &_normalTexture);
+    glBindTexture(GL_TEXTURE_2D, _normalTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, Landblock::OFFSET_MAP_SIZE, Landblock::OFFSET_MAP_SIZE, 0, GL_RGB, GL_UNSIGNED_BYTE, landblock.normalMap());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // default is GL_NEAREST_MIPMAP_LINEAR
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+}
+

@@ -195,7 +195,7 @@ void LandblockRenderer::initProgram()
 
     // samplers
     auto terrainTexLocation = _program.getUniform("terrainTex");
-    glUniform1i(terrainTexLocation, 0); // corresponds to GL_TEXTURE_0
+    glUniform1i(terrainTexLocation, 0); // corresponds to GL_TEXTURE0
 
     auto blendTexLocation = _program.getUniform("blendTex");
     glUniform1i(blendTexLocation, 1);
@@ -203,17 +203,20 @@ void LandblockRenderer::initProgram()
     auto offsetTexLocation = _program.getUniform("offsetTex");
     glUniform1i(offsetTexLocation, 2);
 
+    auto normalTexLocation = _program.getUniform("normalTex");
+    glUniform1i(normalTexLocation, 3);
+
     // lighting parameters
-    Vec3 lightPosition(96.0, 96.0, 50.0);
+    Vec3 lightPosition(0.0, 0.0, 0.0); // in view coordinates, so this is centered at the camera!
     glUniform3f(_program.getUniform("lightPosition"), lightPosition.x, lightPosition.y, lightPosition.z);
 
     Vec3 lightIntensity(1.0, 1.0, 1.0);
     glUniform3f(_program.getUniform("lightIntensity"), lightIntensity.x, lightIntensity.y, lightIntensity.z);
 
-    Vec3 Kd(1.0, 1.0, 1.0);
+    Vec3 Kd(0.7, 0.7, 0.7);
     glUniform3f(_program.getUniform("Kd"), Kd.x, Kd.y, Kd.z);
 
-    Vec3 Ka(0.3, 0.3, 0.3);
+    Vec3 Ka(0.5, 0.5, 0.5);
     glUniform3f(_program.getUniform("Ka"), Ka.x, Ka.y, Ka.z);
 
     Vec3 Ks(0.0, 0.0, 0.0);

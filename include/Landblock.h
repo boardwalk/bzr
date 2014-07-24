@@ -34,6 +34,8 @@ public:
     double offsetMapBase() const;
     double offsetMapScale() const;
 
+    const uint8_t* normalMap() const;
+
     bool isSplitNESW(int x, int y) const;
 
     unique_ptr<Destructable>& renderData();
@@ -46,6 +48,8 @@ private:
     vector<uint16_t> _offsetMap;
     double _offsetMapBase;
     double _offsetMapScale;
+
+    vector<uint8_t> _normalMap;
 
     unique_ptr<Destructable> _renderData;
 };

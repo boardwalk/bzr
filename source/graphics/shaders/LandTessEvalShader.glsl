@@ -15,7 +15,7 @@ in FragmentData
 out FragmentData
 {
     vec3 position;
-    vec3 normal;
+    vec2 normalTexCoord;
     vec2 terrainTexCoord;
     vec4 terrainInfo1;
     vec4 terrainInfo2;
@@ -42,11 +42,9 @@ void main()
 
     gl_Position = modelViewProjectionMatrix * modelPos;
 
-    outData.position = vec3(modelViewMatrix * modelPos);
+    outData.position = (modelViewMatrix * modelPos).xyz;
 
-    vec3 a = gl_in[1].gl_Position.xyz - gl_in[0].gl_Position.xyz;
-    vec3 b = gl_in[2].gl_Position.xyz - gl_in[0].gl_Position.xyz;
-    outData.normal = normalMatrix * cross(a, b);
+    outData.normalTexCoord = modelPos.xy / 192.0;
 
     outData.terrainTexCoord = inData[0].terrainTexCoord * gl_TessCoord.x +
                               inData[1].terrainTexCoord * gl_TessCoord.y +
