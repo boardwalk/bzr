@@ -26,9 +26,14 @@ public:
     Landblock(const void* data, size_t length);
     Landblock(Landblock&& other);
 
-    const RawData& rawData() const;
+    void init();
 
     double calcHeight(double x, double y) const;
+    double calcHeightUnbounded(double x, double y) const;
+
+    LandblockId id() const;
+
+    const RawData& rawData() const;
 
     const uint16_t* offsetMap() const;
     double offsetMapBase() const;
@@ -41,8 +46,6 @@ public:
     unique_ptr<Destructable>& renderData();
 
 private:
-    void buildOffsetMap();
-
     RawData _data;
 
     vector<uint16_t> _offsetMap;

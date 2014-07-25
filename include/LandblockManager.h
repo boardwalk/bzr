@@ -18,6 +18,7 @@ public:
 
 	void setRadius(int radius);
 
+	iterator find(LandblockId id);
 	iterator begin();
 	iterator end();
 

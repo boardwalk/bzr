@@ -1,130 +1,11 @@
 #include "Landblock.h"
 #include "math/Vec3.h"
+#include "Core.h"
+#include "LandblockManager.h"
 #include <algorithm>
 
 const double Landblock::SQUARE_SIZE = 24.0;
 const double Landblock::LANDBLOCK_SIZE = (Landblock::GRID_SIZE - 1) * Landblock::SQUARE_SIZE;
-
-Landblock::Landblock(const void* data, size_t length)
-{
-    if(length != sizeof(RawData))
-    {
-        throw runtime_error("Bad landblock data length");
-    }
-
-    memcpy(&_data, data, sizeof(_data));
-
-    buildOffsetMap();
-}
-
-Landblock::Landblock(Landblock&& other)
-{
-    _data = other._data;
-    _offsetMap = move(other._offsetMap);
-    _offsetMapBase = other._offsetMapBase;
-    _offsetMapScale = other._offsetMapScale;
-    _normalMap = move(other._normalMap);
-    _renderData = move(other._renderData);
-}
-
-const Landblock::RawData& Landblock::rawData() const
-{
-    return _data;
-}
-
-double Landblock::calcHeight(double x, double y) const
-{
-    assert(x >= 0.0 && x <= LANDBLOCK_SIZE);
-    assert(y >= 0.0 && y <= LANDBLOCK_SIZE);
-
-    double dix;
-    auto fx = modf(x / SQUARE_SIZE, &dix);
-    auto ix = (int)dix;
-
-    double diy; 
-    auto fy = modf(y / SQUARE_SIZE, &diy);
-    auto iy = (int)diy;
-
-    double h1 = _data.heights[ix][iy] * 2.0;
-    double h2 = _data.heights[min(ix + 1, GRID_SIZE - 1)][iy] * 2.0;
-    double h3 = _data.heights[ix][min(iy + 1, GRID_SIZE - 1)] * 2.0;
-    double h4 = _data.heights[min(ix + 1, GRID_SIZE - 1)][min(iy + 1, GRID_SIZE - 1)] * 2.0;
-
-    if(isSplitNESW(ix, iy))
-    {
-        // 3---4
-        // |\  |
-        // | \ |
-        // |  \|
-        // 1---2
-        if(fy > 1.0 - fx)
-        {
-            // upper right half
-            h1 = h2 - (h4 - h3);
-        }
-        else
-        {
-            // lower left half
-            h4 = h2 + (h3 - h1);
-        }
-    }
-    else
-    {
-        // 3---4
-        // |  /|
-        // | / |
-        // |/  |
-        // 1---2
-        if(fy > fx)
-        {
-            // upper left half
-            h2 = h1 + (h4 - h3);
-        }
-        else
-        {
-            // lower right half
-            h3 = h4 - (h2 - h1);
-        }
-    }
-
-    auto hb = h1 * (1.0 - fx) + h2 * fx;
-    auto ht = h3 * (1.0 - fx) + h4 * fx;
-    return hb * (1.0 - fy) + ht * fy;
-}
-
-const uint16_t* Landblock::offsetMap() const
-{
-    return _offsetMap.data();
-}
-
-double Landblock::offsetMapBase() const
-{
-    return _offsetMapBase;
-}
-
-double Landblock::offsetMapScale() const
-{
-    return _offsetMapScale;
-}
-
-const uint8_t* Landblock::normalMap() const
-{
-    return _normalMap.data();
-}
-
-bool Landblock::isSplitNESW(int x, int y) const
-{
-    // credits to Akilla
-    uint32_t tx = ((_data.fileId >> 24) & 0xFF) * 8 + x;
-    uint32_t ty = ((_data.fileId >> 16) & 0xFF) * 8 + y;
-    uint32_t v = tx * ty * 0x0CCAC033 - tx * 0x421BE3BD + ty * 0x6C1AC587 - 0x519B8F25;
-    return v & 0x80000000;
-}
-
-unique_ptr<Destructable>& Landblock::renderData()
-{
-    return _renderData;
-}
 
 static double cubic(double p[4], double x)
 {
@@ -141,8 +22,33 @@ static double bicubic(double p[4][4], double x, double y)
     return cubic(arr, x);
 }
 
-void Landblock::buildOffsetMap()
+Landblock::Landblock(const void* data, size_t length)
 {
+    if(length != sizeof(RawData))
+    {
+        throw runtime_error("Bad landblock data length");
+    }
+
+    memcpy(&_data, data, sizeof(_data));
+}
+
+Landblock::Landblock(Landblock&& other)
+{
+    _data = other._data;
+    _offsetMap = move(other._offsetMap);
+    _offsetMapBase = other._offsetMapBase;
+    _offsetMapScale = other._offsetMapScale;
+    _normalMap = move(other._normalMap);
+    _renderData = move(other._renderData);
+}
+
+void Landblock::init()
+{
+    if(!_offsetMap.empty())
+    {
+        return;
+    }
+
     static const int sampleSize = GRID_SIZE;
     vector<double> sample(sampleSize * sampleSize);
 
@@ -252,3 +158,139 @@ void Landblock::buildOffsetMap()
     }
 }
 
+double Landblock::calcHeight(double x, double y) const
+{
+    assert(x >= 0.0 && x <= LANDBLOCK_SIZE);
+    assert(y >= 0.0 && y <= LANDBLOCK_SIZE);
+
+    double dix;
+    auto fx = modf(x / SQUARE_SIZE, &dix);
+    auto ix = (int)dix;
+
+    double diy; 
+    auto fy = modf(y / SQUARE_SIZE, &diy);
+    auto iy = (int)diy;
+
+    double h1 = _data.heights[ix][iy] * 2.0;
+    double h2 = _data.heights[min(ix + 1, GRID_SIZE - 1)][iy] * 2.0;
+    double h3 = _data.heights[ix][min(iy + 1, GRID_SIZE - 1)] * 2.0;
+    double h4 = _data.heights[min(ix + 1, GRID_SIZE - 1)][min(iy + 1, GRID_SIZE - 1)] * 2.0;
+
+    if(isSplitNESW(ix, iy))
+    {
+        // 3---4
+        // |\  |
+        // | \ |
+        // |  \|
+        // 1---2
+        if(fy > 1.0 - fx)
+        {
+            // upper right half
+            h1 = h2 - (h4 - h3);
+        }
+        else
+        {
+            // lower left half
+            h4 = h2 + (h3 - h1);
+        }
+    }
+    else
+    {
+        // 3---4
+        // |  /|
+        // | / |
+        // |/  |
+        // 1---2
+        if(fy > fx)
+        {
+            // upper left half
+            h2 = h1 + (h4 - h3);
+        }
+        else
+        {
+            // lower right half
+            h3 = h4 - (h2 - h1);
+        }
+    }
+
+    auto hb = h1 * (1.0 - fx) + h2 * fx;
+    auto ht = h3 * (1.0 - fx) + h4 * fx;
+    return hb * (1.0 - fy) + ht * fy;
+}
+
+double Landblock::calcHeightUnbounded(double x, double y) const
+{
+    auto thisId = id();
+
+    while(x < 0.0)
+    {
+        thisId = LandblockId(thisId.x() - 1, thisId.y());
+        x += LANDBLOCK_SIZE;
+    }
+
+    while(x >= LANDBLOCK_SIZE)
+    {
+        thisId = LandblockId(thisId.x() + 1, thisId.y());
+        x -= LANDBLOCK_SIZE;
+    }
+
+    while(y < 0.0)
+    {
+        thisId = LandblockId(thisId.x(), thisId.y() - 1);
+        y += LANDBLOCK_SIZE;
+    }
+
+    while(y >= LANDBLOCK_SIZE)
+    {
+        thisId = LandblockId(thisId.x(), thisId.y() + 1);
+        y -= LANDBLOCK_SIZE;
+    }
+
+    return Core::get().landblockManager().find(thisId)->second.calcHeight(x, y);
+}
+
+LandblockId Landblock::id() const
+{
+    auto x = (_data.fileId >> 24) & 0xFF;
+    auto y = (_data.fileId >> 16) & 0xFF;
+    return LandblockId(x, y);
+}
+
+const Landblock::RawData& Landblock::rawData() const
+{
+    return _data;
+}
+
+const uint16_t* Landblock::offsetMap() const
+{
+    return _offsetMap.data();
+}
+
+double Landblock::offsetMapBase() const
+{
+    return _offsetMapBase;
+}
+
+double Landblock::offsetMapScale() const
+{
+    return _offsetMapScale;
+}
+
+const uint8_t* Landblock::normalMap() const
+{
+    return _normalMap.data();
+}
+
+bool Landblock::isSplitNESW(int x, int y) const
+{
+    // credits to Akilla
+    uint32_t tx = ((_data.fileId >> 24) & 0xFF) * 8 + x;
+    uint32_t ty = ((_data.fileId >> 16) & 0xFF) * 8 + y;
+    uint32_t v = tx * ty * 0x0CCAC033 - tx * 0x421BE3BD + ty * 0x6C1AC587 - 0x519B8F25;
+    return v & 0x80000000;
+}
+
+unique_ptr<Destructable>& Landblock::renderData()
+{
+    return _renderData;
+}

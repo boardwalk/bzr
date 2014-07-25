@@ -33,6 +33,11 @@ void LandblockManager::setRadius(int radius)
     }
 }
 
+LandblockManager::iterator LandblockManager::find(LandblockId id)
+{
+	return _data.find(id);
+}
+
 LandblockManager::iterator LandblockManager::begin()
 {
     return _data.begin();
@@ -45,23 +50,13 @@ LandblockManager::iterator LandblockManager::end()
 
 void LandblockManager::load()
 {
-    // cull existing landblocks
-    for(auto it = _data.begin(); it != _data.end(); /**/)
-    {
-        if(_center.calcSquareDistance(it->first) > _radius * _radius)
-        {
-            it = _data.erase(it);
-        }
-        else
-        {
-            ++it;
-        }
-    }
+    // we grab more landblocks than we need so the ones that actually
+    // get initialized have all their neighbors
+    auto sloppyRadius = _radius + 1;
 
-    // load missing landblocks
-    for(auto x = _center.x() - _radius; x <= _center.x() + _radius; x++)
+    for(auto x = _center.x() - sloppyRadius; x <= _center.x() + sloppyRadius; x++)
     {
-        for(auto y = _center.y() - _radius; y <= _center.y() + _radius; y++)
+        for(auto y = _center.y() - sloppyRadius; y <= _center.y() + sloppyRadius; y++)
         {
             LandblockId id(x, y);
 
@@ -75,7 +70,7 @@ void LandblockManager::load()
                 continue;
             }
 
-            if(_center.calcSquareDistance(id) > _radius * _radius)
+            if(_center.calcSquareDistance(id) > sloppyRadius * sloppyRadius)
             {
                 continue;
             }
@@ -87,13 +82,33 @@ void LandblockManager::load()
 
             auto data = Core::get().cellDat().read(id.fileId());
 
-                        if(data.empty())
-                        {
-                             continue;
-                        }
+            if(data.empty())
+            {
+                 continue;
+            }
 
             auto pair = container_type::value_type(id, Landblock(data.data(), data.size()));
             _data.emplace(move(pair));
+        }
+    }
+
+    for(auto it = _data.begin(); it != _data.end(); ++it)
+    {
+        if(_center.calcSquareDistance(it->first) <= _radius * _radius)
+        {
+            it->second.init();
+        }
+    }
+
+    for(auto it = _data.begin(); it != _data.end(); /**/)
+    {
+        if(_center.calcSquareDistance(it->first) > _radius * _radius)
+        {
+            it = _data.erase(it);
+        }
+        else
+        {
+            ++it;
         }
     }
 }
