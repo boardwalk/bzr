@@ -46,7 +46,7 @@ public:
     unique_ptr<Destructable>& renderData();
 
 private:
-    RawData _data;
+    RawData _rawData;
 
     vector<uint16_t> _offsetMap;
     double _offsetMapBase;

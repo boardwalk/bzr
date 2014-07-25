@@ -29,12 +29,12 @@ Landblock::Landblock(const void* data, size_t length)
         throw runtime_error("Bad landblock data length");
     }
 
-    memcpy(&_data, data, sizeof(_data));
+    memcpy(&_rawData, data, sizeof(_rawData));
 }
 
 Landblock::Landblock(Landblock&& other)
 {
-    _data = other._data;
+    _rawData = other._rawData;
     _offsetMap = move(other._offsetMap);
     _offsetMapBase = other._offsetMapBase;
     _offsetMapScale = other._offsetMapScale;
@@ -171,10 +171,10 @@ double Landblock::calcHeight(double x, double y) const
     auto fy = modf(y / SQUARE_SIZE, &diy);
     auto iy = (int)diy;
 
-    double h1 = _data.heights[ix][iy] * 2.0;
-    double h2 = _data.heights[min(ix + 1, GRID_SIZE - 1)][iy] * 2.0;
-    double h3 = _data.heights[ix][min(iy + 1, GRID_SIZE - 1)] * 2.0;
-    double h4 = _data.heights[min(ix + 1, GRID_SIZE - 1)][min(iy + 1, GRID_SIZE - 1)] * 2.0;
+    double h1 = _rawData.heights[ix][iy] * 2.0;
+    double h2 = _rawData.heights[min(ix + 1, GRID_SIZE - 1)][iy] * 2.0;
+    double h3 = _rawData.heights[ix][min(iy + 1, GRID_SIZE - 1)] * 2.0;
+    double h4 = _rawData.heights[min(ix + 1, GRID_SIZE - 1)][min(iy + 1, GRID_SIZE - 1)] * 2.0;
 
     if(isSplitNESW(ix, iy))
     {
@@ -251,14 +251,14 @@ double Landblock::calcHeightUnbounded(double x, double y) const
 
 LandblockId Landblock::id() const
 {
-    auto x = (_data.fileId >> 24) & 0xFF;
-    auto y = (_data.fileId >> 16) & 0xFF;
+    auto x = (_rawData.fileId >> 24) & 0xFF;
+    auto y = (_rawData.fileId >> 16) & 0xFF;
     return LandblockId(x, y);
 }
 
 const Landblock::RawData& Landblock::rawData() const
 {
-    return _data;
+    return _rawData;
 }
 
 const uint16_t* Landblock::offsetMap() const
@@ -284,8 +284,8 @@ const uint8_t* Landblock::normalMap() const
 bool Landblock::isSplitNESW(int x, int y) const
 {
     // credits to Akilla
-    uint32_t tx = ((_data.fileId >> 24) & 0xFF) * 8 + x;
-    uint32_t ty = ((_data.fileId >> 16) & 0xFF) * 8 + y;
+    uint32_t tx = ((_rawData.fileId >> 24) & 0xFF) * 8 + x;
+    uint32_t ty = ((_rawData.fileId >> 16) & 0xFF) * 8 + y;
     uint32_t v = tx * ty * 0x0CCAC033 - tx * 0x421BE3BD + ty * 0x6C1AC587 - 0x519B8F25;
     return v & 0x80000000;
 }
