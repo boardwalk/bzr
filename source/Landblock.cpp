@@ -49,22 +49,24 @@ void Landblock::init()
         return;
     }
 
+    // sample another two times at the edges so we don't have to clamp our bicubic resample
     static const int sampleSize = GRID_SIZE;
-    vector<double> sample(sampleSize * sampleSize);
+    static const int edgeSize = 2;
+    static const int totalSampleSize = sampleSize + edgeSize * 2;
 
-    for(auto sy = 0; sy < sampleSize; sy++)
+    vector<double> sample(totalSampleSize * totalSampleSize);
+
+    for(auto sy = 0; sy < totalSampleSize; sy++)
     {
-        for(auto sx = 0; sx < sampleSize; sx++)
+        for(auto sx = 0; sx < totalSampleSize; sx++)
         {
-            auto lx = double(sx) / double(sampleSize - 1) * LANDBLOCK_SIZE;
-            auto ly = double(sy) / double(sampleSize - 1) * LANDBLOCK_SIZE;
-            sample[sx + sy * sampleSize] = calcHeight(lx, ly);
+            auto lx = double(sx - edgeSize) / double(sampleSize - 1) * LANDBLOCK_SIZE;
+            auto ly = double(sy - edgeSize) / double(sampleSize - 1) * LANDBLOCK_SIZE;
+            sample[sx + sy * totalSampleSize] = calcHeightUnbounded(lx, ly);
         }
     }
 
     vector<double> resample(OFFSET_MAP_SIZE * OFFSET_MAP_SIZE);
-
-#define CLAMP(x, l, h) min(max(x, l), h)
 
     auto minOffset = numeric_limits<double>::max();
     auto maxOffset = numeric_limits<double>::min();
@@ -88,7 +90,7 @@ void Landblock::init()
             {
                 for(auto px = 0; px < 4; px++)
                 {
-                    p[px][py] = sample[CLAMP(ix + px - 1, 0, sampleSize - 1) + CLAMP(iy + py - 1, 0, sampleSize - 1) * sampleSize];
+                    p[px][py] = sample[(edgeSize + ix + px - 1) + (edgeSize + iy + py - 1) * totalSampleSize];
                 }
             }
 
@@ -103,8 +105,6 @@ void Landblock::init()
             resample[ox + oy * OFFSET_MAP_SIZE] = offset;
         }
     }
-
-#undef CLAMP
 
     _offsetMap.resize(OFFSET_MAP_SIZE * OFFSET_MAP_SIZE);
     _offsetMapBase = minOffset;
@@ -246,7 +246,14 @@ double Landblock::calcHeightUnbounded(double x, double y) const
         y -= LANDBLOCK_SIZE;
     }
 
-    return Core::get().landblockManager().find(thisId)->second.calcHeight(x, y);
+    auto it = Core::get().landblockManager().find(thisId);
+
+    if(it == Core::get().landblockManager().end())
+    {
+        throw logic_error("landblock not found");
+    }
+    
+    return it->second.calcHeight(x, y);
 }
 
 LandblockId Landblock::id() const

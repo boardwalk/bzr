@@ -1,5 +1,8 @@
 #include "LandblockId.h"
 
+LandblockId::LandblockId() : _x(0), _y(0)
+{}
+
 LandblockId::LandblockId(uint8_t x, uint8_t y) : _x(x), _y(y)
 {}
 

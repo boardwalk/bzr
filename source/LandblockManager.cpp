@@ -2,10 +2,8 @@
 #include "Core.h"
 #include "DatFile.h"
 
-LandblockManager::LandblockManager() : _center(0x31, 0xD6), _radius(8)
-{
-    load();
-}
+LandblockManager::LandblockManager() : _radius(8)
+{}
 
 void LandblockManager::setCenter(LandblockId center)
 {
@@ -52,7 +50,7 @@ void LandblockManager::load()
 {
     // we grab more landblocks than we need so the ones that actually
     // get initialized have all their neighbors
-    auto sloppyRadius = _radius + 1;
+    auto sloppyRadius = _radius + 2;
 
     for(auto x = _center.x() - sloppyRadius; x <= _center.x() + sloppyRadius; x++)
     {

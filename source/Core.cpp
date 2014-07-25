@@ -44,6 +44,8 @@ void Core::init()
 #ifndef HEADLESS
     _renderer.reset(new Renderer());
 #endif
+
+    _landblockManager->setCenter(LandblockId(0x31, 0xD6));
 }
 
 void Core::cleanup()
