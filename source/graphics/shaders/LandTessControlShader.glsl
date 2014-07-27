@@ -1,4 +1,4 @@
-#version 410
+#version 410 core
 
 layout (vertices = 3) out;
 

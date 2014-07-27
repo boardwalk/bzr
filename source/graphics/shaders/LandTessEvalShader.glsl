@@ -1,4 +1,4 @@
-#version 410
+#version 410 core
 
 layout(triangles, fractional_even_spacing, ccw) in;
 
@@ -30,7 +30,7 @@ const float WORLD_RADIUS = 10000.0;
 
 void main()
 {
-    vec4 modelPos = gl_in[0].gl_Position * gl_TessCoord.x + 
+    vec4 modelPos = gl_in[0].gl_Position * gl_TessCoord.x +
                     gl_in[1].gl_Position * gl_TessCoord.y +
                     gl_in[2].gl_Position * gl_TessCoord.z;
 
