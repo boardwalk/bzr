@@ -33,7 +33,7 @@ void LandblockManager::setRadius(int radius)
 
 LandblockManager::iterator LandblockManager::find(LandblockId id)
 {
-	return _data.find(id);
+    return _data.find(id);
 }
 
 LandblockManager::iterator LandblockManager::begin()

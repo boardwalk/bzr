@@ -8,26 +8,26 @@
 class LandblockManager : Noncopyable
 {
 public:
-	typedef unordered_map<LandblockId, Landblock> container_type;
-	typedef container_type::iterator iterator;
+    typedef unordered_map<LandblockId, Landblock> container_type;
+    typedef container_type::iterator iterator;
 
-	LandblockManager();
+    LandblockManager();
 
-	void setCenter(LandblockId center);
-	LandblockId center() const;
+    void setCenter(LandblockId center);
+    LandblockId center() const;
 
-	void setRadius(int radius);
+    void setRadius(int radius);
 
-	iterator find(LandblockId id);
-	iterator begin();
-	iterator end();
+    iterator find(LandblockId id);
+    iterator begin();
+    iterator end();
 
 private:
-	void load();
+    void load();
 
-	container_type _data;
-	LandblockId _center;
-	int _radius;
+    container_type _data;
+    LandblockId _center;
+    int _radius;
 };
 
 #endif

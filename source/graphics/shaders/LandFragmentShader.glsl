@@ -36,7 +36,7 @@ vec3 phong()
 
 vec4 linearize(in vec4 color)
 {
-	return pow(color, vec4(2.2));
+    return pow(color, vec4(2.2));
 }
 
 // Filmic tonemapping operators
