@@ -2,7 +2,6 @@
 #define BZR_GRAPHICS_LANDBLOCKRENDERER_H
 
 #include "graphics/LandblockRenderData.h"
-#include "graphics/Buffer.h"
 #include "graphics/Program.h"
 #include "math/Vec3.h"
 #include "Noncopyable.h"
