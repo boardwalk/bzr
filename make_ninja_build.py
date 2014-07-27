@@ -34,13 +34,16 @@ def includes(path):
                     if sys.platform == 'win32':
                         base_depend_path = base_depend_path.replace('/', '\\')
                     depend_path = os.path.join('include', base_depend_path)
-                    # if it doesn't exist in include, try build instead
+                    # if it doesn't exist in include, try source instead
+                    if not os.path.exists(depend_path):
+                        depend_path = os.path.join('source', base_depend_path);
+                    # if it doesn't exist in either of those, try build instead
                     if not os.path.exists(depend_path):
                         depend_path = os.path.join('build', base_depend_path)
                     result.append(depend_path)
                     collect(depend_path, result)
 
-    result = [os.path.join('include', 'basic.h')] # everything is dependent on basic.h
+    result = [] 
     collect(path, result)
     return uniq(sorted(result))
 
@@ -170,19 +173,19 @@ def main():
             for filename in filenames:
                 name, ext = os.path.splitext(filename)
                 in_file = os.path.join(dirpath, filename)
-
+                implicit = includes(in_file)
+                
                 if ext == '.glsl':
                     buildrule = 'header'
                     newext = '.glsl.h'
-                    implicit = None
                 elif ext == '.cpp':
                     buildrule = 'cxx'
                     newext = '.o'
-                    implicit = includes(in_file)
+                    # all c++ is dependent on basic.h
+                    implicit.append(os.path.join('include', 'basic.h'))
                 elif ext == '.c':
                     buildrule = 'c'
                     newext = '.o'
-                    implicit = includes(in_file)
                 else:
                     continue
 

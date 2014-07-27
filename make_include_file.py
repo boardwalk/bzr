@@ -14,7 +14,7 @@ def process_file(path, outf):
         for ln in inf:
             m = re.match('^#include "([^"]+)"$', ln)
             if m:
-                include_path = os.path.join(os.path.dirname(path), m.group(1))
+                include_path = os.path.join('source', m.group(1))
                 process_file(include_path, outf)
             else:
                 outf.write("\n    \"{}\"".format(escape_c_string(ln)))
@@ -29,4 +29,3 @@ with open(args.outfile, 'w') as outf:
     outf.write('static const char {}[] ='.format(os.path.basename(root)))
     process_file(args.infile, outf)
     outf.write(";\n")
-
