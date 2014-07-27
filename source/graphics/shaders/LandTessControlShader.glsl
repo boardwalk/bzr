@@ -22,8 +22,7 @@ out FragmentData
     vec4 terrainInfo5;
 } outData[];
 
-uniform mat4 modelMatrix;
-uniform vec4 cameraPosition;
+#include "graphics/shaders/LandUniforms.glsl"
 
 float GetTessLevel(float distance0, float distance1)
 {

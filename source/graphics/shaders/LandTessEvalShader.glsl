@@ -24,13 +24,7 @@ out FragmentData
     vec4 terrainInfo5;
 } outData;
 
-uniform mat3 normalMatrix;
-uniform mat4 modelViewMatrix;
-uniform mat4 modelViewProjectionMatrix;
-
-uniform sampler2D offsetTex;
-uniform float offsetBase;
-uniform float offsetScale;
+#include "graphics/shaders/LandUniforms.glsl"
 
 void main()
 {

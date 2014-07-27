@@ -14,17 +14,7 @@ in FragmentData
 
 out vec4 fragColor;
 
-uniform sampler2DArray terrainTex;
-uniform sampler2DArray blendTex;
-uniform sampler2D normalTex;
-
-uniform mat3 normalMatrix;
-uniform vec3 lightPosition;
-uniform vec3 lightIntensity;
-uniform vec3 Kd;
-uniform vec3 Ka;
-uniform vec3 Ks;
-uniform float shininess;
+#include "graphics/shaders/LandUniforms.glsl"
 
 vec3 phong()
 {
