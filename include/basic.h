@@ -18,14 +18,12 @@
 #error Implement PACK for this compiler.
 #endif
 
-#ifdef __cplusplus
 #include <cassert>
 #include <cstdint>
 #include <memory>
 #include <stdexcept>
 
 using namespace std;
-#endif
 
 #define PI 3.14159265359
 
