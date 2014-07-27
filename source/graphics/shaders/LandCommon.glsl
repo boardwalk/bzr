@@ -1,3 +1,6 @@
+
+const float PI = 3.14159265359;
+
 // textures
 uniform sampler2DArray terrainTex;
 uniform sampler2DArray blendTex;

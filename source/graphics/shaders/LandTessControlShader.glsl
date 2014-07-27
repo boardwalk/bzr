@@ -22,7 +22,7 @@ out FragmentData
     vec4 terrainInfo5;
 } outData[];
 
-#include "graphics/shaders/LandUniforms.glsl"
+#include "graphics/shaders/LandCommon.glsl"
 
 float GetTessLevel(float distance0, float distance1)
 {

@@ -14,7 +14,7 @@ in FragmentData
 
 out vec4 fragColor;
 
-#include "graphics/shaders/LandUniforms.glsl"
+#include "graphics/shaders/LandCommon.glsl"
 
 vec3 phong()
 {

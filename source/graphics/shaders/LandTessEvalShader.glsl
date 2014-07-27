@@ -24,7 +24,9 @@ out FragmentData
     vec4 terrainInfo5;
 } outData;
 
-#include "graphics/shaders/LandUniforms.glsl"
+#include "graphics/shaders/LandCommon.glsl"
+
+const float WORLD_RADIUS = 10000.0;
 
 void main()
 {
@@ -32,7 +34,12 @@ void main()
                     gl_in[1].gl_Position * gl_TessCoord.y +
                     gl_in[2].gl_Position * gl_TessCoord.z;
 
+    vec4 worldPos = modelMatrix * modelPos;
+
     modelPos.z = modelPos.z + offsetBase + texture(offsetTex, modelPos.xy / 192.0).r * offsetScale;
+
+    float angle = atan(distance(worldPos.xy, cameraPosition.xy) / WORLD_RADIUS);
+    modelPos.z = modelPos.z - WORLD_RADIUS * (1.0 - cos(angle));
 
     gl_Position = modelViewProjectionMatrix * modelPos;
 
