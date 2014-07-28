@@ -126,10 +126,9 @@ def main():
             linkextra = ''
 
             cxxflags += ' -std=c++11'
+            cxxflags += ' -include ' + os.path.join('include', 'basic.h')
 
             cppflags += ' -Iinclude -Ibuild'
-            cppflags += ' -include ' + os.path.join('include', 'basic.h')
-
             cppflags += ' -Wall -Wextra -Wformat=2 -Wno-format-nonliteral -Wshadow'
             cppflags += ' -Wpointer-arith -Wcast-qual -Wno-missing-braces'
             cppflags += ' -Werror -pedantic-errors'
