@@ -11,6 +11,15 @@ static double F(double coeff[5], double theta, double gamma)
     return (1.0 + coeff[0] * exp(coeff[1] / cos(theta))) * (1.0 + coeff[2] * exp(coeff[3] * gamma) + coeff[4] * pow(cos(gamma), 2.0));
 }
 
+static double tonemap(double luminance)
+{
+    luminance *= 16.0;
+    auto x = max(0.0, luminance - 0.004);
+    return (x * (6.2 * x + 0.5)) / (x * (6.2 * x + 1.7) + 0.06);
+    //const double whiteLuminance = 8000.0;
+    //return luminance * (1.0 + luminance / (whiteLuminance * whiteLuminance)) / (1.0 + luminance);
+}
+
 void SkyModel::prepare(const Params& p)
 {
     // calculate solar time
@@ -52,6 +61,7 @@ void SkyModel::prepare(const Params& p)
     // calculate Y sub z
     auto chi = (4.0 / 9.0 - p.tu / 120.0) * (PI - 2.0 * _theta_s);
     _Y_z = (4.0453 * p.tu - 4.9710) * tan(chi) - 0.2155 * p.tu + 2.4192;
+    _Y_z *= 1000.0; // convert kcd/m^2 to cd/m^2
 
     auto tu_sq = p.tu * p.tu;
     auto theta_s_sq = _theta_s * _theta_s;
@@ -74,47 +84,47 @@ void SkyModel::prepare(const Params& p)
     _y_z = c1 * theta_s_cu + c2 * theta_s_sq + c3 * _theta_s + c4;
 }
 
+Vec3 toCartesian(double theta, double phi)
+{
+    return Vec3(
+        sin(theta)*cos(phi),
+        sin(theta)*sin(phi),
+        cos(theta));
+}
+
 Vec3 SkyModel::getColor(double theta, double phi)
 {
     // this is the angle between theta_s, phi_s and theta, phi
-    auto gamma = cos(theta - _theta_s) * sin(phi) * sin(_phi_s) + cos(phi) * cos(_phi_s);
+    auto gamma = acos(toCartesian(theta, phi).dot(toCartesian(_theta_s, _phi_s)));
 
     auto Y = F(_coeffs_Y, theta, gamma) / F(_coeffs_Y, 0.0, _theta_s) * _Y_z;
     auto x = F(_coeffs_x, theta, gamma) / F(_coeffs_x, 0.0, _theta_s) * _x_z;
     auto y = F(_coeffs_y, theta, gamma) / F(_coeffs_y, 0.0, _theta_s) * _y_z;
 
-    // Y is luminance in kilo candela/m^2 (aka kilo nit)
-    // we need to scale it to [0-1] using the "white point", where it becomes relative luminance
-    // we also seem to get negative values. abs seems to give a good result *shrug*
-    static const auto whitePoint = 35.0;
-    Y = min(abs(Y) / whitePoint, 1.0);
+    // Y is luminance in candela/m^2 (aka nit)
+    Y = min(tonemap(abs(Y)), 1.0);
 
-    // convert Yxy to XYZ
+    // convert xyY to XYZ
     // http://www.brucelindbloom.com/index.html?Equations.html
     Vec3 XYZ;
 
-    if(y != 0.0) // avoid divide by zero
+    if(y > 0)
     {
-        XYZ.x = Y / y * x;
+        XYZ.x = x * Y / y;
         XYZ.y = Y;
-        XYZ.z = Y / y * (1.0 - x - y);
+        XYZ.z = (1.0 - x - y) * Y / y;
     }
 
-    // convert XYZ to sRGB
-    Mat3 M;
-    M.m[0] = 3.2404542;
-    M.m[1] = -0.9692660;
-    M.m[2] = 0.0556434;
+    auto RGB = Vec3(
+        XYZ.x *  3.2406 + XYZ.y * -1.5372 + XYZ.z * -0.4986,
+        XYZ.x * -0.9689 + XYZ.y *  1.8758 + XYZ.z *  0.0415,
+        XYZ.x *  0.0557 + XYZ.y * -0.2040 + XYZ.z *  1.0570);
 
-    M.m[3] = -1.5371385;
-    M.m[4] = 1.8760108;
-    M.m[5] = -0.2040259;
+    RGB.x = min(RGB.x, 1.0);
+    RGB.y = min(RGB.y, 1.0);
+    RGB.z = min(RGB.z, 1.0);
 
-    M.m[6] = -0.4985314;
-    M.m[7] = 0.0415560;
-    M.m[8] = 1.0572252;
-
-    return M * XYZ;
+    return RGB;
 }
 
 double SkyModel::thetaSun() const
