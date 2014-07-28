@@ -25,6 +25,11 @@ Vec3 Vec3::cross(const Vec3& v) const
         x * v.y - y * v.x);
 }
 
+double Vec3::dot(const Vec3& v) const
+{
+    return x * v.x + y * v.y + z * v.z;
+}
+
 Vec3 operator-(const Vec3& a)
 {
     return Vec3(-a.x, -a.y, -a.z);

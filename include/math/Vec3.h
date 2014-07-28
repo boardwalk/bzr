@@ -9,6 +9,7 @@ struct Vec3
     double magnitude() const;
     Vec3 normalize() const;
     Vec3 cross(const Vec3& v) const;
+    double dot(const Vec3& v) const;
 
     double x;
     double y;
