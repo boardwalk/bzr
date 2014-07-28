@@ -83,6 +83,8 @@ void SkyRenderer::initGeometry()
     glBufferData(GL_ARRAY_BUFFER, sizeof(VERTEX_DATA), VERTEX_DATA, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * COMPONENTS_PER_VERTEX, nullptr);
+
+    glEnableVertexAttribArray(0);
 }
 
 void SkyRenderer::initTexture()
