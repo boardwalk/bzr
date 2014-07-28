@@ -50,14 +50,14 @@ private:
     double _phi_s;
 
     // A, B, C, D and E coefficients for F()
+    double _coeffs_Y[5];
     double _coeffs_x[5];
     double _coeffs_y[5];
-    double _coeffs_Y[5];
 
     // color at zenith
+    double _Y_z;
     double _x_z;
     double _y_z;
-    double _Y_z;
 };
 
 #endif
