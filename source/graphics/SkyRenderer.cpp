@@ -158,6 +158,9 @@ void SkyRenderer::initTexture()
                 auto theta = acos(sp.z / sqrt(sp.x * sp.x + sp.y * sp.y + sp.z * sp.z));
                 auto phi = atan2(sp.x, -sp.y);
 
+                // pull edge below landblock edge
+                theta *= 0.9;
+
                 // compute and store color
                 auto color = model.getColor(theta, phi);
                 data[(i + j * CUBE_SIZE) * 3] = (uint8_t)(color.x * 0xFF);
