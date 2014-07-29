@@ -176,7 +176,7 @@ def main():
                 
                 if ext == '.glsl':
                     buildrule = 'header'
-                    newext = '.glsl.h'
+                    newext = '.h'
                 elif ext == '.cpp':
                     buildrule = 'cxx'
                     newext = '.o'

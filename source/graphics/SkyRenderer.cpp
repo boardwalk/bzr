@@ -8,8 +8,8 @@
 #include <vector>
 #include <fstream>
 
-#include "graphics/shaders/SkyVertexShader.glsl.h"
-#include "graphics/shaders/SkyFragmentShader.glsl.h"
+#include "graphics/shaders/SkyVertexShader.h"
+#include "graphics/shaders/SkyFragmentShader.h"
 
 static const int CUBE_SIZE = 256;
 

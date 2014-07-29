@@ -10,10 +10,10 @@
 #include <algorithm>
 #include <vector>
 
-#include "graphics/shaders/LandVertexShader.glsl.h"
-#include "graphics/shaders/LandTessControlShader.glsl.h"
-#include "graphics/shaders/LandTessEvalShader.glsl.h"
-#include "graphics/shaders/LandFragmentShader.glsl.h"
+#include "graphics/shaders/LandVertexShader.h"
+#include "graphics/shaders/LandTessControlShader.h"
+#include "graphics/shaders/LandTessEvalShader.h"
+#include "graphics/shaders/LandFragmentShader.h"
 
 static const uint32_t LANDSCAPE_TEXTURES[] =
 {
