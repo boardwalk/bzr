@@ -1,5 +1,4 @@
 #include "graphics/Image.h"
-#include "graphics/ctmf.h"
 #include "BlobReader.h"
 #include "Core.h"
 #include "DatFile.h"
@@ -213,17 +212,6 @@ void Image::scale(int newWidth, int newHeight)
     _data = move(newData);
     _width = newWidth;
     _height = newHeight;
-}
-
-void Image::blur(int windowSize)
-{
-    vector<uint8_t> newData(_data.size());
-
-    int stride = _width * numChannels();
-
-    ctmf(_data.data(), newData.data(), _width, _height, stride, stride, windowSize, numChannels(), 512 * 1024);
-
-    _data = move(newData);
 }
 
 void Image::fill(int value)

@@ -20,7 +20,6 @@ public:
 
     void blit(const Image& image, int x, int y);
     void scale(int newWidth, int newHeight);
-    void blur(int windowSize);
     void fill(int value);
     void flipVertical();
 
