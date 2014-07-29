@@ -6,12 +6,12 @@ LandblockId::LandblockId() : _x(0), _y(0)
 LandblockId::LandblockId(uint8_t x, uint8_t y) : _x(x), _y(y)
 {}
 
-int LandblockId::x() const
+uint8_t LandblockId::x() const
 {
     return _x;
 }
 
-int LandblockId::y() const
+uint8_t LandblockId::y() const
 {
     return _y;
 }

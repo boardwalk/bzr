@@ -72,25 +72,27 @@ def main():
         n = ninja_syntax.Writer(buildfile)
 
         if sys.platform == 'win32':
-            clflags = ' /nologo /Iinclude /Ibuild /FIbasic.h /EHsc'
-            linkflags = ' /nologo'
+            cppflags = '/nologo /EHsc /Iinclude /Ibuild'
+            cxxflags = '/FIbasic.h /W4 /WX'
+            cflags = ''
+            linkflags = '/nologo'
 
             sdl_dir = os.path.expanduser(r'~\Documents\SDL2-2.0.3')
-            clflags += r' /MD /I{}\include'.format(sdl_dir)
+            cppflags += r' /MD /I{}\include'.format(sdl_dir)
             linkflags += r' /libpath:{}\lib\x64 SDL2.lib SDL2main.lib'.format(sdl_dir)
 
             glew_dir = os.path.expanduser(r'~\Documents\glew-1.10.0')
-            clflags += r' /I{}\include'.format(glew_dir)
+            cppflags += r' /I{}\include'.format(glew_dir)
             linkflags += r' /libpath:{}\lib\Release\x64 OpenGL32.lib glew32.lib'.format(glew_dir)
 
             if args.release:
-                clflags += ' /O2 /GL'
+                cppflags += ' /O2 /GL'
                 linkflags += ' /LTCG'
             else:
-                clflags += r' /Zi /Fdoutput\bzr.pdb'
+                cppflags += r' /Zi /Fdoutput\bzr.pdb'
                 # cl complains about write access to the PDB with parallel compilation on VS2013 without /FS
                 if os.environ['VisualStudioVersion'] == '12.0':
-                   clflags += ' /FS'
+                   cppflags += ' /FS'
                 linkflags += ' /DEBUG'
 
             if args.release and not args.headless:
@@ -99,14 +101,16 @@ def main():
                linkflags += ' /subsystem:CONSOLE'
 
             if args.headless:
-                clflags += ' /DHEADLESS'
+                cppflags += ' /DHEADLESS'
             
-            n.variable('clflags', clflags)
+            n.variable('cppflags', cppflags)
+            n.variable('cxxflags', cxxflags)
+            n.variable('cflags', cflags)
             n.variable('linkflags', linkflags)
             n.variable('appext', '.exe')
 
-            n.rule('c', 'cl $clflags /c $in /Fo$out')
-            n.rule('cxx', 'cl $clflags /c $in /Fo$out')
+            n.rule('c', 'cl $cppflags $cflags /c $in /Fo$out')
+            n.rule('cxx', 'cl $cppflags $cxxflags /c $in /Fo$out')
             n.rule('link', 'link $linkflags $in /out:$out')
             n.rule('header', 'python make_include_file.py $in $out')
             n.rule('copy', 'cmd /c copy $in $out')

@@ -26,6 +26,8 @@ void Camera::move(double dx, double dy)
 
 void Camera::step(double dt)
 {
+    (void)dt;
+    
     Quat initialPitchQuat;
     initialPitchQuat.makeFromYawPitchRoll(0.0, -PI / 4.0, 0.0);
 

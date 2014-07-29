@@ -93,6 +93,8 @@ Renderer::~Renderer()
 
 void Renderer::render(double interp)
 {
+    (void)interp;
+
     // projection * view * model * vertex
     Mat4 projectionMat;
     projectionMat.makePerspective(_fieldOfView, double(_width)/double(_height), 0.1, 1000.0);
@@ -101,7 +103,7 @@ void Renderer::render(double interp)
 
     glClear(GL_DEPTH_BUFFER_BIT);
 
-    _skyRenderer->render(projectionMat, viewMat);
+    _skyRenderer->render();
     _landblockRenderer->render(projectionMat, viewMat);
 
     SDL_GL_SwapWindow(_window);

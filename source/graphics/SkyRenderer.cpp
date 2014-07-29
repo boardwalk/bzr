@@ -30,7 +30,7 @@ SkyRenderer::~SkyRenderer()
     glDeleteTextures(1, &_texture);
 }
 
-void SkyRenderer::render(const Mat4& projMat, const Mat4& viewMat)
+void SkyRenderer::render()
 {
     _program.use();
 
@@ -160,9 +160,9 @@ void SkyRenderer::initTexture()
 
                 // compute and store color
                 auto color = model.getColor(theta, phi);
-                data[(i + j * CUBE_SIZE) * 3] = color.x * 0xFF;
-                data[(i + j * CUBE_SIZE) * 3 + 1] = color.y * 0xFF;
-                data[(i + j * CUBE_SIZE) * 3 + 2] = color.z * 0xFF;
+                data[(i + j * CUBE_SIZE) * 3] = (uint8_t)(color.x * 0xFF);
+                data[(i + j * CUBE_SIZE) * 3 + 1] = (uint8_t)(color.y * 0xFF);
+                data[(i + j * CUBE_SIZE) * 3 + 2] = (uint8_t)(color.z * 0xFF);
             }
         }
 

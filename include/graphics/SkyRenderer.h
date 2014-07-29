@@ -14,7 +14,7 @@ public:
     SkyRenderer();
     ~SkyRenderer();
 
-    void render(const Mat4& projMat, const Mat4& viewMat);
+    void render();
 
     const Vec3& sunVector() const;
 

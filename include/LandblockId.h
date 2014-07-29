@@ -7,8 +7,8 @@ public:
     LandblockId();
     LandblockId(uint8_t x, uint8_t y);
 
-    int x() const;
-    int y() const;
+    uint8_t x() const;
+    uint8_t y() const;
     uint32_t fileId() const;
 
     int calcSquareDistance(LandblockId other) const;

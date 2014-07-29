@@ -149,10 +149,10 @@ void LandblockRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
     auto& landblockManager = Core::get().landblockManager();
 
     auto cameraPosition = Core::get().camera().position();
-    glUniform4f(_program.getUniform("cameraPosition"), cameraPosition.x, cameraPosition.y, cameraPosition.z, 1.0);
+    glUniform4f(_program.getUniform("cameraPosition"), GLfloat(cameraPosition.x), GLfloat(cameraPosition.y), GLfloat(cameraPosition.z), 1.0f);
 
     auto viewLightPosition = viewMat * _lightPosition;
-    glUniform3f(_program.getUniform("lightPosition"), viewLightPosition.x, viewLightPosition.y, viewLightPosition.z);
+    glUniform3f(_program.getUniform("lightPosition"), GLfloat(viewLightPosition.x), GLfloat(viewLightPosition.y), GLfloat(viewLightPosition.z));
 
     for(auto it = landblockManager.begin(); it != landblockManager.end(); ++it)
     {
@@ -215,18 +215,10 @@ void LandblockRenderer::initProgram()
     glUniform1i(normalTexLocation, 3);
 
     // lighting parameters
-    Vec3 lightIntensity(1.0, 1.0, 1.0);
-    glUniform3f(_program.getUniform("lightIntensity"), lightIntensity.x, lightIntensity.y, lightIntensity.z);
-
-    Vec3 Kd(0.7, 0.7, 0.7);
-    glUniform3f(_program.getUniform("Kd"), Kd.x, Kd.y, Kd.z);
-
-    Vec3 Ka(0.5, 0.5, 0.5);
-    glUniform3f(_program.getUniform("Ka"), Ka.x, Ka.y, Ka.z);
-
-    Vec3 Ks(0.0, 0.0, 0.0);
-    glUniform3f(_program.getUniform("Ks"), Ks.x, Ks.y, Ks.z);
-
+    glUniform3f(_program.getUniform("lightIntensity"), 1.0f, 1.0f, 1.0f);
+    glUniform3f(_program.getUniform("Kd"), 0.7f, 0.7f, 0.7f);
+    glUniform3f(_program.getUniform("Ka"), 0.5f, 0.5f, 0.5f);
+    glUniform3f(_program.getUniform("Ks"), 0.0f, 0.0f, 0.0f);
     glUniform1f(_program.getUniform("shininess"), 1.0);
 }
 

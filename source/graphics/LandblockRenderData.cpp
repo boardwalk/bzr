@@ -40,7 +40,7 @@ GLsizei LandblockRenderData::vertexCount() const
 	return _vertexCount;
 }
 
-static void pushRotatedCoord(vector<uint8_t>& vertexData, double s, double t, int rotations, int scale)
+static void pushRotatedCoord(vector<uint8_t>& vertexData, double s, double t, int rotations, uint8_t scale)
 {
     auto cosine = cos(PI / 180.0 * 90.0 * rotations);
     auto sine = sin(PI / 180.0 * 90.0 * rotations);
@@ -58,9 +58,9 @@ void LandblockRenderData::initGeometry(const Landblock& landblock)
 
     vector<uint8_t> vertexData;
 
-    for(auto y = 0; y < Landblock::GRID_SIZE - 1; y++)
+    for(uint8_t y = 0; y < Landblock::GRID_SIZE - 1; y++)
     {
-        for(auto x = 0; x < Landblock::GRID_SIZE - 1; x++)
+        for(uint8_t x = 0; x < Landblock::GRID_SIZE - 1; x++)
         {
             uint8_t terrain[4];
 
@@ -106,10 +106,10 @@ void LandblockRenderData::initGeometry(const Landblock& landblock)
                 }
 
                 // number of 90 degree ccw rotations
-                auto rotationCount = 0;
-                auto blendTex = 0xFF;
+                uint8_t rotationCount = 0;
+                uint8_t blendTex = 0xFF;
 
-                while(true)
+                for(;;)
                 {
                     switch(bitfield)
                     {
@@ -151,7 +151,7 @@ void LandblockRenderData::initGeometry(const Landblock& landblock)
                 rotations.push_back(0);
             }
 
-            uint32_t roadScale = 3;
+            uint8_t roadScale = 3;
 
             {
                 uint8_t bitfield = 0;
@@ -164,10 +164,10 @@ void LandblockRenderData::initGeometry(const Landblock& landblock)
                     }
                 }
 
-                auto rotationCount = 0;
-                auto blendTex = 0xFF;
+                uint8_t rotationCount = 0;
+                uint8_t blendTex = 0xFF;
 
-                while(true)
+                for(;;)
                 {
                     switch(bitfield)
                     {
@@ -251,7 +251,7 @@ void LandblockRenderData::initGeometry(const Landblock& landblock)
 
     static const int COMPONENTS_PER_VERTEX = 25;
 
-    _vertexCount = vertexData.size() / COMPONENTS_PER_VERTEX;
+    _vertexCount = GLsizei(vertexData.size()) / COMPONENTS_PER_VERTEX;
 
     glGenVertexArrays(1, &_vertexArray);
     glBindVertexArray(_vertexArray);
@@ -286,8 +286,8 @@ void LandblockRenderData::initOffsetTexture(const Landblock& landblock)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    _offsetBase = landblock.offsetMapBase();
-    _offsetScale = landblock.offsetMapScale();
+    _offsetBase = GLfloat(landblock.offsetMapBase());
+    _offsetScale = GLfloat(landblock.offsetMapScale());
 }
 
 void LandblockRenderData::initNormalTexture(const Landblock& landblock)

@@ -121,7 +121,7 @@ void Landblock::init()
             for(auto ox = 0; ox < OFFSET_MAP_SIZE; ox++)
             {
                 double offset = resample[ox + oy * OFFSET_MAP_SIZE];
-                _offsetMap[ox + oy * OFFSET_MAP_SIZE] = (offset - _offsetMapBase) / _offsetMapScale * double(0xFFFF);
+                _offsetMap[ox + oy * OFFSET_MAP_SIZE] = (uint16_t)((offset - _offsetMapBase) / _offsetMapScale * double(0xFFFF));
             }
         }
     }
@@ -151,9 +151,9 @@ void Landblock::init()
             Vec3 b(0.0, ly2 - ly1, h3 - h1);
 
             auto n = a.cross(b).normalize() * 0.5 + Vec3(0.5, 0.5, 0.5);
-            _normalMap[(ox + oy * OFFSET_MAP_SIZE) * 3] = n.x * double(0xFF);
-            _normalMap[(ox + oy * OFFSET_MAP_SIZE) * 3 + 1] = n.y * double(0xFF);
-            _normalMap[(ox + oy * OFFSET_MAP_SIZE) * 3 + 2] = n.z * double(0xFF);
+            _normalMap[(ox + oy * OFFSET_MAP_SIZE) * 3] = (uint8_t)(n.x * double(0xFF));
+            _normalMap[(ox + oy * OFFSET_MAP_SIZE) * 3 + 1] = (uint8_t)(n.y * double(0xFF));
+            _normalMap[(ox + oy * OFFSET_MAP_SIZE) * 3 + 2] = (uint8_t)(n.z * double(0xFF));
         }
     }
 }
@@ -258,8 +258,8 @@ double Landblock::calcHeightUnbounded(double x, double y) const
 
 LandblockId Landblock::id() const
 {
-    auto x = (_rawData.fileId >> 24) & 0xFF;
-    auto y = (_rawData.fileId >> 16) & 0xFF;
+    uint8_t x = uint8_t((_rawData.fileId >> 24) & 0xFF);
+    uint8_t y = uint8_t((_rawData.fileId >> 16) & 0xFF);
     return LandblockId(x, y);
 }
 
@@ -294,7 +294,7 @@ bool Landblock::isSplitNESW(int x, int y) const
     uint32_t tx = ((_rawData.fileId >> 24) & 0xFF) * 8 + x;
     uint32_t ty = ((_rawData.fileId >> 16) & 0xFF) * 8 + y;
     uint32_t v = tx * ty * 0x0CCAC033 - tx * 0x421BE3BD + ty * 0x6C1AC587 - 0x519B8F25;
-    return v & 0x80000000;
+    return (v & 0x80000000) != 0;
 }
 
 unique_ptr<Destructable>& Landblock::renderData()

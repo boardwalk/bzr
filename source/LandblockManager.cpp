@@ -50,11 +50,11 @@ void LandblockManager::load()
 {
     // we grab more landblocks than we need so the ones that actually
     // get initialized have all their neighbors
-    auto sloppyRadius = _radius + 2;
+    uint8_t sloppyRadius = uint8_t(_radius) + 2;
 
-    for(auto x = _center.x() - sloppyRadius; x <= _center.x() + sloppyRadius; x++)
+    for(uint8_t x = _center.x() - sloppyRadius; x <= _center.x() + sloppyRadius; x++)
     {
-        for(auto y = _center.y() - sloppyRadius; y <= _center.y() + sloppyRadius; y++)
+        for(uint8_t y = _center.y() - sloppyRadius; y <= _center.y() + sloppyRadius; y++)
         {
             LandblockId id(x, y);
 

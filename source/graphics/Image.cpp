@@ -17,11 +17,19 @@ PACK(struct TextureHeader
 
 static vector<uint8_t> decodeDXT1(const void* data, int width, int height)
 {
+    (void)data;
+    (void)width;
+    (void)height;
+
     throw runtime_error("DXT1 decoding not yet implemented");
 }
 
 static vector<uint8_t> decodeDXT5(const void* data, int width, int height)
 {
+    (void)data;
+    (void)width;
+    (void)height;
+
     throw runtime_error("DXT5 decoding not yet implemented");
 }
 
@@ -192,9 +200,9 @@ void Image::scale(int newWidth, int newHeight)
 
             for(auto c = 0; c < nchannels; c++)
             {
-                DSTPX(dstX, dstY, c) =
+                DSTPX(dstX, dstY, c) = uint8_t(
                     (SRCPX(srcX, srcY, c) * xOpposite + SRCPX(srcX + 1, srcY, c) * xDiff) * yOpposite +
-                    (SRCPX(srcX, srcY + 1, c) * xOpposite + SRCPX(srcX + 1, srcY + 1, c) * xDiff) * yDiff;
+                    (SRCPX(srcX, srcY + 1, c) * xOpposite + SRCPX(srcX + 1, srcY + 1, c) * xDiff) * yDiff);
             }
 
 #undef SRCPX

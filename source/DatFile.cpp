@@ -63,7 +63,7 @@ vector<uint8_t> DatFile::read(uint32_t id) const
 {
     auto nodePosition = _rootPosition;
 
-    while(true)
+    for(;;)
     {
         auto nodeData = readBlocks(nodePosition);
         auto node = (DatNode*)nodeData.data();
