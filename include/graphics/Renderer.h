@@ -4,6 +4,7 @@
 #include "Noncopyable.h"
 #ifdef OCULUSVR
 #include <OVR_CAPI.h>
+#include <OVR_CAPI_GL.h>
 #endif
 
 class SkyRenderer;
@@ -29,7 +30,11 @@ private:
 #ifdef OCULUSVR
     ovrHmd _hmd;
     ovrSizei _renderTexSize;
+    ovrRecti _eyeViewport[ovrEye_Count];
+    ovrGLTexture _eyeTexture[ovrEye_Count];
     GLuint _renderTex;
+    GLuint _depthTex;
+    GLuint _framebuffer;
 #endif
 
     unique_ptr<SkyRenderer> _skyRenderer;
