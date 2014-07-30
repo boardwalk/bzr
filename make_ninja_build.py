@@ -86,9 +86,9 @@ def main():
             cppflags += r' /I{}\include'.format(glew_dir)
             linkflags += r' /libpath:{}\lib\Release\x64 OpenGL32.lib glew32.lib'.format(glew_dir)
 
-            jansson_dir = os.path.expanduser(r'~\Documents\jansson-2.6')
+            jansson_dir = os.path.expanduser(r'~\Documents\jansson-2.6\VisualStudioSolution')
             cppflags += r' /I{}\include'.format(jansson_dir)
-            linkflags += r' /libpath:{}\lib\Release jansson.lib'.format(jansson_dir)
+            linkflags += r' /libpath:{}\x64\Release jansson.lib advapi32.lib'.format(jansson_dir)
 
             if args.oculusvr:
                 ovr_dir = os.path.expanduser(r'~\Documents\OculusSDK\LibOVR')
