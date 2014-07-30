@@ -66,6 +66,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--release', action='store_true', default=False)
     parser.add_argument('--headless', action='store_true', default=False)
+    parser.add_argument('--oculusvr', action='store_true', default=False)
     args = parser.parse_args()
 
     with open('build.ninja', 'w') as buildfile:
@@ -84,6 +85,15 @@ def main():
             glew_dir = os.path.expanduser(r'~\Documents\glew-1.10.0')
             cppflags += r' /I{}\include'.format(glew_dir)
             linkflags += r' /libpath:{}\lib\Release\x64 OpenGL32.lib glew32.lib'.format(glew_dir)
+
+            if args.oculusvr:
+                ovr_dir = os.path.expanduser(r'~\Documents\OculusSDK\LibOVR')
+                cppflags += r' /I{}\Src /DOVR_OS_WIN32 /DOCULUSVR'.format(ovr_dir)
+                # there are VS2010 and 2013 directories too
+                # i'm only testing this support with VS 2013 right now
+                # attn! libovr requires atls.lib, which is not provided by VS Express
+                # the version provided in the WDK does *not* work, you need the full version of VS
+                linkflags += r' /libpath:{}\Lib\x64\VS2013 libovr64.lib winmm.lib ws2_32.lib gdi32.lib'.format(ovr_dir)
 
             if args.release:
                 cppflags += ' /O2 /GL'
