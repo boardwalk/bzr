@@ -1,9 +1,12 @@
 #include "LandblockManager.h"
 #include "Core.h"
+#include "Config.h"
 #include "DatFile.h"
 
-LandblockManager::LandblockManager() : _radius(8)
-{}
+LandblockManager::LandblockManager()
+{
+    _radius = Core::get().config().getInt("LandblockManager.radius", 8);
+}
 
 void LandblockManager::setCenter(LandblockId center)
 {
