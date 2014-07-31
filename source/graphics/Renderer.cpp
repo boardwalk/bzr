@@ -88,8 +88,15 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     glBindTexture(GL_TEXTURE_2D, _depthTex);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, _renderTexSize.w, _renderTexSize.h, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
 
-    _eyeViewport[ovrEye_Left] = { { 0, 0 }, { _renderTexSize.w / 2, _renderTexSize.h } };
-    _eyeViewport[ovrEye_Right] = { { _renderTexSize.w / 2, 0 }, { _renderTexSize.w / 2, _renderTexSize.h } };
+    _eyeViewport[ovrEye_Left].Pos.x = 0;
+    _eyeViewport[ovrEye_Left].Pos.y = 0;
+    _eyeViewport[ovrEye_Left].Size.w = _renderTexSize.w / 2;
+    _eyeViewport[ovrEye_Left].Size.h = _renderTexSize.h;
+
+    _eyeViewport[ovrEye_Right].Pos.x = _renderTexSize.w / 2;
+    _eyeViewport[ovrEye_Right].Pos.y = 0;
+    _eyeViewport[ovrEye_Right].Size.w = _renderTexSize.w / 2;
+    _eyeViewport[ovrEye_Right].Size.h = _renderTexSize.h;
 
     _eyeTexture[ovrEye_Left].OGL.Header.API = ovrRenderAPI_OpenGL;
     _eyeTexture[ovrEye_Left].OGL.Header.TextureSize = _renderTexSize;
