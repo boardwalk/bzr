@@ -13,6 +13,8 @@
 #include <algorithm>
 #endif
 
+#define FEET_PER_METER 3.28084
+
 Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 #ifdef OCULUSVR
     , _hmd(nullptr), _renderTex(0), _depthTex(0), _framebuffer(0)
@@ -217,7 +219,8 @@ void Renderer::initOVR()
 
     if(!_hmd)
     {
-        throw runtime_error("Failed to create OVR HMD object");
+        fprintf(stderr, "Failed to create OVR HMD, falling back to fake one\n");
+        _hmd = ovrHmd_CreateDebug(ovrHmd_DK2);
     }
 
     auto leftEyeTexSize = ovrHmd_GetFovTextureSize(_hmd, ovrEye_Left, _hmd->DefaultEyeFov[ovrEye_Left], 1.0f);
@@ -336,7 +339,14 @@ void Renderer::renderOVR(double interp)
 
         auto projectionMat = convertOvrMatrix(ovrMatrix4f_Projection(_eyeRenderDesc[eye].Fov, 0.1f, 1000.0f, /*rightHanded*/ true));
 
-        const Mat4& viewMat = Core::get().camera().viewMatrix();
+        Vec3 viewAdjust(
+            _eyeRenderDesc[eye].ViewAdjust.x * FEET_PER_METER,
+            _eyeRenderDesc[eye].ViewAdjust.y * FEET_PER_METER,
+            _eyeRenderDesc[eye].ViewAdjust.z * FEET_PER_METER);
+
+        Mat4 viewMat;
+        viewMat.makeTranslation(viewAdjust);
+        viewMat = viewMat * Core::get().camera().viewMatrix();
 
         _skyRenderer->render();
         _landblockRenderer->render(projectionMat, viewMat);
