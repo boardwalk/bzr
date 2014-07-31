@@ -4,6 +4,7 @@
 #include "graphics/util.h"
 #include "math/Mat3.h"
 #include "Camera.h"
+#include "Config.h"
 #include "Core.h"
 #include "Landblock.h"
 #include "util.h"
@@ -33,10 +34,9 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 16);
 
-    // TODO configurable
-    _width = 1024;
-    _height = 768;
-    _fieldOfView = 90.0;
+    _width = (int)Core::get().config().getInt("Renderer.width", 1024);
+    _height = (int)Core::get().config().getInt("Renderer.height", 768);
+    _fieldOfView = Core::get().config().getDouble("Renderer.fieldOfView", 90.0);
 
     _window = SDL_CreateWindow("Bael'Zharon's Respite",
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height, SDL_WINDOW_OPENGL);

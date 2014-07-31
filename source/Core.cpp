@@ -1,6 +1,7 @@
 #include "Core.h"
 #include "graphics/Renderer.h"
 #include "Camera.h"
+#include "Config.h"
 #include "DatFile.h"
 #include "LandblockManager.h"
 #include "util.h"
@@ -24,7 +25,37 @@ Core& Core::get()
     return *g_singleton;
 }
 
-Core::Core() : _done(false)
+Config& Core::config()
+{
+    return *_config;
+}
+
+const DatFile& Core::portalDat() const
+{
+    return *_portalDat;
+}
+
+const DatFile& Core::cellDat() const
+{
+    return *_cellDat;
+}
+
+const DatFile& Core::highresDat() const
+{
+    return *_highresDat;
+}
+
+LandblockManager& Core::landblockManager()
+{
+    return *_landblockManager;
+}
+
+const Camera& Core::camera() const
+{
+    return *_camera;
+}
+
+Core::Core() : _done(false), _config(nullptr)
 {}
 
 void Core::init()
@@ -34,17 +65,15 @@ void Core::init()
         throwSDLError();
     }
 
+    _config.reset(new Config());
     _portalDat.reset(new DatFile("data/client_portal.dat"));
     _cellDat.reset(new DatFile("data/client_cell_1.dat"));
     _highresDat.reset(new DatFile("data/client_highres.dat"));
-
     _landblockManager.reset(new LandblockManager());
     _camera.reset(new Camera());
-
 #ifndef HEADLESS
     _renderer.reset(new Renderer());
 #endif
-
     _landblockManager->setCenter(LandblockId(0x31, 0xD6));
 }
 
@@ -53,13 +82,12 @@ void Core::cleanup()
 #ifndef HEADLESS
     _renderer.reset();
 #endif
-
     _camera.reset();
     _landblockManager.reset();
-
     _portalDat.reset();
     _cellDat.reset();
     _highresDat.reset();
+    _config.reset();
 
     SDL_Quit();
 }
@@ -95,31 +123,6 @@ void Core::run()
         SDL_Delay(12);
 #endif
     }
-}
-
-const DatFile& Core::portalDat() const
-{
-    return *_portalDat;
-}
-
-const DatFile& Core::cellDat() const
-{
-    return *_cellDat;
-}
-
-const DatFile& Core::highresDat() const
-{
-    return *_highresDat;
-}
-
-LandblockManager& Core::landblockManager()
-{
-    return *_landblockManager;
-}
-
-const Camera& Core::camera() const
-{
-    return *_camera;
 }
 
 void Core::handleEvents()

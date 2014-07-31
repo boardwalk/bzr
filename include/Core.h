@@ -1,6 +1,7 @@
 #ifndef BZR_CORE_H
 #define BZR_CORE_H
 
+class Config;
 class DatFile;
 class LandblockManager;
 class Camera;
@@ -12,10 +13,10 @@ public:
     static void go();
     static Core& get();
 
+    Config& config();
     const DatFile& portalDat() const;
     const DatFile& cellDat() const;
     const DatFile& highresDat() const;
-
     LandblockManager& landblockManager();
     const Camera& camera() const;
 
@@ -30,6 +31,7 @@ private:
     void step(double dt);
 
     bool _done;
+    unique_ptr<Config> _config;
     unique_ptr<DatFile> _portalDat;
     unique_ptr<DatFile> _cellDat;
     unique_ptr<DatFile> _highresDat;

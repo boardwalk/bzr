@@ -73,7 +73,7 @@ def main():
         n = ninja_syntax.Writer(buildfile)
 
         if sys.platform == 'win32':
-            cppflags = '/nologo /EHsc /Iinclude /Ibuild'
+            cppflags = '/nologo /EHsc /Iinclude /Ibuild /D_CRT_SECURE_NO_WARNINGS'
             cxxflags = '/FIbasic.h /W4 /WX'
             cflags = ''
             linkflags = '/nologo'
