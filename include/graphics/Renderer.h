@@ -20,6 +20,11 @@ public:
 
 private:
     void createWindow();
+#ifdef OCULUSVR
+    void initOVR();
+    void cleanupOVR();
+    void renderOVR(double interp);
+#endif
 
     double _fieldOfView;
 

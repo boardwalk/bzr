@@ -13,23 +13,6 @@
 #include <algorithm>
 #endif
 
-#ifdef OCULUSVR
-static Mat4 convertOvrMatrix(const ovrMatrix4f& mat)
-{
-    Mat4 result;
-
-    for(auto j = 0; j < 4; j++)
-    {
-        for(auto i = 0; i < 4; i++)
-        {
-            result.m[i + j * 4] = mat.M[i][j];
-        }
-    }
-
-    return result;
-}
-#endif
-
 Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 #ifdef OCULUSVR
     , _hmd(nullptr), _renderTex(0), _depthTex(0), _framebuffer(0)
@@ -79,7 +62,156 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 #endif
 
 #ifdef OCULUSVR
+    initOVR();
+#endif
+
+    SDL_GL_SetSwapInterval(1); // vsync
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // the default is 4
+
+    _skyRenderer.reset(new SkyRenderer());
+    _landblockRenderer.reset(new LandblockRenderer());
+    _landblockRenderer->setLightPosition(_skyRenderer->sunVector() * 1000.0);
+
+    _fieldOfView = config.getDouble("Renderer.fieldOfView", 90.0);
+}
+
+Renderer::~Renderer()
+{
+    _landblockRenderer.reset();
+    _skyRenderer.reset();
+
+#ifdef OCULUSVR
+    cleanupOVR();
+#endif
+
+    if(_context != nullptr)
+    {
+        SDL_GL_DeleteContext(_context);
+    }
+
+    if(_window != nullptr)
+    {
+        SDL_DestroyWindow(_window);
+    }
+
+    if(_videoInit)
+    {
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
+    }
+}
+
+void Renderer::render(double interp)
+{
+    (void)interp;
+
+#ifdef OCULUSVR
+    if(_hmd != nullptr)
+    {
+        return renderOVR(interp);
+    }
+#endif
+
+    int windowWidth, windowHeight;
+    SDL_GetWindowSize(_window, &windowWidth, &windowHeight);
+
+    // projection * view * model * vertex
+    Mat4 projectionMat;
+    projectionMat.makePerspective(_fieldOfView, double(windowWidth)/double(windowHeight), 0.1, 1000.0);
+
+    const Mat4& viewMat = Core::get().camera().viewMatrix();
+
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    _skyRenderer->render();
+    _landblockRenderer->render(projectionMat, viewMat);
+
+    SDL_GL_SwapWindow(_window);
+}
+
+void Renderer::createWindow()
+{
+    auto& config = Core::get().config();
+    auto displayNum = config.getInt("Renderer.displayNum", 0);
+    auto windowMode = config.getString("Renderer.windowMode", "windowed");
+    auto width = config.getInt("Renderer.width", 1024);
+    auto height = config.getInt("Renderer.height", 768);
+
+    if(displayNum < 0 || displayNum >= SDL_GetNumVideoDisplays())
+    {
+        throw runtime_error("Bad value for Renderer.displayNum");
+    }
+
+    SDL_Rect displayBounds;
+    SDL_GetDisplayBounds(displayNum, &displayBounds);
+
+    SDL_Rect windowBounds;
+    Uint32 windowFlags = SDL_WINDOW_OPENGL;
+
+    if(windowMode == "fullscreen")
+    {
+        windowBounds.x = displayBounds.x;
+        windowBounds.y = displayBounds.y;
+        windowBounds.w = width;
+        windowBounds.h = height;
+        windowFlags |= SDL_WINDOW_FULLSCREEN;
+    }
+    else if(windowMode == "fullscreenDesktop")
+    {
+        windowBounds = displayBounds;
+        windowFlags |= SDL_WINDOW_BORDERLESS;
+    }
+    else if(windowMode == "windowed")
+    {
+        windowBounds.x = displayBounds.x + (displayBounds.w - width) / 2;
+        windowBounds.y = displayBounds.y + (displayBounds.h - height) / 2;
+        windowBounds.w = width;
+        windowBounds.h = height;
+    }
+    else
+    {
+        throw runtime_error("Bad value for Renderer.windowMode");
+    }
+
+    _window = SDL_CreateWindow("Bael'Zharon's Respite",
+        windowBounds.x, windowBounds.y, windowBounds.w, windowBounds.h, windowFlags);
+
+    if(_window == nullptr)
+    {
+        throwSDLError();
+    }
+}
+
+#ifdef OCULUSVR
+static Mat4 convertOvrMatrix(const ovrMatrix4f& mat)
+{
+    Mat4 result;
+
+    for(auto j = 0; j < 4; j++)
+    {
+        for(auto i = 0; i < 4; i++)
+        {
+            result.m[i + j * 4] = mat.M[i][j];
+        }
+    }
+
+    return result;
+}
+
+void Renderer::initOVR()
+{
     ovr_Initialize();
+
+    auto& config = Core::get().config();
+
+    if(!config.getBool("Renderer.OVR", false))
+    {
+        return;
+    }
 
     _hmd = ovrHmd_Create(0);
 
@@ -144,12 +276,12 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 
     if(!ovrHmd_AttachToWindow(_hmd, wmInfo.info.win.window, nullptr, nullptr))
     {
-        throw runtime_error("Failed to attach OVR to window");
+        throw runtime_error("Failed to attach HMD to window");
     }
 
     if(!ovrHmd_ConfigureRendering(_hmd, &cfg.Config, distortionCaps, _hmd->DefaultEyeFov, _eyeRenderDesc))
     {
-        throw runtime_error("Failed to configure OVR rendering");
+        throw runtime_error("Failed to configure HMD rendering");
     }
 
     glGenFramebuffers(1, &_framebuffer);
@@ -163,67 +295,35 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-#endif
 
-    SDL_GL_SetSwapInterval(1); // vsync
-    glEnable(GL_DEPTH_TEST);
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // the default is 4
-
-    _skyRenderer.reset(new SkyRenderer());
-    _landblockRenderer.reset(new LandblockRenderer());
-    _landblockRenderer->setLightPosition(_skyRenderer->sunVector() * 1000.0);
-
-    _fieldOfView = config.getDouble("Renderer.fieldOfView", 90.0);
-}
-
-Renderer::~Renderer()
-{
-    _landblockRenderer.reset();
-    _skyRenderer.reset();
-
-#ifdef OCULUSVR
-    glDeleteFramebuffers(1, &_framebuffer);
-    glDeleteTextures(1, &_renderTex);
-    glDeleteTextures(1, &_depthTex);
-
-    ovrHmd_Destroy(_hmd);
-    ovr_Shutdown();
-#endif
-
-    if(_context != nullptr)
-    {
-        SDL_GL_DeleteContext(_context);
-    }
-
-    if(_window != nullptr)
-    {
-        SDL_DestroyWindow(_window);
-    }
-
-    if(_videoInit)
-    {
-        SDL_QuitSubSystem(SDL_INIT_VIDEO);
-    }
-}
-
-void Renderer::render(double interp)
-{
-    (void)interp;
-
-#ifdef OCULUSVR
-    // shhhhh...
+    // warning will disappear as soon as the timeout expires
     ovrHmd_DismissHSWDisplay(_hmd);
+}
+
+void Renderer::cleanupOVR()
+{
+    if(_hmd)
+    {
+        glDeleteFramebuffers(1, &_framebuffer);
+        glDeleteTextures(1, &_renderTex);
+        glDeleteTextures(1, &_depthTex);
+
+        ovrHmd_Destroy(_hmd);
+    }
+
+    ovr_Shutdown();
+}
+
+void Renderer::renderOVR(double interp)
+{
+    (double)interp;
 
     ovrHmd_BeginFrame(_hmd, 0);
 
-    ovrPosef eyePose[ovrEye_Count];
-
     glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+    ovrPosef eyePose[ovrEye_Count];
 
     for(auto i = 0; i < ovrEye_Count; i++)
     {
@@ -244,75 +344,6 @@ void Renderer::render(double interp)
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    ovrHmd_EndFrame(_hmd, eyePose, (ovrTexture*)_eyeTexture);
-#else
-    int windowWidth, windowHeight;
-    SDL_GetWindowSize(_window, &windowWidth, &windowHeight);
-
-    // projection * view * model * vertex
-    Mat4 projectionMat;
-    projectionMat.makePerspective(_fieldOfView, double(windowWidth)/double(windowHeight), 0.1, 1000.0);
-
-    const Mat4& viewMat = Core::get().camera().viewMatrix();
-
-    glClear(GL_DEPTH_BUFFER_BIT);
-
-    _skyRenderer->render();
-    _landblockRenderer->render(projectionMat, viewMat);
-
-    SDL_GL_SwapWindow(_window);
+    ovrHmd_EndFrame(_hmd, eyePose, (ovrTexture*)_eyeTexture);    
+}
 #endif
-}
-
-void Renderer::createWindow()
-{
-    auto& config = Core::get().config();
-    auto displayNum = config.getInt("Renderer.displayNum", 0);
-    auto windowMode = config.getString("Renderer.windowMode", "windowed");
-    auto width = config.getInt("Renderer.width", 1024);
-    auto height = config.getInt("Renderer.height", 768);
-
-    if(displayNum < 0 || displayNum >= SDL_GetNumVideoDisplays())
-    {
-        throw runtime_error("Bad value for Renderer.displayNum");
-    }
-
-    SDL_Rect displayBounds;
-    SDL_GetDisplayBounds(displayNum, &displayBounds);
-
-    SDL_Rect windowBounds;
-    Uint32 windowFlags = SDL_WINDOW_OPENGL;
-
-    if(windowMode == string("fullscreen"))
-    {
-        windowBounds.x = displayBounds.x;
-        windowBounds.y = displayBounds.y;
-        windowBounds.w = width;
-        windowBounds.h = height;
-        windowFlags |= SDL_WINDOW_FULLSCREEN;
-    }
-    else if(windowMode == "fullscreenDesktop")
-    {
-        windowBounds = displayBounds;
-        windowFlags |= SDL_WINDOW_BORDERLESS;
-    }
-    else if(windowMode == "windowed")
-    {
-        windowBounds.x = displayBounds.x + (displayBounds.w - width) / 2;
-        windowBounds.y = displayBounds.y + (displayBounds.h - height) / 2;
-        windowBounds.w = width;
-        windowBounds.h = height;
-    }
-    else
-    {
-        throw runtime_error("Bad value for Renderer.windowMode");
-    }
-
-    _window = SDL_CreateWindow("Bael'Zharon's Respite",
-        windowBounds.x, windowBounds.y, windowBounds.w, windowBounds.h, windowFlags);
-
-    if(_window == nullptr)
-    {
-        throwSDLError();
-    }
-}
