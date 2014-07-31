@@ -32,6 +32,7 @@ private:
     ovrSizei _renderTexSize;
     ovrRecti _eyeViewport[ovrEye_Count];
     ovrGLTexture _eyeTexture[ovrEye_Count];
+    ovrEyeRenderDesc _eyeRenderDesc[ovrEye_Count];
     GLuint _renderTex;
     GLuint _depthTex;
     GLuint _framebuffer;

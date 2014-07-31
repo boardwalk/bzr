@@ -13,6 +13,23 @@
 #include <algorithm>
 #endif
 
+#ifdef OCULUSVR
+static Mat4 convertOvrMatrix(const ovrMatrix4f& mat)
+{
+    Mat4 result;
+
+    for(auto j = 0; j < 4; j++)
+    {
+        for(auto i = 0; i < 4; i++)
+        {
+            result.m[i + j * 4] = mat.M[i][j];
+        }
+    }
+
+    return result;
+}
+#endif
+
 Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 #ifdef OCULUSVR
     , _hmd(nullptr), _renderTex(0), _depthTex(0), _framebuffer(0)
@@ -124,14 +141,13 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     cfg.OGL.DC = GetDC(wmInfo.info.win.window);
 
     unsigned int distortionCaps = 0;
-    ovrEyeRenderDesc eyeRenderDesc[ovrEye_Count];
 
     if(!ovrHmd_AttachToWindow(_hmd, wmInfo.info.win.window, nullptr, nullptr))
     {
         throw runtime_error("Failed to attach OVR to window");
     }
 
-    if(!ovrHmd_ConfigureRendering(_hmd, &cfg.Config, distortionCaps, _hmd->DefaultEyeFov, eyeRenderDesc))
+    if(!ovrHmd_ConfigureRendering(_hmd, &cfg.Config, distortionCaps, _hmd->DefaultEyeFov, _eyeRenderDesc))
     {
         throw runtime_error("Failed to configure OVR rendering");
     }
@@ -218,9 +234,7 @@ void Renderer::render(double interp)
 
         eyePose[eye] = ovrHmd_GetEyePose(_hmd, eye);
 
-        // FIXME aspect ratio
-        Mat4 projectionMat;
-        projectionMat.makePerspective(_fieldOfView, 1.0, 0.1, 1000.0);
+        auto projectionMat = convertOvrMatrix(ovrMatrix4f_Projection(_eyeRenderDesc[eye].Fov, 0.1f, 1000.0f, /*rightHanded*/ true));
 
         const Mat4& viewMat = Core::get().camera().viewMatrix();
 
