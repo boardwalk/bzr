@@ -272,6 +272,9 @@ void Renderer::initOVR()
     _eyeTexture[ovrEye_Right].OGL.Header.RenderViewport = _eyeViewport[ovrEye_Right];
     _eyeTexture[ovrEye_Right].OGL.TexId = _renderTex;
 
+    ovrSizei targetSize;
+    SDL_GetWindowSize(_window, &targetSize.w, &targetSize.h);
+
     SDL_SysWMinfo wmInfo;
     SDL_VERSION(&wmInfo.version);
 
@@ -282,7 +285,7 @@ void Renderer::initOVR()
 
     ovrGLConfig cfg;
     cfg.OGL.Header.API = ovrRenderAPI_OpenGL;
-    cfg.OGL.Header.RTSize = _renderTexSize;
+    cfg.OGL.Header.RTSize = targetSize;
     cfg.OGL.Header.Multisample = 1; // yes?
     cfg.OGL.Window = wmInfo.info.win.window;
     cfg.OGL.DC = GetDC(wmInfo.info.win.window);
