@@ -277,14 +277,14 @@ void Renderer::initOVR()
 
     unsigned int distortionCaps = 0;
 
-    if(!ovrHmd_AttachToWindow(_hmd, wmInfo.info.win.window, nullptr, nullptr))
-    {
-        throw runtime_error("Failed to attach HMD to window");
-    }
-
     if(!ovrHmd_ConfigureRendering(_hmd, &cfg.Config, distortionCaps, _hmd->DefaultEyeFov, _eyeRenderDesc))
     {
         throw runtime_error("Failed to configure HMD rendering");
+    }
+
+    if(!ovrHmd_AttachToWindow(_hmd, wmInfo.info.win.window, nullptr, nullptr))
+    {
+        throw runtime_error("Failed to attach HMD to window");
     }
 
     glGenFramebuffers(1, &_framebuffer);
