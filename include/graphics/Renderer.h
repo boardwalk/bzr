@@ -19,8 +19,8 @@ public:
     void render(double interp);
 
 private:
-    int _width;
-    int _height;
+    void createWindow();
+
     double _fieldOfView;
 
     bool _videoInit;

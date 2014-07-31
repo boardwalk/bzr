@@ -22,6 +22,7 @@
 #include <cstdint>
 #include <memory>
 #include <stdexcept>
+#include <string>
 
 using namespace std;
 

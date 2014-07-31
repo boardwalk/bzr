@@ -30,21 +30,18 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 #endif
 
-    // Enable 16x MSAA
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 16);
+    auto& config = Core::get().config();
 
-    _width = (int)Core::get().config().getInt("Renderer.width", 1024);
-    _height = (int)Core::get().config().getInt("Renderer.height", 768);
-    _fieldOfView = Core::get().config().getDouble("Renderer.fieldOfView", 90.0);
+    auto multisamples = config.getInt("Renderer.multisamples", 16);
 
-    _window = SDL_CreateWindow("Bael'Zharon's Respite",
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height, SDL_WINDOW_OPENGL);
-
-    if(_window == nullptr)
+    if(multisamples != 0)
     {
-        throwSDLError();
+        // Enable MSAA
+        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, (int)multisamples);
     }
+
+    createWindow();
 
     _context = SDL_GL_CreateContext(_window);
 
@@ -156,6 +153,8 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     _skyRenderer.reset(new SkyRenderer());
     _landblockRenderer.reset(new LandblockRenderer());
     _landblockRenderer->setLightPosition(_skyRenderer->sunVector() * 1000.0);
+
+    _fieldOfView = config.getDouble("Renderer.fieldOfView", 90.0);
 }
 
 Renderer::~Renderer()
@@ -212,8 +211,9 @@ void Renderer::render(double interp)
 
         eyePose[eye] = ovrHmd_GetEyePose(_hmd, eye);
 
+        // FIXME aspect ratio
         Mat4 projectionMat;
-        projectionMat.makePerspective(_fieldOfView, double(_width)/double(_height), 0.1, 1000.0);
+        projectionMat.makePerspective(_fieldOfView, 1.0, 0.1, 1000.0);
 
         const Mat4& viewMat = Core::get().camera().viewMatrix();
 
@@ -225,9 +225,12 @@ void Renderer::render(double interp)
 
     ovrHmd_EndFrame(_hmd, eyePose, (ovrTexture*)_eyeTexture);
 #else
+    int windowWidth, windowHeight;
+    SDL_GetWindowSize(_window, &windowWidth, &windowHeight);
+
     // projection * view * model * vertex
     Mat4 projectionMat;
-    projectionMat.makePerspective(_fieldOfView, double(_width)/double(_height), 0.1, 1000.0);
+    projectionMat.makePerspective(_fieldOfView, double(windowWidth)/double(windowHeight), 0.1, 1000.0);
 
     const Mat4& viewMat = Core::get().camera().viewMatrix();
 
@@ -238,4 +241,57 @@ void Renderer::render(double interp)
 
     SDL_GL_SwapWindow(_window);
 #endif
+}
+
+void Renderer::createWindow()
+{
+    auto& config = Core::get().config();
+    auto displayNum = (int)config.getInt("Renderer.displayNum", 0);
+    auto windowMode = config.getString("Renderer.windowMode", "windowed");
+    auto width = (int)config.getInt("Renderer.width", 1024);
+    auto height = (int)config.getInt("Renderer.height", 768);
+
+    if(displayNum < 0 || displayNum >= SDL_GetNumVideoDisplays())
+    {
+        throw runtime_error("Bad value for Render.displayNum");
+    }
+
+    SDL_Rect displayBounds;
+    SDL_GetDisplayBounds(displayNum, &displayBounds);
+
+    SDL_Rect windowBounds;
+    Uint32 windowFlags = SDL_WINDOW_OPENGL;
+
+    if(windowMode == string("fullscreen"))
+    {
+        windowBounds.x = displayBounds.x;
+        windowBounds.y = displayBounds.y;
+        windowBounds.w = width;
+        windowBounds.h = height;
+        windowFlags |= SDL_WINDOW_FULLSCREEN;
+    }
+    else if(windowMode == "fullscreenDesktop")
+    {
+        windowBounds = displayBounds;
+        windowFlags |= SDL_WINDOW_BORDERLESS;
+    }
+    else if(windowMode == "windowed")
+    {
+        windowBounds.x = displayBounds.x + (displayBounds.w - width) / 2;
+        windowBounds.y = displayBounds.y + (displayBounds.h - height) / 2;
+        windowBounds.w = width;
+        windowBounds.h = height;
+    }
+    else
+    {
+        throw runtime_error("Bad value for Renderer.windowMode");
+    }
+
+    _window = SDL_CreateWindow("Bael'Zharon's Respite",
+        windowBounds.x, windowBounds.y, windowBounds.w, windowBounds.h, windowFlags);
+
+    if(_window == nullptr)
+    {
+        throwSDLError();
+    }
 }
