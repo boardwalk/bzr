@@ -253,7 +253,7 @@ void Renderer::createWindow()
 
     if(displayNum < 0 || displayNum >= SDL_GetNumVideoDisplays())
     {
-        throw runtime_error("Bad value for Render.displayNum");
+        throw runtime_error("Bad value for Renderer.displayNum");
     }
 
     SDL_Rect displayBounds;
