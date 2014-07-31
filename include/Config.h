@@ -12,17 +12,13 @@ public:
     ~Config();
 
     void setBool(const char* name, bool value);
-    void setInt(const char* name, int64_t value);
+    void setInt(const char* name, int value);
     void setDouble(const char* name, double value);
     void setString(const char* name, const string& value);
 
-    bool getBool(const char* name);
     bool getBool(const char* name, bool defaultValue);
-    int64_t getInt(const char* name);
-    int64_t getInt(const char* name, int64_t defaultValue);
-    double getDouble(const char* name);
+    int getInt(const char* name, int defaultValue);
     double getDouble(const char* name, double defaultValue);
-    string getString(const char* name);
     string getString(const char* name, const string& defaultValue);
 
 private:

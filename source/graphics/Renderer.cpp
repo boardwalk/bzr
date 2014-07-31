@@ -38,7 +38,7 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     {
         // Enable MSAA
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, (int)multisamples);
+        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, multisamples);
     }
 
     createWindow();
@@ -246,10 +246,10 @@ void Renderer::render(double interp)
 void Renderer::createWindow()
 {
     auto& config = Core::get().config();
-    auto displayNum = (int)config.getInt("Renderer.displayNum", 0);
+    auto displayNum = config.getInt("Renderer.displayNum", 0);
     auto windowMode = config.getString("Renderer.windowMode", "windowed");
-    auto width = (int)config.getInt("Renderer.width", 1024);
-    auto height = (int)config.getInt("Renderer.height", 768);
+    auto width = config.getInt("Renderer.width", 1024);
+    auto height = config.getInt("Renderer.height", 768);
 
     if(displayNum < 0 || displayNum >= SDL_GetNumVideoDisplays())
     {

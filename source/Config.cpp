@@ -72,7 +72,7 @@ void Config::setBool(const char* name, bool value)
     set(name, json_boolean(value));
 }
 
-void Config::setInt(const char* name, int64_t value)
+void Config::setInt(const char* name, int value)
 {
     set(name, json_integer(value));
 }
@@ -85,11 +85,6 @@ void Config::setDouble(const char* name, double value)
 void Config::setString(const char* name, const string& value)
 {
     set(name, json_string(value.c_str()));
-}
-
-bool Config::getBool(const char* name)
-{
-    return getBool(name, bool());
 }
 
 bool Config::getBool(const char* name, bool defaultValue)
@@ -107,29 +102,19 @@ bool Config::getBool(const char* name, bool defaultValue)
     }
 }
 
-int64_t Config::getInt(const char* name)
-{
-    return getInt(name, int64_t());
-}
-
-int64_t Config::getInt(const char* name, int64_t defaultValue)
+int Config::getInt(const char* name, int defaultValue)
 {
     auto value = get(name);
 
     if(json_is_integer(value))
     {
-        return json_integer_value(value);
+        return (int)json_integer_value(value);
     }
     else
     {
         setInt(name, defaultValue);
         return defaultValue;
     }
-}
-
-double Config::getDouble(const char* name)
-{
-    return getDouble(name, double());
 }
 
 double Config::getDouble(const char* name, double defaultValue)
@@ -145,11 +130,6 @@ double Config::getDouble(const char* name, double defaultValue)
         setDouble(name, defaultValue);
         return defaultValue;
     }
-}
-
-string Config::getString(const char* name)
-{
-    return getString(name, string());
 }
 
 string Config::getString(const char* name, const string& defaultValue)
