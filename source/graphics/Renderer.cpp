@@ -197,9 +197,9 @@ static Quat convertOvrQuatf(const ovrQuatf& quat)
 
 static Vec3 convertOvrVector3f(const ovrVector3f& vec)
 {
-    // ovr has +y up, +x right, and +z back
-    // we have +z up, +x right, and +y forward
-    return Vec3(vec.x, -vec.z, vec.y);
+    // ovr has +x right, +y up, and +z back
+    // we have +x right, +y forward, +z up,
+    return Vec3(vec.x, -vec.z, vec.y) * FEET_PER_METER;
 }
 
 static Mat4 convertOvrMatrix4f(const ovrMatrix4f& mat)
@@ -362,15 +362,10 @@ void Renderer::renderOVR(double interp)
 
         eyePose[eye] = ovrHmd_GetEyePose(_hmd, eye);
         Core::get().camera().setHeadOrientation(convertOvrQuatf(eyePose[eye].Orientation).conjugate());
-        Core::get().camera().setHeadPosition(convertOvrVector3f(eyePose[eye].Position) * FEET_PER_METER);
-
-        Vec3 viewAdjust(
-            _eyeRenderDesc[eye].ViewAdjust.x * FEET_PER_METER,
-            _eyeRenderDesc[eye].ViewAdjust.y * FEET_PER_METER,
-            _eyeRenderDesc[eye].ViewAdjust.z * FEET_PER_METER);
+        Core::get().camera().setHeadPosition(convertOvrVector3f(eyePose[eye].Position));
 
         Mat4 viewMat;
-        viewMat.makeTranslation(viewAdjust);
+        viewMat.makeTranslation(convertOvrVector3f(_eyeRenderDesc[eye].ViewAdjust));
         viewMat = viewMat * Core::get().camera().viewMatrix();
 
         _skyRenderer->render();
