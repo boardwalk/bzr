@@ -50,7 +50,7 @@ LandblockManager& Core::landblockManager()
     return *_landblockManager;
 }
 
-const Camera& Core::camera() const
+Camera& Core::camera()
 {
     return *_camera;
 }

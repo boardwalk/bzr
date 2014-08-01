@@ -18,7 +18,7 @@ public:
     const DatFile& cellDat() const;
     const DatFile& highresDat() const;
     LandblockManager& landblockManager();
-    const Camera& camera() const;
+    Camera& camera();
 
 private:
     Core();

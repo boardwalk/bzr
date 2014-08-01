@@ -3,6 +3,7 @@
 #include "graphics/SkyRenderer.h"
 #include "graphics/util.h"
 #include "math/Mat3.h"
+#include "math/Vec3.h"
 #include "Camera.h"
 #include "Config.h"
 #include "Core.h"
@@ -189,7 +190,18 @@ void Renderer::createWindow()
 }
 
 #ifdef OCULUSVR
-static Mat4 convertOvrMatrix(const ovrMatrix4f& mat)
+static Quat convertOvrQuatf(const ovrQuatf& quat)
+{
+    return Quat(quat.w, quat.x, quat.y, quat.z);
+
+}
+
+static Vec3 convertOvrVector3f(const ovrVector3f& vec)
+{
+    return Vec3(vec.x, vec.y, vec.z);
+}
+
+static Mat4 convertOvrMatrix4f(const ovrMatrix4f& mat)
 {
     Mat4 result;
 
@@ -275,7 +287,7 @@ void Renderer::initOVR()
     cfg.OGL.Window = wmInfo.info.win.window;
     cfg.OGL.DC = GetDC(wmInfo.info.win.window);
 
-    unsigned int distortionCaps = 0;
+    unsigned int distortionCaps = ovrDistortionCap_Chromatic|ovrDistortionCap_TimeWarp|ovrDistortionCap_Overdrive;
 
     if(!ovrHmd_ConfigureRendering(_hmd, &cfg.Config, distortionCaps, _hmd->DefaultEyeFov, _eyeRenderDesc))
     {
@@ -298,6 +310,13 @@ void Renderer::initOVR()
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    unsigned int trackingCaps = ovrTrackingCap_Orientation|ovrTrackingCap_Position;
+
+    if(!ovrHmd_ConfigureTracking(_hmd, trackingCaps, 0))
+    {
+        throw runtime_error("Failed to configure HMD tracking");
+    }
 
     // warning will disappear as soon as the timeout expires
     ovrHmd_DismissHSWDisplay(_hmd);
@@ -335,9 +354,11 @@ void Renderer::renderOVR(double interp)
         glViewport(_eyeViewport[eye].Pos.x, _eyeViewport[eye].Pos.y,
                    _eyeViewport[eye].Size.w, _eyeViewport[eye].Size.h);
 
-        eyePose[eye] = ovrHmd_GetEyePose(_hmd, eye);
+        auto projectionMat = convertOvrMatrix4f(ovrMatrix4f_Projection(_eyeRenderDesc[eye].Fov, 0.1f, 1000.0f, /*rightHanded*/ true));
 
-        auto projectionMat = convertOvrMatrix(ovrMatrix4f_Projection(_eyeRenderDesc[eye].Fov, 0.1f, 1000.0f, /*rightHanded*/ true));
+        eyePose[eye] = ovrHmd_GetEyePose(_hmd, eye);
+        Core::get().camera().setHeadOrientation(convertOvrQuatf(eyePose[eye].Orientation));
+        Core::get().camera().setHeadPosition(convertOvrVector3f(eyePose[eye].Position));
 
         Vec3 viewAdjust(
             _eyeRenderDesc[eye].ViewAdjust.x * FEET_PER_METER,
