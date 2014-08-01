@@ -193,12 +193,13 @@ void Renderer::createWindow()
 static Quat convertOvrQuatf(const ovrQuatf& quat)
 {
     return Quat(quat.w, quat.x, quat.y, quat.z);
-
 }
 
 static Vec3 convertOvrVector3f(const ovrVector3f& vec)
 {
-    return Vec3(vec.x, vec.y, vec.z);
+    // ovr has +y up, +x right, and +z back
+    // we have +z up, +x right, and +y forward
+    return Vec3(vec.x, -vec.z, vec.y);
 }
 
 static Mat4 convertOvrMatrix4f(const ovrMatrix4f& mat)
@@ -360,8 +361,8 @@ void Renderer::renderOVR(double interp)
         auto projectionMat = convertOvrMatrix4f(ovrMatrix4f_Projection(_eyeRenderDesc[eye].Fov, 0.1f, 1000.0f, /*rightHanded*/ true));
 
         eyePose[eye] = ovrHmd_GetEyePose(_hmd, eye);
-        Core::get().camera().setHeadOrientation(convertOvrQuatf(eyePose[eye].Orientation));
-        Core::get().camera().setHeadPosition(convertOvrVector3f(eyePose[eye].Position));
+        Core::get().camera().setHeadOrientation(convertOvrQuatf(eyePose[eye].Orientation).conjugate());
+        Core::get().camera().setHeadPosition(convertOvrVector3f(eyePose[eye].Position) * FEET_PER_METER);
 
         Vec3 viewAdjust(
             _eyeRenderDesc[eye].ViewAdjust.x * FEET_PER_METER,
