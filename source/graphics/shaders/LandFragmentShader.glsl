@@ -34,7 +34,7 @@ vec3 phong()
     return lightIntensity * (ambient + diffuse + specular);
 }
 
-vec4 linearize(in vec4 color)
+vec4 linearize(vec4 color)
 {
     return pow(color, vec4(2.2));
 }
@@ -42,7 +42,7 @@ vec4 linearize(in vec4 color)
 // Filmic tonemapping operators
 // Also applies gamma correction
 // http://filmicgames.com/archives/75
-vec4 hejl(in vec4 color)
+vec4 hejl(vec4 color)
 {
     vec4 x = max(vec4(0.0), color - vec4(0.004));
     return (x * (6.2 * x + 0.5)) / (x * (6.2 * x + 1.7) + 0.06);
