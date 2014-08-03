@@ -68,7 +68,7 @@ void Image::load(uint32_t fileId)
 
     if(blob.empty())
     {
-        throw runtime_error("Texture not found");
+        throw runtime_error("Image not found");
     }
 
     BlobReader reader(blob.data(), blob.size());
