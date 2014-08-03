@@ -12,7 +12,9 @@ public:
     ModelRenderData(const SimpleModel& model);
     ~ModelRenderData();
 
-    void render();
+    void bind();
+
+    GLsizei indexCount() const;
 
 private:
     GLuint _vertexArray;

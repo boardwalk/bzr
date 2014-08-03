@@ -135,7 +135,7 @@ void Renderer::render(double interp)
 
     _skyRenderer->render();
     _landblockRenderer->render(projectionMat, viewMat);
-    _modelRenderer->render();
+    _modelRenderer->render(projectionMat, viewMat);
 
     SDL_GL_SwapWindow(_window);
 }
@@ -374,6 +374,7 @@ void Renderer::renderOVR(double interp)
 
         _skyRenderer->render();
         _landblockRenderer->render(projectionMat, viewMat);
+        _modelRenderer->renderer(projectionMat, viewMat);
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

@@ -1,5 +1,7 @@
 #include "graphics/ModelRenderer.h"
 #include "graphics/ModelRenderData.h"
+#include "graphics/util.h"
+#include "math/Mat4.h"
 #include "Core.h"
 #include "ResourceCache.h"
 #include "SimpleModel.h"
@@ -24,9 +26,15 @@ ModelRenderer::~ModelRenderer()
     _program.destroy();
 }
 
-void ModelRenderer::render()
+void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 {
     _program.use();
+
+    Mat4 modelMat;
+    auto modelViewMat = viewMat * modelMat;
+    auto modelViewProjectionMat = projectionMat * modelViewMat;
+
+    loadMat4ToUniform(modelViewProjectionMat, _program.getUniform("modelViewProjectionMatrix"));
 
     auto& model = (SimpleModel&)*_model;
 
@@ -39,5 +47,7 @@ void ModelRenderer::render()
 
     auto& modelRenderData = (ModelRenderData&)*renderData;
 
-    modelRenderData.render();
+    modelRenderData.bind();
+
+    glDrawElements(GL_TRIANGLE_STRIP, modelRenderData.indexCount(), GL_UNSIGNED_SHORT, nullptr);
 }

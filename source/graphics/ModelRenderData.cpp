@@ -9,8 +9,8 @@ ModelRenderData::ModelRenderData(const SimpleModel& model)
     for(auto& vert : model.vertices())
     {
         vertexData.push_back(vert.position.x);
-        vertexData.push_back(vert.position.x);
-        vertexData.push_back(vert.position.x);
+        vertexData.push_back(vert.position.y);
+        vertexData.push_back(vert.position.z);
 
         vertexData.push_back(vert.normal.x);
         vertexData.push_back(vert.normal.y);
@@ -23,6 +23,7 @@ ModelRenderData::ModelRenderData(const SimpleModel& model)
     {
         for(auto index : prim.vertexIndices)
         {
+            assert(index < (int)model.vertices().size());
             indexData.push_back(index);
         }
 
@@ -40,7 +41,7 @@ ModelRenderData::ModelRenderData(const SimpleModel& model)
 
     glGenBuffers(1, &_indexBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexData.size() * sizeof(float), indexData.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexData.size() * sizeof(uint16_t), indexData.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, nullptr);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (GLvoid*)(sizeof(float) * 3));
@@ -56,8 +57,12 @@ ModelRenderData::~ModelRenderData()
     glDeleteBuffers(1, &_indexBuffer);
 }
 
-void ModelRenderData::render()
+void ModelRenderData::bind()
 {
     glBindVertexArray(_vertexArray);
-    glDrawElements(GL_TRIANGLE_STRIP, _indexCount, GL_UNSIGNED_SHORT, nullptr);
+}
+
+GLsizei ModelRenderData::indexCount() const
+{
+    return _indexCount;
 }
