@@ -1,6 +1,8 @@
 #include "Landblock.h"
 #include "math/Vec3.h"
+#include "BlobReader.h"
 #include "Core.h"
+#include "DatFile.h"
 #include "LandblockManager.h"
 #include <algorithm>
 
@@ -47,6 +49,11 @@ void Landblock::init()
     if(!_offsetMap.empty())
     {
         return;
+    }
+
+    if(_rawData.flags)
+    {
+        //initObjects();
     }
 
     // sample another two times at the edges so we don't have to clamp our bicubic resample
@@ -300,4 +307,70 @@ bool Landblock::isSplitNESW(int x, int y) const
 unique_ptr<Destructable>& Landblock::renderData()
 {
     return _renderData;
+}
+
+static void dumpObject(const Landblock::Object& obj)
+{
+    printf("modelId:%08x (%f, %f, %f) (%f, %f, %f, %f)\n",
+        obj.modelId, obj.position.x, obj.position.y, obj.position.z,
+        obj.orientation.w, obj.orientation.x, obj.orientation.y, obj.orientation.z);
+}
+
+void Landblock::initObjects()
+{
+    auto blob = Core::get().cellDat().read(_rawData.fileId - 1); // xxyyFFFF => xxyyFFFE
+
+    printf("LOADING %08X\n", _rawData.fileId - 1);
+
+    BlobReader reader(blob.data(), blob.size());
+
+    auto fid = reader.read<uint32_t>();
+    assert(fid == _rawData.fileId - 1);
+
+    auto unk = reader.read<uint32_t>();
+    printf("unk = %08x\n", unk);
+
+    auto numObjects = reader.read<uint32_t>();
+    _objects.resize(numObjects);
+    printf("numObjects = %08x\n", numObjects);
+
+    for(auto oi = 0u; oi < numObjects; oi++)
+    {
+        auto& object = _objects[oi];
+
+        object.modelId = reader.read<uint32_t>();
+
+        object.position.x = reader.read<float>();
+        object.position.y = reader.read<float>();
+        object.position.z = reader.read<float>();
+
+        object.orientation.w = reader.read<float>();
+        object.orientation.x = reader.read<float>();
+        object.orientation.y = reader.read<float>();
+        object.orientation.z = reader.read<float>();
+
+        dumpObject(object);
+    }
+
+    auto numObjectsEx = reader.read<uint32_t>();
+    _objects.resize(numObjects + numObjectsEx);
+    printf("numObjectsEx = %08x\n", numObjectsEx);
+
+    for(auto oi = 0u; oi < numObjectsEx; oi++)
+    {
+        auto& object = _objects[numObjects + oi];
+
+        object.modelId = reader.read<uint32_t>();
+
+        object.position.x = reader.read<float>();
+        object.position.y = reader.read<float>();
+        object.position.z = reader.read<float>();
+
+        object.orientation.w = reader.read<float>();
+        object.orientation.x = reader.read<float>();
+        object.orientation.y = reader.read<float>();
+        object.orientation.z = reader.read<float>();
+
+        dumpObject(object);
+    }
 }

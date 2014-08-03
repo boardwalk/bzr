@@ -1,5 +1,6 @@
 #include "graphics/Renderer.h"
 #include "graphics/LandblockRenderer.h"
+#include "graphics/ModelRenderer.h"
 #include "graphics/SkyRenderer.h"
 #include "graphics/util.h"
 #include "math/Mat3.h"
@@ -71,13 +72,14 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     SDL_GL_SetSwapInterval(1); // vsync
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // the default is 4
+    glPrimitiveRestartIndex(0xFFFF);
 
     _skyRenderer.reset(new SkyRenderer());
     _landblockRenderer.reset(new LandblockRenderer());
+    _modelRenderer.reset(new ModelRenderer());
+
     _landblockRenderer->setLightPosition(_skyRenderer->sunVector() * 1000.0);
 
     _fieldOfView = config.getDouble("Renderer.fieldOfView", 90.0);
@@ -85,6 +87,7 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 
 Renderer::~Renderer()
 {
+    _modelRenderer.reset();
     _landblockRenderer.reset();
     _skyRenderer.reset();
 
@@ -132,6 +135,7 @@ void Renderer::render(double interp)
 
     _skyRenderer->render();
     _landblockRenderer->render(projectionMat, viewMat);
+    _modelRenderer->render();
 
     SDL_GL_SwapWindow(_window);
 }

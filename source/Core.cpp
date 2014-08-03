@@ -4,6 +4,7 @@
 #include "Config.h"
 #include "DatFile.h"
 #include "LandblockManager.h"
+#include "ResourceCache.h"
 #include "util.h"
 #include <SDL.h>
 
@@ -45,6 +46,11 @@ const DatFile& Core::highresDat() const
     return *_highresDat;
 }
 
+ResourceCache& Core::resourceCache()
+{
+    return *_resourceCache;
+}
+
 LandblockManager& Core::landblockManager()
 {
     return *_landblockManager;
@@ -69,6 +75,7 @@ void Core::init()
     _portalDat.reset(new DatFile("data/client_portal.dat"));
     _cellDat.reset(new DatFile("data/client_cell_1.dat"));
     _highresDat.reset(new DatFile("data/client_highres.dat"));
+    _resourceCache.reset(new ResourceCache());
     _landblockManager.reset(new LandblockManager());
     _camera.reset(new Camera());
 #ifndef HEADLESS
@@ -84,6 +91,7 @@ void Core::cleanup()
 #endif
     _camera.reset();
     _landblockManager.reset();
+    _resourceCache.reset();
     _portalDat.reset();
     _cellDat.reset();
     _highresDat.reset();

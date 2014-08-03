@@ -5,7 +5,7 @@
 
 SimpleModel::SimpleModel(uint32_t fileId)
 {
-    auto blob = Core::get().highresDat().read(fileId);
+    auto blob = Core::get().portalDat().read(fileId);
 
     if(blob.empty())
     {
@@ -120,4 +120,24 @@ SimpleModel::SimpleModel(uint32_t fileId)
             }
         }
     }
+}
+
+const vector<uint32_t>& SimpleModel::textures() const
+{
+    return _textures;
+}
+
+const vector<SimpleModel::Vertex>& SimpleModel::vertices() const
+{
+    return _vertices;
+}
+
+const vector<SimpleModel::Primitive>& SimpleModel::primitives() const
+{
+    return _primitives;
+}
+
+unique_ptr<Destructable>& SimpleModel::renderData()
+{
+    return _renderData;
 }

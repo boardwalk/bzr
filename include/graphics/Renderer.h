@@ -9,6 +9,7 @@
 
 class SkyRenderer;
 class LandblockRenderer;
+class ModelRenderer;
 
 class Renderer : Noncopyable
 {
@@ -45,6 +46,7 @@ private:
 
     unique_ptr<SkyRenderer> _skyRenderer;
     unique_ptr<LandblockRenderer> _landblockRenderer;
+    unique_ptr<ModelRenderer> _modelRenderer;
 };
 
 #endif

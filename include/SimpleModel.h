@@ -3,9 +3,10 @@
 
 #include "math/Vec2.h"
 #include "math/Vec3.h"
+#include "Destructable.h"
 #include <vector>
 
-class SimpleModel
+class SimpleModel : public Destructable
 {
 public:
     struct Vertex
@@ -27,10 +28,14 @@ public:
     const vector<Vertex>& vertices() const;
     const vector<Primitive>& primitives() const;
 
+    unique_ptr<Destructable>& renderData();
+
 private:
     vector<uint32_t> _textures;
     vector<Vertex> _vertices;
     vector<Primitive> _primitives;
+
+    unique_ptr<Destructable> _renderData;
 };
 
 #endif

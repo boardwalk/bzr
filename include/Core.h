@@ -1,11 +1,12 @@
 #ifndef BZR_CORE_H
 #define BZR_CORE_H
 
+class Camera;
 class Config;
 class DatFile;
 class LandblockManager;
-class Camera;
 class Renderer;
+class ResourceCache;
 
 class Core
 {
@@ -17,6 +18,7 @@ public:
     const DatFile& portalDat() const;
     const DatFile& cellDat() const;
     const DatFile& highresDat() const;
+    ResourceCache& resourceCache();
     LandblockManager& landblockManager();
     Camera& camera();
 
@@ -35,6 +37,7 @@ private:
     unique_ptr<DatFile> _portalDat;
     unique_ptr<DatFile> _cellDat;
     unique_ptr<DatFile> _highresDat;
+    unique_ptr<ResourceCache> _resourceCache;
     unique_ptr<LandblockManager> _landblockManager;
     unique_ptr<Camera> _camera;
 #ifndef HEADLESS
