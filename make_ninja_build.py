@@ -156,12 +156,13 @@ def main():
             cppflags += ' ' + execute('sdl2-config', '--cflags')
             ldflags += ' ' + execute('sdl2-config', '--libs')
 
+            cppflags += ' ' + execute('pkg-config', '--cflags', 'jansson')
+            ldflags += ' ' + execute('pkg-config', '--libs', 'jansson')
+
             if sys.platform == 'darwin':
                 ldflags += ' -framework OpenGL'
             else:
                 ldflags += ' -lGL'
-
-            ldflags += ' -ljansson'
 
             if args.release:
                 cppflags += ' -O2 -flto'
