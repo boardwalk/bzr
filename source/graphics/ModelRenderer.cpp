@@ -58,8 +58,12 @@ void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
                 continue;
             }
 
+            Mat4 modelOrientMat;
+            modelOrientMat.makeRotation(object.orientation);
+
             Mat4 modelMat;
             modelMat.makeTranslation(landblockOffset + object.position);
+            modelMat = modelMat * modelOrientMat;
 
             auto modelViewMat = viewMat * modelMat;
             auto modelViewProjectionMat = projectionMat * modelViewMat;
