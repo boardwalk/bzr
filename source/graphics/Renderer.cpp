@@ -74,6 +74,7 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // the default is 4
+    glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(0xFFFF);
 
     _skyRenderer.reset(new SkyRenderer());
@@ -351,7 +352,7 @@ void Renderer::renderOVR(double interp)
     ovrHmd_BeginFrame(_hmd, 0);
 
     glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
-    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT);
 
     ovrPosef eyePose[ovrEye_Count];
 

@@ -4,6 +4,7 @@
 #include "Core.h"
 #include "DatFile.h"
 #include "LandblockManager.h"
+#include "ResourceCache.h"
 #include <algorithm>
 
 const double Landblock::SQUARE_SIZE = 24.0;
@@ -37,6 +38,7 @@ Landblock::Landblock(const void* data, size_t length)
 Landblock::Landblock(Landblock&& other)
 {
     _rawData = other._rawData;
+    _objects = move(other._objects);
     _offsetMap = move(other._offsetMap);
     _offsetMapBase = other._offsetMapBase;
     _offsetMapScale = other._offsetMapScale;
@@ -53,7 +55,7 @@ void Landblock::init()
 
     if(_rawData.flags)
     {
-        //initObjects();
+        initObjects();
     }
 
     // sample another two times at the edges so we don't have to clamp our bicubic resample
@@ -275,6 +277,11 @@ const Landblock::RawData& Landblock::rawData() const
     return _rawData;
 }
 
+const vector<Landblock::Object>& Landblock::objects() const
+{
+    return _objects;
+}
+
 const uint16_t* Landblock::offsetMap() const
 {
     return _offsetMap.data();
@@ -309,36 +316,39 @@ unique_ptr<Destructable>& Landblock::renderData()
     return _renderData;
 }
 
+/*
 static void dumpObject(const Landblock::Object& obj)
 {
     printf("modelId:%08x (%f, %f, %f) (%f, %f, %f, %f)\n",
         obj.modelId, obj.position.x, obj.position.y, obj.position.z,
         obj.orientation.w, obj.orientation.x, obj.orientation.y, obj.orientation.z);
 }
+*/
 
 void Landblock::initObjects()
 {
     auto blob = Core::get().cellDat().read(_rawData.fileId - 1); // xxyyFFFF => xxyyFFFE
 
-    printf("LOADING %08X\n", _rawData.fileId - 1);
+    //printf("LOADING %08X\n", _rawData.fileId - 1);
 
     BlobReader reader(blob.data(), blob.size());
 
     auto fid = reader.read<uint32_t>();
     assert(fid == _rawData.fileId - 1);
 
-    auto unk = reader.read<uint32_t>();
-    printf("unk = %08x\n", unk);
+    /*auto unk = */reader.read<uint32_t>();
+    //printf("unk = %08x\n", unk);
 
     auto numObjects = reader.read<uint32_t>();
     _objects.resize(numObjects);
-    printf("numObjects = %08x\n", numObjects);
+    //printf("numObjects = %08x\n", numObjects);
 
     for(auto oi = 0u; oi < numObjects; oi++)
     {
         auto& object = _objects[oi];
 
-        object.modelId = reader.read<uint32_t>();
+        auto modelId = reader.read<uint32_t>();
+        object.model = Core::get().resourceCache().get(modelId);
 
         object.position.x = reader.read<float>();
         object.position.y = reader.read<float>();
@@ -349,9 +359,10 @@ void Landblock::initObjects()
         object.orientation.y = reader.read<float>();
         object.orientation.z = reader.read<float>();
 
-        dumpObject(object);
+        //dumpObject(object);
     }
 
+    /*
     auto numObjectsEx = reader.read<uint32_t>();
     _objects.resize(numObjects + numObjectsEx);
     printf("numObjectsEx = %08x\n", numObjectsEx);
@@ -373,4 +384,5 @@ void Landblock::initObjects()
 
         dumpObject(object);
     }
+    */
 }

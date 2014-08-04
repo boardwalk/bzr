@@ -27,7 +27,7 @@ public:
 
     struct Object
     {
-        uint32_t modelId;
+        shared_ptr<Destructable> model;
         Vec3 position;
         Quat orientation;
     };
@@ -43,6 +43,7 @@ public:
     LandblockId id() const;
 
     const RawData& rawData() const;
+    const vector<Object>& objects() const;
 
     const uint16_t* offsetMap() const;
     double offsetMapBase() const;
@@ -58,7 +59,6 @@ private:
     void initObjects();
 
     RawData _rawData;
-
     vector<Object> _objects;
 
     vector<uint16_t> _offsetMap;

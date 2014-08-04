@@ -64,7 +64,7 @@ SimpleModel::SimpleModel(uint32_t fileId)
         }
     }
 
-    if(flags & 0x2)
+    if(flags == 0x2 || flags == 0xA)
     {
         reader.read<float>();
         reader.read<float>();
