@@ -75,7 +75,7 @@ void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 
             renderData.bind();
 
-            glDrawElements(GL_TRIANGLE_STRIP, renderData.indexCount(), GL_UNSIGNED_SHORT, nullptr);
+            glDrawElements(GL_TRIANGLE_FAN, renderData.indexCount(), GL_UNSIGNED_SHORT, nullptr);
         }
     }
 }
