@@ -8,13 +8,13 @@ ModelRenderData::ModelRenderData(const SimpleModel& model)
 
     for(auto& vert : model.vertices())
     {
-        vertexData.push_back(vert.position.x);
-        vertexData.push_back(vert.position.y);
-        vertexData.push_back(vert.position.z);
+        vertexData.push_back(float(vert.position.x));
+        vertexData.push_back(float(vert.position.y));
+        vertexData.push_back(float(vert.position.z));
 
-        vertexData.push_back(vert.normal.x);
-        vertexData.push_back(vert.normal.y);
-        vertexData.push_back(vert.normal.z);
+        vertexData.push_back(float(vert.normal.x));
+        vertexData.push_back(float(vert.normal.y));
+        vertexData.push_back(float(vert.normal.z));
     }
 
     vector<uint16_t> indexData;
@@ -23,8 +23,8 @@ ModelRenderData::ModelRenderData(const SimpleModel& model)
     {
         for(auto index : prim.vertexIndices)
         {
-            assert(index < (int)model.vertices().size());
-            indexData.push_back(index);
+            assert(size_t(index) < model.vertices().size());
+            indexData.push_back(uint16_t(index));
         }
 
         indexData.push_back(0xFFFF);

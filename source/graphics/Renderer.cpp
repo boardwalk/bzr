@@ -375,7 +375,7 @@ void Renderer::renderOVR(double interp)
 
         _skyRenderer->render();
         _landblockRenderer->render(projectionMat, viewMat);
-        _modelRenderer->renderer(projectionMat, viewMat);
+        _modelRenderer->render(projectionMat, viewMat);
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
