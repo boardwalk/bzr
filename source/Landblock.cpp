@@ -362,16 +362,16 @@ void Landblock::initObjects()
         //dumpObject(object);
     }
 
-    /*
     auto numObjectsEx = reader.read<uint32_t>();
-    _objects.resize(numObjects + numObjectsEx);
-    printf("numObjectsEx = %08x\n", numObjectsEx);
+    //printf("numObjectsEx = %08x\n", numObjectsEx);
 
     for(auto oi = 0u; oi < numObjectsEx; oi++)
     {
+        _objects.emplace_back();
         auto& object = _objects[numObjects + oi];
 
-        object.modelId = reader.read<uint32_t>();
+        auto modelId = reader.read<uint32_t>();
+        object.model = Core::get().resourceCache().get(modelId);
 
         object.position.x = reader.read<float>();
         object.position.y = reader.read<float>();
@@ -382,7 +382,14 @@ void Landblock::initObjects()
         object.orientation.y = reader.read<float>();
         object.orientation.z = reader.read<float>();
 
-        dumpObject(object);
+        reader.read<uint32_t>();
+        auto numChunks = reader.read<uint32_t>();
+
+        if(numChunks != 0)
+        {
+            break;
+        }
+
+        //dumpObject(object);
     }
-    */
 }
