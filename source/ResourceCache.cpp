@@ -10,7 +10,7 @@ static Destructable* loadResource(uint32_t fileId)
         case 0x02:
             return nullptr;
         default:
-            throw runtime_error("File type not supporrted");
+            throw runtime_error("File type not supported");
     }
 }
 
