@@ -3,6 +3,7 @@
 #include "DatFile.h"
 #include "Palette.h"
 #include "Model.h"
+#include "TextureLookup.h"
 
 static Destructable* loadResource(uint32_t fileId)
 {
@@ -21,6 +22,8 @@ static Destructable* loadResource(uint32_t fileId)
             return nullptr;
         case 0x04:
             return new Palette(data.data(), data.size());
+        case 0x05:
+            return new TextureLookup(data.data(), data.size());
         default:
             throw runtime_error("File type not supported");
     }
