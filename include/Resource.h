@@ -9,6 +9,7 @@ public:
         Model,
         Palette,
         TextureLookup5,
+        Texture,
         TextureLookup8
     };
 
@@ -17,27 +18,27 @@ public:
     template<class T>
     T& cast()
     {
-        assert(type() == T::TYPE);
+        assert(resourceType() == T::RESOURCE_TYPE);
         return (T&)*this;
     }
 
     template<class T>
     const T& cast() const
     {
-        assert(type() == T::TYPE);
+        assert(resourceType() == T::RESOURCE_TYPE);
         return (const T&)*this;
     }
 
-    virtual ResourceType type() const = 0;
+    virtual ResourceType resourceType() const = 0;
 };
 
 template<Resource::ResourceType RT>
 class ResourceImpl : public Resource
 {
 public:
-    static const Resource::ResourceType TYPE = RT;
+    static const Resource::ResourceType RESOURCE_TYPE = RT;
 
-    Resource::ResourceType type() const override
+    Resource::ResourceType resourceType() const override
     {
         return RT;
     }

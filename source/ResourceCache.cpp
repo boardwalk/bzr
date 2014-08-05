@@ -3,6 +3,7 @@
 #include "DatFile.h"
 #include "Palette.h"
 #include "Model.h"
+#include "Texture.h"
 #include "TextureLookup5.h"
 #include "TextureLookup8.h"
 
@@ -12,7 +13,7 @@ static Resource* loadResource(uint32_t fileId)
 
     if(data.empty())
     {
-        throw runtime_error("Resource not found");
+        return nullptr;
     }
 
     switch(fileId >> 24)
@@ -25,6 +26,8 @@ static Resource* loadResource(uint32_t fileId)
             return new Palette(data.data(), data.size());
         case 0x05:
             return new TextureLookup5(data.data(), data.size());
+        case 0x06:
+            return new Texture(data.data(), data.size());
         case 0x08:
             return new TextureLookup8(data.data(), data.size());
         default:
