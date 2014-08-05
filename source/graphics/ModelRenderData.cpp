@@ -23,7 +23,6 @@ ModelRenderData::ModelRenderData(const Model& model)
     {
         for(auto index : prim.vertexIndices)
         {
-            assert(size_t(index) < model.vertices().size());
             indexData.push_back(uint16_t(index));
         }
 

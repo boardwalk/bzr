@@ -93,6 +93,7 @@ Model::Model(const void* data, size_t size)
         for(auto pvi = 0; pvi < numIndices; pvi++)
         {
             primitive.vertexIndices[pvi] = reader.read<uint16_t>();
+            assert(primitive.vertexIndices[pvi] < numVertices);
         }
 
         if(primFlags != 0x04)
@@ -100,6 +101,7 @@ Model::Model(const void* data, size_t size)
             for(auto pvi = 0; pvi < numIndices; pvi++)
             {
                 primitive.texCoordIndices[pvi] = reader.read<uint8_t>();
+                assert(primitive.texCoordIndices[pvi] < _vertices[primitive.vertexIndices[pvi]].texCoords.size());
             }
         }
 
