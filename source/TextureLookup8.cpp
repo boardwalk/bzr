@@ -24,7 +24,17 @@ TextureLookup8::TextureLookup8(const void* data, size_t size)
     }
 
     // I suspect these may be texture coordinates within the texture
-    reader.read<float>();
+    auto f1 = reader.read<float>();
+
+    if(flags & 0x10)
+    {
+        assert(f1 != 0.0);
+    }
+    else
+    {
+        assert(f1 == 0.0);
+    }
+
     reader.read<float>();
     reader.read<float>();
 
