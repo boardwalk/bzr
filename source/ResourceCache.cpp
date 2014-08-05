@@ -1,6 +1,7 @@
 #include "ResourceCache.h"
 #include "Core.h"
 #include "DatFile.h"
+#include "Palette.h"
 #include "SimpleModel.h"
 
 static Destructable* loadResource(uint32_t fileId)
@@ -18,6 +19,8 @@ static Destructable* loadResource(uint32_t fileId)
             return new SimpleModel(data.data(), data.size());
         case 0x02:
             return nullptr;
+        case 0x04:
+            return new Palette(data.data(), data.size());
         default:
             throw runtime_error("File type not supported");
     }
