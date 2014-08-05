@@ -1,21 +1,12 @@
 #include "SimpleModel.h"
 #include "BlobReader.h"
-#include "Core.h"
-#include "DatFile.h"
 
-SimpleModel::SimpleModel(uint32_t fileId)
+SimpleModel::SimpleModel(const void* data, size_t size)
 {
-    auto blob = Core::get().portalDat().read(fileId);
+    BlobReader reader(data, size);
 
-    if(blob.empty())
-    {
-        throw runtime_error("SimpleModel not found");
-    }
-
-    BlobReader reader(blob.data(), blob.size());
-
-    auto fid = reader.read<uint32_t>();
-    assert(fid == fileId);
+    auto fileId = reader.read<uint32_t>();
+    assert((fileId & 0xFF000000) == 0x01000000);
 
     auto flags = reader.read<uint32_t>();
     assert(flags == 0x2 || flags == 0x3 || flags == 0xA || flags == 0xB);

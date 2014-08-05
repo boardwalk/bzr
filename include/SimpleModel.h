@@ -22,7 +22,7 @@ public:
         vector<int> texCoordIndices;
     };
 
-    SimpleModel(uint32_t fileId);
+    SimpleModel(const void* data, size_t size);
 
     const vector<uint32_t>& textures() const;
     const vector<Vertex>& vertices() const;
