@@ -3,9 +3,10 @@
 
 #include "math/Quat.h"
 #include "math/Vec3.h"
-#include "LandblockId.h"
 #include "Destructable.h"
+#include "LandblockId.h"
 #include "Noncopyable.h"
+#include "Resource.h"
 #include <vector>
 
 class Landblock : Noncopyable
@@ -27,7 +28,7 @@ public:
 
     struct Object
     {
-        shared_ptr<Destructable> model;
+        ResourcePtr model;
         Vec3 position;
         Quat orientation;
     };

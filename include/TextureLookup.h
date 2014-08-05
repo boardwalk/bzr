@@ -2,9 +2,10 @@
 #define BZR_TEXTURELOOKUP_H
 
 #include "Destructable.h"
+#include "Resource.h"
 #include <vector>
 
-class TextureLookup : public Destructable
+class TextureLookup : public ResourceImpl<Resource::TextureLookup>
 {
 public:
     TextureLookup(const void* data, size_t size);

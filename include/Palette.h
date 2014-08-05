@@ -1,10 +1,10 @@
 #ifndef BZR_PALETTE_H
 #define BZR_PALETTE_H
 
-#include "Destructable.h"
+#include "Resource.h"
 #include <vector>
 
-class Palette : public Destructable
+class Palette : public ResourceImpl<Resource::Palette>
 {
 public:
     struct Color

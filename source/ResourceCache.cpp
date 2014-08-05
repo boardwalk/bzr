@@ -5,7 +5,7 @@
 #include "Model.h"
 #include "TextureLookup.h"
 
-static Destructable* loadResource(uint32_t fileId)
+static Resource* loadResource(uint32_t fileId)
 {
     auto data = Core::get().portalDat().read(fileId);
 
@@ -29,9 +29,9 @@ static Destructable* loadResource(uint32_t fileId)
     }
 }
 
-shared_ptr<Destructable> ResourceCache::get(uint32_t fileId)
+ResourcePtr ResourceCache::get(uint32_t fileId)
 {
-    shared_ptr<Destructable> sharedPtr;
+    ResourcePtr sharedPtr;
 
     auto& weakPtr = _data[fileId];
 

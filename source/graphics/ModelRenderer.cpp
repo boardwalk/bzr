@@ -10,19 +10,6 @@
 #include "graphics/shaders/ModelVertexShader.h"
 #include "graphics/shaders/ModelFragmentShader.h"
 
-static ModelRenderData& instantiate(shared_ptr<Destructable>& handle)
-{
-    auto& model = (Model&)*handle;
-    auto& renderData = model.renderData();
-
-    if(!renderData)
-    {
-        renderData.reset(new ModelRenderData(model));
-    }
-
-    return (ModelRenderData&)*renderData;
-}
-
 ModelRenderer::ModelRenderer()
 {
     _program.create();
@@ -71,7 +58,14 @@ void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
             loadMat4ToUniform(modelViewProjectionMat, _program.getUniform("modelViewProjectionMatrix"));
 
             // TODO FIX UGLY CONST_CAST
-            auto& renderData = instantiate(const_cast<shared_ptr<Destructable>&>(object.model));
+            auto& model = const_cast<ResourcePtr&>(object.model)->cast<Model>();
+
+            if(!model.renderData())
+            {
+                model.renderData().reset(new ModelRenderData(model));
+            }
+
+            auto& renderData = (ModelRenderData&)*model.renderData();
 
             renderData.bind();
 

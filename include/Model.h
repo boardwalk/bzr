@@ -4,9 +4,10 @@
 #include "math/Vec2.h"
 #include "math/Vec3.h"
 #include "Destructable.h"
+#include "Resource.h"
 #include <vector>
 
-class Model : public Destructable
+class Model : public ResourceImpl<Resource::Model>
 {
 public:
     struct Vertex
