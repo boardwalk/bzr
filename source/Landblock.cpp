@@ -316,32 +316,19 @@ unique_ptr<Destructable>& Landblock::renderData()
     return _renderData;
 }
 
-/*
-static void dumpObject(const Landblock::Object& obj)
-{
-    printf("modelId:%08x (%f, %f, %f) (%f, %f, %f, %f)\n",
-        obj.modelId, obj.position.x, obj.position.y, obj.position.z,
-        obj.orientation.w, obj.orientation.x, obj.orientation.y, obj.orientation.z);
-}
-*/
-
 void Landblock::initObjects()
 {
     auto blob = Core::get().cellDat().read(_rawData.fileId - 1); // xxyyFFFF => xxyyFFFE
-
-    //printf("LOADING %08X\n", _rawData.fileId - 1);
 
     BlobReader reader(blob.data(), blob.size());
 
     auto fid = reader.read<uint32_t>();
     assert(fid == _rawData.fileId - 1);
 
-    /*auto unk = */reader.read<uint32_t>();
-    //printf("unk = %08x\n", unk);
+    reader.read<uint32_t>();
 
     auto numObjects = reader.read<uint32_t>();
     _objects.resize(numObjects);
-    //printf("numObjects = %08x\n", numObjects);
 
     for(auto oi = 0u; oi < numObjects; oi++)
     {
@@ -358,16 +345,13 @@ void Landblock::initObjects()
         object.orientation.x = reader.read<float>();
         object.orientation.y = reader.read<float>();
         object.orientation.z = reader.read<float>();
-
-        //dumpObject(object);
     }
 
     auto numObjectsEx = reader.read<uint32_t>();
-    //printf("numObjectsEx = %08x\n", numObjectsEx);
+    _objects.resize(numObjects + numObjectsEx);
 
     for(auto oi = 0u; oi < numObjectsEx; oi++)
     {
-        _objects.emplace_back();
         auto& object = _objects[numObjects + oi];
 
         auto modelId = reader.read<uint32_t>();
@@ -385,11 +369,22 @@ void Landblock::initObjects()
         reader.read<uint32_t>();
         auto numChunks = reader.read<uint32_t>();
 
-        if(numChunks != 0)
+        // credits to Akilla
+        for(auto ci = 0u; ci < numChunks; ci++)
         {
-            break;
-        }
+            reader.read<uint32_t>();
+            reader.read<uint16_t>();
+            auto numSubChunks = reader.read<uint16_t>();
 
-        //dumpObject(object);
+            for(auto sci = 0; sci < numSubChunks; sci++)
+            {
+                reader.read<uint16_t>();
+            }
+
+            if(numSubChunks & 1)
+            {
+                reader.read<uint16_t>();
+            }
+        }
     }
 }
