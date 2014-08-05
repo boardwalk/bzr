@@ -1,8 +1,12 @@
 #version 410 core
 
+in vec3 fragTexCoord;
+
 out vec4 fragColor;
+
+uniform sampler2DArray modelTex;
 
 void main()
 {
-    fragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    fragColor = texture(modelTex, fragTexCoord);
 }

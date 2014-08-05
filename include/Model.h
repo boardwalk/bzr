@@ -25,6 +25,7 @@ public:
 
     struct Primitive
     {
+        int texIndex;
         vector<Index> indices;
     };
 

@@ -17,10 +17,14 @@ public:
     GLsizei indexCount() const;
 
 private:
+    void initGeometry(const Model& model);
+    void initTexture(const Model& model);
+
     GLuint _vertexArray;
     GLuint _vertexBuffer;
     GLuint _indexBuffer;
     GLsizei _indexCount;
+    GLuint _texture;
 };
 
 #endif

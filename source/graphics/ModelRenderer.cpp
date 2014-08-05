@@ -16,6 +16,11 @@ ModelRenderer::ModelRenderer()
     _program.attach(GL_VERTEX_SHADER, ModelVertexShader);
     _program.attach(GL_FRAGMENT_SHADER, ModelFragmentShader);
     _program.link();
+
+    _program.use();
+
+    auto modelTexLocation = _program.getUniform("modelTex");
+    glUniform1i(modelTexLocation, 0);
 }
 
 ModelRenderer::~ModelRenderer()

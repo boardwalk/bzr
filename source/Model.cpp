@@ -87,7 +87,7 @@ Model::Model(const void* data, size_t size)
         reader.read<uint8_t>();
         reader.read<uint8_t>();
         reader.read<uint8_t>();
-        reader.read<uint8_t>();
+        primitive.texIndex = reader.read<uint8_t>();
         reader.read<uint8_t>();
         reader.read<uint8_t>();
         reader.read<uint8_t>();
