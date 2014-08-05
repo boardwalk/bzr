@@ -1,5 +1,7 @@
 #include "Model.h"
 #include "BlobReader.h"
+#include "Core.h"
+#include "ResourceCache.h"
 
 Model::Model(const void* data, size_t size)
 {
@@ -16,7 +18,8 @@ Model::Model(const void* data, size_t size)
 
     for(auto ti = 0; ti < numTextures; ti++)
     {
-        _textures[ti] = reader.read<uint32_t>();
+        auto textureId = reader.read<uint32_t>();
+        _textures[ti] = Core::get().resourceCache().get(textureId);
     }
 
     auto one = reader.read<uint32_t>();
@@ -115,7 +118,7 @@ Model::Model(const void* data, size_t size)
     }
 }
 
-const vector<uint32_t>& Model::textures() const
+const vector<ResourcePtr>& Model::textures() const
 {
     return _textures;
 }

@@ -3,7 +3,8 @@
 #include "DatFile.h"
 #include "Palette.h"
 #include "Model.h"
-#include "TextureLookup.h"
+#include "TextureLookup5.h"
+#include "TextureLookup8.h"
 
 static Resource* loadResource(uint32_t fileId)
 {
@@ -23,7 +24,9 @@ static Resource* loadResource(uint32_t fileId)
         case 0x04:
             return new Palette(data.data(), data.size());
         case 0x05:
-            return new TextureLookup(data.data(), data.size());
+            return new TextureLookup5(data.data(), data.size());
+        case 0x08:
+            return new TextureLookup8(data.data(), data.size());
         default:
             throw runtime_error("File type not supported");
     }

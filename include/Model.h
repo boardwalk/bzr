@@ -25,14 +25,14 @@ public:
 
     Model(const void* data, size_t size);
 
-    const vector<uint32_t>& textures() const;
+    const vector<ResourcePtr>& textures() const;
     const vector<Vertex>& vertices() const;
     const vector<Primitive>& primitives() const;
 
     unique_ptr<Destructable>& renderData();
 
 private:
-    vector<uint32_t> _textures;
+    vector<ResourcePtr> _textures;
     vector<Vertex> _vertices;
     vector<Primitive> _primitives;
 

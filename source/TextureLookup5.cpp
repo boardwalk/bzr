@@ -1,7 +1,7 @@
-#include "TextureLookup.h"
+#include "TextureLookup5.h"
 #include "BlobReader.h"
 
-TextureLookup::TextureLookup(const void* data, size_t size)
+TextureLookup5::TextureLookup5(const void* data, size_t size)
 {
     BlobReader reader(data, size);
 
@@ -23,7 +23,7 @@ TextureLookup::TextureLookup(const void* data, size_t size)
     }
 }
 
-const vector<uint32_t>& TextureLookup::textures()
+const vector<uint32_t>& TextureLookup5::textures()
 {
     return _textures;
 }

@@ -8,7 +8,8 @@ public:
     {
         Model,
         Palette,
-        TextureLookup
+        TextureLookup5,
+        TextureLookup8
     };
 
     virtual ~Resource() {}
