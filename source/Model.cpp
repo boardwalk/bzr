@@ -76,8 +76,7 @@ Model::Model(const void* data, size_t size)
         assert(primitiveNum == pi);
 
         auto numIndices = reader.read<uint8_t>();
-        primitive.vertexIndices.resize(numIndices);
-        primitive.texCoordIndices.resize(numIndices);
+        primitive.indices.resize(numIndices);
 
         auto primFlags = reader.read<uint8_t>();
         assert(primFlags == 0x0 || primFlags == 0x1 || primFlags == 0x4);
@@ -95,16 +94,16 @@ Model::Model(const void* data, size_t size)
 
         for(auto pvi = 0; pvi < numIndices; pvi++)
         {
-            primitive.vertexIndices[pvi] = reader.read<uint16_t>();
-            assert(primitive.vertexIndices[pvi] < numVertices);
+            primitive.indices[pvi].vertexIndex = reader.read<uint16_t>();
+            assert(primitive.indices[pvi].vertexIndex < numVertices);
         }
 
         if(primFlags != 0x04)
         {
             for(auto pvi = 0; pvi < numIndices; pvi++)
             {
-                primitive.texCoordIndices[pvi] = reader.read<uint8_t>();
-                assert(primitive.texCoordIndices[pvi] < _vertices[primitive.vertexIndices[pvi]].texCoords.size());
+                primitive.indices[pvi].texCoordIndex = reader.read<uint8_t>();
+                assert(primitive.indices[pvi].texCoordIndex < _vertices[primitive.indices[pvi].vertexIndex].texCoords.size());
             }
         }
 

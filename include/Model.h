@@ -17,10 +17,15 @@ public:
         vector<Vec2> texCoords;
     };
 
+    struct Index
+    {
+        int vertexIndex;
+        int texCoordIndex;
+    };
+
     struct Primitive
     {
-        vector<int> vertexIndices;
-        vector<int> texCoordIndices;
+        vector<Index> indices;
     };
 
     Model(const void* data, size_t size);

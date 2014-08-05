@@ -40,3 +40,8 @@ TextureLookup8::TextureLookup8(const void* data, size_t size)
 
     reader.assertEnd();
 }
+
+const ResourcePtr& TextureLookup8::texture() const
+{
+    return _texture;
+}

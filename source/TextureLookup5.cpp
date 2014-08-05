@@ -22,13 +22,10 @@ TextureLookup5::TextureLookup5(const void* data, size_t size)
     for(auto i = 0u; i < numTextures; i++)
     {
         auto textureId = reader.read<uint32_t>();
-
-        // We're only loading the first one first for now
-        if(i == 0)
-        {
-            _textures[i] = Core::get().resourceCache().get(textureId);
-        }
+        _textures[i] = Core::get().resourceCache().get(textureId);
     }
+
+    reader.assertEnd();
 }
 
 const vector<ResourcePtr>& TextureLookup5::textures()
