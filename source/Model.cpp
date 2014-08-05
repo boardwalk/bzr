@@ -1,7 +1,7 @@
-#include "SimpleModel.h"
+#include "Model.h"
 #include "BlobReader.h"
 
-SimpleModel::SimpleModel(const void* data, size_t size)
+Model::Model(const void* data, size_t size)
 {
     BlobReader reader(data, size);
 
@@ -113,22 +113,22 @@ SimpleModel::SimpleModel(const void* data, size_t size)
     }
 }
 
-const vector<uint32_t>& SimpleModel::textures() const
+const vector<uint32_t>& Model::textures() const
 {
     return _textures;
 }
 
-const vector<SimpleModel::Vertex>& SimpleModel::vertices() const
+const vector<Model::Vertex>& Model::vertices() const
 {
     return _vertices;
 }
 
-const vector<SimpleModel::Primitive>& SimpleModel::primitives() const
+const vector<Model::Primitive>& Model::primitives() const
 {
     return _primitives;
 }
 
-unique_ptr<Destructable>& SimpleModel::renderData()
+unique_ptr<Destructable>& Model::renderData()
 {
     return _renderData;
 }

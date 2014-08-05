@@ -4,12 +4,12 @@
 #include "Destructable.h"
 #include "Noncopyable.h"
 
-class SimpleModel;
+class Model;
 
 class ModelRenderData : public Destructable, Noncopyable
 {
 public:
-    ModelRenderData(const SimpleModel& model);
+    ModelRenderData(const Model& model);
     ~ModelRenderData();
 
     void bind();

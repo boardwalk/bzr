@@ -2,7 +2,7 @@
 #include "Core.h"
 #include "DatFile.h"
 #include "Palette.h"
-#include "SimpleModel.h"
+#include "Model.h"
 
 static Destructable* loadResource(uint32_t fileId)
 {
@@ -16,7 +16,7 @@ static Destructable* loadResource(uint32_t fileId)
     switch(fileId >> 24)
     {
         case 0x01:
-            return new SimpleModel(data.data(), data.size());
+            return new Model(data.data(), data.size());
         case 0x02:
             return nullptr;
         case 0x04:

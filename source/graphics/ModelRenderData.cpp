@@ -1,8 +1,8 @@
 #include "graphics/ModelRenderData.h"
-#include "SimpleModel.h"
+#include "Model.h"
 #include <vector>
 
-ModelRenderData::ModelRenderData(const SimpleModel& model)
+ModelRenderData::ModelRenderData(const Model& model)
 {
     vector<float> vertexData;
 

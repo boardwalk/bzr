@@ -4,15 +4,15 @@
 #include "math/Mat4.h"
 #include "Core.h"
 #include "LandblockManager.h"
+#include "Model.h"
 #include "ResourceCache.h"
-#include "SimpleModel.h"
 
 #include "graphics/shaders/ModelVertexShader.h"
 #include "graphics/shaders/ModelFragmentShader.h"
 
 static ModelRenderData& instantiate(shared_ptr<Destructable>& handle)
 {
-    auto& model = (SimpleModel&)*handle;
+    auto& model = (Model&)*handle;
     auto& renderData = model.renderData();
 
     if(!renderData)

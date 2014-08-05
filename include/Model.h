@@ -1,12 +1,12 @@
-#ifndef BZR_SIMPLEMODEL_H
-#define BZR_SIMPLEMODEL_H
+#ifndef BZR_MODEL_H
+#define BZR_MODEL_H
 
 #include "math/Vec2.h"
 #include "math/Vec3.h"
 #include "Destructable.h"
 #include <vector>
 
-class SimpleModel : public Destructable
+class Model : public Destructable
 {
 public:
     struct Vertex
@@ -22,7 +22,7 @@ public:
         vector<int> texCoordIndices;
     };
 
-    SimpleModel(const void* data, size_t size);
+    Model(const void* data, size_t size);
 
     const vector<uint32_t>& textures() const;
     const vector<Vertex>& vertices() const;
