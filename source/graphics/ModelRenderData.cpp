@@ -5,6 +5,65 @@
 #include "TextureLookup8.h"
 #include <vector>
 
+struct TextureGLFormat
+{
+    GLenum internalFormat;
+    GLenum format;
+    GLenum type;
+    bool compressed;
+};
+
+static void getGLFormat(Texture::Type type, TextureGLFormat& format)
+{
+    switch(type)
+    {
+        case Texture::BGR16:
+            format.internalFormat = GL_RGB;
+            format.format = GL_BGR;
+            format.type = GL_UNSIGNED_BYTE;
+            format.compressed = false;
+            break;
+
+        case Texture::BGRA24:
+            format.internalFormat = GL_BGRA;
+            format.format = GL_BGRA;
+            format.type = GL_UNSIGNED_BYTE;
+            format.compressed = false;
+            break;
+
+        case Texture::Paletted16:
+            throw runtime_error("Paltted textures not yet supported here");
+
+        case Texture::RGB24:
+            format.internalFormat = GL_RGB;
+            format.format = GL_RGB;
+            format.type = GL_UNSIGNED_BYTE;
+            format.compressed = false;
+            break;
+
+        case Texture::Alpha8:
+            format.internalFormat = GL_R;
+            format.format = GL_R;
+            format.type = GL_UNSIGNED_BYTE;
+            format.compressed = false;
+            break;
+
+        case Texture::DXT1:
+            format.internalFormat = GL_COMPRESSED_RGB;
+            format.format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+            format.type = 0;
+            format.compressed = true;
+            break;
+
+        case Texture::DXT5:
+            format.internalFormat = GL_COMPRESSED_RGBA;
+            format.format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+            format.type = 0;
+            format.compressed = true;
+            break;
+    }
+}
+
 ModelRenderData::ModelRenderData(const Model& model)
 {
     initGeometry(model);
@@ -159,6 +218,10 @@ void ModelRenderData::initTexture(const Model& model)
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    //TextureGLFormat format;
+
+
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB8, maxWidth, maxHeight, (GLsizei)model.textures().size(), 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 
     vector<uint8_t> tempTextureData(maxWidth * maxHeight * 3, 0x7F);
