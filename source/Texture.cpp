@@ -19,7 +19,7 @@ Texture::Texture(const void* data, size_t size)
     _height = reader.read<uint32_t>();
     assert(_height <= 2048);
 
-    _type = (TextureType)reader.read<uint32_t>();
+    _type = (Type)reader.read<uint32_t>();
 
     int bitsPerPixel;
 
@@ -75,7 +75,7 @@ uint32_t Texture::height() const
     return _height;
 }
 
-Texture::TextureType Texture::type() const
+Texture::Type Texture::type() const
 {
     return _type;
 }
