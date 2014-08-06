@@ -8,26 +8,35 @@ class Image
 public:
     enum Format
     {
-        Invalid, BGR24, BGRA32, RGB24, A8
+        Invalid = 0x00,
+        BGR24 = 0x14,
+        BGRA32 = 0x15,
+        RGB24 = 0xF3,
+        A8 = 0xF4,
+        DXT1 = 0x31545844,
+        DXT5 = 0x35545844,
+        Paletted16 = 0x65
     };
 
     Image();
     Image(Image&&);
+    Image& operator=(const Image&);
     Image& operator=(Image&&);
 
-    void create(Format f, int w, int h);
-    void load(uint32_t fileId);
+    void init(Format newFormat, int newWidth, int newHeight, const void* newData);
 
-    void blit(const Image& image, int x, int y);
+    void decompress();
     void scale(int newWidth, int newHeight);
     void fill(int value);
     void flipVertical();
 
     Format format() const;
-    int numChannels() const;
-    const void* data() const;
     int width() const;
     int height() const;
+    size_t size() const;
+    const void* data() const;
+
+    static int formatBitsPerPixel(Format f);
 
 private:
     Format _format;

@@ -1,169 +1,160 @@
 #include "graphics/Image.h"
-#include "BlobReader.h"
-#include "Core.h"
-#include "DatFile.h"
-#include <algorithm>
 
-PACK(struct TextureHeader
+/*
+// Converts a 16-bit RGB 5:6:5 to 32-bit BGRA value (with max alpha)
+static uint32_t upconvert(uint16_t c)
 {
-   uint32_t fileId;
-   uint32_t unk;
-   uint32_t width;
-   uint32_t height;
-   uint32_t type;
-   uint32_t dataSize;
-});
+    auto r = (c & 0x1F) * 0xFF / 0x1F;
+    auto g = ((c >> 5) & 0x3F) / 0x3F;
+    auto b = (c >> 11) * 0xFF / 0x1F;
 
-static vector<uint8_t> decodeDXT1(const void* data, int width, int height)
+    return b | (g << 8) | (r << 16) | (0xFF << 24);
+}
+
+// Interpolates between two 32-bit BGRA values
+static uint32_t interpolate(uint32_t c0, uint32_t c1, unsigned int numer0, unsigned int numer1, unsigned int denom)
 {
+    auto b0 = c0 & 0xFF;
+    auto g0 = (c0 >> 8) & 0xFF;
+    auto r0 = (c0 >> 16) & 0xFF;
+    auto a0 = (c0 >> 24) & 0xFF;
+
+    auto b1 = c1 & 0xFF;
+    auto g1 = (c1 >> 8) & 0xFF;
+    auto r1 = (c1 >> 16) & 0xFF;
+    auto a1 = (c1 >> 24) & 0xFF;
+
+    auto b = (r0 * numer0 + r1 * numer1) / denom;
+    auto g = (g0 * numer0 + g1 * numer1) / denom;
+    auto r = (b0 * numer0 + b1 * numer1) / denom;
+    auto a = (a0 * numer0 + a1 * numer1) / denom;
+
+    return b | (g << 8) | (r << 16) | (a << 24);
+}
+
+static vector<uint8_t> decodeDXT1(const uint8_t* data, int width, int height)
+{
+    assert((width & 0x3) == 0);
+    assert((height & 0x3) == 0);
+
+    vector<uint8_t> result(width * height * 4);
+
+    for(auto by = 0; by < height / 4; by++)
+    {
+        for(auto bx = 0; bx < width / 4; bx++)
+        {
+            auto inOffset = (bx + by * width) * 8;
+
+            uint32_t c[4];
+            c[0] = upconvert(*(const uint16_t*)(data + inOffset));
+            c[1] = upconvert(*(const uint16_t*)(data + inOffset + 2));
+
+            if(c[0] > c[1])
+            {
+                c[2] = interpolate(c[0], c[1], 2, 1, 3);
+                c[3] = interpolate(c[0], c[1], 1, 2, 3);
+            }
+            else
+            {
+                c[2] = interpolate(c[0], c[1], 1, 1, 2);
+                c[3] = 0;
+            }
+
+            auto tab = *(const uint32_t*)(data + inOffset + 4);
+
+            for(auto py = 0; py < 4; py++)
+            {
+                for(auto px = 0; px < 4; px++)
+                {
+                    auto outOffset = ((bx + px) + (by + py) * width) * 4;
+                    auto cn = (tab >> (px + py * 4)) & 0x3;
+                    *((uint32_t*)result.data() + outOffset) = c[cn];
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+static vector<uint8_t> decodeDXT5(const uint8_t* data, int width, int height)
+{
+    assert((width & 0x3) == 0);
+    assert((height & 0x3) == 0);
+
+    vector<uint8_t> result(width * height * 4);
+
     (void)data;
     (void)width;
     (void)height;
 
-    throw runtime_error("DXT1 decoding not yet implemented");
-}
+    // TODO
 
-static vector<uint8_t> decodeDXT5(const void* data, int width, int height)
-{
-    (void)data;
-    (void)width;
-    (void)height;
-
-    throw runtime_error("DXT5 decoding not yet implemented");
+    return result;
 }
+*/
 
 Image::Image() : _format(Invalid)
 {}
 
 Image::Image(Image&& other)
 {
-    _format = other._format;
     _data = move(other._data);
+    _width = other._width;
+    _height = other._height;
+    _format = other._format;
+}
+
+Image& Image::operator=(const Image& other)
+{
+    _data = other._data;
+    _width = other._width;
+    _height = other._height;
+    _format = other._format;
+    return *this;
 }
 
 Image& Image::operator=(Image&& other)
 {
-    _format = other._format;
     _data = move(other._data);
+    _width = other._width;
+    _height = other._height;
+    _format = other._format;
     return *this;
 }
 
-void Image::create(Format f, int w, int h)
+void Image::init(Format newFormat, int newWidth, int newHeight, const void* newData)
 {
-    _format = f;
-    _width = w;
-    _height = h;
-    _data.clear();
-    _data.resize(_width * _height * numChannels());
-}
+    _format = newFormat;
+    _width = newWidth;
+    _height = newHeight;
 
-void Image::load(uint32_t fileId)
-{
-    auto blob = Core::get().highresDat().read(fileId);
-
-    if(blob.empty())
+    if(newData == nullptr)
     {
-        blob = Core::get().portalDat().read(fileId);
-    }
-
-    if(blob.empty())
-    {
-        throw runtime_error("Image not found");
-    }
-
-    BlobReader reader(blob.data(), blob.size());
-
-    auto header = reader.readPointer<TextureHeader>();
- 
-    int bpp;
-
-    if(header->type == 0x14) // BGR24
-    {
-        _format = BGR24;
-        bpp = 24;
-    }
-    else if(header->type == 0x15) // BGRA32
-    {
-        _format = BGRA32;
-        bpp = 32;
-    }
-    else if(header->type == 0x31545844) // DXT1
-    {
-        _format = BGR24;
-        bpp = 4;
-    }
-    else if(header->type == 0x35545844) // DXT5
-    {
-        _format = BGRA32;
-        bpp = 8;
-    }
-    else if(header->type == 0x65) // 16-bit paletted
-    {
-        throw runtime_error("Paletted texture not yet implemented");
-    }
-    else if(header->type == 0xf3) // RGB24
-    {
-        _format = RGB24;
-        bpp = 24;
-    }
-    else if(header->type == 0xf4) // A8
-    {
-        _format = A8;
-        bpp = 8;
+        _data.clear();
+        _data.resize(_width * _height * formatBitsPerPixel(_format) / 8);
     }
     else
     {
-        throw runtime_error("Unrecognized texture type");
+        _data.assign((const uint8_t*)newData, (const uint8_t*)newData + _width * _height * formatBitsPerPixel(_format) / 8);
     }
-
-    if(header->width * header->height * bpp / 8 != header->dataSize)
-    {
-        throw runtime_error("Texture dataSize mismatch");
-    }
-
-    auto dataPointer = reader.readPointer<uint8_t>(header->dataSize);
-
-    reader.assertEnd();
-
-    if(header->type == 0x31545844)
-    {
-        _data = decodeDXT1(dataPointer, header->width, header->height);
-    }
-    else if(header->type == 0x35545844)
-    {
-        _data = decodeDXT5(dataPointer, header->width, header->height);
-    }
-    else
-    {
-        _data.assign(dataPointer, dataPointer + header->dataSize);
-    }
-
-    _width = header->width;
-    _height = header->height;
-
-    // OpenGL expects the first row to be the bottom row
-    flipVertical();
 }
 
-void Image::blit(const Image& image, int x, int y)
+void Image::decompress()
 {
-    if(_format != image._format)
+    if(_format == DXT1)
     {
-        throw runtime_error("Image format mismatch in blit");
+        _data.clear();
+        _data.resize(_width * _height * 4);
+        //_data = decodeDXT1(_data.data(), _width, _height);
+        _format = BGRA32;
     }
-
-    if(x < 0 || x + image._width > _width || y < 0 || y + image._height > _height)
+    else if(_format == DXT5)
     {
-        throw runtime_error("Image destination out of range");  
-    }
-
-    auto nchannels = numChannels();
-
-    for(int row = 0; row < image._height; row++)
-    {
-        memcpy(_data.data() + (x + (y + row) * _width) * nchannels,
-               image._data.data() + (row * image._width) * nchannels,
-               image._width * nchannels);
+        _data.clear();
+        _data.resize(_width * _height * 4);
+        //_data = decodeDXT5(_data.data(), _width, _height);
+        _format = BGRA32;
     }
 }
 
@@ -173,8 +164,13 @@ void Image::scale(int newWidth, int newHeight)
     {
         return;
     }
-    
-    int nchannels = numChannels();
+
+    if(_format == DXT1 || _format == DXT5)
+    {
+        throw runtime_error("Cannot scale compressed image");
+    }
+
+    auto nchannels = formatBitsPerPixel(_format) / 8;
 
     vector<uint8_t> newData(newWidth * newHeight * nchannels);
 
@@ -214,14 +210,14 @@ void Image::scale(int newWidth, int newHeight)
     _height = newHeight;
 }
 
-void Image::fill(int value)
-{
-    memset(_data.data(), value, _data.size());
-}
-
 void Image::flipVertical()
 {
-    auto stride = _width * numChannels();
+    if(_format == DXT1 || _format == DXT5)
+    {
+        throw runtime_error("Cannot flip compressed image");
+    }
+
+    auto stride = _width * formatBitsPerPixel(_format) / 8;
 
     vector<uint8_t> rowBuf(stride);
 
@@ -233,31 +229,14 @@ void Image::flipVertical()
     }
 }
 
+void Image::fill(int value)
+{
+    memset(_data.data(), value, _data.size());
+}
+
 Image::Format Image::format() const
 {
     return _format;
-}
-
-int Image::numChannels() const
-{
-    switch(_format)
-    {
-        case A8:
-            return 1;
-        case BGR24:
-        case RGB24:
-            return 3;
-        case BGRA32:
-            return 4;
-        default:
-            assert(!"Invalid Image::Format");
-            return -1;
-    }
-}
-
-const void* Image::data() const
-{
-    return _data.data();
 }
 
 int Image::width() const
@@ -268,4 +247,39 @@ int Image::width() const
 int Image::height() const
 {
     return _height;
+}
+
+size_t Image::size() const
+{
+    return _data.size();
+}
+
+const void* Image::data() const
+{
+    return _data.data();
+}
+
+int Image::formatBitsPerPixel(Format f)
+{
+    switch(f)
+    {
+        case BGR24:
+            return 24;
+        case BGRA32:
+            return 32;
+        case RGB24:
+            return 24;
+        case A8:
+            return 8;
+        case DXT1:
+            return 4;
+        case DXT5:
+            return 8;
+        case Paletted16:
+            return 16;
+        default:
+            break;
+    }
+
+    throw runtime_error("Invalid format");
 }

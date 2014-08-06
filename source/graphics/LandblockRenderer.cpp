@@ -7,6 +7,8 @@
 #include "Camera.h"
 #include "Core.h"
 #include "LandblockManager.h"
+#include "ResourceCache.h"
+#include "Texture.h"
 #include <algorithm>
 #include <vector>
 
@@ -240,12 +242,13 @@ void LandblockRenderer::initTerrainTexture()
 
         if(LANDSCAPE_TEXTURES[i] == 0x00000000)
         {
-            image.create(Image::RGB24, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_SIZE);
+            image.init(Image::RGB24, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_SIZE, nullptr);
             image.fill(0xFF);
         }
         else
         {
-            image.load(LANDSCAPE_TEXTURES[i]);
+            auto texture = Core::get().resourceCache().get(LANDSCAPE_TEXTURES[i]);
+            image = texture->cast<Texture>().image();
             image.scale(TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_SIZE);
         }
 
@@ -292,16 +295,17 @@ void LandblockRenderer::initBlendTexture()
 
         if(BLEND_TEXTURES[i] == 0x00000000)
         {
-            image.create(Image::A8, BLEND_ARRAY_SIZE, BLEND_ARRAY_SIZE);
+            image.init(Image::A8, BLEND_ARRAY_SIZE, BLEND_ARRAY_SIZE, nullptr);
         }
         else if(BLEND_TEXTURES[i] == 0xFFFFFFFF)
         {
-            image.create(Image::A8, BLEND_ARRAY_SIZE, BLEND_ARRAY_SIZE);
+            image.init(Image::A8, BLEND_ARRAY_SIZE, BLEND_ARRAY_SIZE, nullptr);
             image.fill(0xFF);
         }
         else
         {
-            image.load(BLEND_TEXTURES[i]);
+            auto texture = Core::get().resourceCache().get(BLEND_TEXTURES[i]);
+            image = texture->cast<Texture>().image();
         }
 
         // For both the corner and edge textures, we want to use s,t > 1 to repeat emptiness to make skinnier roads

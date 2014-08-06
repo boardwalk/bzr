@@ -5,70 +5,6 @@
 #include "TextureLookup8.h"
 #include <vector>
 
-struct TextureGLFormat
-{
-    GLenum internalFormat;
-    GLenum format;
-    GLenum type;
-    bool compressed;
-};
-
-static void getGLFormat(Texture::Type type, TextureGLFormat& format)
-{
-    switch(type)
-    {
-        case Texture::BGR24:
-            format.internalFormat = GL_RGB8;
-            format.format = GL_BGR;
-            format.type = GL_UNSIGNED_BYTE;
-            format.compressed = false;
-            break;
-
-        case Texture::BGRA32:
-            format.internalFormat = GL_RGBA8;
-            format.format = GL_BGRA;
-            format.type = GL_UNSIGNED_BYTE;
-            format.compressed = false;
-            break;
-
-        case Texture::Paletted16:
-            // TODO We should really be applying the palette!
-            format.internalFormat = GL_R16;
-            format.format = GL_R;
-            format.type = GL_UNSIGNED_SHORT;
-            format.compressed = false;
-            break;
-
-        case Texture::RGB24:
-            format.internalFormat = GL_RGB8;
-            format.format = GL_RGB;
-            format.type = GL_UNSIGNED_BYTE;
-            format.compressed = false;
-            break;
-
-        case Texture::Alpha8:
-            format.internalFormat = GL_R8;
-            format.format = GL_R;
-            format.type = GL_UNSIGNED_BYTE;
-            format.compressed = false;
-            break;
-
-        case Texture::DXT1:
-            format.internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;//GL_COMPRESSED_RGBA
-            format.format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-            format.type = GL_UNSIGNED_BYTE;
-            format.compressed = true;
-            break;
-
-        case Texture::DXT5:
-            format.internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;//GL_COMPRESSED_RGBA;
-            format.format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-            format.type = GL_UNSIGNED_BYTE;
-            format.compressed = true;
-            break;
-    }
-}
-
 ModelRenderData::ModelRenderData(const Model& model)
 {
     vector<Vec2> texCoordScales;
@@ -144,8 +80,6 @@ void ModelRenderData::initTexture(const Model& model, vector<Vec2>& texCoordScal
 
     // Choose common texture format
     // Size array texture by largest texture used
-    auto firstTexture = true;
-    Texture::Type type = Texture::Invalid;
     GLsizei maxWidth = 0;
     GLsizei maxHeight = 0;
 
@@ -158,24 +92,17 @@ void ModelRenderData::initTexture(const Model& model, vector<Vec2>& texCoordScal
             continue;
         }
 
-        auto& texture = innerResource->cast<Texture>();
+        auto& image = innerResource->cast<Texture>().image();
 
-        if(firstTexture)
+        if(image.format() != Image::BGRA32)
         {
-            firstTexture = false;
-            type = texture.type();
-        }
-        else if(texture.type() != type)
-        {
-            throw runtime_error("Multiple texture formats used in model");
+            throw runtime_error("Unsupported image format");
         }
 
-        maxWidth = max(maxWidth, GLsizei(texture.width()));
-        maxHeight = max(maxHeight, GLsizei(texture.height()));
+        assert(image.format() != Image::BGRA32);
+        maxWidth = max(maxWidth, GLsizei(image.width()));
+        maxHeight = max(maxHeight, GLsizei(image.height()));
     }
-
-    TextureGLFormat format;
-    getGLFormat(type, format);
 
     glGenTextures(1, &_texture);
     glBindTexture(GL_TEXTURE_2D_ARRAY, _texture);
@@ -184,20 +111,11 @@ void ModelRenderData::initTexture(const Model& model, vector<Vec2>& texCoordScal
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    if(format.compressed)
-    {
-        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, format.internalFormat, maxWidth, maxHeight, (GLsizei)model.textures().size(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);   
-    }
-    else
-    {
-        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, format.internalFormat, maxWidth, maxHeight, (GLsizei)model.textures().size(), 0, format.format, format.type, nullptr);
-    }
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA8, maxWidth, maxHeight, (GLsizei)model.textures().size(), 0, GL_BGRA, GL_UNSIGNED_BYTE, nullptr);   
 
     checkGLError();
 
     GLint zoffset = 0;
-
-    texCoordScales.resize(model.textures().size());
 
     for(auto& resource : model.textures())
     {
@@ -210,23 +128,11 @@ void ModelRenderData::initTexture(const Model& model, vector<Vec2>& texCoordScal
             continue;
         }
 
-        auto& texture = innerResource->cast<Texture>();
+        auto& image = innerResource->cast<Texture>().image();
 
-        if(format.compressed)
-        {
-            printf("compressed! %d %d %d\n", zoffset, texture.width(), texture.height());
-            glCompressedTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, zoffset, texture.width(), texture.height(), 1, format.format, GLsizei(texture.pixels().size()), texture.pixels().data());
-            checkGLError();
-        }
-        else
-        {
-            printf("uncompressed! %d %d %d\n", zoffset, texture.width(), texture.height());
-            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, zoffset, texture.width(), texture.height(), 1, format.format, format.type, texture.pixels().data());
-            checkGLError();
-        }
-
-        texCoordScales[zoffset].x = double(texture.width()) / double(maxWidth);
-        texCoordScales[zoffset].y = double(texture.height()) / double(maxHeight);
+        printf("boink! %d %d %d\n", zoffset, image.width(), image.height());
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, zoffset, image.width(), image.height(), 1, GL_BGRA, GL_UNSIGNED_BYTE, image.data());
+        checkGLError();
 
         zoffset++;
     }
