@@ -17,48 +17,53 @@ static void getGLFormat(Texture::Type type, TextureGLFormat& format)
 {
     switch(type)
     {
-        case Texture::BGR16:
-            format.internalFormat = GL_RGB;
+        case Texture::BGR24:
+            format.internalFormat = GL_RGB8;
             format.format = GL_BGR;
             format.type = GL_UNSIGNED_BYTE;
             format.compressed = false;
             break;
 
-        case Texture::BGRA24:
-            format.internalFormat = GL_BGRA;
+        case Texture::BGRA32:
+            format.internalFormat = GL_RGBA8;
             format.format = GL_BGRA;
             format.type = GL_UNSIGNED_BYTE;
             format.compressed = false;
             break;
 
         case Texture::Paletted16:
-            throw runtime_error("Paltted textures not yet supported here");
+            // TODO We should really be applying the palette!
+            format.internalFormat = GL_R16;
+            format.format = GL_R;
+            format.type = GL_UNSIGNED_SHORT;
+            format.compressed = false;
+            break;
 
         case Texture::RGB24:
-            format.internalFormat = GL_RGB;
+            format.internalFormat = GL_RGB8;
             format.format = GL_RGB;
             format.type = GL_UNSIGNED_BYTE;
             format.compressed = false;
             break;
 
         case Texture::Alpha8:
-            format.internalFormat = GL_R;
+            format.internalFormat = GL_R8;
             format.format = GL_R;
             format.type = GL_UNSIGNED_BYTE;
             format.compressed = false;
             break;
 
         case Texture::DXT1:
-            format.internalFormat = GL_COMPRESSED_RGB;
+            format.internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;//GL_COMPRESSED_RGBA
             format.format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
-            format.type = 0;
+            format.type = GL_UNSIGNED_BYTE;
             format.compressed = true;
             break;
 
         case Texture::DXT5:
-            format.internalFormat = GL_COMPRESSED_RGBA;
+            format.internalFormat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;//GL_COMPRESSED_RGBA;
             format.format = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-            format.type = 0;
+            format.type = GL_UNSIGNED_BYTE;
             format.compressed = true;
             break;
     }
@@ -66,8 +71,9 @@ static void getGLFormat(Texture::Type type, TextureGLFormat& format)
 
 ModelRenderData::ModelRenderData(const Model& model)
 {
-    initGeometry(model);
-    initTexture(model);
+    vector<Vec2> texCoordScales;
+    initTexture(model, texCoordScales);
+    initGeometry(model, texCoordScales);
 }
 
 ModelRenderData::~ModelRenderData()
@@ -91,7 +97,145 @@ GLsizei ModelRenderData::indexCount() const
     return _indexCount;
 }
 
-void ModelRenderData::initGeometry(const Model& model)
+static ResourcePtr getTexture(ResourcePtr resource)
+{
+    if(!resource)
+    {
+        return ResourcePtr();
+    }
+
+    switch(resource->resourceType())
+    {
+        case Resource::Texture:
+            return resource;
+
+        case Resource::TextureLookup5:
+            for(auto& subtexture : resource->cast<TextureLookup5>().textures())
+            {
+                if(subtexture)
+                {
+                    return getTexture(subtexture);
+                }
+            }
+
+            return ResourcePtr();
+
+        case Resource::TextureLookup8:
+            return getTexture(resource->cast<TextureLookup8>().texture());
+
+        default:
+            return ResourcePtr();
+    }
+}
+
+static void checkGLError()
+{
+    auto err = glGetError();
+
+    if(err != GL_NO_ERROR)
+    {
+        printf("Got GL error: %x\n", err);
+    }
+}
+
+void ModelRenderData::initTexture(const Model& model, vector<Vec2>& texCoordScales)
+{
+    printf("initTexture()\n");
+
+    // Choose common texture format
+    // Size array texture by largest texture used
+    auto firstTexture = true;
+    Texture::Type type = Texture::Invalid;
+    GLsizei maxWidth = 0;
+    GLsizei maxHeight = 0;
+
+    for(auto& resource : model.textures())
+    {
+        auto innerResource = getTexture(resource);
+
+        if(!innerResource)
+        {
+            continue;
+        }
+
+        auto& texture = innerResource->cast<Texture>();
+
+        if(firstTexture)
+        {
+            firstTexture = false;
+            type = texture.type();
+        }
+        else if(texture.type() != type)
+        {
+            throw runtime_error("Multiple texture formats used in model");
+        }
+
+        maxWidth = max(maxWidth, GLsizei(texture.width()));
+        maxHeight = max(maxHeight, GLsizei(texture.height()));
+    }
+
+    TextureGLFormat format;
+    getGLFormat(type, format);
+
+    glGenTextures(1, &_texture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, _texture);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    if(format.compressed)
+    {
+        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, format.internalFormat, maxWidth, maxHeight, (GLsizei)model.textures().size(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);   
+    }
+    else
+    {
+        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, format.internalFormat, maxWidth, maxHeight, (GLsizei)model.textures().size(), 0, format.format, format.type, nullptr);
+    }
+
+    checkGLError();
+
+    GLint zoffset = 0;
+
+    texCoordScales.resize(model.textures().size());
+
+    for(auto& resource : model.textures())
+    {
+        auto innerResource = getTexture(resource);
+
+        if(!innerResource)
+        {
+            printf("skip!\n");
+            zoffset++;
+            continue;
+        }
+
+        auto& texture = innerResource->cast<Texture>();
+
+        if(format.compressed)
+        {
+            printf("compressed! %d %d %d\n", zoffset, texture.width(), texture.height());
+            glCompressedTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, zoffset, texture.width(), texture.height(), 1, format.format, GLsizei(texture.pixels().size()), texture.pixels().data());
+            checkGLError();
+        }
+        else
+        {
+            printf("uncompressed! %d %d %d\n", zoffset, texture.width(), texture.height());
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, zoffset, texture.width(), texture.height(), 1, format.format, format.type, texture.pixels().data());
+            checkGLError();
+        }
+
+        texCoordScales[zoffset].x = double(texture.width()) / double(maxWidth);
+        texCoordScales[zoffset].y = double(texture.height()) / double(maxHeight);
+
+        zoffset++;
+    }
+
+    glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+    checkGLError();
+}
+
+void ModelRenderData::initGeometry(const Model& model, const vector<Vec2>& texCoordScales)
 {
     // vx, vy, vz, nx, ny, nz, s, t, p
     static const int COMPONENTS_PER_VERTEX = 9;
@@ -134,8 +278,8 @@ void ModelRenderData::initGeometry(const Model& model)
             }
             else
             {
-                vertexData.push_back(float(vertex.texCoords[index.texCoordIndex].x));
-                vertexData.push_back(float(vertex.texCoords[index.texCoordIndex].y));
+                vertexData.push_back(float(vertex.texCoords[index.texCoordIndex].x * texCoordScales[index.texCoordIndex].x));
+                vertexData.push_back(float(vertex.texCoords[index.texCoordIndex].y * texCoordScales[index.texCoordIndex].y));
             }
         }
 
@@ -162,74 +306,4 @@ void ModelRenderData::initGeometry(const Model& model)
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
-}
-
-static ResourcePtr getTexture(ResourcePtr resource)
-{
-    if(!resource)
-    {
-        return ResourcePtr();
-    }
-
-    switch(resource->resourceType())
-    {
-        case Resource::Texture:
-            return resource;
-
-        case Resource::TextureLookup5:
-            for(auto& subtexture : resource->cast<TextureLookup5>().textures())
-            {
-                if(subtexture)
-                {
-                    return getTexture(subtexture);
-                }
-            }
-
-            return ResourcePtr();
-
-        case Resource::TextureLookup8:
-            return getTexture(resource->cast<TextureLookup8>().texture());
-
-        default:
-            return ResourcePtr();
-    }
-}
-
-void ModelRenderData::initTexture(const Model& model)
-{
-    // Size array texture by largest texture used
-    GLsizei maxWidth = 0;
-    GLsizei maxHeight = 0;
-
-    for(auto& texture : model.textures())
-    {
-        auto innerTexture = getTexture(texture);
-
-        if(innerTexture)
-        {
-            maxWidth = max(maxWidth, GLsizei(innerTexture->cast<Texture>().width()));
-            maxHeight = max(maxHeight, GLsizei(innerTexture->cast<Texture>().height()));
-        }
-    }
-
-    glGenTextures(1, &_texture);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, _texture);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    //TextureGLFormat format;
-
-
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB8, maxWidth, maxHeight, (GLsizei)model.textures().size(), 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
-
-    vector<uint8_t> tempTextureData(maxWidth * maxHeight * 3, 0x7F);
-
-    for(auto i = 0u; i < model.textures().size(); i++)
-    {
-        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, maxWidth, maxHeight, 1, GL_RGB, GL_UNSIGNED_BYTE, tempTextureData.data());
-    }
-
-    glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 }

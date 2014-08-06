@@ -9,8 +9,9 @@ class Texture : public ResourceImpl<Resource::Texture>
 public:
     enum Type
     {
-        BGR16 = 0x14,
-        BGRA24 = 0x15,
+        Invalid = 0x00,
+        BGR24 = 0x14,
+        BGRA32 = 0x15,
         Paletted16 = 0x65,
         RGB24 = 0xF3,
         Alpha8 = 0xF4,
