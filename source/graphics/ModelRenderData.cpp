@@ -130,9 +130,10 @@ static ResourcePtr getTexture(ResourcePtr resource)
 
         case Resource::TextureLookup8:
             return getTexture(resource->cast<TextureLookup8>().texture());
-    }
 
-    return ResourcePtr();
+        default:
+            return ResourcePtr();
+    }
 }
 
 void ModelRenderData::initTexture(const Model& model)
@@ -162,7 +163,7 @@ void ModelRenderData::initTexture(const Model& model)
 
     vector<uint8_t> tempTextureData(maxWidth * maxHeight * 3, 0x7F);
 
-    for(auto i = 0; i < model.textures().size(); i++)
+    for(auto i = 0u; i < model.textures().size(); i++)
     {
         glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, maxWidth, maxHeight, 1, GL_RGB, GL_UNSIGNED_BYTE, tempTextureData.data());
     }

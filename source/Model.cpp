@@ -103,7 +103,7 @@ Model::Model(const void* data, size_t size)
             for(auto pvi = 0; pvi < numIndices; pvi++)
             {
                 primitive.indices[pvi].texCoordIndex = reader.read<uint8_t>();
-                assert(primitive.indices[pvi].texCoordIndex < _vertices[primitive.indices[pvi].vertexIndex].texCoords.size());
+                assert(primitive.indices[pvi].texCoordIndex < int(_vertices[primitive.indices[pvi].vertexIndex].texCoords.size()));
             }
         }
 
