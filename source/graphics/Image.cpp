@@ -1,4 +1,5 @@
 #include "graphics/Image.h"
+#include "Palette.h"
 #include <algorithm>
 
 // Converts a 16-bit RGB 5:6:5 to 32-bit BGRA value (with max alpha)
@@ -172,6 +173,38 @@ void Image::decompress()
         _data = decodeDXT5(_data.data(), _width, _height);
         _format = BGRA32;
     }
+}
+
+void Image::applyPalette(const Palette& palette)
+{
+    if(_format != Paletted16)
+    {
+        return;
+    }
+
+    vector<uint8_t> newData(_width * _height * 4);
+
+    auto input = (const uint16_t*)_data.data();
+    auto inputEnd = (const uint16_t*)_data.data() + _width * _height;
+
+    auto output = (uint8_t*)newData.data();
+
+    while(input < inputEnd)
+    {
+        // TODO I have no idea if this is the proper thing to do
+        auto paletteIndex = *input & 0x7FF;
+        auto color = palette.colors()[paletteIndex];
+
+        *output++ = color.blue;
+        *output++ = color.green;
+        *output++ = color.red;
+        *output++ = color.alpha;
+
+        input++;
+    }
+
+    _data = move(newData);
+    _format = BGRA32;
 }
 
 void Image::scale(int newWidth, int newHeight)

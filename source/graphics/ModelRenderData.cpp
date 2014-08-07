@@ -64,20 +64,8 @@ static ResourcePtr getTexture(ResourcePtr resource)
     }
 }
 
-static void checkGLError()
-{
-    auto err = glGetError();
-
-    if(err != GL_NO_ERROR)
-    {
-        printf("Got GL error: %x\n", err);
-    }
-}
-
 void ModelRenderData::initTexture(const Model& model)
 {
-    printf("initTexture()\n");
-
     // Choose common texture format
     // Size array texture by largest texture used
     GLsizei maxWidth = 0;
@@ -109,9 +97,7 @@ void ModelRenderData::initTexture(const Model& model)
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA8, maxWidth, maxHeight, (GLsizei)model.textures().size(), 0, GL_BGRA, GL_UNSIGNED_BYTE, nullptr);   
-    checkGLError();
 
     GLint zoffset = 0;
 
@@ -134,13 +120,11 @@ void ModelRenderData::initTexture(const Model& model)
         }
 
         glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, zoffset, image.width(), image.height(), 1, GL_BGRA, GL_UNSIGNED_BYTE, image.data());
-        checkGLError();
 
         zoffset++;
     }
 
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
-    checkGLError();
 }
 
 void ModelRenderData::initGeometry(const Model& model)
@@ -153,6 +137,9 @@ void ModelRenderData::initGeometry(const Model& model)
 
     vector<float> vertexData;
     vector<uint16_t> indexData;
+
+    // TODO The origin of DirectX's texcoord is the top left, OpenGL is bottom right
+    // We may need to correct for this
 
     for(auto& primitive : model.primitives())
     {

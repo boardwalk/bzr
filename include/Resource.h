@@ -7,6 +7,7 @@ public:
     enum ResourceType
     {
         Model,
+        ModelGroup,
         Palette,
         TextureLookup5,
         Texture,

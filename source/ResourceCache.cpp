@@ -3,6 +3,7 @@
 #include "DatFile.h"
 #include "Palette.h"
 #include "Model.h"
+#include "ModelGroup.h"
 #include "Texture.h"
 #include "TextureLookup5.h"
 #include "TextureLookup8.h"
@@ -21,7 +22,7 @@ static Resource* loadResource(uint32_t fileId)
         case 0x01:
             return new Model(data.data(), data.size());
         case 0x02:
-            return nullptr;
+            return new ModelGroup(data.data(), data.size());
         case 0x04:
             return new Palette(data.data(), data.size());
         case 0x05:

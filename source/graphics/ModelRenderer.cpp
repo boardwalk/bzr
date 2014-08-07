@@ -43,9 +43,9 @@ void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 
         for(auto& object : it->second.objects())
         {
-            // TODO REMOVE ME
-            // 02 models are not yet loaded, so we'll have a null
-            if(!object.model)
+            // FIXME
+            // We don't support rendering 02 models yet
+            if(object.model->resourceType() != Resource::Model)
             {
                 continue;
             }

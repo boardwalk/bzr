@@ -3,6 +3,8 @@
 
 #include <vector>
 
+class Palette;
+
 class Image
 {
 public:
@@ -27,6 +29,7 @@ public:
     void init(Format newFormat, int newWidth, int newHeight, const void* newData);
 
     void decompress();
+    void applyPalette(const Palette& palette);
     void scale(int newWidth, int newHeight);
     void fill(int value);
     void flipVertical();

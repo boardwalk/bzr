@@ -1,6 +1,7 @@
 #include "Texture.h"
 #include "BlobReader.h"
 #include "Core.h"
+#include "Palette.h"
 #include "ResourceCache.h"
 
 Texture::Texture(const void* data, size_t size)
@@ -36,6 +37,12 @@ Texture::Texture(const void* data, size_t size)
 
     _image.init(format, width, height, pixels);
     _image.decompress();
+
+    if(_palette)
+    {
+        _image.applyPalette(_palette->cast<::Palette>());
+    }
+
     _image.flipVertical();
 }
 
