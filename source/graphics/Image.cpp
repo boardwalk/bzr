@@ -1,4 +1,5 @@
 #include "graphics/Image.h"
+#include <algorithm>
 
 // Converts a 16-bit RGB 5:6:5 to 32-bit BGRA value (with max alpha)
 static uint32_t upconvert(uint16_t c)

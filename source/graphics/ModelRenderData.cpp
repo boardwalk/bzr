@@ -3,6 +3,7 @@
 #include "Texture.h"
 #include "TextureLookup5.h"
 #include "TextureLookup8.h"
+#include <algorithm>
 #include <vector>
 
 ModelRenderData::ModelRenderData(const Model& model)
@@ -171,8 +172,8 @@ void ModelRenderData::initGeometry(const Model& model)
 
             if(vertex.texCoords.empty())
             {
-                vertexData.push_back(0.0);
-                vertexData.push_back(0.0);
+                vertexData.push_back(0.0f);
+                vertexData.push_back(0.0f);
             }
             else
             {
