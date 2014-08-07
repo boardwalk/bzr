@@ -136,7 +136,7 @@ void Renderer::render(double interp)
 
     _skyRenderer->render();
     _landblockRenderer->render(projectionMat, viewMat);
-    //_modelRenderer->render(projectionMat, viewMat);
+    _modelRenderer->render(projectionMat, viewMat);
 
     SDL_GL_SwapWindow(_window);
 }

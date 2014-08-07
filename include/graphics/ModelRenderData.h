@@ -19,9 +19,9 @@ public:
     GLsizei indexCount() const;
 
 private:
-    void initTexture(const Model& model, vector<Vec2>& texCoordScales);
-    void initGeometry(const Model& model, const vector<Vec2>& texCoordScales);
-
+    void initTexture(const Model& model);
+    void initGeometry(const Model& model);
+    
     GLuint _vertexArray;
     GLuint _vertexBuffer;
     GLuint _indexBuffer;

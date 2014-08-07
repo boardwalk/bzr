@@ -19,6 +19,7 @@ public:
     };
 
     Image();
+    Image(const Image&);
     Image(Image&&);
     Image& operator=(const Image&);
     Image& operator=(Image&&);

@@ -7,9 +7,8 @@
 
 ModelRenderData::ModelRenderData(const Model& model)
 {
-    vector<Vec2> texCoordScales;
-    initTexture(model, texCoordScales);
-    initGeometry(model, texCoordScales);
+    initTexture(model);
+    initGeometry(model);
 }
 
 ModelRenderData::~ModelRenderData()
@@ -74,7 +73,7 @@ static void checkGLError()
     }
 }
 
-void ModelRenderData::initTexture(const Model& model, vector<Vec2>& texCoordScales)
+void ModelRenderData::initTexture(const Model& model)
 {
     printf("initTexture()\n");
 
@@ -96,10 +95,9 @@ void ModelRenderData::initTexture(const Model& model, vector<Vec2>& texCoordScal
 
         if(image.format() != Image::BGRA32)
         {
-            throw runtime_error("Unsupported image format");
+            continue;
         }
 
-        assert(image.format() != Image::BGRA32);
         maxWidth = max(maxWidth, GLsizei(image.width()));
         maxHeight = max(maxHeight, GLsizei(image.height()));
     }
@@ -123,14 +121,20 @@ void ModelRenderData::initTexture(const Model& model, vector<Vec2>& texCoordScal
 
         if(!innerResource)
         {
-            printf("skip!\n");
             zoffset++;
             continue;
         }
 
-        auto& image = innerResource->cast<Texture>().image();
+        auto image = innerResource->cast<Texture>().image();
 
-        printf("boink! %d %d %d\n", zoffset, image.width(), image.height());
+        if(image.format() != Image::BGRA32)
+        {
+            zoffset++;
+            continue;
+        }
+
+        image.scale(maxWidth, maxHeight);
+
         glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, zoffset, image.width(), image.height(), 1, GL_BGRA, GL_UNSIGNED_BYTE, image.data());
         checkGLError();
 
@@ -141,7 +145,7 @@ void ModelRenderData::initTexture(const Model& model, vector<Vec2>& texCoordScal
     checkGLError();
 }
 
-void ModelRenderData::initGeometry(const Model& model, const vector<Vec2>& texCoordScales)
+void ModelRenderData::initGeometry(const Model& model)
 {
     // vx, vy, vz, nx, ny, nz, s, t, p
     static const int COMPONENTS_PER_VERTEX = 9;
@@ -184,8 +188,8 @@ void ModelRenderData::initGeometry(const Model& model, const vector<Vec2>& texCo
             }
             else
             {
-                vertexData.push_back(float(vertex.texCoords[index.texCoordIndex].x * texCoordScales[index.texCoordIndex].x));
-                vertexData.push_back(float(vertex.texCoords[index.texCoordIndex].y * texCoordScales[index.texCoordIndex].y));
+                vertexData.push_back(float(vertex.texCoords[index.texCoordIndex].x));
+                vertexData.push_back(float(vertex.texCoords[index.texCoordIndex].y));
             }
         }
 

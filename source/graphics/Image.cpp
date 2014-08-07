@@ -1,11 +1,10 @@
 #include "graphics/Image.h"
 
-/*
 // Converts a 16-bit RGB 5:6:5 to 32-bit BGRA value (with max alpha)
 static uint32_t upconvert(uint16_t c)
 {
     auto r = (c & 0x1F) * 0xFF / 0x1F;
-    auto g = ((c >> 5) & 0x3F) / 0x3F;
+    auto g = ((c >> 5) & 0x3F) * 0xFF / 0x3F;
     auto b = (c >> 11) * 0xFF / 0x1F;
 
     return b | (g << 8) | (r << 16) | (0xFF << 24);
@@ -39,38 +38,51 @@ static vector<uint8_t> decodeDXT1(const uint8_t* data, int width, int height)
 
     vector<uint8_t> result(width * height * 4);
 
-    for(auto by = 0; by < height / 4; by++)
+    auto input = data;
+    auto inputImageEnd = data + width * height / 2;
+
+    auto output = result.data();
+    auto outputStride = width * 4;
+    auto outputRowEnd = output + outputStride;
+
+    while(input < inputImageEnd)
     {
-        for(auto bx = 0; bx < width / 4; bx++)
+        auto c0 = *(const uint16_t*)input;
+        auto c1 = *(const uint16_t*)(input + 2);
+
+        uint32_t c[4];
+        c[0] = upconvert(c0);
+        c[1] = upconvert(c1);
+
+        if(c0 > c1)
         {
-            auto inOffset = (bx + by * width) * 8;
+            c[2] = interpolate(c[0], c[1], 2, 1, 3);
+            c[3] = interpolate(c[0], c[1], 1, 2, 3);
+        }
+        else
+        {
+            c[2] = interpolate(c[0], c[1], 1, 1, 2);
+            c[3] = 0;
+        }
 
-            uint32_t c[4];
-            c[0] = upconvert(*(const uint16_t*)(data + inOffset));
-            c[1] = upconvert(*(const uint16_t*)(data + inOffset + 2));
+        auto tab = *(const uint32_t*)(input + 4);
 
-            if(c[0] > c[1])
+        for(auto py = 0; py < 4; py++)
+        {
+            for(auto px = 0; px < 4; px++)
             {
-                c[2] = interpolate(c[0], c[1], 2, 1, 3);
-                c[3] = interpolate(c[0], c[1], 1, 2, 3);
+                auto cn = (tab >> (px * 2 + py * 8)) & 0x3;
+                *(uint32_t*)(output + px * 4 + py * outputStride) = c[cn];
             }
-            else
-            {
-                c[2] = interpolate(c[0], c[1], 1, 1, 2);
-                c[3] = 0;
-            }
+        }
 
-            auto tab = *(const uint32_t*)(data + inOffset + 4);
+        input += 8; // 8 bytes per block
+        output += 4 * 4; // 4 pixels across per block
 
-            for(auto py = 0; py < 4; py++)
-            {
-                for(auto px = 0; px < 4; px++)
-                {
-                    auto outOffset = ((bx + px) + (by + py) * width) * 4;
-                    auto cn = (tab >> (px + py * 4)) & 0x3;
-                    *((uint32_t*)result.data() + outOffset) = c[cn];
-                }
-            }
+        if(output >= outputRowEnd)
+        {
+            output += 3 * outputStride;
+            outputRowEnd = output + outputStride;
         }
     }
 
@@ -92,10 +104,17 @@ static vector<uint8_t> decodeDXT5(const uint8_t* data, int width, int height)
 
     return result;
 }
-*/
 
 Image::Image() : _format(Invalid)
 {}
+
+Image::Image(const Image& other)
+{
+    _data = other._data;
+    _width = other._width;
+    _height = other._height;
+    _format = other._format;
+}
 
 Image::Image(Image&& other)
 {
@@ -144,16 +163,12 @@ void Image::decompress()
 {
     if(_format == DXT1)
     {
-        _data.clear();
-        _data.resize(_width * _height * 4);
-        //_data = decodeDXT1(_data.data(), _width, _height);
+        _data = decodeDXT1(_data.data(), _width, _height);
         _format = BGRA32;
     }
     else if(_format == DXT5)
     {
-        _data.clear();
-        _data.resize(_width * _height * 4);
-        //_data = decodeDXT5(_data.data(), _width, _height);
+        _data = decodeDXT5(_data.data(), _width, _height);
         _format = BGRA32;
     }
 }
