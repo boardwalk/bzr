@@ -22,3 +22,8 @@ Palette::Palette(const void* data, size_t size)
 
 	reader.assertEnd();
 }
+
+const vector<Palette::Color>& Palette::colors() const
+{
+	return _colors;
+}

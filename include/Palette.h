@@ -17,7 +17,7 @@ public:
 
     Palette(const void* data, size_t size);
 
-    const vector<Color>& colors();
+    const vector<Color>& colors() const;
 
 private:
     vector<Color> _colors;
