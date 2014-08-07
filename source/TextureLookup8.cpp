@@ -7,8 +7,12 @@ TextureLookup8::TextureLookup8(const void* data, size_t size)
 {
     BlobReader reader(data, size);
 
-    auto flags = reader.read<uint32_t>();
+    auto flags = reader.read<uint8_t>();
     assert(flags == 0x01 || flags == 0x02 || flags == 0x04 || flags == 0x11 || flags == 0x12 || flags == 0x14);
+
+    reader.read<uint8_t>();
+    reader.read<uint8_t>();
+    reader.read<uint8_t>();
 
     if(flags & 0x01)
     {

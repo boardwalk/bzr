@@ -16,6 +16,7 @@ public:
         RGB24 = 0xF3,
         A8 = 0xF4,
         DXT1 = 0x31545844,
+        DXT3 = 0x33545844,
         DXT5 = 0x35545844,
         Paletted16 = 0x65
     };

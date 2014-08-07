@@ -91,6 +91,22 @@ static vector<uint8_t> decodeDXT1(const uint8_t* data, int width, int height)
     return result;
 }
 
+static vector<uint8_t> decodeDXT3(const uint8_t* data, int width, int height)
+{
+    assert((width & 0x3) == 0);
+    assert((height & 0x3) == 0);
+
+    vector<uint8_t> result(width * height * 4);
+
+    (void)data;
+    (void)width;
+    (void)height;
+
+    // TODO
+
+    return result;    
+}
+
 static vector<uint8_t> decodeDXT5(const uint8_t* data, int width, int height)
 {
     assert((width & 0x3) == 0);
@@ -166,6 +182,11 @@ void Image::decompress()
     if(_format == DXT1)
     {
         _data = decodeDXT1(_data.data(), _width, _height);
+        _format = BGRA32;
+    }
+    else if(_format == DXT3)
+    {
+        _data = decodeDXT3(_data.data(), _width, _height);
         _format = BGRA32;
     }
     else if(_format == DXT5)
@@ -322,6 +343,8 @@ int Image::formatBitsPerPixel(Format f)
             return 8;
         case DXT1:
             return 4;
+        case DXT3:
+            return 8;
         case DXT5:
             return 8;
         case Paletted16:
