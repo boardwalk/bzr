@@ -110,30 +110,27 @@ void ModelRenderData::initTexture(const Model& model)
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA8, maxWidth, maxHeight, (GLsizei)model.textures().size(), 0, GL_BGRA, GL_UNSIGNED_BYTE, nullptr);   
-
     checkGLError();
 
     GLint zoffset = 0;
 
     for(auto& resource : model.textures())
     {
+        Image image;
+
         auto innerResource = getTexture(resource);
 
-        if(!innerResource)
+        if(innerResource)
         {
-            zoffset++;
-            continue;
+            image = innerResource->cast<Texture>().image();
+            image.scale(maxWidth, maxHeight);
         }
-
-        auto image = innerResource->cast<Texture>().image();
 
         if(image.format() != Image::BGRA32)
         {
-            zoffset++;
-            continue;
+            image.init(Image::BGRA32, maxWidth, maxHeight, nullptr);
+            image.fill(0xFF);
         }
-
-        image.scale(maxWidth, maxHeight);
 
         glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, zoffset, image.width(), image.height(), 1, GL_BGRA, GL_UNSIGNED_BYTE, image.data());
         checkGLError();
@@ -172,15 +169,6 @@ void ModelRenderData::initGeometry(const Model& model)
             vertexData.push_back(float(vertex.normal.y));
             vertexData.push_back(float(vertex.normal.z));
 
-            if(primitive.texIndex == 0xFF)
-            {
-                vertexData.push_back(0.0f);
-            }
-            else
-            {
-                vertexData.push_back(float(primitive.texIndex));
-            }
-
             if(vertex.texCoords.empty())
             {
                 vertexData.push_back(0.0);
@@ -190,6 +178,15 @@ void ModelRenderData::initGeometry(const Model& model)
             {
                 vertexData.push_back(float(vertex.texCoords[index.texCoordIndex].x));
                 vertexData.push_back(float(vertex.texCoords[index.texCoordIndex].y));
+            }
+
+            if(primitive.texIndex == 0xFF)
+            {
+                vertexData.push_back(0.0f);
+            }
+            else
+            {
+                vertexData.push_back(float(primitive.texIndex));
             }
         }
 
