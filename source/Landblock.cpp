@@ -341,10 +341,10 @@ void Landblock::initObjects()
         object.position.y = reader.read<float>();
         object.position.z = reader.read<float>();
 
-        object.orientation.w = reader.read<float>();
-        object.orientation.x = reader.read<float>();
-        object.orientation.y = reader.read<float>();
-        object.orientation.z = reader.read<float>();
+        object.rotation.w = reader.read<float>();
+        object.rotation.x = reader.read<float>();
+        object.rotation.y = reader.read<float>();
+        object.rotation.z = reader.read<float>();
     }
 
     auto numObjectsEx = reader.read<uint32_t>();
@@ -361,10 +361,10 @@ void Landblock::initObjects()
         object.position.y = reader.read<float>();
         object.position.z = reader.read<float>();
 
-        object.orientation.w = reader.read<float>();
-        object.orientation.x = reader.read<float>();
-        object.orientation.y = reader.read<float>();
-        object.orientation.z = reader.read<float>();
+        object.rotation.w = reader.read<float>();
+        object.rotation.x = reader.read<float>();
+        object.rotation.y = reader.read<float>();
+        object.rotation.z = reader.read<float>();
 
         reader.read<uint32_t>();
         auto numChunks = reader.read<uint32_t>();

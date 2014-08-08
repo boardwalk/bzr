@@ -9,22 +9,23 @@
 class ModelGroup : public ResourceImpl<Resource::ModelGroup>
 {
 public:
-    struct Orientation
+    struct ModelInfo
     {
+        ModelInfo() : parent(0xFFFFFFFF)
+        {}
+
+        ResourcePtr resource;
+        uint32_t parent;
         Vec3 position;
         Quat rotation;
     };
 
     ModelGroup(const void* data, size_t size);
 
-    const vector<ResourcePtr>& models() const;
-    const vector<uint32_t>& parents() const;
-    const vector<Orientation>& orientations() const;
+    const vector<ModelInfo>& modelInfos() const;
 
 private:
-    vector<ResourcePtr> _models;
-    vector<uint32_t> _parents;
-    vector<Orientation> _orientations;
+    vector<ModelInfo> _modelInfos;
 };
 
 #endif

@@ -5,6 +5,7 @@
 #include "Core.h"
 #include "LandblockManager.h"
 #include "Model.h"
+#include "ModelGroup.h"
 #include "ResourceCache.h"
 
 #include "graphics/shaders/ModelVertexShader.h"
@@ -39,42 +40,63 @@ void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
         auto dx = it->first.x() - landblockManager.center().x();
         auto dy = it->first.y() - landblockManager.center().y();
 
-        Vec3 landblockOffset(dx * 192.0, dy * 192.0, 0.0);
+        Vec3 landblockPosition(dx * 192.0, dy * 192.0, 0.0);
 
         for(auto& object : it->second.objects())
         {
-            // FIXME
-            // We don't support rendering 02 models yet
-            if(object.model->resourceType() != Resource::Model)
-            {
-                continue;
-            }
-
-            Mat4 modelOrientMat;
-            modelOrientMat.makeRotation(object.orientation);
-
-            Mat4 modelMat;
-            modelMat.makeTranslation(landblockOffset + object.position);
-            modelMat = modelMat * modelOrientMat;
-
-            auto modelViewMat = viewMat * modelMat;
-            auto modelViewProjectionMat = projectionMat * modelViewMat;
-
-            loadMat4ToUniform(modelViewProjectionMat, _program.getUniform("modelViewProjectionMatrix"));
-
-            // TODO FIX UGLY CONST_CAST
-            auto& model = const_cast<ResourcePtr&>(object.model)->cast<Model>();
-
-            if(!model.renderData())
-            {
-                model.renderData().reset(new ModelRenderData(model));
-            }
-
-            auto& renderData = (ModelRenderData&)*model.renderData();
-
-            renderData.bind();
-
-            glDrawElements(GL_TRIANGLE_FAN, renderData.indexCount(), GL_UNSIGNED_SHORT, nullptr);
+            renderOne(const_cast<ResourcePtr&>(object.model), projectionMat, viewMat, landblockPosition + object.position, object.rotation);
         }
     }
+}
+
+void ModelRenderer::renderOne(ResourcePtr& resource, const Mat4& projectionMat, const Mat4& viewMat, const Vec3& position, const Quat& rotation)
+{
+    if(resource->resourceType() == Resource::ModelGroup)
+    {
+        renderModelGroup(resource->cast<ModelGroup>(), 0xFFFFFFFF, projectionMat, viewMat, position, rotation);
+    }
+    else if(resource->resourceType() == Resource::Model)
+    {
+        renderModel(resource->cast<Model>(), projectionMat, viewMat, position, rotation);
+    }
+}
+
+void ModelRenderer::renderModelGroup(ModelGroup& modelGroup, uint32_t parent, const Mat4& projectionMat, const Mat4& viewMat, const Vec3& position, const Quat& rotation)
+{
+    for(auto i = 0u; i < modelGroup.modelInfos().size(); i++)
+    {
+        auto& modelInfo = modelGroup.modelInfos()[i];
+
+        if(modelInfo.parent == parent)
+        {
+            // fix position, rotation!
+            renderOne(const_cast<ResourcePtr&>(modelInfo.resource), projectionMat, viewMat, position + modelInfo.position, rotation);
+            renderModelGroup(modelGroup, i, projectionMat, viewMat, position + modelInfo.position, rotation);
+        }
+    }
+}
+
+void ModelRenderer::renderModel(Model& model, const Mat4& projectionMat, const Mat4& viewMat, const Vec3& position, const Quat& rotation)
+{
+    Mat4 modelRotationMat;
+    modelRotationMat.makeRotation(rotation);
+
+    Mat4 modelTranslationMat;
+    modelTranslationMat.makeTranslation(position);
+
+    auto modelMat = modelTranslationMat * modelRotationMat;
+    auto modelViewProjectionMat = projectionMat * viewMat * modelMat;
+
+    loadMat4ToUniform(modelViewProjectionMat, _program.getUniform("modelViewProjectionMatrix"));
+
+    if(!model.renderData())
+    {
+        model.renderData().reset(new ModelRenderData(model));
+    }
+
+    auto& renderData = (ModelRenderData&)*model.renderData();
+
+    renderData.bind();
+
+    glDrawElements(GL_TRIANGLE_FAN, renderData.indexCount(), GL_UNSIGNED_SHORT, nullptr);
 }

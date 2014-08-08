@@ -14,21 +14,19 @@ ModelGroup::ModelGroup(const void* data, size_t size)
     assert(flags <= 0xF);
 
     auto modelCount = reader.read<uint32_t>();
-    _models.resize(modelCount);
-    _parents.resize(modelCount, 0xFFFFFFFF);
-    _orientations.resize(modelCount);
+    _modelInfos.resize(modelCount);
 
-    for(auto& model : _models)
+    for(auto& modelInfo : _modelInfos)
     {
         auto modelId = reader.read<uint32_t>();
-        model = Core::get().resourceCache().get(modelId);
+        modelInfo.resource = Core::get().resourceCache().get(modelId);
     }
 
     if(flags & 1)
     {
-        for(auto& parent : _parents)
+        for(auto& modelInfo : _modelInfos)
         {
-            parent = reader.read<uint32_t>();
+            modelInfo.parent = reader.read<uint32_t>();
         }
     }
 
@@ -47,30 +45,20 @@ ModelGroup::ModelGroup(const void* data, size_t size)
     reader.read<uint32_t>();
     reader.read<uint32_t>();
 
-    for(auto& orientation : _orientations)
+    for(auto& modelInfo : _modelInfos)
     {
-        orientation.position.x = reader.read<float>();
-        orientation.position.y = reader.read<float>();
-        orientation.position.z = reader.read<float>();
+        modelInfo.position.x = reader.read<float>();
+        modelInfo.position.y = reader.read<float>();
+        modelInfo.position.z = reader.read<float>();
 
-        orientation.rotation.w = reader.read<float>();
-        orientation.rotation.x = reader.read<float>();
-        orientation.rotation.y = reader.read<float>();
-        orientation.rotation.z = reader.read<float>();
+        modelInfo.rotation.w = reader.read<float>();
+        modelInfo.rotation.x = reader.read<float>();
+        modelInfo.rotation.y = reader.read<float>();
+        modelInfo.rotation.z = reader.read<float>();
     }
 }
 
-const vector<ResourcePtr>& ModelGroup::models() const
+const vector<ModelGroup::ModelInfo>& ModelGroup::modelInfos() const
 {
-    return _models;
-}
-
-const vector<uint32_t>& ModelGroup::parents() const
-{
-    return _parents;
-}
-
-const vector<ModelGroup::Orientation>& ModelGroup::orientations() const
-{
-    return _orientations;
+    return _modelInfos;
 }

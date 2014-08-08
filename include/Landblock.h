@@ -30,7 +30,7 @@ public:
     {
         ResourcePtr model;
         Vec3 position;
-        Quat orientation;
+        Quat rotation;
     };
 
     Landblock(const void* data, size_t length);
