@@ -93,10 +93,7 @@ void ModelRenderData::initTexture(const Model& model)
 
     glGenTextures(1, &_texture);
     glBindTexture(GL_TEXTURE_2D_ARRAY, _texture);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA8, maxWidth, maxHeight, (GLsizei)model.textures().size(), 0, GL_BGRA, GL_UNSIGNED_BYTE, nullptr);   
 
     GLint zoffset = 0;
@@ -160,15 +157,15 @@ void ModelRenderData::initGeometry(const Model& model)
             if(vertex.texCoords.empty())
             {
                 vertexData.push_back(0.0f);
-                vertexData.push_back(0.0f);
+                vertexData.push_back(1.0f);
             }
             else
             {
                 vertexData.push_back(float(vertex.texCoords[index.texCoordIndex].x));
-                vertexData.push_back(float(vertex.texCoords[index.texCoordIndex].y));
+                vertexData.push_back(1.0f - float(vertex.texCoords[index.texCoordIndex].y));
             }
 
-            if(primitive.texIndex == 0xFF)
+            if(primitive.texIndex == 0xFFFF)
             {
                 vertexData.push_back(0.0f);
             }

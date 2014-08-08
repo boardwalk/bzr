@@ -81,16 +81,13 @@ Model::Model(const void* data, size_t size)
         auto primFlags = reader.read<uint8_t>();
         assert(primFlags == 0x0 || primFlags == 0x1 || primFlags == 0x4);
 
-        auto primFlags2 = reader.read<uint8_t>();
+        auto primFlags2 = reader.read<uint32_t>();
         assert(primFlags2 == 0x0 || primFlags2 == 0x1 || primFlags2 == 0x2);
 
-        reader.read<uint8_t>();
-        reader.read<uint8_t>();
-        reader.read<uint8_t>();
-        primitive.texIndex = reader.read<uint8_t>();
-        reader.read<uint8_t>();
-        reader.read<uint8_t>();
-        reader.read<uint8_t>();
+        primitive.texIndex = reader.read<uint16_t>();
+        assert(primitive.texIndex < numTextures || primitive.texIndex == 0xFFFF);
+
+        reader.read<uint16_t>();
 
         for(auto pvi = 0; pvi < numIndices; pvi++)
         {
