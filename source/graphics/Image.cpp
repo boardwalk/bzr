@@ -2,37 +2,41 @@
 #include "Palette.h"
 #include <algorithm>
 
-// Converts a 16-bit RGB 5:6:5 to 32-bit BGRA value (with max alpha)
+// Converts a 16-bit RGB 5:6:5 to 24-bit BGR value
 static uint32_t upconvert(uint16_t c)
 {
     auto r = (c & 0x1F) * 0xFF / 0x1F;
     auto g = ((c >> 5) & 0x3F) * 0xFF / 0x3F;
     auto b = (c >> 11) * 0xFF / 0x1F;
 
-    return b | (g << 8) | (r << 16) | (0xFF << 24);
+    return b | (g << 8) | (r << 16);
 }
 
-// Interpolates between two 32-bit BGRA values
+// Interpolates between two 24-bit BGR values
 static uint32_t interpolate(uint32_t c0, uint32_t c1, unsigned int numer0, unsigned int numer1, unsigned int denom)
 {
     auto b0 = c0 & 0xFF;
     auto g0 = (c0 >> 8) & 0xFF;
     auto r0 = (c0 >> 16) & 0xFF;
-    auto a0 = (c0 >> 24) & 0xFF;
 
     auto b1 = c1 & 0xFF;
     auto g1 = (c1 >> 8) & 0xFF;
     auto r1 = (c1 >> 16) & 0xFF;
-    auto a1 = (c1 >> 24) & 0xFF;
 
     auto b = (r0 * numer0 + r1 * numer1) / denom;
     auto g = (g0 * numer0 + g1 * numer1) / denom;
     auto r = (b0 * numer0 + b1 * numer1) / denom;
-    auto a = (a0 * numer0 + a1 * numer1) / denom;
 
-    return b | (g << 8) | (r << 16) | (a << 24);
+    return b | (g << 8) | (r << 16);
 }
 
+// Interpolates between two 8-bit alpha values
+static uint8_t interpolateAlpha(uint8_t a0, uint8_t a1, unsigned int numer0, unsigned int numer1, unsigned int denom)
+{
+    return uint8_t((a0 * numer0 + a1 * numer1) / denom);
+}
+
+// Converts a 4BPP DXT1-compressed image to a 32BPP BGRA image
 static vector<uint8_t> decodeDXT1(const uint8_t* data, int width, int height)
 {
     assert((width & 0x3) == 0);
@@ -51,6 +55,7 @@ static vector<uint8_t> decodeDXT1(const uint8_t* data, int width, int height)
     {
         auto c0 = *(const uint16_t*)input;
         auto c1 = *(const uint16_t*)(input + 2);
+        auto ctab = *(const uint32_t*)(input + 4);
 
         uint32_t c[4];
         c[0] = upconvert(c0);
@@ -67,14 +72,12 @@ static vector<uint8_t> decodeDXT1(const uint8_t* data, int width, int height)
             c[3] = 0;
         }
 
-        auto tab = *(const uint32_t*)(input + 4);
-
         for(auto py = 0; py < 4; py++)
         {
             for(auto px = 0; px < 4; px++)
             {
-                auto cn = (tab >> (px * 2 + py * 8)) & 0x3;
-                *(uint32_t*)(output + px * 4 + py * outputStride) = c[cn];
+                auto cn = (ctab >> (px * 2 + py * 8)) & 0x3;
+                *(uint32_t*)(output + px * 4 + py * outputStride) = c[cn] | (0xFF << 24);
             }
         }
 
@@ -91,6 +94,7 @@ static vector<uint8_t> decodeDXT1(const uint8_t* data, int width, int height)
     return result;
 }
 
+// Converts an 8BPP DXT3-encoded image to a 32BPP BGRA image
 static vector<uint8_t> decodeDXT3(const uint8_t* data, int width, int height)
 {
     assert((width & 0x3) == 0);
@@ -98,15 +102,50 @@ static vector<uint8_t> decodeDXT3(const uint8_t* data, int width, int height)
 
     vector<uint8_t> result(width * height * 4);
 
-    (void)data;
-    (void)width;
-    (void)height;
+    auto input = data;
+    auto inputImageEnd = data + width * height;
 
-    // TODO
+    auto output = result.data();
+    auto outputStride = width * 4;
+    auto outputRowEnd = output + outputStride;
 
-    return result;    
+    while(input < inputImageEnd)
+    {
+        auto atab = *(const uint64_t*)input;
+        auto c0 = *(const uint16_t*)(input + 8);
+        auto c1 = *(const uint16_t*)(input + 10);
+        auto ctab = *(const uint32_t*)(input + 12);
+
+        uint32_t c[4];
+        c[0] = upconvert(c0);
+        c[1] = upconvert(c1);
+        c[2] = interpolate(c[0], c[1], 2, 1, 3);
+        c[3] = interpolate(c[0], c[1], 1, 2, 3);
+
+        for(auto py = 0; py < 4; py++)
+        {
+            for(auto px = 0; px < 4; px++)
+            {
+                auto cn = (ctab >> (px * 2 + py * 8)) & 0x3;
+                auto a = ((atab >> (px * 4 + py * 16)) & 0xF) * 0xFF / 0xF;
+                *(uint32_t*)(output + px * 4 + py * outputStride) = c[cn] | uint32_t(a << 24);
+            }
+        }
+
+        input += 16; // 16 bytes per block
+        output += 4 * 4; // 4 pixels across per block
+
+        if(output >= outputRowEnd)
+        {
+            output += 3 * outputStride;
+            outputRowEnd = output + outputStride;
+        }
+    }
+
+    return result;
 }
 
+// Converts an 8BPP DXT5-encoded image to a 32BPP BGRA image
 static vector<uint8_t> decodeDXT5(const uint8_t* data, int width, int height)
 {
     assert((width & 0x3) == 0);
@@ -114,11 +153,70 @@ static vector<uint8_t> decodeDXT5(const uint8_t* data, int width, int height)
 
     vector<uint8_t> result(width * height * 4);
 
-    (void)data;
-    (void)width;
-    (void)height;
+    auto input = data;
+    auto inputImageEnd = data + width * height;
 
-    // TODO
+    auto output = result.data();
+    auto outputStride = width * 4;
+    auto outputRowEnd = output + outputStride;
+
+    while(input < inputImageEnd)
+    {
+        auto a0 = *input;
+        auto a1 = *(input + 1);
+        auto atab = *(const uint64_t*)(input + 2); // we're only using 6 bytes of this, not 8!
+        auto c0 = *(const uint16_t*)(input + 8);
+        auto c1 = *(const uint16_t*)(input + 10);
+        auto ctab = *(const uint32_t*)(input + 12);
+
+        uint8_t a[8];
+        a[0] = a0;
+        a[1] = a1;
+
+        if(a0 > a1)
+        {
+            a[2] = interpolateAlpha(a0, a1, 6, 1, 7);
+            a[3] = interpolateAlpha(a0, a1, 5, 2, 7);
+            a[4] = interpolateAlpha(a0, a1, 4, 3, 7);
+            a[5] = interpolateAlpha(a0, a1, 3, 4, 7);
+            a[6] = interpolateAlpha(a0, a1, 2, 5, 7);
+            a[7] = interpolateAlpha(a0, a1, 1, 6, 7);
+        }
+        else
+        {
+            a[2] = interpolateAlpha(a0, a1, 4, 1, 7);
+            a[3] = interpolateAlpha(a0, a1, 3, 2, 7);
+            a[4] = interpolateAlpha(a0, a1, 2, 3, 7);
+            a[5] = interpolateAlpha(a0, a1, 1, 4, 7);
+            a[6] = 0x00;
+            a[7] = 0xFF;
+        }
+
+        uint32_t c[4];
+        c[0] = upconvert(c0);
+        c[1] = upconvert(c1);
+        c[2] = interpolate(c[0], c[1], 2, 1, 3);
+        c[3] = interpolate(c[0], c[1], 1, 2, 3);
+
+        for(auto py = 0; py < 4; py++)
+        {
+            for(auto px = 0; px < 4; px++)
+            {
+                auto cn = (ctab >> (px * 2 + py * 8)) & 0x3;
+                auto an = (atab >> (px * 3 + py * 12)) & 0xF;
+                *(uint32_t*)(output + px * 4 + py * outputStride) = c[cn] | (a[an] << 24);
+            }
+        }
+
+        input += 16; // 16 bytes per block
+        output += 4 * 4; // 4 pixels across per block
+
+        if(output >= outputRowEnd)
+        {
+            output += 3 * outputStride;
+            outputRowEnd = output + outputStride;
+        }
+    }
 
     return result;
 }

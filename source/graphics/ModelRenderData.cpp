@@ -46,15 +46,7 @@ static ResourcePtr getTexture(ResourcePtr resource)
             return resource;
 
         case Resource::TextureLookup5:
-            for(auto& subtexture : resource->cast<TextureLookup5>().textures())
-            {
-                if(subtexture)
-                {
-                    return getTexture(subtexture);
-                }
-            }
-
-            return ResourcePtr();
+            return getTexture(resource->cast<TextureLookup5>().texture());
 
         case Resource::TextureLookup8:
             return getTexture(resource->cast<TextureLookup8>().texture());
@@ -110,13 +102,21 @@ void ModelRenderData::initTexture(const Model& model)
             image.scale(maxWidth, maxHeight);
         }
 
-        if(image.format() != Image::BGRA32)
+        if(image.format() == Image::BGRA32)
         {
-            image.init(Image::BGRA32, maxWidth, maxHeight, nullptr);
-            image.fill(0xFF);
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, zoffset, image.width(), image.height(), 1, GL_BGRA, GL_UNSIGNED_BYTE, image.data());
         }
+        else if(image.format() == Image::BGR24)
+        {
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, zoffset, image.width(), image.height(), 1, GL_BGR, GL_UNSIGNED_BYTE, image.data());
+        }
+        else
+        {
+            image.init(Image::BGR24, maxWidth, maxHeight, nullptr);
+            image.fill(0xFF);
 
-        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, zoffset, image.width(), image.height(), 1, GL_BGRA, GL_UNSIGNED_BYTE, image.data());
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, zoffset, image.width(), image.height(), 1, GL_BGR, GL_UNSIGNED_BYTE, image.data());
+        }
 
         zoffset++;
     }

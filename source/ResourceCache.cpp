@@ -14,7 +14,12 @@ static Resource* loadResource(uint32_t fileId)
 
     if(data.empty())
     {
-        return nullptr;
+        data = Core::get().highresDat().read(fileId);
+
+        if(data.empty())
+        {
+            throw runtime_error("Resource not found");
+        }
     }
 
     switch(fileId >> 24)
@@ -32,7 +37,7 @@ static Resource* loadResource(uint32_t fileId)
         case 0x08:
             return new TextureLookup8(data.data(), data.size());
         default:
-            throw runtime_error("File type not supported");
+            throw runtime_error("Resource type not supported");
     }
 }
 

@@ -17,18 +17,23 @@ TextureLookup5::TextureLookup5(const void* data, size_t size)
     assert(two == 2);
 
     auto numTextures = reader.read<uint32_t>();
-    _textures.resize(numTextures);
+    assert(numTextures > 0);
 
-    for(auto& texture : _textures)
+    // This seems to be a list of textures by decreasing quality, as the first ones in the list are in highres.dat
+    // We're just going to pick the first and roll with it
+
+    auto textureId = reader.read<uint32_t>();
+    _texture = Core::get().resourceCache().get(textureId);
+
+    for(auto i = 1u; i < numTextures; i++)
     {
-        auto textureId = reader.read<uint32_t>();
-        texture = Core::get().resourceCache().get(textureId);
+        reader.read<uint32_t>();
     }
 
     reader.assertEnd();
 }
 
-const vector<ResourcePtr>& TextureLookup5::textures()
+const ResourcePtr& TextureLookup5::texture()
 {
-    return _textures;
+    return _texture;
 }
