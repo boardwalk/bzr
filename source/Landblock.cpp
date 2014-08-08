@@ -335,7 +335,7 @@ void Landblock::initObjects()
         auto& object = _objects[oi];
 
         auto modelId = reader.read<uint32_t>();
-        object.model = Core::get().resourceCache().get(modelId);
+        object.resource = Core::get().resourceCache().get(modelId);
 
         object.position.x = reader.read<float>();
         object.position.y = reader.read<float>();
@@ -355,7 +355,7 @@ void Landblock::initObjects()
         auto& object = _objects[numObjects + oi];
 
         auto modelId = reader.read<uint32_t>();
-        object.model = Core::get().resourceCache().get(modelId);
+        object.resource = Core::get().resourceCache().get(modelId);
 
         object.position.x = reader.read<float>();
         object.position.y = reader.read<float>();

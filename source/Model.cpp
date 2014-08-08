@@ -16,10 +16,10 @@ Model::Model(const void* data, size_t size)
     auto numTextures = reader.read<uint8_t>();
     _textures.resize(numTextures);
 
-    for(auto ti = 0; ti < numTextures; ti++)
+    for(auto& texture : _textures)
     {
         auto textureId = reader.read<uint32_t>();
-        _textures[ti] = Core::get().resourceCache().get(textureId);
+        texture = Core::get().resourceCache().get(textureId);
     }
 
     auto one = reader.read<uint32_t>();

@@ -28,7 +28,7 @@ public:
 
     struct Object
     {
-        ResourcePtr model;
+        ResourcePtr resource;
         Vec3 position;
         Quat rotation;
     };

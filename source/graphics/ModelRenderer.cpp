@@ -44,7 +44,7 @@ void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 
         for(auto& object : it->second.objects())
         {
-            renderOne(const_cast<ResourcePtr&>(object.model), projectionMat, viewMat, landblockPosition + object.position, object.rotation);
+            renderOne(const_cast<ResourcePtr&>(object.resource), projectionMat, viewMat, landblockPosition + object.position, object.rotation);
         }
     }
 }

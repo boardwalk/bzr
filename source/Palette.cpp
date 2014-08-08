@@ -12,12 +12,12 @@ Palette::Palette(const void* data, size_t size)
 	assert(numColors == 2048);
 	_colors.resize(numColors);
 
-	for(auto i = 0u; i < numColors; i++)
+	for(auto& color : _colors)
 	{
-		_colors[i].red = reader.read<uint8_t>();
-		_colors[i].green = reader.read<uint8_t>();
-		_colors[i].blue = reader.read<uint8_t>();
-		_colors[i].alpha = reader.read<uint8_t>();
+		color.red = reader.read<uint8_t>();
+		color.green = reader.read<uint8_t>();
+		color.blue = reader.read<uint8_t>();
+		color.alpha = reader.read<uint8_t>();
 	}
 
 	reader.assertEnd();

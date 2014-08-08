@@ -19,10 +19,10 @@ TextureLookup5::TextureLookup5(const void* data, size_t size)
     auto numTextures = reader.read<uint32_t>();
     _textures.resize(numTextures);
 
-    for(auto i = 0u; i < numTextures; i++)
+    for(auto& texture : _textures)
     {
         auto textureId = reader.read<uint32_t>();
-        _textures[i] = Core::get().resourceCache().get(textureId);
+        texture = Core::get().resourceCache().get(textureId);
     }
 
     reader.assertEnd();
