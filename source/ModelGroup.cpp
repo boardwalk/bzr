@@ -3,7 +3,7 @@
 #include "Core.h"
 #include "ResourceCache.h"
 
-ModelGroup::ModelGroup(const void* data, size_t size)
+ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 {
     BlobReader reader(data, size);
 

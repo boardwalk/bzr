@@ -1,7 +1,7 @@
 #include "Palette.h"
 #include "BlobReader.h"
 
-Palette::Palette(const void* data, size_t size)
+Palette::Palette(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 {
 	BlobReader reader(data, size);
 

@@ -4,7 +4,7 @@
 #include "Palette.h"
 #include "ResourceCache.h"
 
-Texture::Texture(const void* data, size_t size)
+Texture::Texture(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 {
     BlobReader reader(data, size);
 

@@ -1,7 +1,9 @@
 #ifndef BZR_RESOURCE_H
 #define BZR_RESOURCE_H
 
-class Resource
+#include "Noncopyable.h"
+
+class Resource : Noncopyable
 {
 public:
     enum ResourceType
@@ -14,7 +16,11 @@ public:
         TextureLookup8
     };
 
-    virtual ~Resource() {}
+    Resource(uint32_t id) : _resourceId(id)
+    {}
+
+    virtual ~Resource()
+    {}
 
     template<class T>
     T& cast()
@@ -31,18 +37,29 @@ public:
     }
 
     virtual ResourceType resourceType() const = 0;
+
+    uint32_t resourceId() const
+    {
+        return _resourceId;
+    }
+
+private:
+    const uint32_t _resourceId;
 };
 
 template<Resource::ResourceType RT>
 class ResourceImpl : public Resource
 {
 public:
-    static const Resource::ResourceType RESOURCE_TYPE = RT;
+    ResourceImpl(uint32_t id) : Resource(id)
+    {}
 
     Resource::ResourceType resourceType() const override
     {
         return RT;
     }
+
+    static const Resource::ResourceType RESOURCE_TYPE = RT;
 };
 
 typedef shared_ptr<Resource> ResourcePtr;

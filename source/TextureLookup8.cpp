@@ -3,7 +3,7 @@
 #include "Core.h"
 #include "ResourceCache.h"
 
-TextureLookup8::TextureLookup8(const void* data, size_t size)
+TextureLookup8::TextureLookup8(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 {
     BlobReader reader(data, size);
 

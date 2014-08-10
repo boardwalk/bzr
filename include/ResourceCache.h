@@ -8,7 +8,7 @@
 class ResourceCache : Noncopyable
 {
 public:
-    ResourcePtr get(uint32_t fileId);
+    ResourcePtr get(uint32_t resourceId);
 
 private:
     unordered_map<uint32_t, weak_ptr<Resource>> _data;

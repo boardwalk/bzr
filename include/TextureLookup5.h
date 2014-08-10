@@ -8,7 +8,7 @@
 class TextureLookup5 : public ResourceImpl<Resource::TextureLookup5>
 {
 public:
-    TextureLookup5(const void* data, size_t size);
+    TextureLookup5(uint32_t id, const void* data, size_t size);
 
     const ResourcePtr& texture();
 

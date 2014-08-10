@@ -3,7 +3,7 @@
 #include "Core.h"
 #include "ResourceCache.h"
 
-Model::Model(const void* data, size_t size)
+Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 {
     BlobReader reader(data, size);
 

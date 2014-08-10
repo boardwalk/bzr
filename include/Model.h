@@ -19,17 +19,23 @@ public:
 
     struct Index
     {
+        Index() : vertexIndex(0), texCoordIndex(0)
+        {}
+
         int vertexIndex;
         int texCoordIndex;
     };
 
     struct Primitive
     {
+        Primitive() : texIndex(0)
+        {}
+
         int texIndex;
         vector<Index> indices;
     };
 
-    Model(const void* data, size_t size);
+    Model(uint32_t id, const void* data, size_t size);
 
     const vector<ResourcePtr>& textures() const;
     const vector<Vertex>& vertices() const;

@@ -7,7 +7,7 @@
 class Texture : public ResourceImpl<Resource::Texture>
 {
 public:
-    Texture(const void* data, size_t size);
+    Texture(uint32_t id, const void* data, size_t size);
 
     const Image& image() const;
     const ResourcePtr& palette() const;

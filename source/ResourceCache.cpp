@@ -8,13 +8,13 @@
 #include "TextureLookup5.h"
 #include "TextureLookup8.h"
 
-static Resource* loadResource(uint32_t fileId)
+static Resource* loadResource(uint32_t resourceId)
 {
-    auto data = Core::get().portalDat().read(fileId);
+    auto data = Core::get().portalDat().read(resourceId);
 
     if(data.empty())
     {
-        data = Core::get().highresDat().read(fileId);
+        data = Core::get().highresDat().read(resourceId);
 
         if(data.empty())
         {
@@ -22,34 +22,34 @@ static Resource* loadResource(uint32_t fileId)
         }
     }
 
-    switch(fileId >> 24)
+    switch(resourceId >> 24)
     {
         case 0x01:
-            return new Model(data.data(), data.size());
+            return new Model(resourceId, data.data(), data.size());
         case 0x02:
-            return new ModelGroup(data.data(), data.size());
+            return new ModelGroup(resourceId, data.data(), data.size());
         case 0x04:
-            return new Palette(data.data(), data.size());
+            return new Palette(resourceId, data.data(), data.size());
         case 0x05:
-            return new TextureLookup5(data.data(), data.size());
+            return new TextureLookup5(resourceId, data.data(), data.size());
         case 0x06:
-            return new Texture(data.data(), data.size());
+            return new Texture(resourceId, data.data(), data.size());
         case 0x08:
-            return new TextureLookup8(data.data(), data.size());
+            return new TextureLookup8(resourceId, data.data(), data.size());
         default:
             throw runtime_error("Resource type not supported");
     }
 }
 
-ResourcePtr ResourceCache::get(uint32_t fileId)
+ResourcePtr ResourceCache::get(uint32_t resourceId)
 {
     ResourcePtr sharedPtr;
 
-    auto& weakPtr = _data[fileId];
+    auto& weakPtr = _data[resourceId];
 
     if(weakPtr.expired())
     {
-        sharedPtr.reset(loadResource(fileId));
+        sharedPtr.reset(loadResource(resourceId));
         weakPtr = sharedPtr;
     }
     else

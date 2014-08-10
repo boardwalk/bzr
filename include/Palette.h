@@ -15,7 +15,7 @@ public:
         uint8_t alpha;
     };
 
-    Palette(const void* data, size_t size);
+    Palette(uint32_t id, const void* data, size_t size);
 
     const vector<Color>& colors() const;
 
