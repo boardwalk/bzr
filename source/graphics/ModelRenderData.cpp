@@ -129,7 +129,7 @@ void ModelRenderData::initGeometry(const Model& model)
     // vx, vy, vz, nx, ny, nz, s, t, p
     static const int COMPONENTS_PER_VERTEX = 9;
 
-    // we're deduplicating a bit to make all this fit the structure of modern graphics APIs
+    // we're duplicating a bit to make all this fit the structure of modern graphics APIs
     // the models are so low resolution it should not matter
 
     vector<float> vertexData;
