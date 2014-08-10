@@ -8,8 +8,9 @@ Texture::Texture(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 {
     BlobReader reader(data, size);
 
-    auto fileId = reader.read<uint32_t>();
-    assert((fileId & 0xFF000000) == 0x06000000);
+    auto resourceId = reader.read<uint32_t>();
+    assert(resourceId == id);
+    assert((resourceId & 0xFF000000) == 0x06000000);
 
     auto unk1 = reader.read<uint32_t>();
     assert(unk1 <= 0xA);

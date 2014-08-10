@@ -7,8 +7,9 @@ TextureLookup5::TextureLookup5(uint32_t id,  const void* data, size_t size) : Re
 {
     BlobReader reader(data, size);
 
-    auto fileId = reader.read<uint32_t>();
-    assert((fileId & 0xFF000000) == 0x05000000);
+    auto resourceId = reader.read<uint32_t>();
+    assert(resourceId == id);
+    assert((resourceId & 0xFF000000) == 0x05000000);
 
     auto zero = reader.read<uint32_t>();
     assert(zero == 0);

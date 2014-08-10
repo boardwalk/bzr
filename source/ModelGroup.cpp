@@ -7,8 +7,9 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
 {
     BlobReader reader(data, size);
 
-    auto fileId = reader.read<uint32_t>();
-    assert((fileId & 0xFF000000) == 0x02000000);
+    auto resourceId = reader.read<uint32_t>();
+    assert(resourceId == id);
+    assert((resourceId & 0xFF000000) == 0x02000000);
 
     auto flags = reader.read<uint32_t>();
     assert(flags <= 0xF);

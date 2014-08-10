@@ -7,8 +7,9 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 {
     BlobReader reader(data, size);
 
-    auto fileId = reader.read<uint32_t>();
-    assert((fileId & 0xFF000000) == 0x01000000);
+    auto resourceId = reader.read<uint32_t>();
+    assert(resourceId == id);
+    assert((resourceId & 0xFF000000) == 0x01000000);
 
     auto flags = reader.read<uint32_t>();
     assert(flags == 0x2 || flags == 0x3 || flags == 0xA || flags == 0xB);
