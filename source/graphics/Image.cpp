@@ -5,9 +5,9 @@
 // Converts a 16-bit RGB 5:6:5 to 24-bit BGR value
 static uint32_t upconvert(uint16_t c)
 {
-    auto r = (c & 0x1F) * 0xFF / 0x1F;
+    auto b = (c & 0x1F) * 0xFF / 0x1F;
     auto g = ((c >> 5) & 0x3F) * 0xFF / 0x3F;
-    auto b = (c >> 11) * 0xFF / 0x1F;
+    auto r = (c >> 11) * 0xFF / 0x1F;
 
     return b | (g << 8) | (r << 16);
 }
