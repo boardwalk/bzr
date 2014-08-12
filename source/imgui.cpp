@@ -335,7 +335,7 @@ static const char* ImStristr(const char* haystack, const char* needle, const cha
     if (!needle_end)
         needle_end = needle + strlen(needle);
 
-    const char un0 = toupper(*needle);
+    const char un0 = (char)toupper(*needle);
     while (*haystack)
     {
         if (toupper(*haystack) == un0)
@@ -380,7 +380,7 @@ static size_t ImFormatString(char* buf, size_t buf_size, const char* fmt, ...)
     int w = vsnprintf(buf, buf_size, fmt, args);
     va_end(args);
     buf[buf_size-1] = 0;
-    if (w == -1) w = buf_size;
+    if (w == -1) w = (int)buf_size;
     return w;
 }
 
@@ -388,7 +388,7 @@ static size_t ImFormatStringV(char* buf, size_t buf_size, const char* fmt, va_li
 {
     int w = vsnprintf(buf, buf_size, fmt, args);
     buf[buf_size-1] = 0;
-    if (w == -1) w = buf_size;
+    if (w == -1) w = (int)buf_size;
     return w;
 }
 
@@ -553,7 +553,7 @@ struct ImGuiTextEditState
     void                CursorAnimReset()               { CursorAnim = -0.30f; }                                                // After a user-input the cursor stays on for a while without blinking
     bool                CursorIsVisible() const         { return CursorAnim <= 0.0f || fmodf(CursorAnim, 1.20f) <= 0.80f; }     // Blinking
     bool                HasSelection() const            { return StbState.select_start != StbState.select_end; }
-    void                SelectAll()                     { StbState.select_start = 0; StbState.select_end = strlen(Text); StbState.cursor = StbState.select_end; StbState.has_preferred_x = false; }
+    void                SelectAll()                     { StbState.select_start = 0; StbState.select_end = (int)strlen(Text); StbState.cursor = StbState.select_end; StbState.has_preferred_x = false; }
 
     void                OnKeyboardPressed(int key);
     void                UpdateScrollOffset();
@@ -715,7 +715,7 @@ static ImVector<ImGuiStorage::Pair>::iterator LowerBound(ImVector<ImGuiStorage::
 {
     ImVector<ImGuiStorage::Pair>::iterator first = data.begin();
     ImVector<ImGuiStorage::Pair>::iterator last = data.end();
-    int count = last - first;
+    int count = (int)(last - first);
     while (count > 0)
     {
         int count2 = count / 2;
@@ -1028,7 +1028,7 @@ static void LoadSettings()
     if (fseek(f, 0, SEEK_SET)) 
         return;
     char* f_data = new char[f_size+1];
-    f_size = fread(f_data, 1, f_size, f);   // Text conversion alter read size so let's not be fussy about return value
+    f_size = (long)fread(f_data, 1, f_size, f);   // Text conversion alter read size so let's not be fussy about return value
     fclose(f);
     if (f_size == 0)
     {
@@ -1416,7 +1416,7 @@ static void LogText(const ImVec2& ref_pos, const char* text, const char* text_en
 
     const char* text_remaining = text;
     const int tree_depth = window->DC.TreeDepth;
-    while (true)
+    for (;;)
     {
         const char* line_end = text_remaining;
         while (line_end < text_end)
@@ -3392,7 +3392,7 @@ bool RadioButton(const char* label, int* v, int v_button)
 // Wrapper for stb_textedit.h to edit text (our wrapper is for: statically sized buffer, single-line, ASCII, fixed-width font)
 int     STB_TEXTEDIT_STRINGLEN(const STB_TEXTEDIT_STRING* obj)                                  { return (int)strlen(obj->Text); }
 char    STB_TEXTEDIT_GETCHAR(const STB_TEXTEDIT_STRING* obj, int idx)                           { return (char)obj->Text[idx]; }
-float   STB_TEXTEDIT_GETWIDTH(STB_TEXTEDIT_STRING* obj, int line_start_idx, int char_idx)       { return obj->Font->CalcTextSize(obj->FontSize, 0, &obj->Text[char_idx], &obj->Text[char_idx]+1, NULL).x; }
+float   STB_TEXTEDIT_GETWIDTH(STB_TEXTEDIT_STRING* obj, int, int char_idx)                      { return obj->Font->CalcTextSize(obj->FontSize, 0, &obj->Text[char_idx], &obj->Text[char_idx]+1, NULL).x; }
 char    STB_TEXTEDIT_KEYTOTEXT(int key)                                                         { return key >= 0x10000 ? 0 : (char)key; }
 char    STB_TEXTEDIT_NEWLINE = '\n';
 void    STB_TEXTEDIT_LAYOUTROW(StbTexteditRow* r, STB_TEXTEDIT_STRING* obj, int line_start_idx)
@@ -3416,7 +3416,7 @@ void    STB_TEXTEDIT_DELETECHARS(STB_TEXTEDIT_STRING* obj, int idx, int n)      
 bool    STB_TEXTEDIT_INSERTCHARS(STB_TEXTEDIT_STRING* obj, int idx, const char* new_text, int new_text_size)
 {
     char* buf_end = obj->Text + obj->MaxLength;
-    int text_size = strlen(obj->Text);
+    int text_size = (int)strlen(obj->Text);
 
     if (new_text_size > buf_end - (obj->Text + text_size + 1))
         return false;
@@ -3647,7 +3647,7 @@ bool InputText(const char* label, char* buf, size_t buf_size, ImGuiInputTextFlag
     bool cancel_edit = false;
     if (g.ActiveId == id)
     {
-        edit_state.MaxLength = buf_size < ARRAYSIZE(edit_state.Text) ? buf_size : ARRAYSIZE(edit_state.Text);
+        edit_state.MaxLength = (int)(buf_size < ARRAYSIZE(edit_state.Text) ? buf_size : ARRAYSIZE(edit_state.Text));
         edit_state.Font = window->Font();
         edit_state.FontSize = window->FontSize();
     
@@ -3712,7 +3712,7 @@ bool InputText(const char* label, char* buf, size_t buf_size, ImGuiInputTextFlag
                 if (const char* clipboard = g.IO.GetClipboardTextFn())
                 {
                     // Remove new-line from pasted buffer
-                    int clipboard_len = strlen(clipboard);
+                    int clipboard_len = (int)strlen(clipboard);
                     char* clipboard_filtered = (char*)malloc(clipboard_len+1);
                     int clipboard_filtered_len = 0;
                     for (int i = 0; clipboard[i]; i++)
@@ -4287,7 +4287,7 @@ bool IsClipped(ImVec2 item_size)
     return IsClipped(ImGuiAabb(window->DC.CursorPos, window->DC.CursorPos + item_size));
 }
 
-static bool ClipAdvance(const ImGuiAabb& bb, bool skip_columns)
+static bool ClipAdvance(const ImGuiAabb& bb, bool /*skip_columns*/)
 {
     ImGuiWindow* window = GetCurrentWindow();
     if (ImGui::IsClipped(bb))
@@ -4558,7 +4558,7 @@ void ImDrawList::AddCommand(ImDrawCmdType cmd_type, int vtx_count)
 
     // Merge commands if we can, turning them into less draw calls
     ImDrawCmd* prev = commands.empty() ? NULL : &commands.back();
-    if (vtx_count > 0 && prev && prev->cmd_type == (ImU32)cmd_type && prev->vtx_count + vtx_count < VTX_COUNT_MAX)
+    if (vtx_count > 0 && prev && prev->cmd_type == cmd_type && prev->vtx_count + vtx_count < VTX_COUNT_MAX)
         prev->vtx_count += vtx_count;
     else
         commands.push_back(ImDrawCmd(cmd_type, vtx_count));
@@ -4776,14 +4776,14 @@ void ImDrawList::AddText(ImFont font, float font_size, const ImVec2& pos, ImU32 
     if (text_end == NULL)
         text_end = text_begin + strlen(text_begin);
 
-    int char_count = text_end - text_begin;
+    int char_count = (int)(text_end - text_begin);
     int vtx_count_max = char_count * 6;
-    int vtx_begin = vtx_buffer.size();
+    int vtx_begin = (int)vtx_buffer.size();
     AddCommand(ImDrawCmdType_DrawTriangleList, vtx_count_max);
 
     font->RenderText(font_size, pos, col, clip_rect_stack_.back(), text_begin, text_end, vtx_write_);
     vtx_buffer.resize(vtx_write_ - &vtx_buffer.front());
-    int vtx_count = vtx_buffer.size() - vtx_begin;
+    int vtx_count = (int)vtx_buffer.size() - vtx_begin;
 
     commands.back().vtx_count -= (vtx_count_max - vtx_count);
     vtx_write_ -= (vtx_count_max - vtx_count);
@@ -4843,7 +4843,7 @@ bool    ImBitmapFont::LoadFromFile(const char* filename)
     }
     fclose(f);
     DataOwned = true;
-    return LoadFromMemory(Data, DataSize);
+    return LoadFromMemory(Data, (int)DataSize);
 }
 
 bool    ImBitmapFont::LoadFromMemory(const void* data, int data_size)
@@ -5129,10 +5129,10 @@ void ShowStyleEditor(ImGuiStyle* ref)
     ImGui::ColorEditMode(edit_mode);
     for (size_t i = 0; i < ImGuiCol_COUNT; i++)
     {
-        const char* name = GetStyleColorName(i);
+        const char* name = GetStyleColorName((int)i);
         if (!filter.PassFilter(name))
             continue;
-        ImGui::PushID(i);
+        ImGui::PushID((int)i);
         ImGui::ColorEdit4(name, (float*)&style.Colors[i], true);
         if (memcmp(&style.Colors[i], (ref ? &ref->Colors[i] : &def.Colors[i]), sizeof(ImVec4)) != 0)
         {
@@ -5305,7 +5305,7 @@ void ShowTestWindow(bool* open)
                 phase += 0.10f*values_offset; 
             }
         }
-        ImGui::PlotLines("Frame Times", &values.front(), values.size(), values_offset, "avg 0.0", -1.0f, 1.0f, ImVec2(0,70));
+        ImGui::PlotLines("Frame Times", &values.front(), (int)values.size(), values_offset, "avg 0.0", -1.0f, 1.0f, ImVec2(0,70));
 
         ImGui::SameLine(); ImGui::Checkbox("pause", &pause);
         ImGui::PlotHistogram("Histogram", arr, ARRAYSIZE(arr), 0, NULL, 0.0f, 1.0f, ImVec2(0,70));

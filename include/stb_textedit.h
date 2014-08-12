@@ -1203,7 +1203,7 @@ static void stb_text_redo(STB_TEXTEDIT_STRING *str, STB_TexteditState *state)
    s->redo_point++;
 }
 
-static void stb_text_makeundo_insert(STB_TEXTEDIT_STRING *str, STB_TexteditState *state, int where, int length)
+static void stb_text_makeundo_insert(STB_TEXTEDIT_STRING *, STB_TexteditState *state, int where, int length)
 {
    stb_text_createundo(&state->undostate, where, 0, length);
 }
