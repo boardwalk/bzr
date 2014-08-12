@@ -327,8 +327,11 @@ void Landblock::initObjects()
 
     reader.read<uint32_t>();
 
-    auto numObjects = reader.read<uint32_t>();
+    auto numObjects = reader.read<uint16_t>();
     _objects.resize(numObjects);
+
+    auto unk1 = reader.read<uint16_t>();
+    assert(unk1 == 0);
 
     for(auto oi = 0u; oi < numObjects; oi++)
     {
@@ -347,8 +350,12 @@ void Landblock::initObjects()
         object.rotation.z = reader.read<float>();
     }
 
-    auto numObjectsEx = reader.read<uint32_t>();
+    auto numObjectsEx = reader.read<uint16_t>();
     _objects.resize(numObjects + numObjectsEx);
+
+    auto unk2 = reader.read<uint16_t>();
+    // I don't know what this is, but it means there's more data
+    assert(unk2 == 0 || unk2 == 1);
 
     for(auto oi = 0u; oi < numObjectsEx; oi++)
     {
