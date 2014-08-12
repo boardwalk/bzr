@@ -163,6 +163,11 @@ vector<Model::Primitive> unpackPrimitives(BlobReader& reader)
                 index.texCoordIndex = reader.read<uint8_t>();
             }
         }
+        else
+        {
+            // This is some sort of lighting/partitioning poly, don't render it
+            primitive.indices.clear();
+        }
 
         if(primFlags2 == 0x02)
         {
