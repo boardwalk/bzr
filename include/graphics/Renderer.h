@@ -7,6 +7,7 @@
 #include <OVR_CAPI_GL.h>
 #endif
 
+class GuiRenderer;
 class SkyRenderer;
 class LandblockRenderer;
 class ModelRenderer;
@@ -44,6 +45,7 @@ private:
     GLuint _framebuffer;
 #endif
 
+    unique_ptr<GuiRenderer> _guiRenderer;
     unique_ptr<SkyRenderer> _skyRenderer;
     unique_ptr<LandblockRenderer> _landblockRenderer;
     unique_ptr<ModelRenderer> _modelRenderer;
