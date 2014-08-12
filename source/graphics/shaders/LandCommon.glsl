@@ -11,7 +11,7 @@ uniform sampler2D offsetTex;
 uniform float offsetBase;
 uniform float offsetScale;
 
-// camera parameters
+// lighting parameters
 uniform vec4 cameraPosition;
 uniform vec3 lightPosition;
 uniform vec3 lightIntensity;
