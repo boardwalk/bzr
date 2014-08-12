@@ -140,6 +140,11 @@ void ModelRenderData::initGeometry(const Model& model)
 
     for(auto& primitive : model.primitives())
     {
+        if(!indexData.empty())
+        {
+            indexData.push_back(0xFFFF);
+        }
+        
         for(auto& index : primitive.indices)
         {
             indexData.push_back(uint16_t(vertexData.size() / COMPONENTS_PER_VERTEX));
@@ -174,8 +179,6 @@ void ModelRenderData::initGeometry(const Model& model)
                 vertexData.push_back(float(primitive.texIndex));
             }
         }
-
-        indexData.push_back(0xFFFF);
     }
 
     _indexCount = GLsizei(indexData.size());
