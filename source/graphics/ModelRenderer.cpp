@@ -2,14 +2,32 @@
 #include "graphics/ModelRenderData.h"
 #include "graphics/util.h"
 #include "math/Mat4.h"
+#include "Camera.h"
 #include "Core.h"
 #include "LandblockManager.h"
 #include "Model.h"
 #include "ModelGroup.h"
 #include "ResourceCache.h"
+#include <algorithm>
 
 #include "graphics/shaders/ModelVertexShader.h"
 #include "graphics/shaders/ModelFragmentShader.h"
+
+struct CompareByDepth
+{
+    CompareByDepth()
+    {
+        _cameraPos = Core::get().camera().position();
+    }
+
+    bool operator()(const ModelRenderer::DepthSortedModel& a, const ModelRenderer::DepthSortedModel& b) const
+    {
+        // descending order
+        return _cameraPos.squareDist(a.worldPos) > _cameraPos.squareDist(b.worldPos);
+    }
+
+    Vec3 _cameraPos;
+};
 
 ModelRenderer::ModelRenderer()
 {
@@ -35,6 +53,9 @@ void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 
     auto& landblockManager = Core::get().landblockManager();
 
+    // first pass, render solid objects and collect objects that need depth sorting
+    _depthSortList.clear();
+
     for(auto it = landblockManager.begin(); it != landblockManager.end(); ++it)
     {
         auto dx = it->first.x() - landblockManager.center().x();
@@ -47,6 +68,14 @@ void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
             renderOne(const_cast<ResourcePtr&>(object.resource), projectionMat, viewMat, landblockPosition + object.position, object.rotation);
         }
     }
+
+    // second pass, sort and render objects that need depth sorting
+    sort(_depthSortList.begin(), _depthSortList.end(), CompareByDepth());
+
+    for(auto& depthSortedModel : _depthSortList)
+    {
+        renderModel(*depthSortedModel.model, projectionMat, viewMat, depthSortedModel.worldPos, depthSortedModel.worldRot, /*firstPass*/ false);
+    }
 }
 
 void ModelRenderer::renderOne(ResourcePtr& resource, const Mat4& projectionMat, const Mat4& viewMat, const Vec3& position, const Quat& rotation)
@@ -57,7 +86,7 @@ void ModelRenderer::renderOne(ResourcePtr& resource, const Mat4& projectionMat, 
     }
     else if(resource->resourceType() == Resource::Model)
     {
-        renderModel(resource->cast<Model>(), projectionMat, viewMat, position, rotation);
+        renderModel(resource->cast<Model>(), projectionMat, viewMat, position, rotation, /*firstPass*/ true);
     }
 }
 
@@ -76,8 +105,15 @@ void ModelRenderer::renderModelGroup(ModelGroup& modelGroup, uint32_t parent, co
     }
 }
 
-void ModelRenderer::renderModel(Model& model, const Mat4& projectionMat, const Mat4& viewMat, const Vec3& position, const Quat& rotation)
+void ModelRenderer::renderModel(Model& model, const Mat4& projectionMat, const Mat4& viewMat, const Vec3& position, const Quat& rotation, bool firstPass)
 {
+    if(firstPass && model.needsDepthSort())
+    {
+        DepthSortedModel depthSortedModel = { &model, position, rotation };
+        _depthSortList.push_back(depthSortedModel);
+        return;
+    }
+
     Mat4 modelRotationMat;
     modelRotationMat.makeRotation(rotation);
 

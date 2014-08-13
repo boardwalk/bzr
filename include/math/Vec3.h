@@ -10,6 +10,7 @@ struct Vec3
     Vec3 normalize() const;
     Vec3 cross(const Vec3& v) const;
     double dot(const Vec3& v) const;
+    double squareDist(const Vec3& v) const;
 
     double x;
     double y;

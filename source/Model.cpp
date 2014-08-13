@@ -267,6 +267,9 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
     }
 
     reader.assertEnd();
+
+    // TODO check whether any textures have alpha < 1
+    _needsDepthSort = true;
 }
 
 const vector<ResourcePtr>& Model::textures() const
@@ -282,6 +285,11 @@ const vector<Model::Vertex>& Model::vertices() const
 const vector<Model::Primitive>& Model::primitives() const
 {
     return _primitives;
+}
+
+bool Model::needsDepthSort() const
+{
+    return _needsDepthSort;
 }
 
 unique_ptr<Destructable>& Model::renderData()

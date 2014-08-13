@@ -30,6 +30,14 @@ double Vec3::dot(const Vec3& v) const
     return x * v.x + y * v.y + z * v.z;
 }
 
+double Vec3::squareDist(const Vec3& v) const
+{
+    auto xd = abs(v.x - x);
+    auto yd = abs(v.y - y);
+    auto zd = abs(v.z - z);
+    return xd * xd + yd * yd + zd * zd;
+}
+
 Vec3 operator-(const Vec3& a)
 {
     return Vec3(-a.x, -a.y, -a.z);

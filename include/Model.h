@@ -41,12 +41,16 @@ public:
     const vector<Vertex>& vertices() const;
     const vector<Primitive>& primitives() const;
 
+    // If true, the model has transparent or translucent elements and must be depth sorted before rendering
+    bool needsDepthSort() const;
+
     unique_ptr<Destructable>& renderData();
 
 private:
     vector<ResourcePtr> _textures;
     vector<Vertex> _vertices;
     vector<Primitive> _primitives;
+    bool _needsDepthSort;
 
     unique_ptr<Destructable> _renderData;
 };
