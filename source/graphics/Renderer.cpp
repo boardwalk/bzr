@@ -77,6 +77,8 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // the default is 4
     glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(0xFFFF);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     _guiRenderer.reset(new GuiRenderer());
     _skyRenderer.reset(new SkyRenderer());

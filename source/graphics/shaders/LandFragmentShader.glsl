@@ -34,17 +34,17 @@ vec3 phong()
     return lightIntensity * (ambient + diffuse + specular);
 }
 
-vec4 linearize(vec4 color)
+vec3 linearize(vec3 color)
 {
-    return pow(color, vec4(2.2));
+    return pow(color, vec3(2.2));
 }
 
 // Filmic tonemapping operators
 // Also applies gamma correction
 // http://filmicgames.com/archives/75
-vec4 hejl(vec4 color)
+vec3 hejl(vec3 color)
 {
-    vec4 x = max(vec4(0.0), color - vec4(0.004));
+    vec3 x = max(vec3(0.0), color - vec3(0.004));
     return (x * (6.2 * x + 0.5)) / (x * (6.2 * x + 1.7) + 0.06);
 }
 
@@ -58,20 +58,21 @@ float alpha(vec3 texCoord)
 
 void main()
 {
-    vec4 tc1 = linearize(texture(terrainTex, vec3(terrainTexCoord.st, terrainInfo1.q)));
-    vec4 tc2 = linearize(texture(terrainTex, vec3(terrainTexCoord.st, terrainInfo2.q)));
-    vec4 tc3 = linearize(texture(terrainTex, vec3(terrainTexCoord.st, terrainInfo3.q)));
-    vec4 tc4 = linearize(texture(terrainTex, vec3(terrainTexCoord.st, terrainInfo4.q)));
-    vec4 tc5 = linearize(texture(terrainTex, vec3(terrainTexCoord.st, terrainInfo5.q)));
+    vec3 tc1 = linearize(texture(terrainTex, vec3(terrainTexCoord.st, terrainInfo1.q)).rgb);
+    vec3 tc2 = linearize(texture(terrainTex, vec3(terrainTexCoord.st, terrainInfo2.q)).rgb);
+    vec3 tc3 = linearize(texture(terrainTex, vec3(terrainTexCoord.st, terrainInfo3.q)).rgb);
+    vec3 tc4 = linearize(texture(terrainTex, vec3(terrainTexCoord.st, terrainInfo4.q)).rgb);
+    vec3 tc5 = linearize(texture(terrainTex, vec3(terrainTexCoord.st, terrainInfo5.q)).rgb);
 
     float ba2 = alpha(terrainInfo2.stp);
     float ba3 = alpha(terrainInfo3.stp);
     float ba4 = alpha(terrainInfo4.stp);
     float ba5 = alpha(terrainInfo5.stp);
+ 
+    vec3 tc = mix(tc2, tc1, ba2);
+    tc = mix(tc3, tc, ba3);
+    tc = mix(tc4, tc, ba4);
+    tc = mix(tc5, tc, ba5);
 
-    fragColor = mix(tc2, tc1, ba2);
-    fragColor = mix(tc3, fragColor, ba3);
-    fragColor = mix(tc4, fragColor, ba4);
-    fragColor = mix(tc5, fragColor, ba5);
-    fragColor = hejl(fragColor) * vec4(phong(), 1.0);
+    fragColor = vec4(hejl(tc) * phong(), 1.0);
 }
