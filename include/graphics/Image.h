@@ -42,6 +42,7 @@ public:
     const void* data() const;
 
     static int formatBitsPerPixel(Format f);
+    static bool formatIsCompressed(Format f);
 
 private:
     Format _format;

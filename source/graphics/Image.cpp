@@ -453,3 +453,8 @@ int Image::formatBitsPerPixel(Format f)
 
     throw runtime_error("Invalid format");
 }
+
+bool Image::formatIsCompressed(Format f)
+{
+    return f == DXT1 || f == DXT3 || f == DXT5;
+}
