@@ -297,8 +297,14 @@ void Renderer::initOVR()
     cfg.OGL.Header.API = ovrRenderAPI_OpenGL;
     cfg.OGL.Header.RTSize = targetSize;
     cfg.OGL.Header.Multisample = 1; // yes?
+#if defined(OVR_OS_WIN32)
     cfg.OGL.Window = wmInfo.info.win.window;
     cfg.OGL.DC = GetDC(wmInfo.info.win.window);
+#elif defined(OVR_OS_MAC)
+    // Mac does not have any fields
+#else
+    #error Implement for this OS.
+#endif
 
     unsigned int distortionCaps = ovrDistortionCap_Chromatic|ovrDistortionCap_TimeWarp|ovrDistortionCap_Overdrive;
 
@@ -307,10 +313,12 @@ void Renderer::initOVR()
         throw runtime_error("Failed to configure HMD rendering");
     }
 
+#ifdef OVR_OS_WIN32
     if(!ovrHmd_AttachToWindow(_hmd, wmInfo.info.win.window, nullptr, nullptr))
     {
         throw runtime_error("Failed to attach HMD to window");
     }
+#endif
 
     glGenFramebuffers(1, &_framebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
@@ -351,7 +359,7 @@ void Renderer::cleanupOVR()
 
 void Renderer::renderOVR(double interp)
 {
-    (double)interp;
+    (void)interp;
 
     ovrHmd_BeginFrame(_hmd, 0);
 

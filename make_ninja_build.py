@@ -164,6 +164,11 @@ def main():
             else:
                 ldflags += ' -lGL'
 
+            if args.oculusvr:
+                ovr_dir = os.path.expanduser('~/Documents/OculusSDK/LibOVR')
+                cppflags += ' -I{}/Src -DOVR_OS_MAC -DOCULUSVR'.format(ovr_dir)
+                ldflags += ' -L{}/Lib/Mac/Release -lovr -framework CoreFoundation -framework CoreGraphics -framework IOKit'.format(ovr_dir)
+
             if args.release:
                 cppflags += ' -O2 -flto'
                 if sys.platform == 'darwin':
