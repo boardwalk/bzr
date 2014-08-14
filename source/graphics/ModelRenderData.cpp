@@ -135,9 +135,6 @@ void ModelRenderData::initGeometry(const Model& model)
     vector<float> vertexData;
     vector<uint16_t> indexData;
 
-    // TODO The origin of DirectX's texcoord is the top left, OpenGL is bottom right
-    // We may need to correct for this
-
     for(auto& primitive : model.primitives())
     {
         if(!indexData.empty())
