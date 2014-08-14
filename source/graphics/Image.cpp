@@ -333,7 +333,7 @@ void Image::scale(int newWidth, int newHeight)
         return;
     }
 
-    if(_format == DXT1 || _format == DXT5)
+    if(formatIsCompressed(_format))
     {
         throw runtime_error("Cannot scale compressed image");
     }
@@ -380,7 +380,7 @@ void Image::scale(int newWidth, int newHeight)
 
 void Image::flipVertical()
 {
-    if(_format == DXT1 || _format == DXT5)
+    if(formatIsCompressed(_format))
     {
         throw runtime_error("Cannot flip compressed image");
     }
