@@ -42,7 +42,7 @@ void SkyRenderer::render()
     glBindVertexArray(_vertexArray);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, _texture);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, _texture);
 
     glDisable(GL_DEPTH_TEST);
 
