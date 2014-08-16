@@ -37,14 +37,11 @@ Texture::Texture(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
     reader.assertEnd();
 
     _image.init(format, width, height, pixels);
-    _image.decompress();
 
     if(_palette)
     {
         _image.applyPalette(_palette->cast<::Palette>());
     }
-
-    _image.flipVertical();
 }
 
 const Image& Texture::image() const

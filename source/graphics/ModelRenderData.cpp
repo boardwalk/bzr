@@ -1,4 +1,5 @@
 #include "graphics/ModelRenderData.h"
+#include "graphics/Program.h"
 #include "Model.h"
 #include "Texture.h"
 #include "TextureLookup5.h"
@@ -17,13 +18,17 @@ ModelRenderData::~ModelRenderData()
     glDeleteVertexArrays(1, &_vertexArray);
     glDeleteBuffers(1, &_vertexBuffer);
     glDeleteBuffers(1, &_indexBuffer);
-    glDeleteTextures(1, &_texture);
+    glDeleteTextures(1, &_textures);
+    glDeleteTextures(1, &_textureSizes);
 }
 
-void ModelRenderData::bind()
+void ModelRenderData::bind(Program& program)
 {
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, _texture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, _textures);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_1D, _textureSizes);
 
     glBindVertexArray(_vertexArray);
 }
@@ -102,9 +107,9 @@ static GLenum formatInternalGLEnum(Image::Format f)
         case Image::DXT5:
             return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
         case Image::BGR24:
-            return GL_RGB;
+            return GL_RGB8;
         case Image::BGRA32:
-            return GL_RGBA;
+            return GL_RGBA8;
         default:
             // what's this?
             assert(false);
@@ -130,75 +135,6 @@ static GLenum formatGLEnum(Image::Format f)
             // what's this?
             assert(false);
             return 0;
-    }
-}
-
-static void scaledUpload(const Image& image, GLuint targetArrayTex, int zOffset, GLenum internalFormat, int targetWidth, int targetHeight)
-{
-    // upload image to sourceTex
-    GLuint sourceTex;
-    glGenTextures(1, &sourceTex);
-    glBindTexture(GL_TEXTURE_2D, sourceTex);
-
-    if(Image::formatIsCompressed(image.format()))
-    {
-        printf("uploading scaled compressed\n");
-        //glCompressedTexImage2D(GL_TEXTURE_2D, 0, formatInternalGLEnum(image.format()), image.width(), image.height(), 0, (GLsizei)image.size(), image.data());
-    }
-    else
-    {
-        printf("uploading scaled uncompressed\n");
-        //glTexImage2D(GL_TEXTURE_2D, 0, formatInternalGLEnum(image.format()), image.width(), image.height(), 0, formatGLEnum(image.format()), GL_UNSIGNED_BYTE, image.data());
-    }
-
-    // alias targetArrayTex to targetTex
-    GLuint targetTex;
-    (void)targetArrayTex;
-    (void)internalFormat;
-    (void)zOffset;
-    glGenTextures(1, &targetTex);
-    glTextureView(targetTex, GL_TEXTURE_2D, targetArrayTex, internalFormat, 0, 1, zOffset, 1);
-
-    // create framebuffers for sourceTex and targetTex
-    GLuint sourceFramebuffer;
-    glGenFramebuffers(1, &sourceFramebuffer);
-    //glBindFramebuffer(GL_FRAMEBUFFER, sourceFramebuffer);
-    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, sourceTex, 0);
-
-    GLuint targetFramebuffer;
-    glGenFramebuffers(1, &targetFramebuffer);
-    //glBindFramebuffer(GL_FRAMEBUFFER, targetFramebuffer);
-    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, targetTex, 0);
-
-    // blit from sourceTex to targetTex
-    (void)targetWidth;
-    (void)targetHeight;
-    //glBindFramebuffer(GL_READ_FRAMEBUFFER, sourceFramebuffer);
-    //glBindFramebuffer(GL_DRAW_FRAMEBUFFER, targetFramebuffer);
-    //glBlitFramebuffer(0, 0, image.width(), image.height(), 0, 0, targetWidth, targetHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    // TODO restore old framebuffer?
-
-    // clean up
-    glDeleteTextures(1, &sourceTex);
-    glDeleteTextures(1, &targetTex);
-    glDeleteFramebuffers(1, &sourceFramebuffer);
-    glDeleteFramebuffers(1, &targetFramebuffer);
-}
-
-static void regularUpload(const Image& image, GLuint targetArrayTex, int zOffset)
-{
-    glBindTexture(GL_TEXTURE_2D_ARRAY, targetArrayTex);
-
-    if(Image::formatIsCompressed(image.format()))
-    {
-        printf("uploading regular compressed\n");
-        glCompressedTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, zOffset, image.width(), image.height(), 1, formatGLEnum(image.format()), (GLsizei)image.size(), image.data());
-    }
-    else
-    {
-        printf("uploading regular uncompressed\n");
-        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, zOffset, image.width(), image.height(), 1, formatGLEnum(image.format()), GL_UNSIGNED_BYTE, image.data());
     }
 }
 
@@ -229,17 +165,20 @@ void ModelRenderData::initTexture(const Model& model)
         maxHeight = max(maxHeight, GLsizei(image.height()));
     }
 
+    glGenTextures(1, &_textures);
+    glGenTextures(1, &_textureSizes);
+
     if(format == Image::Invalid)
     {
-        printf("WOT!\n");
+        printf("No valid textures found\n");
         return;
     }
 
-    glGenTextures(1, &_texture);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, _texture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, _textures);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, formatInternalGLEnum(format), maxWidth, maxHeight, (GLsizei)model.textures().size(), 0, GL_BGRA, GL_UNSIGNED_BYTE, nullptr);   
 
+    vector<float> textureSizesData;
     GLint zOffset = 0;
 
     for(auto& resource : model.textures())
@@ -248,25 +187,34 @@ void ModelRenderData::initTexture(const Model& model)
 
         if(!innerResource)
         {
+            textureSizesData.push_back(1.0f);
+            textureSizesData.push_back(1.0f);
+            zOffset++;
             continue;
         }
 
         auto& image = innerResource->cast<Texture>().image();
 
-        if(image.width() != maxWidth || image.height() != maxHeight)
+        if(Image::formatIsCompressed(image.format()))
         {
-            scaledUpload(image, _texture, zOffset, formatInternalGLEnum(format), maxWidth, maxHeight);
+            glCompressedTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, zOffset, image.width(), image.height(), 1, formatGLEnum(image.format()), (GLsizei)image.size(), image.data());
         }
         else
         {
-            regularUpload(image, _texture, zOffset);
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, zOffset, image.width(), image.height(), 1, formatGLEnum(image.format()), GL_UNSIGNED_BYTE, image.data());
         }
 
+        textureSizesData.push_back(float(image.width()) / float(maxWidth));
+        textureSizesData.push_back(float(image.height()) / float(maxHeight));
         zOffset++;
     }
 
-    glActiveTexture(GL_TEXTURE0);
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+
+    glBindTexture(GL_TEXTURE_1D, _textureSizes);
+    // we need to do this even if we're using texelFetch and no sampling is done
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage1D(GL_TEXTURE_1D, 0, GL_RG32F, (GLsizei)textureSizesData.size() / 2, 0, GL_RG, GL_FLOAT, textureSizesData.data());
 }
 
 void ModelRenderData::initGeometry(const Model& model)

@@ -308,10 +308,6 @@ void LandblockRenderer::initBlendTexture()
             image = texture->cast<Texture>().image();
         }
 
-        // For both the corner and edge textures, we want to use s,t > 1 to repeat emptiness to make skinnier roads
-        // This flip allows us to do this
-        image.flipVertical();
-
         if(image.width() != BLEND_ARRAY_SIZE || image.height() != BLEND_ARRAY_SIZE)
         {
             throw runtime_error("Bad terrain image size");

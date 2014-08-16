@@ -40,6 +40,9 @@ ModelRenderer::ModelRenderer()
 
     auto modelTexLocation = _program.getUniform("modelTex");
     glUniform1i(modelTexLocation, 0);
+
+    auto modelTexSizesLocation = _program.getUniform("modelTexSizes");
+    glUniform1i(modelTexSizesLocation, 1);
 }
 
 ModelRenderer::~ModelRenderer()
@@ -132,7 +135,7 @@ void ModelRenderer::renderModel(Model& model, const Mat4& projectionMat, const M
 
     auto& renderData = (ModelRenderData&)*model.renderData();
 
-    renderData.bind();
+    renderData.bind(_program);
 
     glDrawElements(GL_TRIANGLE_FAN, renderData.indexCount(), GL_UNSIGNED_SHORT, nullptr);
 }

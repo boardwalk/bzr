@@ -4,9 +4,9 @@
 #include "math/Vec2.h"
 #include "Destructable.h"
 #include "Noncopyable.h"
-#include <vector>
 
 class Model;
+class Program;
 
 class ModelRenderData : public Destructable, Noncopyable
 {
@@ -14,7 +14,7 @@ public:
     ModelRenderData(const Model& model);
     ~ModelRenderData();
 
-    void bind();
+    void bind(Program& program);
 
     GLsizei indexCount() const;
 
@@ -26,7 +26,8 @@ private:
     GLuint _vertexBuffer;
     GLuint _indexBuffer;
     GLsizei _indexCount;
-    GLuint _texture;
+    GLuint _textures;
+    GLuint _textureSizes;
 };
 
 #endif
