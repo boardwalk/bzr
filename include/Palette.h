@@ -4,7 +4,7 @@
 #include "Resource.h"
 #include <vector>
 
-class Palette : public ResourceImpl<Resource::Palette>
+class Palette : public ResourceImpl<ResourceType::Palette>
 {
 public:
     struct Color

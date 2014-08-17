@@ -7,7 +7,7 @@
 
 class Texture;
 
-class TextureLookup5 : public ResourceImpl<Resource::TextureLookup5>
+class TextureLookup5 : public ResourceImpl<ResourceType::TextureLookup5>
 {
 public:
     TextureLookup5(uint32_t id, const void* data, size_t size);

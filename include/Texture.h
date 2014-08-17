@@ -4,7 +4,7 @@
 #include "graphics/Image.h"
 #include "Resource.h"
 
-class Texture : public ResourceImpl<Resource::Texture>
+class Texture : public ResourceImpl<ResourceType::Texture>
 {
 public:
     Texture(uint32_t id, const void* data, size_t size);

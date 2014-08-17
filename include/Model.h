@@ -7,7 +7,7 @@
 #include "Resource.h"
 #include <vector>
 
-class Model : public ResourceImpl<Resource::Model>
+class Model : public ResourceImpl<ResourceType::Model>
 {
 public:
     struct Vertex

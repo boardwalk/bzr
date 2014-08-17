@@ -40,7 +40,7 @@ Texture::Texture(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 
     if(_palette)
     {
-        _image.applyPalette(_palette->cast<::Palette>());
+        _image.applyPalette(_palette->cast<Palette>());
     }
 }
 

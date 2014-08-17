@@ -6,7 +6,7 @@
 #include "Resource.h"
 #include <vector>
 
-class ModelGroup : public ResourceImpl<Resource::ModelGroup>
+class ModelGroup : public ResourceImpl<ResourceType::ModelGroup>
 {
 public:
     struct ModelInfo

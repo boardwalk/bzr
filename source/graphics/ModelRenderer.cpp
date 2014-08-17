@@ -83,11 +83,11 @@ void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 
 void ModelRenderer::renderOne(ResourcePtr& resource, const Mat4& projectionMat, const Mat4& viewMat, const Vec3& position, const Quat& rotation)
 {
-    if(resource->resourceType() == Resource::ModelGroup)
+    if(resource->resourceType() == ResourceType::ModelGroup)
     {
         renderModelGroup(resource->cast<ModelGroup>(), 0xFFFFFFFF, projectionMat, viewMat, position, rotation);
     }
-    else if(resource->resourceType() == Resource::Model)
+    else if(resource->resourceType() == ResourceType::Model)
     {
         renderModel(resource->cast<Model>(), projectionMat, viewMat, position, rotation, /*firstPass*/ true);
     }

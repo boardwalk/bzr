@@ -19,15 +19,15 @@ TextureLookup8::TextureLookup8(uint32_t id, const void* data, size_t size) : Res
     if(flags & 0x01)
     {
         uint32_t bgra = reader.read<uint32_t>();
-        ResourcePtr texture(new ::Texture(bgra));
-        ResourcePtr textureLookup5(new ::TextureLookup5(texture));
+        ResourcePtr texture(new Texture(bgra));
+        ResourcePtr textureLookup5(new TextureLookup5(texture));
         _textureLookup5 = textureLookup5;
     }
     else
     {
         auto textureId = reader.read<uint32_t>();
         _textureLookup5 = Core::get().resourceCache().get(textureId);
-        assert(_textureLookup5->resourceType() == Texture::TextureLookup5);
+        assert(_textureLookup5->resourceType() == ResourceType::TextureLookup5);
 
         auto zero = reader.read<uint32_t>();
         assert(zero == 0);
@@ -53,5 +53,5 @@ TextureLookup8::TextureLookup8(uint32_t id, const void* data, size_t size) : Res
 
 const TextureLookup5& TextureLookup8::textureLookup5() const
 {
-    return _textureLookup5->cast<::TextureLookup5>();
+    return _textureLookup5->cast<TextureLookup5>();
 }

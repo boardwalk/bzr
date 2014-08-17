@@ -3,10 +3,9 @@
 
 #include "Noncopyable.h"
 
-class Resource : Noncopyable
+struct ResourceType
 {
-public:
-    enum ResourceType
+    enum Value
     {
         Model,
         ModelGroup,
@@ -15,7 +14,11 @@ public:
         Texture,
         TextureLookup8
     };
+};
 
+class Resource : Noncopyable
+{
+public:
     Resource(uint32_t id) : _resourceId(id)
     {}
 
@@ -36,7 +39,7 @@ public:
         return (const T&)*this;
     }
 
-    virtual ResourceType resourceType() const = 0;
+    virtual ResourceType::Value resourceType() const = 0;
 
     uint32_t resourceId() const
     {
@@ -47,19 +50,19 @@ private:
     const uint32_t _resourceId;
 };
 
-template<Resource::ResourceType RT>
+template<ResourceType::Value RT>
 class ResourceImpl : public Resource
 {
 public:
     ResourceImpl(uint32_t id) : Resource(id)
     {}
 
-    Resource::ResourceType resourceType() const override
+    ResourceType::Value resourceType() const override
     {
         return RT;
     }
 
-    static const Resource::ResourceType RESOURCE_TYPE = RT;
+    static const ResourceType::Value RESOURCE_TYPE = RT;
 };
 
 typedef shared_ptr<Resource> ResourcePtr;
