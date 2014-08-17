@@ -458,3 +458,8 @@ bool Image::formatIsCompressed(Format f)
 {
     return f == DXT1 || f == DXT3 || f == DXT5;
 }
+
+bool Image::formatHasAlpha(Format f)
+{
+    return f == BGRA32 || f == A8 || f == DXT3 || f == DXT5 || f == Paletted16;
+}

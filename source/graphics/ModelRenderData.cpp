@@ -38,29 +38,6 @@ GLsizei ModelRenderData::indexCount() const
     return _indexCount;
 }
 
-static ResourcePtr getTexture(ResourcePtr resource)
-{
-    if(!resource)
-    {
-        return ResourcePtr();
-    }
-
-    switch(resource->resourceType())
-    {
-        case Resource::Texture:
-            return resource;
-
-        case Resource::TextureLookup5:
-            return getTexture(resource->cast<TextureLookup5>().texture());
-
-        case Resource::TextureLookup8:
-            return getTexture(resource->cast<TextureLookup8>().texture());
-
-        default:
-            return ResourcePtr();
-    }
-}
-
 // If texture of multiple formats are used in the same model, we have to choose a common format to convert to
 // We prefer uncompressed formats over compressed and ones with alpha over ones without
 static int formatValue(Image::Format f)
@@ -147,14 +124,7 @@ void ModelRenderData::initTexture(const Model& model)
 
     for(auto& resource : model.textures())
     {
-        auto innerResource = getTexture(resource);
-
-        if(!innerResource)
-        {
-            continue;
-        }
-
-        auto& image = innerResource->cast<Texture>().image();
+        auto& image = resource->cast<TextureLookup8>().textureLookup5().texture().image();
 
         if(formatValue(image.format()) > formatValue(format))
         {
@@ -166,14 +136,6 @@ void ModelRenderData::initTexture(const Model& model)
     }
 
     glGenTextures(1, &_textures);
-    glGenTextures(1, &_textureSizes);
-
-    if(format == Image::Invalid)
-    {
-        printf("No valid textures found\n");
-        return;
-    }
-
     glBindTexture(GL_TEXTURE_2D_ARRAY, _textures);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, formatInternalGLEnum(format), maxWidth, maxHeight, (GLsizei)model.textures().size(), 0, GL_BGRA, GL_UNSIGNED_BYTE, nullptr);
@@ -183,17 +145,7 @@ void ModelRenderData::initTexture(const Model& model)
 
     for(auto& resource : model.textures())
     {
-        auto innerResource = getTexture(resource);
-
-        if(!innerResource)
-        {
-            textureSizesData.push_back(1.0f);
-            textureSizesData.push_back(1.0f);
-            zOffset++;
-            continue;
-        }
-
-        auto& image = innerResource->cast<Texture>().image();
+        auto& image = resource->cast<TextureLookup8>().textureLookup5().texture().image();
 
         if(Image::formatIsCompressed(image.format()) && !Image::formatIsCompressed(format))
         {
@@ -219,6 +171,7 @@ void ModelRenderData::initTexture(const Model& model)
 
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 
+    glGenTextures(1, &_textureSizes);
     glBindTexture(GL_TEXTURE_1D, _textureSizes);
     // we need to do this even if we're using texelFetch and no sampling is done
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

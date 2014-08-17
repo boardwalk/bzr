@@ -43,6 +43,7 @@ public:
 
     static int formatBitsPerPixel(Format f);
     static bool formatIsCompressed(Format f);
+    static bool formatHasAlpha(Format f);
 
 private:
     Format _format;

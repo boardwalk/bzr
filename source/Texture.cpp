@@ -44,6 +44,15 @@ Texture::Texture(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
     }
 }
 
+Texture::Texture(uint32_t bgra) : ResourceImpl(0)
+{
+    // if we have a solid alpha, create as BGR
+    // this will reduce the size of our depth sort list slightly
+    auto format = (bgra >> 24 == 0xFF) ? Image::BGR24 : Image::BGRA32;
+    
+    _image.init(format, 1, 1, &bgra);
+}
+
 const Image& Texture::image() const
 {
     return _image;

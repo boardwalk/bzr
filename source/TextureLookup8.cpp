@@ -2,6 +2,8 @@
 #include "BlobReader.h"
 #include "Core.h"
 #include "ResourceCache.h"
+#include "Texture.h"
+#include "TextureLookup5.h"
 
 TextureLookup8::TextureLookup8(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 {
@@ -16,12 +18,16 @@ TextureLookup8::TextureLookup8(uint32_t id, const void* data, size_t size) : Res
 
     if(flags & 0x01)
     {
-        reader.read<uint32_t>();
+        uint32_t bgra = reader.read<uint32_t>();
+        ResourcePtr texture(new ::Texture(bgra));
+        ResourcePtr textureLookup5(new ::TextureLookup5(texture));
+        _textureLookup5 = textureLookup5;
     }
     else
     {
         auto textureId = reader.read<uint32_t>();
-        _texture = Core::get().resourceCache().get(textureId);
+        _textureLookup5 = Core::get().resourceCache().get(textureId);
+        assert(_textureLookup5->resourceType() == Texture::TextureLookup5);
 
         auto zero = reader.read<uint32_t>();
         assert(zero == 0);
@@ -45,7 +51,7 @@ TextureLookup8::TextureLookup8(uint32_t id, const void* data, size_t size) : Res
     reader.assertEnd();
 }
 
-const ResourcePtr& TextureLookup8::texture() const
+const TextureLookup5& TextureLookup8::textureLookup5() const
 {
-    return _texture;
+    return _textureLookup5->cast<::TextureLookup5>();
 }

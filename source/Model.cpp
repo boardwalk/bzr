@@ -2,6 +2,9 @@
 #include "BlobReader.h"
 #include "Core.h"
 #include "ResourceCache.h"
+#include "Texture.h"
+#include "TextureLookup5.h"
+#include "TextureLookup8.h"
 
 static void skipBSP(BlobReader&, int);
 
@@ -181,7 +184,7 @@ vector<Model::Primitive> unpackPrimitives(BlobReader& reader)
     return primitives;
 }
 
-Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
+Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _needsDepthSort(false)
 {
     BlobReader reader(data, size);
 
@@ -199,6 +202,9 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
     {
         auto textureId = reader.read<uint32_t>();
         texture = Core::get().resourceCache().get(textureId);
+
+        auto format = texture->cast<::TextureLookup8>().textureLookup5().texture().image().format();
+        _needsDepthSort = _needsDepthSort || Image::formatHasAlpha(format);
     }
 
     auto one = reader.read<uint32_t>();
@@ -267,9 +273,6 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
     }
 
     reader.assertEnd();
-
-    // TODO check whether any textures have alpha < 1
-    _needsDepthSort = true;
 }
 
 const vector<ResourcePtr>& Model::textures() const
