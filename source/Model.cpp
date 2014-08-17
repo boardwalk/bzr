@@ -204,7 +204,7 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _ne
         texture = Core::get().resourceCache().get(textureId);
 
         auto format = texture->cast<TextureLookup8>().textureLookup5().texture().image().format();
-        _needsDepthSort = _needsDepthSort || Image::formatHasAlpha(format);
+        _needsDepthSort = _needsDepthSort || ImageFormat::hasAlpha(format);
     }
 
     auto one = reader.read<uint32_t>();

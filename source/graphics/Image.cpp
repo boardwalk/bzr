@@ -221,7 +221,44 @@ static vector<uint8_t> decodeDXT5(const uint8_t* data, int width, int height)
     return result;
 }
 
-Image::Image() : _format(Invalid)
+int ImageFormat::bitsPerPixel(Value f)
+{
+    switch(f)
+    {
+        case BGR24:
+            return 24;
+        case BGRA32:
+            return 32;
+        case RGB24:
+            return 24;
+        case A8:
+            return 8;
+        case DXT1:
+            return 4;
+        case DXT3:
+            return 8;
+        case DXT5:
+            return 8;
+        case Paletted16:
+            return 16;
+        default:
+            break;
+    }
+
+    throw runtime_error("Invalid format");
+}
+
+bool ImageFormat::isCompressed(Value f)
+{
+    return f == DXT1 || f == DXT3 || f == DXT5;
+}
+
+bool ImageFormat::hasAlpha(Value f)
+{
+    return f == BGRA32 || f == A8 || f == DXT3 || f == DXT5 || f == Paletted16;
+}
+
+Image::Image() : _format(ImageFormat::Invalid)
 {}
 
 Image::Image(const Image& other)
@@ -258,7 +295,7 @@ Image& Image::operator=(Image&& other)
     return *this;
 }
 
-void Image::init(Format newFormat, int newWidth, int newHeight, const void* newData)
+void Image::init(ImageFormat::Value newFormat, int newWidth, int newHeight, const void* newData)
 {
     _format = newFormat;
     _width = newWidth;
@@ -267,36 +304,36 @@ void Image::init(Format newFormat, int newWidth, int newHeight, const void* newD
     if(newData == nullptr)
     {
         _data.clear();
-        _data.resize(_width * _height * formatBitsPerPixel(_format) / 8);
+        _data.resize(_width * _height * ImageFormat::bitsPerPixel(_format) / 8);
     }
     else
     {
-        _data.assign((const uint8_t*)newData, (const uint8_t*)newData + _width * _height * formatBitsPerPixel(_format) / 8);
+        _data.assign((const uint8_t*)newData, (const uint8_t*)newData + _width * _height * ImageFormat::bitsPerPixel(_format) / 8);
     }
 }
 
 void Image::decompress()
 {
-    if(_format == DXT1)
+    if(_format == ImageFormat::DXT1)
     {
         _data = decodeDXT1(_data.data(), _width, _height);
-        _format = BGRA32;
+        _format = ImageFormat::BGRA32;
     }
-    else if(_format == DXT3)
+    else if(_format == ImageFormat::DXT3)
     {
         _data = decodeDXT3(_data.data(), _width, _height);
-        _format = BGRA32;
+        _format = ImageFormat::BGRA32;
     }
-    else if(_format == DXT5)
+    else if(_format == ImageFormat::DXT5)
     {
         _data = decodeDXT5(_data.data(), _width, _height);
-        _format = BGRA32;
+        _format = ImageFormat::BGRA32;
     }
 }
 
 void Image::applyPalette(const Palette& palette)
 {
-    if(_format != Paletted16)
+    if(_format != ImageFormat::Paletted16)
     {
         return;
     }
@@ -323,7 +360,7 @@ void Image::applyPalette(const Palette& palette)
     }
 
     _data = move(newData);
-    _format = BGRA32;
+    _format = ImageFormat::BGRA32;
 }
 
 void Image::scale(int newWidth, int newHeight)
@@ -333,12 +370,12 @@ void Image::scale(int newWidth, int newHeight)
         return;
     }
 
-    if(formatIsCompressed(_format))
+    if(ImageFormat::isCompressed(_format))
     {
         throw runtime_error("Cannot scale compressed image");
     }
 
-    auto nchannels = formatBitsPerPixel(_format) / 8;
+    auto nchannels = ImageFormat::bitsPerPixel(_format) / 8;
 
     vector<uint8_t> newData(newWidth * newHeight * nchannels);
 
@@ -380,12 +417,12 @@ void Image::scale(int newWidth, int newHeight)
 
 void Image::flipVertical()
 {
-    if(formatIsCompressed(_format))
+    if(ImageFormat::isCompressed(_format))
     {
         throw runtime_error("Cannot flip compressed image");
     }
 
-    auto stride = _width * formatBitsPerPixel(_format) / 8;
+    auto stride = _width * ImageFormat::bitsPerPixel(_format) / 8;
 
     vector<uint8_t> rowBuf(stride);
 
@@ -402,7 +439,7 @@ void Image::fill(int value)
     memset(_data.data(), value, _data.size());
 }
 
-Image::Format Image::format() const
+ImageFormat::Value Image::format() const
 {
     return _format;
 }
@@ -425,41 +462,4 @@ size_t Image::size() const
 const void* Image::data() const
 {
     return _data.data();
-}
-
-int Image::formatBitsPerPixel(Format f)
-{
-    switch(f)
-    {
-        case BGR24:
-            return 24;
-        case BGRA32:
-            return 32;
-        case RGB24:
-            return 24;
-        case A8:
-            return 8;
-        case DXT1:
-            return 4;
-        case DXT3:
-            return 8;
-        case DXT5:
-            return 8;
-        case Paletted16:
-            return 16;
-        default:
-            break;
-    }
-
-    throw runtime_error("Invalid format");
-}
-
-bool Image::formatIsCompressed(Format f)
-{
-    return f == DXT1 || f == DXT3 || f == DXT5;
-}
-
-bool Image::formatHasAlpha(Format f)
-{
-    return f == BGRA32 || f == A8 || f == DXT3 || f == DXT5 || f == Paletted16;
 }

@@ -242,7 +242,7 @@ void LandblockRenderer::initTerrainTexture()
 
         if(LANDSCAPE_TEXTURES[i] == 0x00000000)
         {
-            image.init(Image::RGB24, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_SIZE, nullptr);
+            image.init(ImageFormat::RGB24, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_SIZE, nullptr);
             image.fill(0xFF);
         }
         else
@@ -254,15 +254,15 @@ void LandblockRenderer::initTerrainTexture()
 
         GLenum format;
 
-        if(image.format() == Image::RGB24)
+        if(image.format() == ImageFormat::RGB24)
         {
             format = GL_RGB;
         }
-        else if(image.format() == Image::BGR24)
+        else if(image.format() == ImageFormat::BGR24)
         {
             format = GL_BGR;
         }
-        else if(image.format() == Image::BGRA32)
+        else if(image.format() == ImageFormat::BGRA32)
         {
             format = GL_BGRA;
         }
@@ -295,11 +295,11 @@ void LandblockRenderer::initBlendTexture()
 
         if(BLEND_TEXTURES[i] == 0x00000000)
         {
-            image.init(Image::A8, BLEND_ARRAY_SIZE, BLEND_ARRAY_SIZE, nullptr);
+            image.init(ImageFormat::A8, BLEND_ARRAY_SIZE, BLEND_ARRAY_SIZE, nullptr);
         }
         else if(BLEND_TEXTURES[i] == 0xFFFFFFFF)
         {
-            image.init(Image::A8, BLEND_ARRAY_SIZE, BLEND_ARRAY_SIZE, nullptr);
+            image.init(ImageFormat::A8, BLEND_ARRAY_SIZE, BLEND_ARRAY_SIZE, nullptr);
             image.fill(0xFF);
         }
         else
@@ -313,7 +313,7 @@ void LandblockRenderer::initBlendTexture()
             throw runtime_error("Bad terrain image size");
         }
 
-        if(image.format() != Image::A8)
+        if(image.format() != ImageFormat::A8)
         {
             throw runtime_error("Bad terrain image format");
         }

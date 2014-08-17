@@ -40,31 +40,31 @@ GLsizei ModelRenderData::indexCount() const
 
 // If texture of multiple formats are used in the same model, we have to choose a common format to convert to
 // We prefer uncompressed formats over compressed and ones with alpha over ones without
-static int formatValue(Image::Format f)
+static int formatValue(ImageFormat::Value f)
 {
     switch(f)
     {
-        case Image::Invalid:
+        case ImageFormat::Invalid:
             return 0;
-        case Image::Paletted16:
+        case ImageFormat::Paletted16:
             // we should not have a paletted texture at this point
             assert(false);
             return 0;
-        case Image::A8:
+        case ImageFormat::A8:
             // blend textures are used in landscape and shouldn't be referenced here
             assert(false);
             return 0;
-        case Image::RGB24:
+        case ImageFormat::RGB24:
             // RGB textures are used in landscape and shouldn't be referenced here
             assert(false);
             return 0;
-        case Image::DXT1:
-        case Image::DXT3:
-        case Image::DXT5:
+        case ImageFormat::DXT1:
+        case ImageFormat::DXT3:
+        case ImageFormat::DXT5:
             return 1;
-        case Image::BGR24:
+        case ImageFormat::BGR24:
             return 2;
-        case Image::BGRA32:
+        case ImageFormat::BGRA32:
             return 3;
         default:
             // what's this?
@@ -73,19 +73,19 @@ static int formatValue(Image::Format f)
     }
 }
 
-static GLenum formatInternalGLEnum(Image::Format f)
+static GLenum formatInternalGLEnum(ImageFormat::Value f)
 {
     switch(f)
     {
-        case Image::DXT1:
+        case ImageFormat::DXT1:
             return GL_COMPRESSED_RGB_S3TC_DXT1_EXT; // Or RGBA? Hmmm.
-        case Image::DXT3:
+        case ImageFormat::DXT3:
             return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-        case Image::DXT5:
+        case ImageFormat::DXT5:
             return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-        case Image::BGR24:
+        case ImageFormat::BGR24:
             return GL_RGB8;
-        case Image::BGRA32:
+        case ImageFormat::BGRA32:
             return GL_RGBA8;
         default:
             // what's this?
@@ -94,19 +94,19 @@ static GLenum formatInternalGLEnum(Image::Format f)
     }
 }
 
-static GLenum formatGLEnum(Image::Format f)
+static GLenum formatGLEnum(ImageFormat::Value f)
 {
     switch(f)
     {
-        case Image::DXT1:
+        case ImageFormat::DXT1:
             return GL_COMPRESSED_RGB_S3TC_DXT1_EXT; // Or RGBA? Hmmm.
-        case Image::DXT3:
+        case ImageFormat::DXT3:
             return GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
-        case Image::DXT5:
+        case ImageFormat::DXT5:
             return GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-        case Image::BGR24:
+        case ImageFormat::BGR24:
             return GL_BGR;
-        case Image::BGRA32:
+        case ImageFormat::BGRA32:
             return GL_BGRA;
         default:
             // what's this?
@@ -118,7 +118,7 @@ static GLenum formatGLEnum(Image::Format f)
 void ModelRenderData::initTexture(const Model& model)
 {
     // Choose common texture format and size
-    Image::Format format = Image::Invalid;
+    auto format = ImageFormat::Invalid;
     GLsizei maxWidth = 0;
     GLsizei maxHeight = 0;
 
@@ -147,7 +147,7 @@ void ModelRenderData::initTexture(const Model& model)
     {
         auto& image = resource->cast<TextureLookup8>().textureLookup5().texture().image();
 
-        if(Image::formatIsCompressed(image.format()) && !Image::formatIsCompressed(format))
+        if(ImageFormat::isCompressed(image.format()) && !ImageFormat::isCompressed(format))
         {
             // we can't upload compressed data to an uncompressed texture
             auto uncompImage = image;
@@ -155,7 +155,7 @@ void ModelRenderData::initTexture(const Model& model)
 
             glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, zOffset, uncompImage.width(), uncompImage.height(), 1, formatGLEnum(uncompImage.format()), GL_UNSIGNED_BYTE, uncompImage.data());
         }
-        else if(Image::formatIsCompressed(image.format()))
+        else if(ImageFormat::isCompressed(image.format()))
         {
             glCompressedTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, zOffset, image.width(), image.height(), 1, formatGLEnum(image.format()), (GLsizei)image.size(), image.data());
         }

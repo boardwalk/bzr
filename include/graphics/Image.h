@@ -5,10 +5,9 @@
 
 class Palette;
 
-class Image
+struct ImageFormat
 {
-public:
-    enum Format
+    enum Value
     {
         Invalid = 0x00,
         BGR24 = 0x14,
@@ -21,13 +20,21 @@ public:
         Paletted16 = 0x65
     };
 
+    static int bitsPerPixel(Value f);
+    static bool isCompressed(Value f);
+    static bool hasAlpha(Value f);
+};
+
+class Image
+{
+public:
     Image();
     Image(const Image&);
     Image(Image&&);
     Image& operator=(const Image&);
     Image& operator=(Image&&);
 
-    void init(Format newFormat, int newWidth, int newHeight, const void* newData);
+    void init(ImageFormat::Value newFormat, int newWidth, int newHeight, const void* newData);
 
     void decompress();
     void applyPalette(const Palette& palette);
@@ -35,18 +42,14 @@ public:
     void fill(int value);
     void flipVertical();
 
-    Format format() const;
+    ImageFormat::Value format() const;
     int width() const;
     int height() const;
     size_t size() const;
     const void* data() const;
 
-    static int formatBitsPerPixel(Format f);
-    static bool formatIsCompressed(Format f);
-    static bool formatHasAlpha(Format f);
-
 private:
-    Format _format;
+    ImageFormat::Value _format;
     int _width;
     int _height;
     vector<uint8_t> _data;
