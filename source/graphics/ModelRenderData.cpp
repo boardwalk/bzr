@@ -176,7 +176,7 @@ void ModelRenderData::initTexture(const Model& model)
 
     glBindTexture(GL_TEXTURE_2D_ARRAY, _textures);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, formatInternalGLEnum(format), maxWidth, maxHeight, (GLsizei)model.textures().size(), 0, GL_BGRA, GL_UNSIGNED_BYTE, nullptr);   
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, formatInternalGLEnum(format), maxWidth, maxHeight, (GLsizei)model.textures().size(), 0, GL_BGRA, GL_UNSIGNED_BYTE, nullptr);
 
     vector<float> textureSizesData;
     GLint zOffset = 0;
@@ -195,7 +195,15 @@ void ModelRenderData::initTexture(const Model& model)
 
         auto& image = innerResource->cast<Texture>().image();
 
-        if(Image::formatIsCompressed(image.format()))
+        if(Image::formatIsCompressed(image.format()) && !Image::formatIsCompressed(format))
+        {
+            // we can't upload compressed data to an uncompressed texture
+            auto uncompImage = image;
+            uncompImage.decompress();
+
+            glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, zOffset, uncompImage.width(), uncompImage.height(), 1, formatGLEnum(uncompImage.format()), GL_UNSIGNED_BYTE, uncompImage.data());
+        }
+        else if(Image::formatIsCompressed(image.format()))
         {
             glCompressedTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, zOffset, image.width(), image.height(), 1, formatGLEnum(image.format()), (GLsizei)image.size(), image.data());
         }
