@@ -212,12 +212,12 @@ void ModelRenderData::initGeometry(const Model& model)
 
             if(vertex.texCoords.empty())
             {
-                vertexData.push_back(0.0f);
+                vertexData.push_back(1.0f);
                 vertexData.push_back(1.0f);
             }
             else
             {
-                vertexData.push_back(float(vertex.texCoords[index.texCoordIndex].x));
+                vertexData.push_back(1.0f - float(vertex.texCoords[index.texCoordIndex].x));
                 vertexData.push_back(1.0f - float(vertex.texCoords[index.texCoordIndex].y));
             }
 
