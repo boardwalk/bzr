@@ -128,60 +128,23 @@ static void skipBSP(BlobReader& reader, int treeType)
     }
 }
 
-vector<Model::Primitive> unpackPrimitives(BlobReader& reader)
+vector<TriangleStrip> unpackTriangleStrips(BlobReader& reader)
 {
-    auto numPrimitives = reader.readVarInt();
+    auto numTriangleStrips = reader.readVarInt();
 
-    vector<Model::Primitive> primitives(numPrimitives);
+    vector<TriangleStrip> triangleStrips(numTriangleStrips);
 
-    for(auto pi = 0; pi < numPrimitives; pi++)
+    for(auto i = 0; i < numTriangleStrips; i++)
     {
-        auto& primitive = primitives[pi];
+        auto& triangleStrip = triangleStrips[i];
 
-        auto primitiveNum = reader.read<uint16_t>();
-        assert(primitiveNum == pi);
+        auto triangleStripNum = reader.read<uint16_t>();
+        assert(triangleStripNum == i);
 
-        auto numIndices = reader.read<uint8_t>();
-        primitive.indices.resize(numIndices);
-
-        auto primFlags = reader.read<uint8_t>();
-        assert(primFlags == 0x0 || primFlags == 0x1 || primFlags == 0x4);
-
-        auto primFlags2 = reader.read<uint32_t>();
-        assert(primFlags2 == 0x0 || primFlags2 == 0x1 || primFlags2 == 0x2);
-
-        primitive.texIndex = reader.read<uint16_t>();
-
-        reader.read<uint16_t>();
-
-        for(auto& index : primitive.indices)
-        {
-            index.vertexIndex = reader.read<uint16_t>();
-        }
-
-        if(primFlags != 0x04)
-        {
-            for(auto& index : primitive.indices)
-            {
-                index.texCoordIndex = reader.read<uint8_t>();
-            }
-        }
-        else
-        {
-            // This is some sort of lighting/partitioning poly, don't render it
-            primitive.indices.clear();
-        }
-
-        if(primFlags2 == 0x02)
-        {
-            for(auto pvi = 0; pvi < numIndices; pvi++)
-            {
-                reader.read<uint8_t>();
-            }
-        }
+        triangleStrip.read(reader);
     }
 
-    return primitives;
+    return triangleStrips;
 }
 
 Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _needsDepthSort(false)
@@ -223,22 +186,7 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _ne
         auto vertexNum = reader.read<uint16_t>();
         assert(vertexNum == vi);
 
-        auto numTexCoords = reader.read<uint16_t>();
-        vertex.texCoords.resize(numTexCoords);
-
-        vertex.position.x = reader.read<float>();
-        vertex.position.y = reader.read<float>();
-        vertex.position.z = reader.read<float>();
-
-        vertex.normal.x = reader.read<float>();
-        vertex.normal.y = reader.read<float>();
-        vertex.normal.z = reader.read<float>();
-
-        for(auto& texCoord : vertex.texCoords)
-        {
-            texCoord.x = reader.read<float>();
-            texCoord.y = reader.read<float>();
-        }
+        vertex.read(reader);
     }
 
     if(flags == 0x2 || flags == 0xA)
@@ -250,7 +198,7 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _ne
 
     if(flags & 0x1)
     {
-        unpackPrimitives(reader);
+        unpackTriangleStrips(reader);
         skipBSP(reader, 1);
     }
 
@@ -263,7 +211,7 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _ne
 
     if(flags & 0x2)
     {
-        _primitives = unpackPrimitives(reader);
+        _triangleStrips = unpackTriangleStrips(reader);
         skipBSP(reader, 0);
     }
 
@@ -280,14 +228,14 @@ const vector<ResourcePtr>& Model::textures() const
     return _textures;
 }
 
-const vector<Model::Vertex>& Model::vertices() const
+const vector<Vertex>& Model::vertices() const
 {
     return _vertices;
 }
 
-const vector<Model::Primitive>& Model::primitives() const
+const vector<TriangleStrip>& Model::triangleStrips() const
 {
-    return _primitives;
+    return _triangleStrips;
 }
 
 bool Model::needsDepthSort() const

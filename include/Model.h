@@ -5,41 +5,18 @@
 #include "math/Vec3.h"
 #include "Destructable.h"
 #include "Resource.h"
+#include "Vertex.h"
+#include "TriangleStrip.h"
 #include <vector>
 
 class Model : public ResourceImpl<ResourceType::Model>
 {
 public:
-    struct Vertex
-    {
-        Vec3 position;
-        Vec3 normal;
-        vector<Vec2> texCoords;
-    };
-
-    struct Index
-    {
-        Index() : vertexIndex(0), texCoordIndex(0)
-        {}
-
-        int vertexIndex;
-        int texCoordIndex;
-    };
-
-    struct Primitive
-    {
-        Primitive() : texIndex(0)
-        {}
-
-        int texIndex;
-        vector<Index> indices;
-    };
-
     Model(uint32_t id, const void* data, size_t size);
 
     const vector<ResourcePtr>& textures() const;
     const vector<Vertex>& vertices() const;
-    const vector<Primitive>& primitives() const;
+    const vector<TriangleStrip>& triangleStrips() const;
 
     // If true, the model has transparent or translucent elements and must be depth sorted before rendering
     bool needsDepthSort() const;
@@ -49,7 +26,7 @@ public:
 private:
     vector<ResourcePtr> _textures;
     vector<Vertex> _vertices;
-    vector<Primitive> _primitives;
+    vector<TriangleStrip> _triangleStrips;
     bool _needsDepthSort;
 
     unique_ptr<Destructable> _renderData;

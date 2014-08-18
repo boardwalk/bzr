@@ -189,14 +189,14 @@ void ModelRenderData::initGeometry(const Model& model)
     vector<float> vertexData;
     vector<uint16_t> indexData;
 
-    for(auto& primitive : model.primitives())
+    for(auto& triangleStrip : model.triangleStrips())
     {
         if(!indexData.empty())
         {
             indexData.push_back(0xFFFF);
         }
         
-        for(auto& index : primitive.indices)
+        for(auto& index : triangleStrip.indices)
         {
             indexData.push_back(uint16_t(vertexData.size() / COMPONENTS_PER_VERTEX));
 
@@ -221,13 +221,13 @@ void ModelRenderData::initGeometry(const Model& model)
                 vertexData.push_back(1.0f - float(vertex.texCoords[index.texCoordIndex].y));
             }
 
-            if(primitive.texIndex == 0xFFFF)
+            if(triangleStrip.texIndex == 0xFFFF)
             {
                 vertexData.push_back(0.0f);
             }
             else
             {
-                vertexData.push_back(float(primitive.texIndex));
+                vertexData.push_back(float(triangleStrip.texIndex));
             }
         }
     }
