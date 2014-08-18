@@ -36,6 +36,7 @@ public:
 
     const RawData& rawData() const;
     const vector<Object>& objects() const;
+    const vector<Structure>& structures() const;
 
     const uint16_t* offsetMap() const;
     double offsetMapBase() const;

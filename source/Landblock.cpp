@@ -282,6 +282,11 @@ const vector<Object>& Landblock::objects() const
     return _objects;
 }
 
+const vector<Structure>& Landblock::structures() const
+{
+    return _structures;
+}
+
 const uint16_t* Landblock::offsetMap() const
 {
     return _offsetMap.data();

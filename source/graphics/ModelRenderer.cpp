@@ -64,11 +64,22 @@ void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
         auto dx = it->first.x() - landblockManager.center().x();
         auto dy = it->first.y() - landblockManager.center().y();
 
-        Vec3 landblockPosition(dx * 192.0, dy * 192.0, 0.0);
+        auto landblockPosition = Vec3(dx * 192.0, dy * 192.0, 0.0);
 
         for(auto& object : it->second.objects())
         {
             renderOne(const_cast<ResourcePtr&>(object.resource), projectionMat, viewMat, landblockPosition + object.position, object.rotation);
+        }
+
+        for(auto& structure : it->second.structures())
+        {
+            // TODO apply structure rotation
+            auto structurePosition = landblockPosition + structure.position();
+
+            for(auto& object : structure.objects())
+            {
+                renderOne(const_cast<ResourcePtr&>(object.resource), projectionMat, viewMat, structurePosition + object.position, object.rotation);
+            }
         }
     }
 

@@ -35,13 +35,15 @@ Structure::Structure(const void* data, size_t size)
     _geometry = Core::get().resourceCache().get(0x0D000000 | geometryId);
 
     reader.read<uint16_t>(); // structure index (resourceId & 0x0000FFFF)
-    reader.read<float>(); // px
-    reader.read<float>(); // py
-    reader.read<float>(); // pz
-    reader.read<float>(); // rw
-    reader.read<float>(); // rx
-    reader.read<float>(); // ry
-    reader.read<float>(); // rz
+
+    _position.x = reader.read<float>();
+    _position.y = reader.read<float>();
+    _position.z = reader.read<float>();
+
+    _rotation.w = reader.read<float>();
+    _rotation.x = reader.read<float>();
+    _rotation.y = reader.read<float>();
+    _rotation.z = reader.read<float>();
 
     for(auto ci = 0u; ci < numConnections; ci++)
     {
@@ -59,17 +61,21 @@ Structure::Structure(const void* data, size_t size)
     if(flags & 2)
     {
         auto numObjects = reader.read<uint32_t>();
-        
-        for(auto oi = 0u; oi < numObjects; oi++)
+        _objects.resize(numObjects);
+
+        for(auto& object : _objects)
         {
-            reader.read<uint32_t>(); // model id
-            reader.read<float>(); // px
-            reader.read<float>(); // py
-            reader.read<float>(); // pz
-            reader.read<float>(); // rw
-            reader.read<float>(); // rx
-            reader.read<float>(); // ry
-            reader.read<float>(); // rz
+            auto modelId = reader.read<uint32_t>();
+            object.resource = Core::get().resourceCache().get(modelId);
+
+            object.position.x = reader.read<float>();
+            object.position.y = reader.read<float>();
+            object.position.z = reader.read<float>();
+
+            object.rotation.w = reader.read<float>();
+            object.rotation.x = reader.read<float>();
+            object.rotation.y = reader.read<float>();
+            object.rotation.z = reader.read<float>();
         }
     }
 
@@ -87,6 +93,16 @@ Structure::Structure(Structure&& other)
     _textures = move(other._textures);
     _objects = move(other._objects);
     _geometry = move(other._geometry);
+}
+
+const Vec3& Structure::position() const
+{
+    return _position;
+}
+
+const Quat& Structure::rotation() const
+{
+    return _rotation;
 }
 
 const vector<ResourcePtr>& Structure::textures() const
