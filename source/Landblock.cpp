@@ -277,7 +277,7 @@ const Landblock::RawData& Landblock::rawData() const
     return _rawData;
 }
 
-const vector<Landblock::Object>& Landblock::objects() const
+const vector<Object>& Landblock::objects() const
 {
     return _objects;
 }
@@ -318,14 +318,28 @@ unique_ptr<Destructable>& Landblock::renderData()
 
 void Landblock::initObjects()
 {
-    auto blob = Core::get().cellDat().read(_rawData.fileId - 1); // xxyyFFFF => xxyyFFFE
+    auto baseFileId = _rawData.fileId & 0xFFFF0000;
+
+    auto blob = Core::get().cellDat().read(baseFileId | 0xFFFE);
 
     BlobReader reader(blob.data(), blob.size());
 
     auto fid = reader.read<uint32_t>();
     assert(fid == _rawData.fileId - 1);
 
-    reader.read<uint32_t>();
+    auto numStructures = reader.read<uint32_t>();
+
+    for(auto si = 0u; si < numStructures; si++)
+    {
+        auto structBlob = Core::get().cellDat().read(baseFileId | (0x0100 + si));
+
+        if(structBlob.empty())
+        {
+            throw runtime_error("Structure not found");
+        }
+
+        _structures.emplace_back(structBlob.data(), structBlob.size());
+    }
 
     auto numObjects = reader.read<uint16_t>();
     _objects.resize(numObjects);

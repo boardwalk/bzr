@@ -12,7 +12,8 @@ struct ResourceType
         Palette,
         TextureLookup5,
         Texture,
-        TextureLookup8
+        TextureLookup8,
+        StructureGeom
     };
 };
 

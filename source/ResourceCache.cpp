@@ -4,6 +4,7 @@
 #include "Palette.h"
 #include "Model.h"
 #include "ModelGroup.h"
+#include "StructureGeom.h"
 #include "Texture.h"
 #include "TextureLookup5.h"
 #include "TextureLookup8.h"
@@ -36,6 +37,8 @@ static Resource* loadResource(uint32_t resourceId)
             return new Texture(resourceId, data.data(), data.size());
         case 0x08:
             return new TextureLookup8(resourceId, data.data(), data.size());
+        case 0x0D:
+            return new StructureGeom(resourceId, data.data(), data.size());
         default:
             throw runtime_error("Resource type not supported");
     }

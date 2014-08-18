@@ -1,12 +1,10 @@
 #ifndef BZR_LANDBLOCK_H
 #define BZR_LANDBLOCK_H
 
-#include "math/Quat.h"
-#include "math/Vec3.h"
 #include "Destructable.h"
 #include "LandblockId.h"
 #include "Noncopyable.h"
-#include "Resource.h"
+#include "Structure.h"
 #include <vector>
 
 class Landblock : Noncopyable
@@ -25,13 +23,6 @@ public:
         uint8_t heights[GRID_SIZE][GRID_SIZE];
         uint8_t pad;
     });
-
-    struct Object
-    {
-        ResourcePtr resource;
-        Vec3 position;
-        Quat rotation;
-    };
 
     Landblock(const void* data, size_t length);
     Landblock(Landblock&& other);
@@ -61,6 +52,7 @@ private:
 
     RawData _rawData;
     vector<Object> _objects;
+    vector<Structure> _structures;
 
     vector<uint16_t> _offsetMap;
     double _offsetMapBase;
