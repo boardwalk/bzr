@@ -10,10 +10,7 @@ public:
     template<class T>
     T read()
     {
-        if(_position + sizeof(T) > _size)
-        {
-            throw runtime_error("Read overrun in blob");
-        }
+        assertRemaining(sizeof(T));
 
         auto result = *(const T*)((const uint8_t*)_data + _position);
 
@@ -37,10 +34,7 @@ public:
     template<class T>
     const T* readPointer(size_t count = 1)
     {
-        if(_position + sizeof(T) * count > _size)
-        {
-            throw runtime_error("Read overrun in blob");
-        }
+        assertRemaining(sizeof(T) * count);
 
         auto result = (const T*)((const uint8_t*)_data + _position);
 
@@ -49,7 +43,7 @@ public:
         return result;
     }
 
-    void assertEnd()
+    void assertEnd() const
     {
         if(_position < _size)
         {
@@ -58,6 +52,14 @@ public:
     }
 
 private:
+    void assertRemaining(size_t numBytes) const
+    {
+        if(_position + numBytes > _size)
+        {
+            throw runtime_error("Read overrun in blob");
+        }
+    }
+
     const void* _data;
     size_t _size;
     size_t _position;
