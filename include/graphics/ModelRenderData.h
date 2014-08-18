@@ -14,7 +14,7 @@ public:
     ModelRenderData(const Model& model);
     ~ModelRenderData();
 
-    void bind(Program& program);
+    void bind();
 
     GLsizei indexCount() const;
 

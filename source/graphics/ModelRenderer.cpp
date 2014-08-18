@@ -135,7 +135,7 @@ void ModelRenderer::renderModel(Model& model, const Mat4& projectionMat, const M
 
     auto& renderData = (ModelRenderData&)*model.renderData();
 
-    renderData.bind(_program);
+    renderData.bind();
 
     glDrawElements(GL_TRIANGLE_FAN, renderData.indexCount(), GL_UNSIGNED_SHORT, nullptr);
 }

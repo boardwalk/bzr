@@ -22,7 +22,7 @@ ModelRenderData::~ModelRenderData()
     glDeleteTextures(1, &_textureSizes);
 }
 
-void ModelRenderData::bind(Program& program)
+void ModelRenderData::bind()
 {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, _textures);
