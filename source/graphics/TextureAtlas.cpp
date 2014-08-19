@@ -90,8 +90,6 @@ void TextureAtlas::generate()
 
     GLsizei height = y + rowHeight;
 
-    printf("Uploading texture atlas with dimensions %d x %d, %lu textures\n", width, height, _textures.size());
-
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, _atlas);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -144,13 +142,9 @@ void TextureAtlas::generate()
     // TODO Generate our own mipmaps
     glGenerateMipmap(GL_TEXTURE_2D);
 
-    printf("Uploading texture atlas TOC\n");
-
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_1D, _atlasToc);
     // we need to do this even if we're using texelFetch and no sampling is done
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, (GLsizei)(atlasTocData.size() / 4), 0, GL_RGBA, GL_FLOAT, atlasTocData.data());
-
-    printf("All done with texture atlas\n");
 }
