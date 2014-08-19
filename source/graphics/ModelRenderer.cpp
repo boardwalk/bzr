@@ -59,19 +59,19 @@ void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
     // first pass, render solid objects and collect objects that need depth sorting
     _depthSortList.clear();
 
-    for(auto it = landblockManager.begin(); it != landblockManager.end(); ++it)
+    for(auto& pair : landblockManager)
     {
-        auto dx = it->first.x() - landblockManager.center().x();
-        auto dy = it->first.y() - landblockManager.center().y();
+        auto dx = pair.first.x() - landblockManager.center().x();
+        auto dy = pair.first.y() - landblockManager.center().y();
 
         auto landblockPosition = Vec3(dx * 192.0, dy * 192.0, 0.0);
 
-        for(auto& object : it->second.objects())
+        for(auto& object : pair.second.objects())
         {
             renderOne(const_cast<ResourcePtr&>(object.resource), projectionMat, viewMat, landblockPosition + object.position, object.rotation);
         }
 
-        for(auto& structure : it->second.structures())
+        for(auto& structure : pair.second.structures())
         {
             // TODO apply structure rotation
             auto structurePosition = landblockPosition + structure.position();

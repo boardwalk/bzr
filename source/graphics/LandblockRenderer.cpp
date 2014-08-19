@@ -156,10 +156,10 @@ void LandblockRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
     auto viewLightPosition = viewMat * _lightPosition;
     glUniform3f(_program.getUniform("lightPosition"), GLfloat(viewLightPosition.x), GLfloat(viewLightPosition.y), GLfloat(viewLightPosition.z));
 
-    for(auto it = landblockManager.begin(); it != landblockManager.end(); ++it)
+    for(auto& pair : landblockManager)
     {
-        auto dx = it->first.x() - landblockManager.center().x();
-        auto dy = it->first.y() - landblockManager.center().y();
+        auto dx = pair.first.x() - landblockManager.center().x();
+        auto dy = pair.first.y() - landblockManager.center().y();
 
         Mat4 modelMat;
         modelMat.makeTranslation(Vec3(dx * 192.0, dy * 192.0, 0.0));
@@ -172,11 +172,11 @@ void LandblockRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
         loadMat4ToUniform(modelViewMat, _program.getUniform("modelViewMatrix"));
         loadMat4ToUniform(modelViewProjectionMat, _program.getUniform("modelViewProjectionMatrix"));
 
-        auto& renderData = it->second.renderData();
+        auto& renderData = pair.second.renderData();
 
         if(!renderData)
         {
-            renderData.reset(new LandblockRenderData(it->second));
+            renderData.reset(new LandblockRenderData(pair.second));
         }
 
         auto& landblockRenderData = *(LandblockRenderData*)renderData.get();
