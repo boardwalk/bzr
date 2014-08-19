@@ -1,5 +1,5 @@
 #include "graphics/ModelRenderer.h"
-#include "graphics/ModelRenderData.h"
+#include "graphics/MeshRenderData.h"
 #include "graphics/util.h"
 #include "math/Mat4.h"
 #include "Camera.h"
@@ -74,7 +74,7 @@ void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
         for(auto& structure : pair.second.structures())
         {
             // TODO apply structure rotation
-            auto structurePosition = landblockPosition + structure.position();
+            auto structurePosition = structure.rotation() * landblockPosition + structure.position();
 
             for(auto& object : structure.objects())
             {
@@ -141,10 +141,10 @@ void ModelRenderer::renderModel(Model& model, const Mat4& projectionMat, const M
 
     if(!model.renderData())
     {
-        model.renderData().reset(new ModelRenderData(model));
+        model.renderData().reset(new MeshRenderData(model));
     }
 
-    auto& renderData = (ModelRenderData&)*model.renderData();
+    auto& renderData = (MeshRenderData&)*model.renderData();
 
     renderData.bind();
 

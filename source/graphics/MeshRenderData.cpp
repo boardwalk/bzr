@@ -1,19 +1,27 @@
-#include "graphics/ModelRenderData.h"
+#include "graphics/MeshRenderData.h"
 #include "graphics/Program.h"
 #include "Model.h"
+#include "Structure.h"
+#include "StructureGeom.h"
 #include "Texture.h"
 #include "TextureLookup5.h"
 #include "TextureLookup8.h"
 #include <algorithm>
 #include <vector>
 
-ModelRenderData::ModelRenderData(const Model& model)
+MeshRenderData::MeshRenderData(const Model& model)
 {
-    initTexture(model);
-    initGeometry(model);
+    initTexture(model.textures());
+    initGeometry(model.vertices(), model.triangleStrips());
 }
 
-ModelRenderData::~ModelRenderData()
+MeshRenderData::MeshRenderData(const Structure& structure)
+{
+    initTexture(structure.textures());
+    initGeometry(structure.geometry().vertices(), structure.geometry().triangleStrips());
+}
+
+MeshRenderData::~MeshRenderData()
 {
     glDeleteVertexArrays(1, &_vertexArray);
     glDeleteBuffers(1, &_vertexBuffer);
@@ -22,7 +30,7 @@ ModelRenderData::~ModelRenderData()
     glDeleteTextures(1, &_textureSizes);
 }
 
-void ModelRenderData::bind()
+void MeshRenderData::bind()
 {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D_ARRAY, _textures);
@@ -33,7 +41,7 @@ void ModelRenderData::bind()
     glBindVertexArray(_vertexArray);
 }
 
-GLsizei ModelRenderData::indexCount() const
+GLsizei MeshRenderData::indexCount() const
 {
     return _indexCount;
 }
@@ -115,14 +123,14 @@ static GLenum formatGLEnum(ImageFormat::Value f)
     }
 }
 
-void ModelRenderData::initTexture(const Model& model)
+void MeshRenderData::initTexture(const vector<ResourcePtr>& textures)
 {
     // Choose common texture format and size
     auto format = ImageFormat::Invalid;
     GLsizei maxWidth = 0;
     GLsizei maxHeight = 0;
 
-    for(auto& resource : model.textures())
+    for(auto& resource : textures)
     {
         auto& image = resource->cast<TextureLookup8>().textureLookup5().texture().image();
 
@@ -138,12 +146,12 @@ void ModelRenderData::initTexture(const Model& model)
     glGenTextures(1, &_textures);
     glBindTexture(GL_TEXTURE_2D_ARRAY, _textures);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, formatInternalGLEnum(format), maxWidth, maxHeight, (GLsizei)model.textures().size(), 0, GL_BGRA, GL_UNSIGNED_BYTE, nullptr);
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, formatInternalGLEnum(format), maxWidth, maxHeight, (GLsizei)textures.size(), 0, GL_BGRA, GL_UNSIGNED_BYTE, nullptr);
 
     vector<float> textureSizesData;
     GLint zOffset = 0;
 
-    for(auto& resource : model.textures())
+    for(auto& resource : textures)
     {
         auto& image = resource->cast<TextureLookup8>().textureLookup5().texture().image();
 
@@ -178,7 +186,7 @@ void ModelRenderData::initTexture(const Model& model)
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RG32F, (GLsizei)textureSizesData.size() / 2, 0, GL_RG, GL_FLOAT, textureSizesData.data());
 }
 
-void ModelRenderData::initGeometry(const Model& model)
+void MeshRenderData::initGeometry(const vector<Vertex>& vertices, const vector<TriangleStrip>& triangleStrips)
 {
     // vx, vy, vz, nx, ny, nz, s, t, p
     static const int COMPONENTS_PER_VERTEX = 9;
@@ -189,7 +197,7 @@ void ModelRenderData::initGeometry(const Model& model)
     vector<float> vertexData;
     vector<uint16_t> indexData;
 
-    for(auto& triangleStrip : model.triangleStrips())
+    for(auto& triangleStrip : triangleStrips)
     {
         if(!indexData.empty())
         {
@@ -200,7 +208,7 @@ void ModelRenderData::initGeometry(const Model& model)
         {
             indexData.push_back(uint16_t(vertexData.size() / COMPONENTS_PER_VERTEX));
 
-            auto& vertex = model.vertices()[index.vertexIndex];
+            auto& vertex = vertices[index.vertexIndex];
 
             vertexData.push_back(float(vertex.position.x));
             vertexData.push_back(float(vertex.position.y));

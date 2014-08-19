@@ -1,5 +1,5 @@
-#ifndef BZR_GUIRENDERER_H
-#define BZR_GUIRENDERER_H
+#ifndef BZR_GRAPHICS_GUIRENDERER_H
+#define BZR_GRAPHICS_GUIRENDERER_H
 
 #include "Noncopyable.h"
 

@@ -1,5 +1,5 @@
-#ifndef BZR_MODELRENDERER_H
-#define BZR_MODELRENDERER_H
+#ifndef BZR_GRAPHICS_MODELRENDERER_H
+#define BZR_GRAPHICS_MODELRENDERER_H
 
 #include "graphics/Program.h"
 #include "math/Quat.h"
