@@ -12,6 +12,7 @@ class LandblockRenderer;
 class ModelRenderer;
 class SkyRenderer;
 class StructureRenderer;
+class TextureAtlas;
 
 class Renderer : Noncopyable
 {
@@ -20,6 +21,8 @@ public:
     ~Renderer();
 
     void render(double interp);
+
+    TextureAtlas& textureAtlas();
 
 private:
     void createWindow();
@@ -46,6 +49,7 @@ private:
     GLuint _framebuffer;
 #endif
 
+    unique_ptr<TextureAtlas> _textureAtlas;
     unique_ptr<GuiRenderer> _guiRenderer;
     unique_ptr<SkyRenderer> _skyRenderer;
     unique_ptr<LandblockRenderer> _landblockRenderer;

@@ -4,12 +4,13 @@ in vec3 fragTexCoord;
 
 out vec4 fragColor;
 
-uniform sampler2DArray modelTex;
-uniform sampler1D modelTexSizes;
+uniform sampler2D atlas;
+uniform sampler1D atlasToc;
 
 void main()
 {
-    vec4 texSize = texelFetch(modelTexSizes, int(fragTexCoord.p), 0);
-    vec3 scaledFragTexCoord = vec3((1.0 - mod(fragTexCoord.st, 1.0)) * texSize.st, fragTexCoord.p);
-    fragColor = texture(modelTex, scaledFragTexCoord);
+    // stpq -- st, normalized lower left; pq, normalized width and height
+    vec4 tileExtents = texelFetch(atlasToc, int(fragTexCoord.p), 0);
+    vec2 scaledFragTexCoord = tileExtents.st + mod(fragTexCoord.st, 1.0) * tileExtents.pq;
+    fragColor = texture(atlas, scaledFragTexCoord);
 }

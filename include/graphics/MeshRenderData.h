@@ -23,15 +23,12 @@ public:
     GLsizei indexCount() const;
 
 private:
-    void initTexture(const vector<ResourcePtr>& textures);
-    void initGeometry(const vector<Vertex>& vertices, const vector<TriangleStrip>& triangleStrips);
+    void initGeometry(const vector<ResourcePtr>& textures, const vector<Vertex>& vertices, const vector<TriangleStrip>& triangleStrips);
     
     GLuint _vertexArray;
     GLuint _vertexBuffer;
     GLuint _indexBuffer;
     GLsizei _indexCount;
-    GLuint _textures;
-    GLuint _textureSizes;
 };
 
 #endif

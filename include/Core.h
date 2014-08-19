@@ -21,6 +21,9 @@ public:
     ResourceCache& resourceCache();
     LandblockManager& landblockManager();
     Camera& camera();
+#ifndef HEADLESS
+    Renderer& renderer();
+#endif
 
 private:
     Core();

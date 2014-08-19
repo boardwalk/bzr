@@ -1,5 +1,7 @@
 #include "graphics/ModelRenderer.h"
 #include "graphics/MeshRenderData.h"
+#include "graphics/Renderer.h"
+#include "graphics/TextureAtlas.h"
 #include "graphics/util.h"
 #include "math/Mat4.h"
 #include "Camera.h"
@@ -7,7 +9,6 @@
 #include "LandblockManager.h"
 #include "Model.h"
 #include "ModelGroup.h"
-#include "ResourceCache.h"
 #include <algorithm>
 
 #include "graphics/shaders/ModelVertexShader.h"
@@ -38,11 +39,11 @@ ModelRenderer::ModelRenderer()
 
     _program.use();
 
-    auto modelTexLocation = _program.getUniform("modelTex");
-    glUniform1i(modelTexLocation, 0);
+    auto atlasLocation = _program.getUniform("atlas");
+    glUniform1i(atlasLocation, 0);
 
-    auto modelTexSizesLocation = _program.getUniform("modelTexSizes");
-    glUniform1i(modelTexSizesLocation, 1);
+    auto atlasTocLocation = _program.getUniform("atlasToc");
+    glUniform1i(atlasTocLocation, 1);
 }
 
 ModelRenderer::~ModelRenderer()
@@ -53,6 +54,8 @@ ModelRenderer::~ModelRenderer()
 void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 {
     _program.use();
+
+    Core::get().renderer().textureAtlas().bind();
 
     auto& landblockManager = Core::get().landblockManager();
 

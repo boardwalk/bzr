@@ -4,6 +4,7 @@
 #include "graphics/ModelRenderer.h"
 #include "graphics/SkyRenderer.h"
 #include "graphics/StructureRenderer.h"
+#include "graphics/TextureAtlas.h"
 #include "graphics/util.h"
 #include "math/Mat3.h"
 #include "math/Vec3.h"
@@ -81,6 +82,7 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    _textureAtlas.reset(new TextureAtlas());
     _guiRenderer.reset(new GuiRenderer());
     _skyRenderer.reset(new SkyRenderer());
     _landblockRenderer.reset(new LandblockRenderer());
@@ -99,6 +101,7 @@ Renderer::~Renderer()
     _structureRenderer.reset();
     _skyRenderer.reset();
     _guiRenderer.reset();
+    _textureAtlas.reset();
 
 #ifdef OCULUSVR
     cleanupOVR();
@@ -149,6 +152,11 @@ void Renderer::render(double interp)
     _guiRenderer->render();
 
     SDL_GL_SwapWindow(_window);
+}
+
+TextureAtlas& Renderer::textureAtlas()
+{
+    return *_textureAtlas;
 }
 
 void Renderer::createWindow()

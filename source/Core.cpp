@@ -61,6 +61,13 @@ Camera& Core::camera()
     return *_camera;
 }
 
+#ifndef HEADLESS
+Renderer& Core::renderer()
+{
+    return *_renderer;
+}
+#endif
+
 Core::Core() : _done(false), _config(nullptr)
 {}
 
