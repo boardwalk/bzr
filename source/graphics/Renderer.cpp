@@ -3,6 +3,7 @@
 #include "graphics/LandblockRenderer.h"
 #include "graphics/ModelRenderer.h"
 #include "graphics/SkyRenderer.h"
+#include "graphics/StructureRenderer.h"
 #include "graphics/util.h"
 #include "math/Mat3.h"
 #include "math/Vec3.h"
@@ -83,6 +84,7 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     _guiRenderer.reset(new GuiRenderer());
     _skyRenderer.reset(new SkyRenderer());
     _landblockRenderer.reset(new LandblockRenderer());
+    _structureRenderer.reset(new StructureRenderer());
     _modelRenderer.reset(new ModelRenderer());
 
     _landblockRenderer->setLightPosition(_skyRenderer->sunVector() * 1000.0);
@@ -94,6 +96,7 @@ Renderer::~Renderer()
 {
     _modelRenderer.reset();
     _landblockRenderer.reset();
+    _structureRenderer.reset();
     _skyRenderer.reset();
     _guiRenderer.reset();
 
@@ -141,6 +144,7 @@ void Renderer::render(double interp)
 
     _skyRenderer->render();
     _landblockRenderer->render(projectionMat, viewMat);
+    _structureRenderer->render(projectionMat, viewMat);
     _modelRenderer->render(projectionMat, viewMat);
     _guiRenderer->render();
 
@@ -389,6 +393,7 @@ void Renderer::renderOVR(double interp)
 
         _skyRenderer->render();
         _landblockRenderer->render(projectionMat, viewMat);
+        _structureRenderer->render(projectionMat, viewMat);
         _modelRenderer->render(projectionMat, viewMat);
         _guiRenderer->render();
     }

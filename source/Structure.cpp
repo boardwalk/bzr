@@ -119,3 +119,8 @@ const StructureGeom& Structure::geometry() const
 {
     return _geometry->cast<StructureGeom>();
 }
+
+unique_ptr<Destructable>& Structure::renderData()
+{
+    return _renderData;
+}

@@ -1,6 +1,7 @@
 #ifndef BZR_STRUCTURE_H
 #define BZR_STRUCTURE_H
 
+#include "Destructable.h"
 #include "Noncopyable.h"
 #include "Object.h"
 #include <vector>
@@ -19,12 +20,15 @@ public:
     const vector<Object>& objects() const;
     const StructureGeom& geometry() const;
 
+    unique_ptr<Destructable>& renderData();
+
 private:
     Vec3 _position;
     Quat _rotation;
     vector<ResourcePtr> _textures;
     vector<Object> _objects;
     ResourcePtr _geometry;
+    unique_ptr<Destructable> _renderData;
 };
 
 #endif

@@ -8,9 +8,10 @@
 #endif
 
 class GuiRenderer;
-class SkyRenderer;
 class LandblockRenderer;
 class ModelRenderer;
+class SkyRenderer;
+class StructureRenderer;
 
 class Renderer : Noncopyable
 {
@@ -48,6 +49,7 @@ private:
     unique_ptr<GuiRenderer> _guiRenderer;
     unique_ptr<SkyRenderer> _skyRenderer;
     unique_ptr<LandblockRenderer> _landblockRenderer;
+    unique_ptr<StructureRenderer> _structureRenderer;
     unique_ptr<ModelRenderer> _modelRenderer;
 };
 

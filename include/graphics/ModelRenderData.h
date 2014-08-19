@@ -1,12 +1,10 @@
 #ifndef BZR_MODELRENDERDATA_H
 #define BZR_MODELRENDERDATA_H
 
-#include "math/Vec2.h"
 #include "Destructable.h"
 #include "Noncopyable.h"
 
 class Model;
-class Program;
 
 class ModelRenderData : public Destructable, Noncopyable
 {
