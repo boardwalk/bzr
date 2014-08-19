@@ -11,6 +11,6 @@ void main()
 {
     // stpq -- st, normalized lower left; pq, normalized width and height
     vec4 tileExtents = texelFetch(atlasToc, int(fragTexCoord.p), 0);
-    vec2 scaledFragTexCoord = tileExtents.st + mod(fragTexCoord.st, 1.0) * tileExtents.pq;
+    vec2 scaledFragTexCoord = tileExtents.st + (vec2(1.0) - mod(fragTexCoord.st, 1.0)) * tileExtents.pq;
     fragColor = texture(atlas, scaledFragTexCoord);
 }

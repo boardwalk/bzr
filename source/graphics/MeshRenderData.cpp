@@ -86,7 +86,7 @@ void MeshRenderData::initGeometry(const vector<ResourcePtr>& textures, const vec
                 vertexData.push_back(1.0f - float(vertex.texCoords[index.texCoordIndex].y));
             }
 
-            assert(triangleStrip.texIndex < textureIndices.size());
+            assert((size_t)triangleStrip.texIndex < textureIndices.size());
             vertexData.push_back((float)textureIndices[triangleStrip.texIndex]);
         }
     }

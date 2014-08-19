@@ -53,17 +53,42 @@ void TextureAtlas::bind()
 
 void TextureAtlas::generate()
 {
+    GLint maxSize;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxSize);
+
     // TODO Look at using bin packing algorithm to pack textures in tighter
+    GLint x = 0;
+    GLint y = 0;
+    GLsizei rowHeight = 0;
     GLsizei width = 0;
-    GLsizei height = 0;
 
     for(auto& pair : _textures)
     {
         auto& image = pair.second.resource->cast<TextureLookup8>().textureLookup5().texture().image();
 
-        width += image.width();
-        height = max(height, image.height());
+        // start new row when we exceed the maximum width
+        if(x + image.width() > maxSize)
+        {
+            x = 0;
+            y += rowHeight;
+            rowHeight = 0;
+        }
+
+        /// bail when we exceed the maximum height
+        if(y + image.height() > maxSize)
+        {
+            throw runtime_error("Maximum texture size exceeded");
+        }
+
+        // image is placed at x, y
+
+        x += image.width();
+
+        rowHeight = max(rowHeight, image.height());
+        width = max(width, x);
     }
+
+    GLsizei height = y + rowHeight;
 
     printf("Uploading texture atlas with dimensions %d x %d, %lu textures\n", width, height, _textures.size());
 
@@ -74,19 +99,29 @@ void TextureAtlas::generate()
 
     vector<GLfloat> atlasTocData(_textures.size() * 4);
 
-    GLint x = 0;
+    x = 0;
+    y = 0;
+    rowHeight = 0;
 
     for(auto& pair : _textures)
     {
         auto& image = pair.second.resource->cast<TextureLookup8>().textureLookup5().texture().image();
 
+        // start new row when we exceed the maximum width
+        if(x + image.width() > maxSize)
+        {
+            x = 0;
+            y += rowHeight;
+            rowHeight = 0;
+        }
+
         if(image.format() == ImageFormat::BGRA32)
         {
-            glTexSubImage2D(GL_TEXTURE_2D, 0, x, 0, image.width(), image.height(), GL_BGRA, GL_UNSIGNED_BYTE, image.data());
+            glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, image.width(), image.height(), GL_BGRA, GL_UNSIGNED_BYTE, image.data());
         }
         else if(image.format() == ImageFormat::BGR24)
         {
-            glTexSubImage2D(GL_TEXTURE_2D, 0, x, 0, image.width(), image.height(), GL_BGR, GL_UNSIGNED_BYTE, image.data());
+            glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, image.width(), image.height(), GL_BGR, GL_UNSIGNED_BYTE, image.data());
         }
         else
         {
@@ -96,12 +131,14 @@ void TextureAtlas::generate()
         // bottom left
         auto tocOffset = pair.second.index * 4;
         atlasTocData[tocOffset + 0] = GLfloat(x) / GLfloat(width);
-        atlasTocData[tocOffset + 1] = 0.0f;
+        atlasTocData[tocOffset + 1] = GLfloat(y) / GLfloat(height);
         // top right
         atlasTocData[tocOffset + 2] = GLfloat(image.width()) / GLfloat(width);
         atlasTocData[tocOffset + 3] = GLfloat(image.height()) / GLfloat(height);
 
         x += image.width();
+
+        rowHeight = max(rowHeight, image.height());
     }
 
     // TODO Generate our own mipmaps
