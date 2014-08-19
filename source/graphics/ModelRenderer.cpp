@@ -77,7 +77,7 @@ void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
         for(auto& structure : pair.second.structures())
         {
             // TODO apply structure rotation
-            auto structurePosition = structure.rotation() * landblockPosition + structure.position();
+            auto structurePosition = landblockPosition + structure.position();
 
             for(auto& object : structure.objects())
             {
