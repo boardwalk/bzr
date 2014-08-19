@@ -47,12 +47,16 @@ public:
     int height() const;
     size_t size() const;
     const void* data() const;
+    bool hasAlpha() const;
 
 private:
+    void updateHasAlpha();
+
     ImageFormat::Value _format;
     int _width;
     int _height;
     vector<uint8_t> _data;
+    bool _hasAlpha;
 };
 
 #endif

@@ -267,6 +267,7 @@ Image::Image(const Image& other)
     _width = other._width;
     _height = other._height;
     _format = other._format;
+    _hasAlpha = other._hasAlpha;
 }
 
 Image::Image(Image&& other)
@@ -275,6 +276,7 @@ Image::Image(Image&& other)
     _width = other._width;
     _height = other._height;
     _format = other._format;
+    _hasAlpha = other._hasAlpha;
 }
 
 Image& Image::operator=(const Image& other)
@@ -283,6 +285,7 @@ Image& Image::operator=(const Image& other)
     _width = other._width;
     _height = other._height;
     _format = other._format;
+    _hasAlpha = other._hasAlpha;
     return *this;
 }
 
@@ -292,6 +295,7 @@ Image& Image::operator=(Image&& other)
     _width = other._width;
     _height = other._height;
     _format = other._format;
+    _hasAlpha = other._hasAlpha;
     return *this;
 }
 
@@ -310,6 +314,8 @@ void Image::init(ImageFormat::Value newFormat, int newWidth, int newHeight, cons
     {
         _data.assign((const uint8_t*)newData, (const uint8_t*)newData + _width * _height * ImageFormat::bitsPerPixel(_format) / 8);
     }
+
+    updateHasAlpha();
 }
 
 void Image::decompress()
@@ -318,16 +324,19 @@ void Image::decompress()
     {
         _data = decodeDXT1(_data.data(), _width, _height);
         _format = ImageFormat::BGRA32;
+        updateHasAlpha();
     }
     else if(_format == ImageFormat::DXT3)
     {
         _data = decodeDXT3(_data.data(), _width, _height);
         _format = ImageFormat::BGRA32;
+        updateHasAlpha();
     }
     else if(_format == ImageFormat::DXT5)
     {
         _data = decodeDXT5(_data.data(), _width, _height);
         _format = ImageFormat::BGRA32;
+        updateHasAlpha();
     }
 }
 
@@ -361,6 +370,7 @@ void Image::applyPalette(const Palette& palette)
 
     _data = move(newData);
     _format = ImageFormat::BGRA32;
+    updateHasAlpha();
 }
 
 void Image::scale(int newWidth, int newHeight)
@@ -437,6 +447,7 @@ void Image::flipVertical()
 void Image::fill(int value)
 {
     memset(_data.data(), value, _data.size());
+    updateHasAlpha();
 }
 
 ImageFormat::Value Image::format() const
@@ -462,4 +473,38 @@ size_t Image::size() const
 const void* Image::data() const
 {
     return _data.data();
+}
+
+bool Image::hasAlpha() const
+{
+    return _hasAlpha;
+}
+
+void Image::updateHasAlpha()
+{
+    _hasAlpha = false;
+
+    if(_format == ImageFormat::BGRA32)
+    {
+        auto input = _data.data() + 3;
+        auto inputEnd = _data.data() + _width * _height + 4;
+
+        while(input < inputEnd)
+        {
+            if(*input != 0xFF)
+            {
+                _hasAlpha = true;
+                return;
+            }
+
+            input += 4;
+        }
+    }
+    else if(_format == ImageFormat::A8)
+    {
+        _hasAlpha = true;
+    }
+
+    // Compressed and paletted textures may well have alpha
+    // We just don't know at this point
 }
