@@ -43,6 +43,14 @@ public:
         return result;
     }
 
+    void align()
+    {
+        while(_position & 3)
+        {
+            _position++;
+        }
+    }
+
     void assertEnd() const
     {
         if(_position < _size)

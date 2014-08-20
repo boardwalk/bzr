@@ -16,7 +16,7 @@ MeshRenderData::MeshRenderData(const Model& model)
 
 MeshRenderData::MeshRenderData(const Structure& structure)
 {
-    initGeometry(structure.textures(), structure.geometry().vertices(), structure.geometry().triangleFans());
+    initGeometry(structure.textures(), structure.geometry().pieces()[0].vertices, structure.geometry().pieces()[0].triangleFans);
 }
 
 MeshRenderData::~MeshRenderData()
