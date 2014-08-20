@@ -126,11 +126,9 @@ void TextureAtlas::generate()
             throw runtime_error("Unsupported image format for texture atlas");
         }
 
-        // bottom left
         auto tocOffset = pair.second.index * 4;
         atlasTocData[tocOffset + 0] = GLfloat(x) / GLfloat(width);
         atlasTocData[tocOffset + 1] = GLfloat(y) / GLfloat(height);
-        // top right
         atlasTocData[tocOffset + 2] = GLfloat(image.width()) / GLfloat(width);
         atlasTocData[tocOffset + 3] = GLfloat(image.height()) / GLfloat(height);
 
