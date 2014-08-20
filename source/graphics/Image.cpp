@@ -36,19 +36,19 @@ static uint8_t interpolateAlpha(uint8_t a0, uint8_t a1, unsigned int numer0, uns
     return uint8_t((a0 * numer0 + a1 * numer1) / denom);
 }
 
-// Converts a 4BPP DXT1-compressed image to a 32BPP BGRA image
+// Converts a 4BPP DXT1-compressed image to a 24BPP BGR image
 static vector<uint8_t> decodeDXT1(const uint8_t* data, int width, int height)
 {
     assert((width & 0x3) == 0);
     assert((height & 0x3) == 0);
 
-    vector<uint8_t> result(width * height * 4);
+    vector<uint8_t> result(width * height * 3);
 
     auto input = data;
     auto inputImageEnd = data + width * height / 2;
 
     auto output = result.data();
-    auto outputStride = width * 4;
+    auto outputStride = width * 3;
     auto outputRowEnd = output + outputStride;
 
     while(input < inputImageEnd)
@@ -77,12 +77,15 @@ static vector<uint8_t> decodeDXT1(const uint8_t* data, int width, int height)
             for(auto px = 0; px < 4; px++)
             {
                 auto cn = (ctab >> (px * 2 + py * 8)) & 0x3;
-                *(uint32_t*)(output + px * 4 + py * outputStride) = c[cn] | (0xFF << 24);
+                auto p = output + px * 3 + py * outputStride;
+                p[0] = c[cn] & 0xFF;
+                p[1] = (c[cn] >> 8) & 0xFF;
+                p[2] = (c[cn] >> 16) & 0xFF;
             }
         }
 
         input += 8; // 8 bytes per block
-        output += 4 * 4; // 4 pixels across per block
+        output += 4 * 3; // 4 pixels across per block
 
         if(output >= outputRowEnd)
         {
@@ -323,7 +326,7 @@ void Image::decompress()
     if(_format == ImageFormat::DXT1)
     {
         _data = decodeDXT1(_data.data(), _width, _height);
-        _format = ImageFormat::BGRA32;
+        _format = ImageFormat::BGR24;
         updateHasAlpha();
     }
     else if(_format == ImageFormat::DXT3)
