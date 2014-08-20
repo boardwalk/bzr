@@ -12,8 +12,8 @@ StructureGeom::StructureGeom(uint32_t id, const void* data, size_t size) : Resou
     reader.read<uint32_t>(); // unk1
     reader.read<uint32_t>(); // unk2
 
-    auto numTriangleStrips = reader.read<uint32_t>();
-    _triangleStrips.resize(numTriangleStrips);
+    auto numTriangleFans = reader.read<uint32_t>();
+    _triangleFans.resize(numTriangleFans);
 
     reader.read<uint32_t>(); // unk3
     reader.read<uint32_t>(); // unk4
@@ -32,12 +32,12 @@ StructureGeom::StructureGeom(uint32_t id, const void* data, size_t size) : Resou
         _vertices[i].read(reader);
     }
 
-    for(auto i = 0u; i < numTriangleStrips; i++)
+    for(auto i = 0u; i < numTriangleFans; i++)
     {
-        auto triangleStripNum = reader.read<uint16_t>();
-        assert(triangleStripNum == i);
+        auto triangleFanNum = reader.read<uint16_t>();
+        assert(triangleFanNum == i);
 
-        _triangleStrips[i].read(reader);
+        _triangleFans[i].read(reader);
     }
 
     reader.read<uint16_t>(); // unk7
@@ -49,7 +49,7 @@ const vector<Vertex>& StructureGeom::vertices() const
     return _vertices;
 }
 
-const vector<TriangleStrip>& StructureGeom::triangleStrips() const
+const vector<TriangleFan>& StructureGeom::triangleFans() const
 {
-    return _triangleStrips;
+    return _triangleFans;
 }

@@ -1,11 +1,11 @@
-#ifndef BZR_TRIANGLESTRIP_H
-#define BZR_TRIANGLESTRIP_H
+#ifndef BZR_TRIANGLEFAN_H
+#define BZR_TRIANGLEFAN_H
 
 #include <vector>
 
 class BlobReader;
 
-struct TriangleStrip
+struct TriangleFan
 {
 	struct Index
 	{
@@ -16,7 +16,7 @@ struct TriangleStrip
 	    int texCoordIndex;
 	};
 
-	TriangleStrip() : texIndex(0)
+	TriangleFan() : texIndex(0)
     {}
 
     int texIndex;

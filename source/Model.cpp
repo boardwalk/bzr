@@ -7,21 +7,21 @@
 #include "TextureLookup5.h"
 #include "TextureLookup8.h"
 
-vector<TriangleStrip> unpackTriangleStrips(BlobReader& reader)
+vector<TriangleFan> unpackTriangleFans(BlobReader& reader)
 {
-    auto numTriangleStrips = reader.readVarInt();
+    auto numTriangleFans = reader.readVarInt();
 
-    vector<TriangleStrip> triangleStrips(numTriangleStrips);
+    vector<TriangleFan> triangleFans(numTriangleFans);
 
-    for(auto i = 0u; i < numTriangleStrips; i++)
+    for(auto i = 0u; i < numTriangleFans; i++)
     {
-        auto triangleStripNum = reader.read<uint16_t>();
-        assert(triangleStripNum == i);
+        auto triangleFanNum = reader.read<uint16_t>();
+        assert(triangleFanNum == i);
 
-        triangleStrips[i].read(reader);
+        triangleFans[i].read(reader);
     }
 
-    return triangleStrips;
+    return triangleFans;
 }
 
 Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _needsDepthSort(false)
@@ -73,7 +73,7 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _ne
 
     if(flags & 0x1)
     {
-        unpackTriangleStrips(reader);
+        unpackTriangleFans(reader);
         skipBSP(reader, 1);
     }
 
@@ -86,7 +86,7 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _ne
 
     if(flags & 0x2)
     {
-        _triangleStrips = unpackTriangleStrips(reader);
+        _triangleFans = unpackTriangleFans(reader);
         skipBSP(reader, 0);
     }
 
@@ -108,9 +108,9 @@ const vector<Vertex>& Model::vertices() const
     return _vertices;
 }
 
-const vector<TriangleStrip>& Model::triangleStrips() const
+const vector<TriangleFan>& Model::triangleFans() const
 {
-    return _triangleStrips;
+    return _triangleFans;
 }
 
 bool Model::needsDepthSort() const

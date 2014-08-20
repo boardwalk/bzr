@@ -11,12 +11,12 @@
 
 MeshRenderData::MeshRenderData(const Model& model)
 {
-    initGeometry(model.textures(), model.vertices(), model.triangleStrips());
+    initGeometry(model.textures(), model.vertices(), model.triangleFans());
 }
 
 MeshRenderData::MeshRenderData(const Structure& structure)
 {
-    initGeometry(structure.textures(), structure.geometry().vertices(), structure.geometry().triangleStrips());
+    initGeometry(structure.textures(), structure.geometry().vertices(), structure.geometry().triangleFans());
 }
 
 MeshRenderData::~MeshRenderData()
@@ -36,7 +36,7 @@ GLsizei MeshRenderData::indexCount() const
     return _indexCount;
 }
 
-void MeshRenderData::initGeometry(const vector<ResourcePtr>& textures, const vector<Vertex>& vertices, const vector<TriangleStrip>& triangleStrips)
+void MeshRenderData::initGeometry(const vector<ResourcePtr>& textures, const vector<Vertex>& vertices, const vector<TriangleFan>& triangleFans)
 {
     // vx, vy, vz, nx, ny, nz, s, t, p
     static const int COMPONENTS_PER_VERTEX = 9;
@@ -54,14 +54,14 @@ void MeshRenderData::initGeometry(const vector<ResourcePtr>& textures, const vec
     vector<float> vertexData;
     vector<uint16_t> indexData;
 
-    for(auto& triangleStrip : triangleStrips)
+    for(auto& triangleFan : triangleFans)
     {
         if(!indexData.empty())
         {
             indexData.push_back(0xFFFF);
         }
         
-        for(auto& index : triangleStrip.indices)
+        for(auto& index : triangleFan.indices)
         {
             indexData.push_back(uint16_t(vertexData.size() / COMPONENTS_PER_VERTEX));
 
@@ -86,8 +86,8 @@ void MeshRenderData::initGeometry(const vector<ResourcePtr>& textures, const vec
                 vertexData.push_back(1.0f - float(vertex.texCoords[index.texCoordIndex].y));
             }
 
-            assert((size_t)triangleStrip.texIndex < textureIndices.size());
-            vertexData.push_back((float)textureIndices[triangleStrip.texIndex]);
+            assert((size_t)triangleFan.texIndex < textureIndices.size());
+            vertexData.push_back((float)textureIndices[triangleFan.texIndex]);
         }
     }
 

@@ -6,7 +6,7 @@
 #include "Destructable.h"
 #include "Resource.h"
 #include "Vertex.h"
-#include "TriangleStrip.h"
+#include "TriangleFan.h"
 #include <vector>
 
 class Model : public ResourceImpl<ResourceType::Model>
@@ -16,7 +16,7 @@ public:
 
     const vector<ResourcePtr>& textures() const;
     const vector<Vertex>& vertices() const;
-    const vector<TriangleStrip>& triangleStrips() const;
+    const vector<TriangleFan>& triangleFans() const;
 
     // If true, the model has transparent or translucent elements and must be depth sorted before rendering
     bool needsDepthSort() const;
@@ -26,7 +26,7 @@ public:
 private:
     vector<ResourcePtr> _textures;
     vector<Vertex> _vertices;
-    vector<TriangleStrip> _triangleStrips;
+    vector<TriangleFan> _triangleFans;
     bool _needsDepthSort;
 
     unique_ptr<Destructable> _renderData;

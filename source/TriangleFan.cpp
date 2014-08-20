@@ -1,7 +1,7 @@
-#include "TriangleStrip.h"
+#include "TriangleFan.h"
 #include "BlobReader.h"
 
-void TriangleStrip::read(BlobReader& reader)
+void TriangleFan::read(BlobReader& reader)
 {
     auto numIndices = reader.read<uint8_t>();
     indices.resize(numIndices);

@@ -9,7 +9,7 @@
 class Model;
 class Structure;
 struct Vertex;
-struct TriangleStrip;
+struct TriangleFan;
 
 class MeshRenderData : public Destructable, Noncopyable
 {
@@ -23,7 +23,7 @@ public:
     GLsizei indexCount() const;
 
 private:
-    void initGeometry(const vector<ResourcePtr>& textures, const vector<Vertex>& vertices, const vector<TriangleStrip>& triangleStrips);
+    void initGeometry(const vector<ResourcePtr>& textures, const vector<Vertex>& vertices, const vector<TriangleFan>& triangleFans);
     
     GLuint _vertexArray;
     GLuint _vertexBuffer;
