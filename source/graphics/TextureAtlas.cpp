@@ -4,6 +4,17 @@
 #include "Texture.h"
 #include "TextureLookup5.h"
 #include "TextureLookup8.h"
+#include <algorithm>
+
+struct SortByHeight
+{
+    bool operator()(const TextureAtlas::TextureInfo* a, const TextureAtlas::TextureInfo* b) const
+    {
+        auto& imageA = a->resource->cast<TextureLookup8>().textureLookup5().texture().image();
+        auto& imageB = b->resource->cast<TextureLookup8>().textureLookup5().texture().image();
+        return imageA.height() > imageB.height(); // sort descending
+    }
+};
 
 TextureAtlas::TextureAtlas() : _nextIndex(0), _buildIndex(0)
 {
@@ -56,15 +67,26 @@ void TextureAtlas::generate()
     GLint maxSize;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxSize);
 
-    // TODO Look at using bin packing algorithm to pack textures in tighter
+    // Sort textures by height
+    // We waste significantly less space when we do this
+    vector<TextureInfo*> sortedTextureInfos;
+    sortedTextureInfos.reserve(_textures.size());
+
+    for(auto& pair : _textures)
+    {
+        sortedTextureInfos.push_back(&pair.second);
+    }
+
+    sort(sortedTextureInfos.begin(), sortedTextureInfos.end(), SortByHeight());
+
     GLint x = 0;
     GLint y = 0;
     GLsizei rowHeight = 0;
     GLsizei width = 0;
 
-    for(auto& pair : _textures)
+    for(auto textureInfo : sortedTextureInfos)
     {
-        auto& image = pair.second.resource->cast<TextureLookup8>().textureLookup5().texture().image();
+        auto& image = textureInfo->resource->cast<TextureLookup8>().textureLookup5().texture().image();
 
         // start new row when we exceed the maximum width
         if(x + image.width() > maxSize)
@@ -101,9 +123,9 @@ void TextureAtlas::generate()
     y = 0;
     rowHeight = 0;
 
-    for(auto& pair : _textures)
+    for(auto textureInfo : sortedTextureInfos)
     {
-        auto& image = pair.second.resource->cast<TextureLookup8>().textureLookup5().texture().image();
+        auto& image = textureInfo->resource->cast<TextureLookup8>().textureLookup5().texture().image();
 
         // start new row when we exceed the maximum width
         if(x + image.width() > maxSize)
@@ -126,7 +148,7 @@ void TextureAtlas::generate()
             throw runtime_error("Unsupported image format for texture atlas");
         }
 
-        auto tocOffset = pair.second.index * 4;
+        auto tocOffset = textureInfo->index * 4;
         atlasTocData[tocOffset + 0] = GLfloat(x) / GLfloat(width);
         atlasTocData[tocOffset + 1] = GLfloat(y) / GLfloat(height);
         atlasTocData[tocOffset + 2] = GLfloat(image.width()) / GLfloat(width);

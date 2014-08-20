@@ -8,6 +8,12 @@
 class TextureAtlas : Noncopyable
 {
 public:
+    struct TextureInfo
+    {
+        ResourcePtr resource;
+        uint32_t index;
+    };
+
     TextureAtlas();
     ~TextureAtlas();
 
@@ -15,12 +21,6 @@ public:
     void bind();
 
 private:
-    struct TextureInfo
-    {
-        ResourcePtr resource;
-        uint32_t index;
-    };
-
     void generate();
 
     GLuint _atlas;
