@@ -22,7 +22,7 @@ Structure::Structure(const void* data, size_t size)
     auto numTextures = reader.read<uint8_t>();
     _textures.resize(numTextures);
 
-    auto numConnections = reader.read<uint8_t>();
+    auto numConnected = reader.read<uint8_t>();
     auto numVisible = reader.read<uint16_t>();
 
     for(auto& texture : _textures)
@@ -34,7 +34,7 @@ Structure::Structure(const void* data, size_t size)
     auto geometryId = reader.read<uint16_t>();
     _geometry = Core::get().resourceCache().get(0x0D000000 | geometryId);
 
-    reader.read<uint16_t>(); // structure index (resourceId & 0x0000FFFF)
+    reader.read<uint16_t>(); // some sort of index into the geometry resource?
 
     _position.x = reader.read<float>();
     _position.y = reader.read<float>();
@@ -45,7 +45,7 @@ Structure::Structure(const void* data, size_t size)
     _rotation.y = reader.read<float>();
     _rotation.z = reader.read<float>();
 
-    for(auto ci = 0u; ci < numConnections; ci++)
+    for(auto ci = 0u; ci < numConnected; ci++)
     {
         reader.read<uint16_t>();
         reader.read<uint16_t>();
