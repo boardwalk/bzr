@@ -19,6 +19,7 @@ public:
     const vector<ResourcePtr>& textures() const;
     const vector<Object>& objects() const;
     const StructureGeom& geometry() const;
+    uint16_t pieceNum() const;
 
     unique_ptr<Destructable>& renderData();
 
@@ -28,6 +29,7 @@ private:
     vector<ResourcePtr> _textures;
     vector<Object> _objects;
     ResourcePtr _geometry;
+    uint16_t _pieceNum;
     unique_ptr<Destructable> _renderData;
 };
 

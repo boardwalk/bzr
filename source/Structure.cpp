@@ -34,8 +34,8 @@ Structure::Structure(const void* data, size_t size)
     auto geometryId = reader.read<uint16_t>();
     _geometry = Core::get().resourceCache().get(0x0D000000 | geometryId);
 
-    reader.read<uint16_t>(); // some sort of index into the geometry resource?
-
+    _pieceNum = reader.read<uint16_t>();
+    
     _position.x = reader.read<float>();
     _position.y = reader.read<float>();
     _position.z = reader.read<float>();
@@ -93,6 +93,7 @@ Structure::Structure(Structure&& other)
     _textures = move(other._textures);
     _objects = move(other._objects);
     _geometry = move(other._geometry);
+    _pieceNum = other._pieceNum;
 }
 
 const Vec3& Structure::position() const
@@ -118,6 +119,11 @@ const vector<Object>& Structure::objects() const
 const StructureGeom& Structure::geometry() const
 {
     return _geometry->cast<StructureGeom>();
+}
+
+uint16_t Structure::pieceNum() const
+{
+    return _pieceNum;
 }
 
 unique_ptr<Destructable>& Structure::renderData()
