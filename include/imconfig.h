@@ -5,7 +5,6 @@
 #pragma once
 
 //----- Define your own ImVector<> type if you don't want to use the provided implementation defined in imgui.h
-#include <vector>
 #define ImVector    std::vector
 //#define ImVector  MyVector
 

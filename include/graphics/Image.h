@@ -1,8 +1,6 @@
 #ifndef BZR_GRAPHICS_IMAGE_H
 #define BZR_GRAPHICS_IMAGE_H
 
-#include <vector>
-
 class Palette;
 
 struct ImageFormat

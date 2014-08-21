@@ -2,7 +2,6 @@
 #define BZR_PALETTE_H
 
 #include "Resource.h"
-#include <vector>
 
 class Palette : public ResourceImpl<ResourceType::Palette>
 {

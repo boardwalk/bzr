@@ -4,7 +4,6 @@
 #include "Destructable.h"
 #include "Noncopyable.h"
 #include "Object.h"
-#include <vector>
 
 class StructureGeom;
 

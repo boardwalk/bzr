@@ -5,7 +5,6 @@
 #include "Resource.h"
 #include "Vertex.h"
 #include "TriangleFan.h"
-#include <vector>
 
 class Model : public ResourceImpl<ResourceType::Model>
 {

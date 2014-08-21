@@ -4,7 +4,6 @@
 #include "Destructable.h"
 #include "Noncopyable.h"
 #include "Resource.h"
-#include <vector>
 
 class Model;
 class Structure;

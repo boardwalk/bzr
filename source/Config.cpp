@@ -1,7 +1,6 @@
 #include "Config.h"
 #include <jansson.h>
 #include <sstream>
-#include <vector>
 
 static vector<string> splitName(const string& name)
 {

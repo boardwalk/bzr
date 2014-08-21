@@ -6,7 +6,6 @@
 #include "math/Vec3.h"
 #include "Noncopyable.h"
 #include "Resource.h"
-#include <vector>
 
 struct Mat4;
 class ModelGroup;

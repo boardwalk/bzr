@@ -1,8 +1,6 @@
 #ifndef BZR_TRIANGLEFAN_H
 #define BZR_TRIANGLEFAN_H
 
-#include <vector>
-
 class BlobReader;
 
 struct TriangleFan

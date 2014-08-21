@@ -4,7 +4,6 @@
 #include "Noncopyable.h"
 #include <fstream>
 #include <string>
-#include <vector>
 
 class DatFile : Noncopyable
 {

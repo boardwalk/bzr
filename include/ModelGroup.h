@@ -4,7 +4,6 @@
 #include "math/Quat.h"
 #include "math/Vec3.h"
 #include "Resource.h"
-#include <vector>
 
 class ModelGroup : public ResourceImpl<ResourceType::ModelGroup>
 {

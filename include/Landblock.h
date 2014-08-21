@@ -5,7 +5,6 @@
 #include "LandblockId.h"
 #include "Noncopyable.h"
 #include "Structure.h"
-#include <vector>
 
 class Landblock : Noncopyable
 {

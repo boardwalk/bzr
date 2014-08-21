@@ -4,7 +4,6 @@
 #include "Resource.h"
 #include "TriangleFan.h"
 #include "Vertex.h"
-#include <vector>
 
 class StructureGeom : public ResourceImpl<ResourceType::StructureGeom>
 {

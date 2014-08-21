@@ -3,7 +3,6 @@
 #include "graphics/util.h"
 #include "Camera.h"
 #include "Core.h"
-#include <vector>
 
 #include "graphics/shaders/SkyVertexShader.h"
 #include "graphics/shaders/SkyFragmentShader.h"

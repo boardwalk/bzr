@@ -3,7 +3,6 @@
 
 #include "Destructable.h"
 #include "Resource.h"
-#include <vector>
 
 class Texture;
 
