@@ -1,5 +1,4 @@
 #include "graphics/Program.h"
-#include <string>
 #include <vector>
 
 Program::Program() : _handle(0)

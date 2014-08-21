@@ -1,10 +1,8 @@
 #include "Landblock.h"
-#include "math/Vec3.h"
 #include "BlobReader.h"
 #include "Core.h"
 #include "DatFile.h"
 #include "LandblockManager.h"
-#include "ResourceCache.h"
 #include <algorithm>
 
 const double Landblock::SQUARE_SIZE = 24.0;

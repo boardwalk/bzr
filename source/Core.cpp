@@ -6,7 +6,6 @@
 #include "LandblockManager.h"
 #include "ResourceCache.h"
 #include "util.h"
-#include <SDL.h>
 
 static const double STEP_RATE = 60.0;
 

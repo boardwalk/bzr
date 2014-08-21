@@ -1,5 +1,4 @@
 #include "Camera.h"
-#include "math/Quat.h"
 #include <algorithm>
 
 static const auto FT_PER_SECOND = 100.0;

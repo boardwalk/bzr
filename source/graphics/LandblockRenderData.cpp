@@ -1,6 +1,5 @@
 #include "graphics/LandblockRenderData.h"
 #include "graphics/Program.h"
-#include "math/Vec2.h"
 #include "Landblock.h"
 
 LandblockRenderData::LandblockRenderData(const Landblock& landblock)

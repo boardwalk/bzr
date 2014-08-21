@@ -1,8 +1,6 @@
 #ifndef BZR_MODEL_H
 #define BZR_MODEL_H
 
-#include "math/Vec2.h"
-#include "math/Vec3.h"
 #include "Destructable.h"
 #include "Resource.h"
 #include "Vertex.h"

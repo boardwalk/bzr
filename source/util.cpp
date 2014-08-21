@@ -1,8 +1,4 @@
 #include "util.h"
-#include <SDL.h>
-#include <string>
-
-using namespace std;
 
 void throwSDLError()
 {

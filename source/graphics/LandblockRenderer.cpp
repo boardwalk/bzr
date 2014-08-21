@@ -1,16 +1,12 @@
 #include "graphics/LandblockRenderer.h"
-#include "graphics/Image.h"
 #include "graphics/util.h"
 #include "math/Mat3.h"
-#include "math/Mat4.h"
-#include "math/Vec3.h"
 #include "Camera.h"
 #include "Core.h"
 #include "LandblockManager.h"
 #include "ResourceCache.h"
 #include "Texture.h"
 #include <algorithm>
-#include <vector>
 
 #include "graphics/shaders/LandVertexShader.h"
 #include "graphics/shaders/LandTessControlShader.h"

@@ -1,13 +1,10 @@
 #include "graphics/MeshRenderData.h"
-#include "graphics/Program.h"
 #include "graphics/Renderer.h"
 #include "graphics/TextureAtlas.h"
 #include "Core.h"
 #include "Model.h"
 #include "Structure.h"
 #include "StructureGeom.h"
-#include <algorithm>
-#include <vector>
 
 MeshRenderData::MeshRenderData(const Model& model)
 {

@@ -1,12 +1,9 @@
 #include "graphics/SkyRenderer.h"
 #include "graphics/SkyModel.h"
 #include "graphics/util.h"
-#include "math/Mat3.h"
-#include "math/Mat4.h"
 #include "Camera.h"
 #include "Core.h"
 #include <vector>
-#include <fstream>
 
 #include "graphics/shaders/SkyVertexShader.h"
 #include "graphics/shaders/SkyFragmentShader.h"

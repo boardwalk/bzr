@@ -1,5 +1,4 @@
 #include "graphics/SkyModel.h"
-#include "math/Mat3.h"
 #include <algorithm>
 
 // A Practical Analytic Model for Daylight

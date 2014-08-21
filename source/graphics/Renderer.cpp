@@ -5,13 +5,9 @@
 #include "graphics/SkyRenderer.h"
 #include "graphics/StructureRenderer.h"
 #include "graphics/TextureAtlas.h"
-#include "graphics/util.h"
-#include "math/Mat3.h"
-#include "math/Vec3.h"
 #include "Camera.h"
 #include "Config.h"
 #include "Core.h"
-#include "Landblock.h"
 #include "util.h"
 #ifdef OCULUSVR
 #include <SDL_syswm.h>
