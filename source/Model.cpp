@@ -7,7 +7,7 @@
 #include "TextureLookup5.h"
 #include "TextureLookup8.h"
 
-vector<TriangleFan> unpackTriangleFans(BlobReader& reader)
+static vector<TriangleFan> unpackTriangleFans(BlobReader& reader)
 {
     auto numTriangleFans = reader.readVarInt();
 
