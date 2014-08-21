@@ -354,19 +354,7 @@ void Landblock::initObjects()
 
     for(auto oi = 0u; oi < numObjects; oi++)
     {
-        auto& object = _objects[oi];
-
-        auto modelId = reader.read<uint32_t>();
-        object.resource = Core::get().resourceCache().get(modelId);
-
-        object.position.x = reader.read<float>();
-        object.position.y = reader.read<float>();
-        object.position.z = reader.read<float>();
-
-        object.rotation.w = reader.read<float>();
-        object.rotation.x = reader.read<float>();
-        object.rotation.y = reader.read<float>();
-        object.rotation.z = reader.read<float>();
+        _objects[oi].read(reader);
     }
 
     auto numObjectsEx = reader.read<uint16_t>();
@@ -378,19 +366,7 @@ void Landblock::initObjects()
 
     for(auto oi = 0u; oi < numObjectsEx; oi++)
     {
-        auto& object = _objects[numObjects + oi];
-
-        auto modelId = reader.read<uint32_t>();
-        object.resource = Core::get().resourceCache().get(modelId);
-
-        object.position.x = reader.read<float>();
-        object.position.y = reader.read<float>();
-        object.position.z = reader.read<float>();
-
-        object.rotation.w = reader.read<float>();
-        object.rotation.x = reader.read<float>();
-        object.rotation.y = reader.read<float>();
-        object.rotation.z = reader.read<float>();
+        _objects[numObjects + oi].read(reader);
 
         reader.read<uint32_t>();
         auto numChunks = reader.read<uint32_t>();

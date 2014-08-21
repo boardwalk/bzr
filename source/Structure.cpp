@@ -35,7 +35,7 @@ Structure::Structure(const void* data, size_t size)
     _geometry = Core::get().resourceCache().get(0x0D000000 | geometryId);
 
     _pieceNum = reader.read<uint16_t>();
-    
+
     _position.x = reader.read<float>();
     _position.y = reader.read<float>();
     _position.z = reader.read<float>();
@@ -65,17 +65,7 @@ Structure::Structure(const void* data, size_t size)
 
         for(auto& object : _objects)
         {
-            auto modelId = reader.read<uint32_t>();
-            object.resource = Core::get().resourceCache().get(modelId);
-
-            object.position.x = reader.read<float>();
-            object.position.y = reader.read<float>();
-            object.position.z = reader.read<float>();
-
-            object.rotation.w = reader.read<float>();
-            object.rotation.x = reader.read<float>();
-            object.rotation.y = reader.read<float>();
-            object.rotation.z = reader.read<float>();
+            object.read(reader);
         }
     }
 

@@ -5,11 +5,15 @@
 #include "math/Vec3.h"
 #include "Resource.h"
 
+class BlobReader;
+
 struct Object
 {
     ResourcePtr resource;
     Vec3 position;
     Quat rotation;
+
+    void read(BlobReader& reader);
 };
 
 #endif
