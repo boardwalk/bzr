@@ -135,18 +135,22 @@ void TextureAtlas::generate()
             rowHeight = 0;
         }
 
+        GLenum format;
+
         if(image.format() == ImageFormat::BGRA32)
         {
-            glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, image.width(), image.height(), GL_BGRA, GL_UNSIGNED_BYTE, image.data());
+            format = GL_BGRA;
         }
         else if(image.format() == ImageFormat::BGR24)
         {
-            glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, image.width(), image.height(), GL_BGR, GL_UNSIGNED_BYTE, image.data());
+            format = GL_BGR;
         }
         else
         {
             throw runtime_error("Unsupported image format for texture atlas");
         }
+
+        glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, image.width(), image.height(), format, GL_UNSIGNED_BYTE, image.data());
 
         auto tocOffset = textureInfo->index * 4;
         atlasTocData[tocOffset + 0] = GLfloat(x) / GLfloat(width);
