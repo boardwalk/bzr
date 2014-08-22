@@ -75,12 +75,9 @@ void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 
         for(auto& structure : pair.second.structures())
         {
-            // TODO apply structure rotation
-            auto structurePosition = landblockPosition + structure.position();
-
             for(auto& object : structure.objects())
             {
-                renderOne(const_cast<ResourcePtr&>(object.resource), projectionMat, viewMat, structurePosition + object.position, object.rotation);
+                renderOne(const_cast<ResourcePtr&>(object.resource), projectionMat, viewMat, landblockPosition + object.position, object.rotation);
             }
         }
     }

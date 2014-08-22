@@ -80,10 +80,13 @@ Structure::Structure(const void* data, size_t size)
 
 Structure::Structure(Structure&& other)
 {
+    _position = other._position;
+    _rotation = other._rotation;
     _textures = move(other._textures);
     _objects = move(other._objects);
     _geometry = move(other._geometry);
     _pieceNum = other._pieceNum;
+    _renderData = move(other._renderData);
 }
 
 const Vec3& Structure::position() const
