@@ -7,7 +7,6 @@
 #include <OVR_CAPI_GL.h>
 #endif
 
-class GuiRenderer;
 class LandblockRenderer;
 class ModelRenderer;
 class SkyRenderer;
@@ -50,7 +49,6 @@ private:
 #endif
 
     unique_ptr<TextureAtlas> _textureAtlas;
-    unique_ptr<GuiRenderer> _guiRenderer;
     unique_ptr<SkyRenderer> _skyRenderer;
     unique_ptr<LandblockRenderer> _landblockRenderer;
     unique_ptr<StructureRenderer> _structureRenderer;

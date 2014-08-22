@@ -1,5 +1,4 @@
 #include "graphics/Renderer.h"
-#include "graphics/GuiRenderer.h"
 #include "graphics/LandblockRenderer.h"
 #include "graphics/ModelRenderer.h"
 #include "graphics/SkyRenderer.h"
@@ -79,7 +78,6 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     _textureAtlas.reset(new TextureAtlas());
-    _guiRenderer.reset(new GuiRenderer());
     _skyRenderer.reset(new SkyRenderer());
     _landblockRenderer.reset(new LandblockRenderer());
     _structureRenderer.reset(new StructureRenderer());
@@ -96,7 +94,6 @@ Renderer::~Renderer()
     _landblockRenderer.reset();
     _structureRenderer.reset();
     _skyRenderer.reset();
-    _guiRenderer.reset();
     _textureAtlas.reset();
 
 #ifdef OCULUSVR
@@ -145,7 +142,6 @@ void Renderer::render(double interp)
     _landblockRenderer->render(projectionMat, viewMat);
     _structureRenderer->render(projectionMat, viewMat);
     _modelRenderer->render(projectionMat, viewMat);
-    _guiRenderer->render();
 
     SDL_GL_SwapWindow(_window);
 }
@@ -399,7 +395,6 @@ void Renderer::renderOVR(double interp)
         _landblockRenderer->render(projectionMat, viewMat);
         _structureRenderer->render(projectionMat, viewMat);
         _modelRenderer->render(projectionMat, viewMat);
-        _guiRenderer->render();
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
