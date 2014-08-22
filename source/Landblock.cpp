@@ -381,10 +381,7 @@ void Landblock::initObjects()
                 reader.read<uint16_t>();
             }
 
-            if(numSubChunks & 1)
-            {
-                reader.read<uint16_t>();
-            }
+            reader.align();
         }
     }
 }
