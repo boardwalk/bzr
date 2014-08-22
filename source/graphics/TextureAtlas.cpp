@@ -67,16 +67,25 @@ void TextureAtlas::generate()
     GLint maxSize;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxSize);
 
-    // Sort textures by height
-    // We waste significantly less space when we do this
     vector<TextureInfo*> sortedTextureInfos;
     sortedTextureInfos.reserve(_textures.size());
 
-    for(auto& pair : _textures)
+    // Collect used and remove unused textures
+    for(auto it = _textures.begin(); it != _textures.end(); /**/)
     {
-        sortedTextureInfos.push_back(&pair.second);
+        if(it->second.resource.use_count() > 1)
+        {
+            sortedTextureInfos.push_back(&it->second);
+            ++it;
+        }
+        else
+        {
+            it = _textures.erase(it);
+        }
     }
 
+    // Sort textures by height
+    // We waste significantly less space when we do this
     sort(sortedTextureInfos.begin(), sortedTextureInfos.end(), SortByHeight());
 
     GLint x = 0;
@@ -117,7 +126,7 @@ void TextureAtlas::generate()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
-    vector<GLfloat> atlasTocData(_textures.size() * 4);
+    vector<GLfloat> atlasTocData(_nextIndex * 4);
 
     x = 0;
     y = 0;
