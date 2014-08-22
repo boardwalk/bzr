@@ -152,6 +152,7 @@ def main():
             cppflags += ' -Werror -pedantic-errors'
             cppflags += ' -Wstrict-aliasing=1'
             cppflags += ' -Wno-unused-parameter' # annoying error when stubbing things out
+            cppflags += ' -Wno-shadow'
 
             cppflags += ' ' + execute('sdl2-config', '--cflags')
             ldflags += ' ' + execute('sdl2-config', '--libs')
@@ -198,19 +199,21 @@ def main():
             for filename in filenames:
                 name, ext = os.path.splitext(filename)
                 in_file = os.path.join(dirpath, filename)
-                implicit = includes(in_file)
                 
                 if ext == '.glsl':
                     buildrule = 'header'
                     newext = '.h'
+                    implicit = includes(in_file)
                 elif ext == '.cpp':
                     buildrule = 'cxx'
                     newext = '.o'
                     # all c++ is dependent on basic.h
+                    implicit = includes(in_file)
                     implicit.append(os.path.join('include', 'basic.h'))
                 elif ext == '.c':
                     buildrule = 'c'
                     newext = '.o'
+                    implicit = includes(in_file)
                 else:
                     continue
 
