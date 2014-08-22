@@ -168,6 +168,19 @@ void Core::step(double dt)
 {
     const Uint8* state = SDL_GetKeyboardState(nullptr);
 
+    auto speed = 0.0;
+
+    if(state[SDL_SCANCODE_LSHIFT])
+    {
+        speed = 100.0;
+    }
+    else
+    {
+        speed = 10.0;
+    }
+
+    _camera->setSpeed(speed);
+
     auto lx = 0.0;
     auto ly = 0.0;
 

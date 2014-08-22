@@ -24,6 +24,7 @@ public:
 
     void step(double dt);
 
+    void setSpeed(double newSpeed);
     void setPosition(const Vec3& newPosition);
     void setHeadPosition(const Vec3& newHeadPosition);
     void setHeadOrientation(const Quat& newHeadOrientation);
@@ -36,6 +37,7 @@ private:
     void updateRotationQuat();
     void updateViewMatrix();
     
+    double _speed;
     Vec3 _position;
     double _yaw;
     double _pitch;

@@ -1,10 +1,9 @@
 #include "Camera.h"
 #include <algorithm>
 
-static const auto FT_PER_SECOND = 100.0;
-
 Camera::Camera()
 {
+    _speed = 0.0;
     _position = Vec3(88.5, 22.5, 125);
     _yaw = 0.0;
     _pitch = 0.26666;
@@ -14,7 +13,7 @@ Camera::Camera()
 
 void Camera::move(double dx, double dy)
 {
-    Vec3 dp(dx * FT_PER_SECOND, 0.0, -dy * FT_PER_SECOND);
+    Vec3 dp(dx * _speed, 0.0, -dy * _speed);
     _position = _position +_rotationQuat.conjugate() * dp;
     updateViewMatrix();
 }
@@ -29,6 +28,11 @@ void Camera::look(double dx, double dy)
 void Camera::step(double dt)
 {
     (void)dt;
+}
+
+void Camera::setSpeed(double newSpeed)
+{
+    _speed = newSpeed;
 }
 
 void Camera::setPosition(const Vec3& newPosition)
