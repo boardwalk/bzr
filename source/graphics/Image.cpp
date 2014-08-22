@@ -2,7 +2,7 @@
 #include "Palette.h"
 #include <algorithm>
 
-// Converts a 16-bit RGB 5:6:5 to 24-bit BGR value
+// Converts a 16-bit BGR 5:6:5 to 24-bit BGR value
 static uint32_t upconvert(uint16_t c)
 {
     auto b = (c & 0x1F) * 0xFF / 0x1F;
@@ -23,9 +23,9 @@ static uint32_t interpolate(uint32_t c0, uint32_t c1, unsigned int numer0, unsig
     auto g1 = (c1 >> 8) & 0xFF;
     auto r1 = (c1 >> 16) & 0xFF;
 
-    auto b = (r0 * numer0 + r1 * numer1) / denom;
+    auto b = (b0 * numer0 + b1 * numer1) / denom;
     auto g = (g0 * numer0 + g1 * numer1) / denom;
-    auto r = (b0 * numer0 + b1 * numer1) / denom;
+    auto r = (r0 * numer0 + r1 * numer1) / denom;
 
     return b | (g << 8) | (r << 16);
 }
