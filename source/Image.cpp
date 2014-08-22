@@ -1,4 +1,4 @@
-#include "graphics/Image.h"
+#include "Image.h"
 #include "Palette.h"
 #include <algorithm>
 

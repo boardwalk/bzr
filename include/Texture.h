@@ -1,7 +1,7 @@
 #ifndef BZR_TEXTURE_H
 #define BZR_TEXTURE_H
 
-#include "graphics/Image.h"
+#include "Image.h"
 #include "Resource.h"
 
 class Texture : public ResourceImpl<ResourceType::Texture>

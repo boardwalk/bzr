@@ -160,15 +160,16 @@ def main():
             cppflags += ' ' + execute('pkg-config', '--cflags', 'jansson')
             ldflags += ' ' + execute('pkg-config', '--libs', 'jansson')
 
-            if sys.platform == 'darwin':
-                ldflags += ' -framework OpenGL'
-            else:
-                ldflags += ' -lGL'
+            if not args.headless:
+                if sys.platform == 'darwin':
+                    ldflags += ' -framework OpenGL'
+                else:
+                    ldflags += ' -lGL'
 
-            if args.oculusvr:
-                ovr_dir = os.path.expanduser('~/Documents/OculusSDK/LibOVR')
-                cppflags += ' -I{}/Src -DOVR_OS_MAC -DOCULUSVR'.format(ovr_dir)
-                ldflags += ' -L{}/Lib/Mac/Release -lovr -framework CoreFoundation -framework CoreGraphics -framework IOKit'.format(ovr_dir)
+                if args.oculusvr:
+                    ovr_dir = os.path.expanduser('~/Documents/OculusSDK/LibOVR')
+                    cppflags += ' -I{}/Src -DOVR_OS_MAC -DOCULUSVR'.format(ovr_dir)
+                    ldflags += ' -L{}/Lib/Mac/Release -lovr -framework CoreFoundation -framework CoreGraphics -framework IOKit'.format(ovr_dir)
 
             if args.release:
                 cppflags += ' -O2 -flto'
@@ -196,6 +197,10 @@ def main():
         link_inputs = []
 
         for dirpath, dirnames, filenames in os.walk('source'):
+
+            if args.headless and splitall(dirpath)[0:2] == ['source', 'graphics']:
+                continue
+
             for filename in filenames:
                 name, ext = os.path.splitext(filename)
                 in_file = os.path.join(dirpath, filename)
