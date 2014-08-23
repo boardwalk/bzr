@@ -37,14 +37,16 @@ public:
     void decompress();
     void applyPalette(const Palette& palette);
     void scale(int newWidth, int newHeight);
+    Image scaleHalf() const;
     void fill(int value);
     void flipVertical();
+	void blit(const Image& source, int x, int y);
 
     ImageFormat::Value format() const;
     int width() const;
     int height() const;
     size_t size() const;
-    const void* data() const;
+    const uint8_t* data() const;
     bool hasAlpha() const;
 
 private:

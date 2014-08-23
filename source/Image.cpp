@@ -36,19 +36,19 @@ static uint8_t interpolateAlpha(uint8_t a0, uint8_t a1, unsigned int numer0, uns
     return uint8_t((a0 * numer0 + a1 * numer1) / denom);
 }
 
-// Converts a 4BPP DXT1-compressed image to a 24BPP BGR image
+// Converts a 4BPP DXT1-compressed image to a 32BPP BGRA image
 static vector<uint8_t> decodeDXT1(const uint8_t* data, int width, int height)
 {
     assert((width & 0x3) == 0);
     assert((height & 0x3) == 0);
 
-    vector<uint8_t> result(width * height * 3);
+    vector<uint8_t> result(width * height * 4);
 
     auto input = data;
     auto inputImageEnd = data + width * height / 2;
 
     auto output = result.data();
-    auto outputStride = width * 3;
+    auto outputStride = width * 4;
     auto outputRowEnd = output + outputStride;
 
     while(input < inputImageEnd)
@@ -77,15 +77,13 @@ static vector<uint8_t> decodeDXT1(const uint8_t* data, int width, int height)
             for(auto px = 0; px < 4; px++)
             {
                 auto cn = (ctab >> (px * 2 + py * 8)) & 0x3;
-                auto p = output + px * 3 + py * outputStride;
-                p[0] = c[cn] & 0xFF;
-                p[1] = (c[cn] >> 8) & 0xFF;
-                p[2] = (c[cn] >> 16) & 0xFF;
+                auto p = output + px * 4 + py * outputStride;
+                *(uint32_t*)p = c[cn] | (0xFF << 24);
             }
         }
 
         input += 8; // 8 bytes per block
-        output += 4 * 3; // 4 pixels across per block
+        output += 4 * 4; // 4 pixels across per block
 
         if(output >= outputRowEnd)
         {
@@ -326,7 +324,7 @@ void Image::decompress()
     if(_format == ImageFormat::DXT1)
     {
         _data = decodeDXT1(_data.data(), _width, _height);
-        _format = ImageFormat::BGR24;
+        _format = ImageFormat::BGRA32;
         updateHasAlpha();
     }
     else if(_format == ImageFormat::DXT3)
@@ -428,6 +426,39 @@ void Image::scale(int newWidth, int newHeight)
     _height = newHeight;
 }
 
+Image Image::scaleHalf() const
+{
+    assert(_format == ImageFormat::BGRA32);
+    assert(_width != 0 && (_width & 1) == 0);
+    assert(_height != 0 && (_height & 1) == 0);
+
+    Image result;
+    result._format = ImageFormat::BGRA32;
+    result._width = _width / 2;
+    result._height = _height / 2;
+    result._data.resize(result._width * result._height * 4);
+    result._hasAlpha = _hasAlpha;
+
+    static const auto PIXEL_SIZE = 4;
+
+    for(auto y = 0; y < result._height; y++)
+    {
+        for(auto x = 0; x < result._width; x++)
+        {
+            for(auto c = 0; c < 4; c++)
+            {
+                int v0 = _data[(y * 2) * _width * PIXEL_SIZE + (x * 2) * PIXEL_SIZE + c];
+                int v1 = _data[(y * 2) * _width * PIXEL_SIZE + (x * 2 + 1) * PIXEL_SIZE + c];
+                int v2 = _data[(y * 2 + 1) * _width * PIXEL_SIZE + (x * 2) * PIXEL_SIZE + c];
+                int v3 = _data[(y * 2 + 1) * _width * PIXEL_SIZE + (x * 2 + 1) * PIXEL_SIZE + c];
+                result._data[y * result._width * PIXEL_SIZE + x * PIXEL_SIZE + c] = (v0 + v1 + v2 + v3) / 4;
+            }
+        }
+    }
+
+    return result;
+}
+
 void Image::flipVertical()
 {
     if(ImageFormat::isCompressed(_format))
@@ -444,6 +475,39 @@ void Image::flipVertical()
         memcpy(rowBuf.data(), _data.data() + y * stride, stride);
         memcpy(_data.data() + stride * y, _data.data() + (_height - y - 1) * stride, stride);
         memcpy(_data.data() + (_height - y - 1) * stride, rowBuf.data(), stride);
+    }
+}
+
+void Image::blit(const Image& source, int x, int y)
+{
+    if(&source == this)
+    {
+        throw runtime_error("Cannot blit image to itself");
+    }
+
+    if(x < 0 || y < 0 || x + source.width() > _width || y + source.height() > _height)
+    {
+        throw runtime_error("Blit destination out of range");
+    }
+
+    if(source.format() != _format)
+    {
+        throw runtime_error("Mismatched format to blit");
+    }
+
+    auto inputStride = source.width() * ImageFormat::bitsPerPixel(source.format()) / 8;
+    auto input = source.data();
+    auto inputEnd = source.data() + source.size();
+
+    auto outputStride = _width * ImageFormat::bitsPerPixel(_format) / 8;    
+    auto output = _data.data() + x * ImageFormat::bitsPerPixel(_format) / 8 + y * outputStride;
+    
+    while(input < inputEnd)
+    {
+        memcpy(output, input, inputStride);
+        
+        input += inputStride;
+        output += outputStride;
     }
 }
 
@@ -473,7 +537,7 @@ size_t Image::size() const
     return _data.size();
 }
 
-const void* Image::data() const
+const uint8_t* Image::data() const
 {
     return _data.data();
 }
