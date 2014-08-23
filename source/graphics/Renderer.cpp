@@ -13,7 +13,7 @@
 #include <algorithm>
 #endif
 
-#define FEET_PER_METER 3.28084
+#define UNITS_PER_METER 1.0
 
 Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 #ifdef OCULUSVR
@@ -262,7 +262,7 @@ static Vec3 convertOvrVector3f(const ovrVector3f& vec)
 {
     // ovr has +x right, +y up, and +z back
     // we have +x right, +y forward, +z up,
-    return Vec3(vec.x, -vec.z, vec.y) * FEET_PER_METER;
+    return Vec3(vec.x, -vec.z, vec.y) * UNITS_PER_METER;
 }
 
 static Mat4 convertOvrMatrix4f(const ovrMatrix4f& mat)
