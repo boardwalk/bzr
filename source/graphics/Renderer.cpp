@@ -80,7 +80,7 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
         throw runtime_error("Bad value for Renderer.textureFiltering");
     }
 
-    _textureMaxAnisotropy = config.getDouble("Renderer.anisotropyLevel", 0.0);
+    _textureMaxAnisotropy = (GLfloat)config.getDouble("Renderer.anisotropyLevel", 0.0);
 
     if(_textureMaxAnisotropy != 0.0f)
     {
@@ -94,7 +94,7 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
         GLfloat driverMaxAnisotropy;
         glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &driverMaxAnisotropy);
 
-        if(_textureMaxAnisotropy < 0.0f or _textureMaxAnisotropy > driverMaxAnisotropy)
+        if(_textureMaxAnisotropy < 0.0f || _textureMaxAnisotropy > driverMaxAnisotropy)
         {
             throw runtime_error("Bad value for Renderer.maxAnisotropyLevel");
         }

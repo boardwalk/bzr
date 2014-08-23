@@ -451,7 +451,7 @@ Image Image::scaleHalf() const
                 int v1 = _data[(y * 2) * _width * PIXEL_SIZE + (x * 2 + 1) * PIXEL_SIZE + c];
                 int v2 = _data[(y * 2 + 1) * _width * PIXEL_SIZE + (x * 2) * PIXEL_SIZE + c];
                 int v3 = _data[(y * 2 + 1) * _width * PIXEL_SIZE + (x * 2 + 1) * PIXEL_SIZE + c];
-                result._data[y * result._width * PIXEL_SIZE + x * PIXEL_SIZE + c] = (v0 + v1 + v2 + v3) / 4;
+                result._data[y * result._width * PIXEL_SIZE + x * PIXEL_SIZE + c] = uint8_t((v0 + v1 + v2 + v3) / 4);
             }
         }
     }
