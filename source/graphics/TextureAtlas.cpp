@@ -1,4 +1,5 @@
 #include "graphics/TextureAtlas.h"
+#include "graphics/Renderer.h"
 #include "Core.h"
 #include "ResourceCache.h"
 #include "Texture.h"
@@ -196,9 +197,9 @@ void TextureAtlas::generate()
     // Upload mipmaps
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, _atlas);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mipmaps.size() - 1);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, Core::get().renderer().textureMinFilter());
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, Core::get().renderer().textureMaxAnisotropy());
 
     for(auto level = 0u; level < mipmaps.size(); level++)
     {

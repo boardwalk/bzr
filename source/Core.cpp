@@ -86,6 +86,7 @@ void Core::init()
     _camera.reset(new Camera());
 #ifndef HEADLESS
     _renderer.reset(new Renderer());
+    _renderer->init();
 #endif
     _landblockManager->setCenter(LandblockId(0x31, 0xD6));
 }

@@ -1,4 +1,5 @@
 #include "graphics/LandblockRenderer.h"
+#include "graphics/Renderer.h"
 #include "graphics/util.h"
 #include "math/Mat3.h"
 #include "Camera.h"
@@ -225,10 +226,10 @@ void LandblockRenderer::initTerrainTexture()
     // allocate terrain texture
     glGenTextures(1, &_terrainTexture);
     glBindTexture(GL_TEXTURE_2D_ARRAY, _terrainTexture);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, Core::get().renderer().textureMinFilter());
+    glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_ANISOTROPY_EXT, Core::get().renderer().textureMaxAnisotropy());
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB8, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_DEPTH, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 
     // populate terrain texture 

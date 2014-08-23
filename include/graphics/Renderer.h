@@ -19,9 +19,12 @@ public:
     Renderer();
     ~Renderer();
 
+    void init();
     void render(double interp);
 
     TextureAtlas& textureAtlas();
+    GLenum textureMinFilter() const;
+    GLfloat textureMaxAnisotropy() const;
 
 private:
     void createWindow();
@@ -32,6 +35,8 @@ private:
 #endif
 
     double _fieldOfView;
+    GLenum _textureMinFilter;
+    GLfloat _textureMaxAnisotropy;
 
     bool _videoInit;
     SDL_Window* _window;

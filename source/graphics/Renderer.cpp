@@ -63,29 +63,42 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 	}
 #endif
 
-#ifdef OCULUSVR
-    initOVR();
+    _fieldOfView = config.getDouble("Renderer.fieldOfView", 90.0);
+
+    auto textureFiltering = config.getString("Renderer.textureFiltering", "trilinear");
+
+    if(textureFiltering == "bilinear")
+    {
+        _textureMinFilter = GL_LINEAR_MIPMAP_NEAREST;
+    }
+    else if(textureFiltering == "trilinear")
+    {
+        _textureMinFilter = GL_LINEAR_MIPMAP_LINEAR;
+    }
+    else
+    {
+        throw runtime_error("Bad value for Renderer.textureFiltering");
+    }
+
+    _textureMaxAnisotropy = config.getDouble("Renderer.anisotropyLevel", 0.0);
+
+    if(_textureMaxAnisotropy != 0.0f)
+    {
+#ifdef _MSC_VER
+        if(!GLEW_EXT_texture_filter_anisotropic)
+        {
+            throw runtime_error("Anisotropic filtering not supported");
+        }
 #endif
 
-    SDL_GL_SetSwapInterval(1); // vsync
-    glEnable(GL_DEPTH_TEST);
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // the default is 4
-    glEnable(GL_PRIMITIVE_RESTART);
-    glPrimitiveRestartIndex(0xFFFF);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        GLfloat driverMaxAnisotropy;
+        glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &driverMaxAnisotropy);
 
-    _textureAtlas.reset(new TextureAtlas());
-    _skyRenderer.reset(new SkyRenderer());
-    _landblockRenderer.reset(new LandblockRenderer());
-    _structureRenderer.reset(new StructureRenderer());
-    _modelRenderer.reset(new ModelRenderer());
-
-    _landblockRenderer->setLightPosition(_skyRenderer->sunVector() * 1000.0);
-
-    _fieldOfView = config.getDouble("Renderer.fieldOfView", 90.0);
+        if(_textureMaxAnisotropy < 0.0f or _textureMaxAnisotropy > driverMaxAnisotropy)
+        {
+            throw runtime_error("Bad value for Renderer.maxAnisotropyLevel");
+        }
+    }
 }
 
 Renderer::~Renderer()
@@ -114,6 +127,31 @@ Renderer::~Renderer()
     {
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
     }
+}
+
+void Renderer::init()
+{
+#ifdef OCULUSVR
+    initOVR();
+#endif
+
+    SDL_GL_SetSwapInterval(1); // vsync
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // the default is 4
+    glEnable(GL_PRIMITIVE_RESTART);
+    glPrimitiveRestartIndex(0xFFFF);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    _textureAtlas.reset(new TextureAtlas());
+    _skyRenderer.reset(new SkyRenderer());
+    _landblockRenderer.reset(new LandblockRenderer());
+    _structureRenderer.reset(new StructureRenderer());
+    _modelRenderer.reset(new ModelRenderer());
+
+    _landblockRenderer->setLightPosition(_skyRenderer->sunVector() * 1000.0);
 }
 
 void Renderer::render(double interp)
@@ -149,6 +187,16 @@ void Renderer::render(double interp)
 TextureAtlas& Renderer::textureAtlas()
 {
     return *_textureAtlas;
+}
+
+GLenum Renderer::textureMinFilter() const
+{
+    return _textureMinFilter;
+}
+
+GLfloat Renderer::textureMaxAnisotropy() const
+{
+    return _textureMaxAnisotropy;
 }
 
 void Renderer::createWindow()
