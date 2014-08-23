@@ -226,8 +226,8 @@ void TextureAtlas::generate()
         }
 
         auto tocOffset = textureInfo->index * 4;
-        atlasTocData[tocOffset + 0] = GLfloat(x) / GLfloat(width);
-        atlasTocData[tocOffset + 1] = GLfloat(y) / GLfloat(height);
+        atlasTocData[tocOffset + 0] = (GLfloat(x) + 0.5f) / GLfloat(width);
+        atlasTocData[tocOffset + 1] = (GLfloat(y) + 0.5f) / GLfloat(height);
         atlasTocData[tocOffset + 2] = GLfloat(image.width() - 1) / GLfloat(width);
         atlasTocData[tocOffset + 3] = GLfloat(image.height() - 1) / GLfloat(height);
 
