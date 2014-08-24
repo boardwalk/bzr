@@ -27,8 +27,6 @@
 #include <algorithm>
 
 #include "graphics/shaders/LandVertexShader.h"
-#include "graphics/shaders/LandTessControlShader.h"
-#include "graphics/shaders/LandTessEvalShader.h"
 #include "graphics/shaders/LandFragmentShader.h"
 
 static const uint32_t LANDSCAPE_TEXTURES[] =
@@ -197,7 +195,7 @@ void LandblockRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 
         landblockRenderData.bind(_program);
 
-        glDrawArrays(GL_PATCHES, 0, landblockRenderData.vertexCount());
+        glDrawArrays(GL_TRIANGLES, 0, landblockRenderData.vertexCount());
     }
 }
 
@@ -210,8 +208,6 @@ void LandblockRenderer::initProgram()
 {
     _program.create();
     _program.attach(GL_VERTEX_SHADER, LandVertexShader);
-    _program.attach(GL_TESS_CONTROL_SHADER, LandTessControlShader);
-    _program.attach(GL_TESS_EVALUATION_SHADER, LandTessEvalShader);
     _program.attach(GL_FRAGMENT_SHADER, LandFragmentShader);
     _program.link();
 
@@ -224,11 +220,8 @@ void LandblockRenderer::initProgram()
     auto blendTexLocation = _program.getUniform("blendTex");
     glUniform1i(blendTexLocation, 1);
 
-    auto offsetTexLocation = _program.getUniform("offsetTex");
-    glUniform1i(offsetTexLocation, 2);
-
     auto normalTexLocation = _program.getUniform("normalTex");
-    glUniform1i(normalTexLocation, 3);
+    glUniform1i(normalTexLocation, 2);
 
     // lighting parameters
     glUniform3f(_program.getUniform("lightIntensity"), 1.0f, 1.0f, 1.0f);

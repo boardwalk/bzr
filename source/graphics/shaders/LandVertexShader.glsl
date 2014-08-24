@@ -27,6 +27,8 @@ layout(location = 6) in vec4 terrainInfo5;
 
 out FragmentData
 {
+    vec3 position;
+    vec2 normalTexCoord;
     vec2 terrainTexCoord;
     vec4 terrainInfo1;
     vec4 terrainInfo2;
@@ -35,14 +37,26 @@ out FragmentData
     vec4 terrainInfo5;
 } fragData;
 
+#include "graphics/shaders/LandCommon.glsl"
+
+const float WORLD_RADIUS = 10000.0;
+
 void main()
 {
+    vec4 modelPos = vec4(vertexPosition, 1.0) * vec4(24.0, 24.0, 2.0, 1.0);
+
+    vec4 worldPos = modelMatrix * modelPos;
+    float angle = atan(distance(worldPos.xy, cameraPosition.xy) / WORLD_RADIUS);
+    modelPos.z = modelPos.z - WORLD_RADIUS * (1.0 - cos(angle));
+
+    gl_Position = modelViewProjectionMatrix * modelPos;
+
+    fragData.position = (modelViewMatrix * modelPos).xyz;
+    fragData.normalTexCoord = modelPos.xy / 192.0;
     fragData.terrainTexCoord = terrainTexCoord;
     fragData.terrainInfo1 = terrainInfo1;
     fragData.terrainInfo2 = terrainInfo2;
     fragData.terrainInfo3 = terrainInfo3;
     fragData.terrainInfo4 = terrainInfo4;
     fragData.terrainInfo5 = terrainInfo5;
-
-    gl_Position = vec4(vertexPosition, 1.0) * vec4(24.0, 24.0, 2.0, 1.0);
 }

@@ -22,7 +22,6 @@
 LandblockRenderData::LandblockRenderData(const Landblock& landblock)
 {
     initGeometry(landblock);
-    initOffsetTexture(landblock);
     initNormalTexture(landblock);
 }
 
@@ -30,7 +29,6 @@ LandblockRenderData::~LandblockRenderData()
 {
     glDeleteVertexArrays(1, &_vertexArray);
     glDeleteBuffers(1, &_vertexBuffer);
-    glDeleteTextures(1, &_offsetTexture);
     glDeleteTextures(1, &_normalTexture);
 }
 
@@ -39,16 +37,7 @@ void LandblockRenderData::bind(Program& program)
     glBindVertexArray(_vertexArray);
 
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, _offsetTexture);
-
-    glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, _normalTexture);
-
-    auto offsetBaseLoc = program.getUniform("offsetBase");
-    glUniform1f(offsetBaseLoc, _offsetBase);
-
-    auto offsetScaleLoc = program.getUniform("offsetScale");
-    glUniform1f(offsetScaleLoc, _offsetScale);
 }
 
 GLsizei LandblockRenderData::vertexCount() const
@@ -291,19 +280,6 @@ void LandblockRenderData::initGeometry(const Landblock& landblock)
     glEnableVertexAttribArray(4);
     glEnableVertexAttribArray(5);
     glEnableVertexAttribArray(6);
-}
-
-void LandblockRenderData::initOffsetTexture(const Landblock& landblock)
-{
-    glGenTextures(1, &_offsetTexture);
-    glBindTexture(GL_TEXTURE_2D, _offsetTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R16, Landblock::OFFSET_MAP_SIZE, Landblock::OFFSET_MAP_SIZE, 0, GL_RED, GL_UNSIGNED_SHORT, landblock.offsetMap());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // default is GL_NEAREST_MIPMAP_LINEAR
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    _offsetBase = GLfloat(landblock.offsetMapBase());
-    _offsetScale = GLfloat(landblock.offsetMapScale());
 }
 
 void LandblockRenderData::initNormalTexture(const Landblock& landblock)

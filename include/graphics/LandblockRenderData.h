@@ -36,16 +36,11 @@ public:
 
 private:
     void initGeometry(const Landblock& landblock);
-    void initOffsetTexture(const Landblock& landblock);
     void initNormalTexture(const Landblock& landblock);
 
     GLuint _vertexArray;
     GLuint _vertexBuffer;
     GLsizei _vertexCount;
-
-    GLuint _offsetTexture;
-    GLfloat _offsetBase;
-    GLfloat _offsetScale;
 
     GLuint _normalTexture;
 };
