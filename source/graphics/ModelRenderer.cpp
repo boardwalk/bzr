@@ -22,8 +22,10 @@ struct CompareByDepth
 
     bool operator()(const ModelRenderer::DepthSortedModel& a, const ModelRenderer::DepthSortedModel& b) const
     {
+        // FIXME This is total bullshit right now
         // descending order
-        return _cameraPos.squareDist(a.worldPos) > _cameraPos.squareDist(b.worldPos);
+        //return _cameraPos.squareDist(a.worldPos) > _cameraPos.squareDist(b.worldPos);
+        return a.worldMat.m[0] < b.worldMat.m[0];
     }
 
     Vec3 _cameraPos;
@@ -70,14 +72,36 @@ void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 
         for(auto& object : pair.second.objects())
         {
-            renderOne(const_cast<ResourcePtr&>(object.resource), projectionMat, viewMat, landblockPosition + object.position, object.rotation);
+            Mat4 worldTransMat;
+            worldTransMat.makeTranslation(landblockPosition + object.position);
+
+            Mat4 worldRotMat;
+            worldRotMat.makeRotation(object.rotation);
+
+            auto worldMat = worldTransMat * worldRotMat;
+
+            renderOne(const_cast<ResourcePtr&>(object.resource),
+                projectionMat,
+                viewMat,
+                worldMat);
         }
 
         for(auto& structure : pair.second.structures())
         {
             for(auto& object : structure.objects())
             {
-                renderOne(const_cast<ResourcePtr&>(object.resource), projectionMat, viewMat, landblockPosition + object.position, object.rotation);
+                Mat4 worldTransMat;
+                worldTransMat.makeTranslation(landblockPosition + object.position);
+
+                Mat4 worldRotMat;
+                worldRotMat.makeRotation(object.rotation);
+
+                auto worldMat = worldTransMat * worldRotMat;
+
+                renderOne(const_cast<ResourcePtr&>(object.resource),
+                    projectionMat,
+                    viewMat,
+                    worldMat);
             }
         }
     }
@@ -87,54 +111,76 @@ void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 
     for(auto& depthSortedModel : _depthSortList)
     {
-        renderModel(*depthSortedModel.model, projectionMat, viewMat, depthSortedModel.worldPos, depthSortedModel.worldRot, /*firstPass*/ false);
+        renderModel(*depthSortedModel.model,
+            projectionMat,
+            viewMat,
+            depthSortedModel.worldMat,
+            /*firstPass*/ false);
     }
 }
 
-void ModelRenderer::renderOne(ResourcePtr& resource, const Mat4& projectionMat, const Mat4& viewMat, const Vec3& position, const Quat& rotation)
+void ModelRenderer::renderOne(ResourcePtr& resource,
+    const Mat4& projectionMat,
+    const Mat4& viewMat, 
+    const Mat4& worldMat)
 {
     if(resource->resourceType() == ResourceType::ModelGroup)
     {
-        renderModelGroup(resource->cast<ModelGroup>(), 0xFFFFFFFF, projectionMat, viewMat, position, rotation);
+        renderModelGroup(resource->cast<ModelGroup>(),
+            projectionMat,
+            viewMat,
+            worldMat);
     }
     else if(resource->resourceType() == ResourceType::Model)
     {
-        renderModel(resource->cast<Model>(), projectionMat, viewMat, position, rotation, /*firstPass*/ true);
+        renderModel(resource->cast<Model>(),
+            projectionMat,
+            viewMat,
+            worldMat,
+            /*firstPass*/ true);
     }
 }
 
-void ModelRenderer::renderModelGroup(ModelGroup& modelGroup, uint32_t parent, const Mat4& projectionMat, const Mat4& viewMat, const Vec3& position, const Quat& rotation)
+void ModelRenderer::renderModelGroup(ModelGroup& modelGroup,
+    const Mat4& projectionMat,
+    const Mat4& viewMat,
+    const Mat4& worldMat)
 {
-    for(auto i = 0u; i < modelGroup.modelInfos().size(); i++)
+    for(auto& modelInfo : modelGroup.modelInfos())
     {
-        auto& modelInfo = modelGroup.modelInfos()[i];
+        Mat4 subWorldTransMat;
+        subWorldTransMat.makeTranslation(modelInfo.position);
 
-        if(modelInfo.parent == parent)
-        {
-            // fix position, rotation!
-            renderOne(const_cast<ResourcePtr&>(modelInfo.resource), projectionMat, viewMat, position + modelInfo.position, rotation);
-            renderModelGroup(modelGroup, i, projectionMat, viewMat, position + modelInfo.position, rotation);
-        }
+        Mat4 subWorldRotMat;
+        subWorldRotMat.makeRotation(modelInfo.rotation);
+
+        Mat4 subWorldScaleMat;
+        subWorldScaleMat.makeScale(modelInfo.scale);
+
+        auto subWorldMat = subWorldTransMat * subWorldRotMat * subWorldScaleMat;
+
+        // fix position, rotation!
+        renderOne(const_cast<ResourcePtr&>(modelInfo.resource),
+            projectionMat,
+            viewMat,
+            worldMat * subWorldMat);
     }
 }
 
-void ModelRenderer::renderModel(Model& model, const Mat4& projectionMat, const Mat4& viewMat, const Vec3& position, const Quat& rotation, bool firstPass)
+void ModelRenderer::renderModel(Model& model,
+    const Mat4& projectionMat,
+    const Mat4& viewMat,
+    const Mat4& worldMat,
+    bool firstPass)
 {
     if(firstPass && model.needsDepthSort())
     {
-        DepthSortedModel depthSortedModel = { &model, position, rotation };
+        DepthSortedModel depthSortedModel = { &model, worldMat };
         _depthSortList.push_back(depthSortedModel);
         return;
     }
 
-    Mat4 modelRotationMat;
-    modelRotationMat.makeRotation(rotation);
-
-    Mat4 modelTranslationMat;
-    modelTranslationMat.makeTranslation(position);
-
-    auto modelMat = modelTranslationMat * modelRotationMat;
-    auto modelViewProjectionMat = projectionMat * viewMat * modelMat;
+    auto modelViewProjectionMat = projectionMat * viewMat * worldMat;
 
     loadMat4ToUniform(modelViewProjectionMat, _program.getUniform("modelViewProjectionMatrix"));
 

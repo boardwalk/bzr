@@ -26,6 +26,16 @@ void Mat4::makeTranslation(const Vec3& v)
     m[14] = v.z;
 }
 
+void Mat4::makeScale(const Vec3& v)
+{
+    memset(m, 0, sizeof(m));
+
+    m[0] = v.x;
+    m[5] = v.y;
+    m[10] = v.z;
+    m[15] = 1.0;
+}
+
 void Mat4::makeRotation(const Quat& q)
 {
     m[0] = 1.0 - 2.0 * (q.y * q.y + q.z * q.z);

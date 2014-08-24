@@ -10,13 +10,14 @@ class ModelGroup : public ResourceImpl<ResourceType::ModelGroup>
 public:
     struct ModelInfo
     {
-        ModelInfo() : parent(0xFFFFFFFF)
+        ModelInfo() : parent(0xFFFFFFFF), scale(1.0, 1.0, 1.0)
         {}
 
         ResourcePtr resource;
         uint32_t parent;
         Vec3 position;
         Quat rotation;
+        Vec3 scale;
     };
 
     ModelGroup(uint32_t id, const void* data, size_t size);

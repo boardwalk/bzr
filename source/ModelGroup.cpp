@@ -33,11 +33,11 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
 
     if(flags & 2)
     {
-        for(auto i = 0u; i < modelCount; i++)
+        for(auto& modelInfo : _modelInfos)
         {
-            reader.read<uint32_t>();
-            reader.read<uint32_t>();
-            reader.read<uint32_t>();
+            modelInfo.scale.x = reader.read<float>();
+            modelInfo.scale.y = reader.read<float>();
+            modelInfo.scale.z = reader.read<float>();
         }
     }
 
