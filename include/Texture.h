@@ -18,6 +18,7 @@
 #ifndef BZR_TEXTURE_H
 #define BZR_TEXTURE_H
 
+#include "Destructable.h"
 #include "Image.h"
 #include "Resource.h"
 
@@ -29,10 +30,12 @@ public:
 
     const Image& image() const;
     const ResourcePtr& palette() const;
+    unique_ptr<Destructable>& renderData();
 
 private:
     Image _image;
     ResourcePtr _palette;
+    unique_ptr<Destructable> _renderData;
 };
 
 #endif

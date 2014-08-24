@@ -76,3 +76,8 @@ const ResourcePtr& Texture::palette() const
 {
     return _palette;
 }
+
+unique_ptr<Destructable>& Texture::renderData()
+{
+    return _renderData;
+}

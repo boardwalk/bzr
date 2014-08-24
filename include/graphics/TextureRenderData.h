@@ -15,36 +15,24 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_GRAPHICS_TEXTUREATLAS_H
-#define BZR_GRAPHICS_TEXTUREATLAS_H
+#ifndef BZR_GRAPHICS_TEXTURERENDERDATA_H
+#define BZR_GRAPHICS_TEXTURERENDERDATA_H
 
+#include "Destructable.h"
 #include "Noncopyable.h"
-#include "Resource.h"
-#include <unordered_map>
 
-class TextureAtlas : Noncopyable
+class Texture;
+
+class TextureRenderData : public Destructable, Noncopyable
 {
 public:
-    struct TextureInfo
-    {
-        ResourcePtr resource;
-        uint32_t index;
-    };
+    TextureRenderData(const Texture& texture);
+    ~TextureRenderData();
 
-    TextureAtlas();
-    ~TextureAtlas();
-
-    int get(uint32_t resourceId);
     void bind();
 
 private:
-    void generate();
-
-    GLuint _atlas;
-    GLuint _atlasToc;
-    int _nextIndex;
-    int _buildIndex;
-    unordered_map<uint32_t, TextureInfo> _textures;
+    GLuint _handle;
 };
 
 #endif

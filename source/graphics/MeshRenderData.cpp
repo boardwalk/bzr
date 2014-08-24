@@ -17,11 +17,22 @@
  */
 #include "graphics/MeshRenderData.h"
 #include "graphics/Renderer.h"
-#include "graphics/TextureAtlas.h"
+#include "graphics/TextureRenderData.h"
 #include "Core.h"
 #include "Model.h"
 #include "Structure.h"
 #include "StructureGeom.h"
+#include "Texture.h"
+#include "TextureLookup5.h"
+#include "TextureLookup8.h"
+
+struct SortByTexIndex
+{
+    bool operator()(const TriangleFan* a, const TriangleFan* b)
+    {
+        return a->texIndex < b->texIndex;
+    }
+};
 
 MeshRenderData::MeshRenderData(const Model& model)
 {
@@ -42,44 +53,73 @@ MeshRenderData::~MeshRenderData()
     glDeleteBuffers(1, &_indexBuffer);
 }
 
-void MeshRenderData::bind()
+void MeshRenderData::render()
 {
     glBindVertexArray(_vertexArray);
-}
 
-GLsizei MeshRenderData::indexCount() const
-{
-    return _indexCount;
-}
+    auto indexBase = 0;
 
-void MeshRenderData::initGeometry(const vector<ResourcePtr>& textures, const vector<Vertex>& vertices, const vector<TriangleFan>& triangleFans)
-{
-    // vx, vy, vz, nx, ny, nz, s, t, p
-    static const int COMPONENTS_PER_VERTEX = 9;
-
-    vector<int> textureIndices;
-
-    for(auto& texture : textures)
+    for(auto& batch : _batches)
     {
-        textureIndices.push_back(Core::get().renderer().textureAtlas().get(texture->resourceId()));
+        auto& texture = const_cast<Texture&>(batch.texture->cast<TextureLookup8>().textureLookup5().texture());
+
+        if(!texture.renderData())
+        {
+            texture.renderData().reset(new TextureRenderData(texture));
+        }
+
+        auto& renderData = (TextureRenderData&)*texture.renderData();
+
+        glActiveTexture(GL_TEXTURE0);
+        renderData.bind();
+
+        glDrawElements(GL_TRIANGLE_FAN, batch.indexCount, GL_UNSIGNED_SHORT, (void*)(indexBase * sizeof(uint16_t)));
+
+        indexBase += batch.indexCount;
     }
+}
 
-    // we're duplicating a bit to make all this fit the structure of modern graphics APIs
-    // the models are so low resolution it should not matter
+void MeshRenderData::initGeometry(
+    const vector<ResourcePtr>& textures,
+    const vector<Vertex>& vertices,
+    const vector<TriangleFan>& triangleFans)
+{
+    // vx, vy, vz, nx, ny, nz, s, t
+    static const int COMPONENTS_PER_VERTEX = 8;
 
-    vector<float> vertexData;
-    vector<uint16_t> indexData;
+    // Sort triangle fans by texture
+    vector<const TriangleFan*> sortedTriangleFans;
 
     for(auto& triangleFan : triangleFans)
     {
-        if(!indexData.empty())
+        sortedTriangleFans.push_back(&triangleFan);
+    }
+
+    sort(sortedTriangleFans.begin(), sortedTriangleFans.end(), SortByTexIndex());
+
+    // Build batches
+    vector<float> vertexData;
+    vector<uint16_t> indexData;
+
+    for(auto triangleFan : sortedTriangleFans)
+    {
+        if(_batches.empty() || textures[triangleFan->texIndex].get() != _batches.back().texture.get())
         {
-            indexData.push_back(0xFFFF);
+            // Start a new batch
+            Batch batch = { textures[triangleFan->texIndex], 0 };
+            _batches.push_back(batch);
         }
-        
-        for(auto& index : triangleFan.indices)
+        else
+        {
+            // Starting a new triangle fan in existing batch
+            indexData.push_back(0xFFFF);
+            _batches.back().indexCount++;
+        }
+
+        for(auto& index : triangleFan->indices)
         {
             indexData.push_back(uint16_t(vertexData.size() / COMPONENTS_PER_VERTEX));
+            _batches.back().indexCount++;
 
             auto& vertex = vertices[index.vertexIndex];
 
@@ -93,21 +133,16 @@ void MeshRenderData::initGeometry(const vector<ResourcePtr>& textures, const vec
 
             if(vertex.texCoords.empty())
             {
-                vertexData.push_back(1.0f);
-                vertexData.push_back(1.0f);
+                vertexData.push_back(0.0f);
+                vertexData.push_back(0.0f);
             }
             else
             {
-                vertexData.push_back(1.0f - float(vertex.texCoords[index.texCoordIndex].x));
-                vertexData.push_back(1.0f - float(vertex.texCoords[index.texCoordIndex].y));
+                vertexData.push_back(float(vertex.texCoords[index.texCoordIndex].x));
+                vertexData.push_back(float(vertex.texCoords[index.texCoordIndex].y));
             }
-
-            assert((size_t)triangleFan.texIndex < textureIndices.size());
-            vertexData.push_back((float)textureIndices[triangleFan.texIndex]);
         }
     }
-
-    _indexCount = GLsizei(indexData.size());
 
     glGenVertexArrays(1, &_vertexArray);
     glBindVertexArray(_vertexArray);
@@ -122,7 +157,7 @@ void MeshRenderData::initGeometry(const vector<ResourcePtr>& textures, const vec
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * COMPONENTS_PER_VERTEX, nullptr);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * COMPONENTS_PER_VERTEX, (GLvoid*)(sizeof(float) * 3));
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(float) * COMPONENTS_PER_VERTEX, (GLvoid*)(sizeof(float) * 6));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * COMPONENTS_PER_VERTEX, (GLvoid*)(sizeof(float) * 6));
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);

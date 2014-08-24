@@ -34,17 +34,21 @@ public:
     MeshRenderData(const Structure& structure);
     ~MeshRenderData();
 
-    void bind();
-
-    GLsizei indexCount() const;
+    void render();
 
 private:
+    struct Batch
+    {
+        ResourcePtr texture;
+        int indexCount;
+    };
+
     void initGeometry(const vector<ResourcePtr>& textures, const vector<Vertex>& vertices, const vector<TriangleFan>& triangleFans);
     
     GLuint _vertexArray;
     GLuint _vertexBuffer;
     GLuint _indexBuffer;
-    GLsizei _indexCount;
+    vector<Batch> _batches;
 };
 
 #endif

@@ -18,7 +18,6 @@
 #include "graphics/ModelRenderer.h"
 #include "graphics/MeshRenderData.h"
 #include "graphics/Renderer.h"
-#include "graphics/TextureAtlas.h"
 #include "graphics/util.h"
 #include "Camera.h"
 #include "Core.h"
@@ -57,11 +56,8 @@ ModelRenderer::ModelRenderer()
 
     _program.use();
 
-    auto atlasLocation = _program.getUniform("atlas");
-    glUniform1i(atlasLocation, 0);
-
-    auto atlasTocLocation = _program.getUniform("atlasToc");
-    glUniform1i(atlasTocLocation, 1);
+    auto texLocation = _program.getUniform("tex");
+    glUniform1i(texLocation, 0);
 }
 
 ModelRenderer::~ModelRenderer()
@@ -72,8 +68,6 @@ ModelRenderer::~ModelRenderer()
 void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 {
     _program.use();
-
-    Core::get().renderer().textureAtlas().bind();
 
     auto& landblockManager = Core::get().landblockManager();
 
@@ -208,7 +202,5 @@ void ModelRenderer::renderModel(Model& model,
 
     auto& renderData = (MeshRenderData&)*model.renderData();
 
-    renderData.bind();
-
-    glDrawElements(GL_TRIANGLE_FAN, renderData.indexCount(), GL_UNSIGNED_SHORT, nullptr);
+    renderData.render();
 }

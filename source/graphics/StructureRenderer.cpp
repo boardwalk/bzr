@@ -18,7 +18,6 @@
 #include "graphics/StructureRenderer.h"
 #include "graphics/MeshRenderData.h"
 #include "graphics/Renderer.h"
-#include "graphics/TextureAtlas.h"
 #include "graphics/util.h"
 #include "math/Mat4.h"
 #include "Core.h"
@@ -52,8 +51,6 @@ StructureRenderer::~StructureRenderer()
 void StructureRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 {
     _program.use();
-
-    Core::get().renderer().textureAtlas().bind();
 
     auto& landblockManager = Core::get().landblockManager();
 
@@ -91,7 +88,5 @@ void StructureRenderer::renderStructure(Structure& structure, const Mat4& projec
 
     auto& renderData = (MeshRenderData&)*structure.renderData();
 
-    renderData.bind();
-
-    glDrawElements(GL_TRIANGLE_FAN, renderData.indexCount(), GL_UNSIGNED_SHORT, nullptr);
+    renderData.render();
 }

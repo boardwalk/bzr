@@ -20,7 +20,6 @@
 #include "graphics/ModelRenderer.h"
 #include "graphics/SkyRenderer.h"
 #include "graphics/StructureRenderer.h"
-#include "graphics/TextureAtlas.h"
 #include "Camera.h"
 #include "Config.h"
 #include "Core.h"
@@ -124,7 +123,6 @@ Renderer::~Renderer()
     _landblockRenderer.reset();
     _structureRenderer.reset();
     _skyRenderer.reset();
-    _textureAtlas.reset();
 
 #ifdef OCULUSVR
     cleanupOVR();
@@ -162,7 +160,6 @@ void Renderer::init()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    _textureAtlas.reset(new TextureAtlas());
     _skyRenderer.reset(new SkyRenderer());
     _landblockRenderer.reset(new LandblockRenderer());
     _structureRenderer.reset(new StructureRenderer());
@@ -199,11 +196,6 @@ void Renderer::render(double interp)
     _modelRenderer->render(projectionMat, viewMat);
 
     SDL_GL_SwapWindow(_window);
-}
-
-TextureAtlas& Renderer::textureAtlas()
-{
-    return *_textureAtlas;
 }
 
 GLenum Renderer::textureMinFilter() const
