@@ -25,6 +25,7 @@
 #include "Texture.h"
 #include "TextureLookup5.h"
 #include "TextureLookup8.h"
+#include <algorithm>
 
 struct SortByTexIndex
 {
@@ -109,7 +110,7 @@ void MeshRenderData::initGeometry(
             Batch batch = { textures[triangleFan->texIndex], 0 };
             _batches.push_back(batch);
         }
-        else
+        else if(_batches.back().indexCount != 0)
         {
             // Starting a new triangle fan in existing batch
             indexData.push_back(0xFFFF);

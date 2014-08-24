@@ -193,7 +193,7 @@ void LandblockRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 
         auto& landblockRenderData = *(LandblockRenderData*)renderData.get();
 
-        landblockRenderData.bind(_program);
+        landblockRenderData.bind();
 
         glDrawArrays(GL_TRIANGLES, 0, landblockRenderData.vertexCount());
     }

@@ -30,7 +30,7 @@ public:
     LandblockRenderData(const Landblock& landblock);
     ~LandblockRenderData();
 
-    void bind(Program& program);
+    void bind();
 
     GLsizei vertexCount() const;
 

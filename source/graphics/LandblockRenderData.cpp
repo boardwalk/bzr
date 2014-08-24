@@ -32,7 +32,7 @@ LandblockRenderData::~LandblockRenderData()
     glDeleteTextures(1, &_normalTexture);
 }
 
-void LandblockRenderData::bind(Program& program)
+void LandblockRenderData::bind()
 {
     glBindVertexArray(_vertexArray);
 

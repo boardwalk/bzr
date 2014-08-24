@@ -38,13 +38,13 @@ TextureRenderData::TextureRenderData(const Texture& texture)
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, image.width(), image.height(), 0, GL_BGR, GL_UNSIGNED_BYTE, image.data());
             break;
         case ImageFormat::DXT1:
-            glCompressedTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, image.width(), image.height(), 0, image.size(), image.data());
+            glCompressedTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, image.width(), image.height(), 0, (GLsizei)image.size(), image.data());
             break;
         case ImageFormat::DXT3:
-            glCompressedTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, image.width(), image.height(), 0, image.size(), image.data());
+            glCompressedTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, image.width(), image.height(), 0, (GLsizei)image.size(), image.data());
             break;
         case ImageFormat::DXT5:
-            glCompressedTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, image.width(), image.height(), 0, image.size(), image.data());
+            glCompressedTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, image.width(), image.height(), 0, (GLsizei)image.size(), image.data());
             break;
         default:
             throw runtime_error("Unsupported image format");
