@@ -20,6 +20,7 @@
 #include "graphics/Renderer.h"
 #include "graphics/util.h"
 #include "math/Mat4.h"
+#include "Camera.h"
 #include "Core.h"
 #include "LandblockManager.h"
 
@@ -52,6 +53,9 @@ void StructureRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 
     auto& landblockManager = Core::get().landblockManager();
 
+    auto cameraPosition = Core::get().camera().position();
+    glUniform4f(_program.getUniform("cameraPosition"), GLfloat(cameraPosition.x), GLfloat(cameraPosition.y), GLfloat(cameraPosition.z), 1.0f);
+
     for(auto& pair : landblockManager)
     {
         auto dx = pair.first.x() - landblockManager.center().x();
@@ -77,6 +81,7 @@ void StructureRenderer::renderStructure(Structure& structure, const Mat4& projec
     auto worldMat = worldTranslationMat * worldRotationMat;
     auto worldViewProjectionMat = projectionMat * viewMat * worldMat;
 
+    loadMat4ToUniform(worldMat, _program.getUniform("worldMatrix"));
     loadMat4ToUniform(worldViewProjectionMat, _program.getUniform("worldViewProjectionMatrix"));
 
     if(!structure.renderData())

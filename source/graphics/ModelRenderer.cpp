@@ -70,6 +70,9 @@ void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 
     auto& landblockManager = Core::get().landblockManager();
 
+    auto cameraPosition = Core::get().camera().position();
+    glUniform4f(_program.getUniform("cameraPosition"), GLfloat(cameraPosition.x), GLfloat(cameraPosition.y), GLfloat(cameraPosition.z), 1.0f);
+
     // first pass, render solid objects and collect objects that need depth sorting
     _depthSortList.clear();
 
@@ -193,6 +196,7 @@ void ModelRenderer::renderModel(Model& model,
 
     auto worldViewProjectionMat = projectionMat * viewMat * worldMat;
 
+    loadMat4ToUniform(worldMat, _program.getUniform("worldMatrix"));
     loadMat4ToUniform(worldViewProjectionMat, _program.getUniform("worldViewProjectionMatrix"));
 
     if(!model.renderData())
