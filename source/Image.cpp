@@ -260,14 +260,14 @@ void Image::updateHasAlpha()
 {
     _hasAlpha = false;
 
+    auto input = _data.data();
+    auto inputEnd = _data.data() + _data.size();
+
     if(_format == ImageFormat::BGRA32)
     {
-        auto input = _data.data() + 3;
-        auto inputEnd = _data.data() + _width * _height + 4;
-
         while(input < inputEnd)
         {
-            if(*input != 0xFF)
+            if(input[3] != 0xFF)
             {
                 _hasAlpha = true;
                 return;
@@ -276,11 +276,35 @@ void Image::updateHasAlpha()
             input += 4;
         }
     }
-    else if(_format == ImageFormat::A8)
+    else if(_format == ImageFormat::DXT1)
     {
+        while(input < inputEnd)
+        {
+            auto c0 = *(const uint16_t*)input;
+            auto c1 = *(const uint16_t*)(input + 2);
+            auto ctab = *(const uint32_t*)(input + 4);
+
+            if(c0 <= c1)
+            {
+                while(ctab)
+                {
+                    if((ctab & 0x3) == 0x3)
+                    {
+                        _hasAlpha = true;
+                        return;
+                    }
+
+                    ctab >>= 2;
+                }
+            }
+
+            input += 8;
+        }
+    }
+    else if(_format == ImageFormat::A8 || _format == ImageFormat::DXT3 || _format == ImageFormat::DXT5)
+    {
+        // There's no reason to use these formats unless you have alpha
+        // So let's just assume it's they do
         _hasAlpha = true;
     }
-
-    // Compressed and paletted textures may well have alpha
-    // We just don't know at this point
 }

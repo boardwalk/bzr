@@ -19,6 +19,7 @@
 #include "graphics/MeshRenderData.h"
 #include "graphics/Renderer.h"
 #include "graphics/util.h"
+#include "math/Vec4.h"
 #include "Camera.h"
 #include "Core.h"
 #include "LandblockManager.h"
@@ -38,10 +39,8 @@ struct CompareByDepth
 
     bool operator()(const ModelRenderer::DepthSortedModel& a, const ModelRenderer::DepthSortedModel& b) const
     {
-        // FIXME This is total bullshit right now
         // descending order
-        //return _cameraPos.squareDist(a.worldPos) > _cameraPos.squareDist(b.worldPos);
-        return a.worldMat.m[0] < b.worldMat.m[0];
+        return _cameraPos.squareDist(a.worldPos) > _cameraPos.squareDist(b.worldPos);
     }
 
     Vec3 _cameraPos;
@@ -186,7 +185,8 @@ void ModelRenderer::renderModel(Model& model,
 {
     if(firstPass && model.needsDepthSort())
     {
-        DepthSortedModel depthSortedModel = { &model, worldMat };
+        auto worldPos = worldMat * Vec4(0.0, 0.0, 0.0, 1.0);
+        DepthSortedModel depthSortedModel = { &model, worldMat, Vec3(worldPos.x, worldPos.y, worldPos.z) };
         _depthSortList.push_back(depthSortedModel);
         return;
     }

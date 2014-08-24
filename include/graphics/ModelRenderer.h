@@ -20,6 +20,7 @@
 
 #include "graphics/Program.h"
 #include "math/Mat4.h"
+#include "math/Vec3.h"
 #include "Noncopyable.h"
 #include "Resource.h"
 
@@ -33,6 +34,7 @@ public:
     {
         Model* model;
         Mat4 worldMat;
+        Vec3 worldPos;
     };
 
     ModelRenderer();
