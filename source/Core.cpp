@@ -67,7 +67,7 @@ Renderer& Core::renderer()
 }
 #endif
 
-Core::Core() : _done(false), _config(nullptr)
+Core::Core() : _done(false)
 {}
 
 void Core::init()
