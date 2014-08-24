@@ -23,10 +23,10 @@ layout(location = 2) in vec2 texCoord;
 
 out vec2 fragTexCoord;
 
-uniform mat4 modelViewProjectionMatrix;
+uniform mat4 worldViewProjectionMatrix;
 
 void main()
 {
-    gl_Position = modelViewProjectionMatrix * vec4(vertexPosition, 1.0);
+    gl_Position = worldViewProjectionMatrix * vec4(vertexPosition, 1.0);
     fragTexCoord = texCoord;
 }

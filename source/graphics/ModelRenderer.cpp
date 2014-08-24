@@ -191,9 +191,9 @@ void ModelRenderer::renderModel(Model& model,
         return;
     }
 
-    auto modelViewProjectionMat = projectionMat * viewMat * worldMat;
+    auto worldViewProjectionMat = projectionMat * viewMat * worldMat;
 
-    loadMat4ToUniform(modelViewProjectionMat, _program.getUniform("modelViewProjectionMatrix"));
+    loadMat4ToUniform(worldViewProjectionMat, _program.getUniform("worldViewProjectionMatrix"));
 
     if(!model.renderData())
     {

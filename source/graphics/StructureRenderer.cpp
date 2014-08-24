@@ -36,11 +36,9 @@ StructureRenderer::StructureRenderer()
 
     _program.use();
 
-    auto atlasLocation = _program.getUniform("atlas");
-    glUniform1i(atlasLocation, 0);
 
-    auto atlasTocLocation = _program.getUniform("atlasToc");
-    glUniform1i(atlasTocLocation, 1);
+    auto texLocation = _program.getUniform("tex");
+    glUniform1i(texLocation, 0);
 }
 
 StructureRenderer::~StructureRenderer()
@@ -70,16 +68,16 @@ void StructureRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 
 void StructureRenderer::renderStructure(Structure& structure, const Mat4& projectionMat, const Mat4& viewMat, const Vec3& position, const Quat& rotation)
 {
-    Mat4 modelRotationMat;
-    modelRotationMat.makeRotation(rotation);
+    Mat4 worldRotationMat;
+    worldRotationMat.makeRotation(rotation);
 
-    Mat4 modelTranslationMat;
-    modelTranslationMat.makeTranslation(position);
+    Mat4 worldTranslationMat;
+    worldTranslationMat.makeTranslation(position);
 
-    auto modelMat = modelTranslationMat * modelRotationMat;
-    auto modelViewProjectionMat = projectionMat * viewMat * modelMat;
+    auto worldMat = worldTranslationMat * worldRotationMat;
+    auto worldViewProjectionMat = projectionMat * viewMat * worldMat;
 
-    loadMat4ToUniform(modelViewProjectionMat, _program.getUniform("modelViewProjectionMatrix"));
+    loadMat4ToUniform(worldViewProjectionMat, _program.getUniform("worldViewProjectionMatrix"));
 
     if(!structure.renderData())
     {

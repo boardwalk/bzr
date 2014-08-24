@@ -45,13 +45,13 @@ void main()
 {
     vec4 modelPos = vec4(vertexPosition, 1.0) * vec4(24.0, 24.0, 2.0, 1.0);
 
-    vec4 worldPos = modelMatrix * modelPos;
+    vec4 worldPos = worldMatrix * modelPos;
     float angle = atan(distance(worldPos.xy, cameraPosition.xy) / WORLD_RADIUS);
     modelPos.z = modelPos.z - WORLD_RADIUS * (1.0 - cos(angle));
 
-    gl_Position = modelViewProjectionMatrix * modelPos;
+    gl_Position = worldViewProjectionMatrix * modelPos;
 
-    fragData.position = (modelViewMatrix * modelPos).xyz;
+    fragData.position = (worldViewMatrix * modelPos).xyz;
     fragData.normalTexCoord = modelPos.xy / 192.0;
     fragData.terrainTexCoord = terrainTexCoord;
     fragData.terrainInfo1 = terrainInfo1;

@@ -173,16 +173,16 @@ void LandblockRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
         auto dx = pair.first.x() - landblockManager.center().x();
         auto dy = pair.first.y() - landblockManager.center().y();
 
-        Mat4 modelMat;
-        modelMat.makeTranslation(Vec3(dx * 192.0, dy * 192.0, 0.0));
+        Mat4 worldMat;
+        worldMat.makeTranslation(Vec3(dx * 192.0, dy * 192.0, 0.0));
 
-        auto modelViewMat = viewMat * modelMat;
-        auto modelViewProjectionMat = projectionMat * modelViewMat;
+        auto worldViewMat = viewMat * worldMat;
+        auto worldViewProjectionMat = projectionMat * worldViewMat;
 
-        loadMat3ToUniform(Mat3(modelViewMat).inverse().transpose(), _program.getUniform("normalMatrix"));
-        loadMat4ToUniform(modelMat, _program.getUniform("modelMatrix"));
-        loadMat4ToUniform(modelViewMat, _program.getUniform("modelViewMatrix"));
-        loadMat4ToUniform(modelViewProjectionMat, _program.getUniform("modelViewProjectionMatrix"));
+        loadMat3ToUniform(Mat3(worldViewMat).inverse().transpose(), _program.getUniform("normalMatrix"));
+        loadMat4ToUniform(worldMat, _program.getUniform("worldMatrix"));
+        loadMat4ToUniform(worldViewMat, _program.getUniform("worldViewMatrix"));
+        loadMat4ToUniform(worldViewProjectionMat, _program.getUniform("worldViewProjectionMatrix"));
 
         auto& renderData = pair.second.renderData();
 
