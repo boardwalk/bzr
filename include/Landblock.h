@@ -54,10 +54,6 @@ public:
     const vector<Object>& objects() const;
     const vector<Structure>& structures() const;
 
-    const uint16_t* offsetMap() const;
-    double offsetMapBase() const;
-    double offsetMapScale() const;
-
     const uint8_t* normalMap() const;
 
     bool isSplitNESW(int x, int y) const;

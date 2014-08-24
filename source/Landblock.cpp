@@ -302,21 +302,6 @@ const vector<Structure>& Landblock::structures() const
     return _structures;
 }
 
-const uint16_t* Landblock::offsetMap() const
-{
-    return _offsetMap.data();
-}
-
-double Landblock::offsetMapBase() const
-{
-    return _offsetMapBase;
-}
-
-double Landblock::offsetMapScale() const
-{
-    return _offsetMapScale;
-}
-
 const uint8_t* Landblock::normalMap() const
 {
     return _normalMap.data();
