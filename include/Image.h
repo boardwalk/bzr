@@ -51,13 +51,10 @@ public:
 
     void init(ImageFormat::Value newFormat, int newWidth, int newHeight, const void* newData);
 
-    void decompress();
     void applyPalette(const Palette& palette);
     void scale(int newWidth, int newHeight);
-    Image scaleHalf() const;
     void fill(int value);
     void flipVertical();
-	void blit(const Image& source, int x, int y);
 
     ImageFormat::Value format() const;
     int width() const;

@@ -22,22 +22,32 @@
 
 TextureRenderData::TextureRenderData(const Texture& texture)
 {
+    auto& image = texture.image();
+
     glGenTextures(1, &_handle);
     glBindTexture(GL_TEXTURE_2D, _handle);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, Core::get().renderer().textureMinFilter());
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, Core::get().renderer().textureMaxAnisotropy());
 
-    if(texture.image().format() == ImageFormat::BGRA32)
+    switch(image.format())
     {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, texture.image().width(), texture.image().height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, texture.image().data());
-    }
-    else if(texture.image().format() == ImageFormat::BGR24)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, texture.image().width(), texture.image().height(), 0, GL_BGR, GL_UNSIGNED_BYTE, texture.image().data());
-    }
-    else
-    {
-        printf("skipped! %08x\n", texture.image().format());
+        case ImageFormat::BGRA32:
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.width(), image.height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, image.data());
+            break;
+        case ImageFormat::BGR24:
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, image.width(), image.height(), 0, GL_BGR, GL_UNSIGNED_BYTE, image.data());
+            break;
+        case ImageFormat::DXT1:
+            glCompressedTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, image.width(), image.height(), 0, image.size(), image.data());
+            break;
+        case ImageFormat::DXT3:
+            glCompressedTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, image.width(), image.height(), 0, image.size(), image.data());
+            break;
+        case ImageFormat::DXT5:
+            glCompressedTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, image.width(), image.height(), 0, image.size(), image.data());
+            break;
+        default:
+            throw runtime_error("Unsupported image format");
     }
 
     glGenerateMipmap(GL_TEXTURE_2D);
