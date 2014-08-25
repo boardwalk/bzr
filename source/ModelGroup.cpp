@@ -20,6 +20,9 @@
 #include "Core.h"
 #include "ResourceCache.h"
 
+//#define DEBUG_MODEL (resourceId == 0x02000120)
+#define DEBUG_MODEL ((resourceId & 0xFF000000) == 0x02000000)
+
 ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 {
     BlobReader reader(data, size);
@@ -58,10 +61,10 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
         }
     }
 
-    reader.read<uint32_t>();
-    reader.read<uint32_t>();
-    reader.read<uint32_t>();
-    reader.read<uint32_t>();
+    auto a = reader.read<uint32_t>();
+    auto b = reader.read<uint32_t>();
+    auto c = reader.read<uint32_t>();
+    auto d = reader.read<uint32_t>();
 
     for(auto& modelInfo : _modelInfos)
     {
@@ -73,6 +76,27 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
         modelInfo.rotation.x = reader.read<float>();
         modelInfo.rotation.y = reader.read<float>();
         modelInfo.rotation.z = reader.read<float>();
+    }
+
+    if(DEBUG_MODEL)
+    {
+        printf("ModelGroup::ModelGroup(%08x): flags=%08x\n", resourceId, flags);
+        printf("ModelGroup::ModelGroup(%08x): unk=%08x %08x %08x %08x\n", resourceId, a, b, c, d);
+
+        int i = 0;
+
+        for(auto& modelInfo : _modelInfos)
+        {
+            printf("ModelGroup::ModelGroup(%08x): %02x model=%08x\n", resourceId, i, modelInfo.resource->resourceId());
+            printf("ModelGroup::ModelGroup(%08x): %02x parent=%08x\n", resourceId, i, modelInfo.parent);
+            printf("ModelGroup::ModelGroup(%08x): %02x scale=%.2f %.2f %.2f\n", resourceId, i, modelInfo.scale.x, modelInfo.scale.y, modelInfo.scale.z);
+            printf("ModelGroup::ModelGroup(%08x): %02x pos=%.2f %.2f %.2f rot=%.2f %.2f %.2f %.2f\n\n", resourceId, i,
+                modelInfo.position.x, modelInfo.position.y, modelInfo.position.z,
+                modelInfo.rotation.w, modelInfo.rotation.x, modelInfo.rotation.y, modelInfo.rotation.z);
+
+            i++;
+        }
+
     }
 }
 

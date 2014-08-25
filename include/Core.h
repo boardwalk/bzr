@@ -63,6 +63,9 @@ private:
 #ifndef HEADLESS
     unique_ptr<Renderer> _renderer;
 #endif
+    // TEMPORARY
+    uint32_t _modelId;
+    uint32_t _submodelNum;
 };
 
 #endif

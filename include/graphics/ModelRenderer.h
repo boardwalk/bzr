@@ -42,6 +42,10 @@ public:
 
     void render(const Mat4& projectionMat, const Mat4& viewMat);
 
+    // TEMPORARY!
+    ResourcePtr _theModel;
+    int _submodelNum;
+
 private:
     void renderOne(ResourcePtr& resource,
         const Mat4& projectionMat,
@@ -51,7 +55,8 @@ private:
     void renderModelGroup(ModelGroup& modelGroup,
         const Mat4& projectionMat,
         const Mat4& viewMat,
-        const Mat4& worldMat);
+        const Mat4& worldMat,
+        uint32_t parent);
 
     void renderModel(Model& model,
         const Mat4& projectionMat,

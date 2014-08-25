@@ -84,7 +84,7 @@ Renderer& Core::renderer()
 }
 #endif
 
-Core::Core() : _done(false)
+Core::Core() : _done(false) /* TEMPORARY */, _modelId(0x02001960), _submodelNum(0)
 {}
 
 void Core::init()
@@ -161,6 +161,8 @@ void Core::handleEvents()
 {
     SDL_Event event;
 
+    bool newModel = false; // TEMPORARY
+
     while(SDL_PollEvent(&event) != 0)
     {
         switch(event.type)
@@ -177,8 +179,58 @@ void Core::handleEvents()
                     _done = true;
                 }
 #endif
+                // TEMPORARY
+                if(event.key.keysym.sym == SDLK_z)
+                {
+                    while(_modelId > 0x02000000)
+                    {
+                        _modelId--;
+
+                        if(!_portalDat->read(_modelId).empty())
+                        {
+                            newModel = true;
+                            break;
+                        }
+                    }
+                }
+
+                if(event.key.keysym.sym == SDLK_x)
+                {
+                    while(_modelId < 0x02005000)
+                    {
+                        _modelId++;
+
+                        if(!_portalDat->read(_modelId).empty())
+                        {
+                            newModel = true;
+                            break;
+                        }
+                    }
+                }
+
+                if(event.key.keysym.sym == SDLK_c)
+                {
+                    _submodelNum--;
+                    printf("Submodel num %d\n", _submodelNum);
+                    _renderer->setSubmodelNum(_submodelNum);
+                }
+
+                if(event.key.keysym.sym == SDLK_v)
+                {
+                    _submodelNum++;
+                    printf("Submodel num %d\n", _submodelNum);
+                    _renderer->setSubmodelNum(_submodelNum);
+                }
+
                 break;
         }
+    }
+
+    // TEMPORARY
+    if(newModel)
+    {
+        printf("Loading model %08x\n", _modelId);
+        _renderer->setModel( _resourceCache->get(_modelId) );
     }
 }
 

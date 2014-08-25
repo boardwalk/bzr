@@ -198,6 +198,18 @@ void Renderer::render(double interp)
     SDL_GL_SwapWindow(_window);
 }
 
+// TEMPORARY
+void Renderer::setModel(ResourcePtr model)
+{
+    _modelRenderer->_theModel = model;
+}
+
+// TEMPORARY
+void Renderer::setSubmodelNum(int submodelNum)
+{
+    _modelRenderer->_submodelNum = submodelNum;
+}
+
 GLenum Renderer::textureMinFilter() const
 {
     return _textureMinFilter;

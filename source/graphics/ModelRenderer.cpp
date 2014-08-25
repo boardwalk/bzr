@@ -46,7 +46,7 @@ struct CompareByDepth
     Vec3 _cameraPos;
 };
 
-ModelRenderer::ModelRenderer()
+ModelRenderer::ModelRenderer() /* TEMPORARY */ : _submodelNum(0)
 {
     _program.create();
     _program.attach(GL_VERTEX_SHADER, ModelVertexShader);
@@ -75,6 +75,14 @@ void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 
     // first pass, render solid objects and collect objects that need depth sorting
     _depthSortList.clear();
+
+    // TEMPORARY
+    if(_theModel)
+    {
+        Mat4 worldMat;
+        worldMat.makeTranslation(Vec3(96.0, 96.0, 0.0));
+        renderOne(_theModel, projectionMat, viewMat, worldMat);
+    }
 
     for(auto& pair : landblockManager)
     {
@@ -142,7 +150,8 @@ void ModelRenderer::renderOne(ResourcePtr& resource,
         renderModelGroup(resource->cast<ModelGroup>(),
             projectionMat,
             viewMat,
-            worldMat);
+            worldMat,
+            0xFFFFFFFF);
     }
     else if(resource->resourceType() == ResourceType::Model)
     {
@@ -157,11 +166,20 @@ void ModelRenderer::renderOne(ResourcePtr& resource,
 void ModelRenderer::renderModelGroup(ModelGroup& modelGroup,
     const Mat4& projectionMat,
     const Mat4& viewMat,
-    const Mat4& worldMat)
+    const Mat4& worldMat,
+    uint32_t parent)
 {
-    for(auto& modelInfo : modelGroup.modelInfos())
+    for(auto child = 0u; child < modelGroup.modelInfos().size(); child++)
     {
+        auto& modelInfo = modelGroup.modelInfos()[child];
+
+        if(modelInfo.parent != parent)
+        {
+            continue;
+        }
+
         Mat4 subWorldTransMat;
+        //subWorldTransMat.makeTranslation(Vec3(-modelInfo.position.x, -modelInfo.position.y, -modelInfo.position.z));
         subWorldTransMat.makeTranslation(modelInfo.position);
 
         Mat4 subWorldRotMat;
@@ -170,13 +188,21 @@ void ModelRenderer::renderModelGroup(ModelGroup& modelGroup,
         Mat4 subWorldScaleMat;
         subWorldScaleMat.makeScale(modelInfo.scale);
 
-        auto subWorldMat = subWorldTransMat * subWorldRotMat * subWorldScaleMat;
+        auto subWorldMat = worldMat * subWorldTransMat * subWorldRotMat * subWorldScaleMat;
 
-        // fix position, rotation!
-        renderOne(const_cast<ResourcePtr&>(modelInfo.resource),
+        if(child == (unsigned int)_submodelNum)
+        {
+            renderOne(const_cast<ResourcePtr&>(modelInfo.resource),
+                projectionMat,
+                viewMat,
+                subWorldMat);
+        }
+
+        renderModelGroup(modelGroup,
             projectionMat,
             viewMat,
-            worldMat * subWorldMat);
+            subWorldMat,
+            child);
     }
 }
 
