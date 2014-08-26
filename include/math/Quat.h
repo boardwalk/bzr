@@ -28,6 +28,7 @@ struct Quat
     void makeFromYawPitchRoll(double yaw, double pitch, double roll);
 
     Quat conjugate() const;
+    double norm() const;
 
     double w;
     double x;

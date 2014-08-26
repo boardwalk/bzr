@@ -39,6 +39,11 @@ Quat Quat::conjugate() const
    return Quat(w, -x, -y, -z);
 }
 
+double Quat::norm() const
+{
+    return sqrt(w*w + x*x + y*y + z*z);
+}
+
 Quat operator*(const Quat& a, const Quat& b)
 {
     return Quat(

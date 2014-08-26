@@ -61,7 +61,26 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
         }
     }
 
-    auto a = reader.read<uint32_t>();
+    auto numExtendedLocs = reader.read<uint32_t>();
+
+    for(auto i = 0u; i < numExtendedLocs; i++)
+    {
+        reader.read<uint32_t>();
+        reader.read<uint32_t>();
+
+        reader.read<float>();
+        reader.read<float>();
+        reader.read<float>();
+
+        Quat q;
+        q.w = reader.read<float>();
+        q.x = reader.read<float>();
+        q.y = reader.read<float>();
+        q.z = reader.read<float>();
+        
+        assert(q.norm() >= 0.999 && q.norm() <= 1.001);
+    }
+
     auto b = reader.read<uint32_t>();
     auto c = reader.read<uint32_t>();
     auto d = reader.read<uint32_t>();
@@ -76,12 +95,14 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
         modelInfo.rotation.x = reader.read<float>();
         modelInfo.rotation.y = reader.read<float>();
         modelInfo.rotation.z = reader.read<float>();
+
+        assert(modelInfo.rotation.norm() >= 0.999 && modelInfo.rotation.norm() <= 1.001);
     }
 
     if(DEBUG_MODEL)
     {
         printf("ModelGroup::ModelGroup(%08x): flags=%08x\n", resourceId, flags);
-        printf("ModelGroup::ModelGroup(%08x): unk=%08x %08x %08x %08x\n", resourceId, a, b, c, d);
+        printf("ModelGroup::ModelGroup(%08x): unk=%08x %08x %08x\n", resourceId, b, c, d);
 
         int i = 0;
 

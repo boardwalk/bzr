@@ -150,8 +150,7 @@ void ModelRenderer::renderOne(ResourcePtr& resource,
         renderModelGroup(resource->cast<ModelGroup>(),
             projectionMat,
             viewMat,
-            worldMat,
-            0xFFFFFFFF);
+            worldMat);
     }
     else if(resource->resourceType() == ResourceType::Model)
     {
@@ -166,20 +165,13 @@ void ModelRenderer::renderOne(ResourcePtr& resource,
 void ModelRenderer::renderModelGroup(ModelGroup& modelGroup,
     const Mat4& projectionMat,
     const Mat4& viewMat,
-    const Mat4& worldMat,
-    uint32_t parent)
+    const Mat4& worldMat)
 {
     for(auto child = 0u; child < modelGroup.modelInfos().size(); child++)
     {
         auto& modelInfo = modelGroup.modelInfos()[child];
 
-        if(modelInfo.parent != parent)
-        {
-            continue;
-        }
-
         Mat4 subWorldTransMat;
-        //subWorldTransMat.makeTranslation(Vec3(-modelInfo.position.x, -modelInfo.position.y, -modelInfo.position.z));
         subWorldTransMat.makeTranslation(modelInfo.position);
 
         Mat4 subWorldRotMat;
@@ -190,19 +182,10 @@ void ModelRenderer::renderModelGroup(ModelGroup& modelGroup,
 
         auto subWorldMat = worldMat * subWorldTransMat * subWorldRotMat * subWorldScaleMat;
 
-        if(child == (unsigned int)_submodelNum)
-        {
-            renderOne(const_cast<ResourcePtr&>(modelInfo.resource),
-                projectionMat,
-                viewMat,
-                subWorldMat);
-        }
-
-        renderModelGroup(modelGroup,
+        renderOne(const_cast<ResourcePtr&>(modelInfo.resource),
             projectionMat,
             viewMat,
-            subWorldMat,
-            child);
+            subWorldMat);
     }
 }
 

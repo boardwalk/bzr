@@ -55,8 +55,7 @@ private:
     void renderModelGroup(ModelGroup& modelGroup,
         const Mat4& projectionMat,
         const Mat4& viewMat,
-        const Mat4& worldMat,
-        uint32_t parent);
+        const Mat4& worldMat);
 
     void renderModel(Model& model,
         const Mat4& projectionMat,
