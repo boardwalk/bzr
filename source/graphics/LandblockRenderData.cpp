@@ -42,7 +42,7 @@ void LandblockRenderData::bind()
 
 GLsizei LandblockRenderData::vertexCount() const
 {
-	return _vertexCount;
+    return _vertexCount;
 }
 
 static void pushRotatedCoord(vector<uint8_t>& vertexData, double s, double t, int rotations, uint8_t scale)

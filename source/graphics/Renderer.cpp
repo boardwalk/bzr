@@ -69,14 +69,14 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     }
 
 #ifdef _MSC_VER
-	auto glewErr = glewInit();
+    auto glewErr = glewInit();
 
-	if(glewErr != GLEW_OK)
-	{
+    if(glewErr != GLEW_OK)
+    {
         string err("Unable to initialize GLEW: ");
         err.append((const char*)glewGetErrorString(glewErr));
         throw runtime_error(err);
-	}
+    }
 #endif
 
     _fieldOfView = config.getDouble("Renderer.fieldOfView", 90.0);

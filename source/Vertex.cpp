@@ -20,7 +20,7 @@
 
 void Vertex::read(BlobReader& reader)
 {
-	auto numTexCoords = reader.read<uint16_t>();
+    auto numTexCoords = reader.read<uint16_t>();
     texCoords.resize(numTexCoords);
 
     position.x = reader.read<float>();

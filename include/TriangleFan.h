@@ -22,16 +22,16 @@ class BlobReader;
 
 struct TriangleFan
 {
-	struct Index
-	{
-	    Index() : vertexIndex(0), texCoordIndex(0)
-	    {}
+    struct Index
+    {
+        Index() : vertexIndex(0), texCoordIndex(0)
+        {}
 
-	    int vertexIndex;
-	    int texCoordIndex;
-	};
+        int vertexIndex;
+        int texCoordIndex;
+    };
 
-	TriangleFan() : texIndex(0)
+    TriangleFan() : texIndex(0)
     {}
 
     int texIndex;
