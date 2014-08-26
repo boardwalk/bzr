@@ -77,13 +77,15 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
         q.x = reader.read<float>();
         q.y = reader.read<float>();
         q.z = reader.read<float>();
-        
+
         assert(q.norm() >= 0.999 && q.norm() <= 1.001);
     }
 
-    auto b = reader.read<uint32_t>();
-    auto c = reader.read<uint32_t>();
-    auto d = reader.read<uint32_t>();
+    auto unk1 = reader.read<uint32_t>();
+    assert(unk1 == 0);
+
+    auto unk2 = reader.read<uint32_t>();
+    auto unk3 = reader.read<uint32_t>();
 
     for(auto& modelInfo : _modelInfos)
     {
@@ -102,7 +104,7 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
     if(DEBUG_MODEL)
     {
         printf("ModelGroup::ModelGroup(%08x): flags=%08x\n", resourceId, flags);
-        printf("ModelGroup::ModelGroup(%08x): unk=%08x %08x %08x\n", resourceId, b, c, d);
+        printf("ModelGroup::ModelGroup(%08x): unk2=%08x unk3=%08x\n", resourceId, unk2, unk3);
 
         int i = 0;
 
