@@ -19,11 +19,7 @@
 #define BZR_GRAPHICS_SKYRENDERER_H
 
 #include "graphics/Program.h"
-#include "math/Vec3.h"
 #include "Noncopyable.h"
-
-struct Mat4;
-struct Vec3;
 
 class SkyRenderer : Noncopyable
 {
@@ -33,7 +29,7 @@ public:
 
     void render();
 
-    const Vec3& sunVector() const;
+    const glm::vec3& sunVector() const;
 
 private:
     void initProgram();
@@ -46,7 +42,7 @@ private:
     GLsizei _vertexCount;
     GLuint _texture;
 
-    Vec3 _sunVector;
+    glm::vec3 _sunVector;
 };
 
 #endif

@@ -45,16 +45,16 @@ GLsizei LandblockRenderData::vertexCount() const
     return _vertexCount;
 }
 
-static void pushRotatedCoord(vector<uint8_t>& vertexData, double s, double t, int rotations, uint8_t scale)
+static void pushRotatedCoord(vector<uint8_t>& vertexData, fp_t s, fp_t t, int rotations, uint8_t scale)
 {
-    auto cosine = cos(PI / 180.0 * 90.0 * rotations);
-    auto sine = sin(PI / 180.0 * 90.0 * rotations);
+    auto cosine = glm::cos(pi() / fp_t(180.0) * fp_t(90.0) * rotations);
+    auto sine = glm::sin(pi() / fp_t(180.0) * fp_t(90.0) * rotations);
 
-    auto ns = (s - 0.5) * cosine - (t - 0.5) * sine + 0.5;
-    auto nt = (s - 0.5) * sine + (t - 0.5) * cosine + 0.5;
+    auto ns = (s - fp_t(0.5)) * cosine - (t - fp_t(0.5)) * sine + fp_t(0.5);
+    auto nt = (s - fp_t(0.5)) * sine + (t - fp_t(0.5)) * cosine + fp_t(0.5);
 
-    vertexData.push_back(uint8_t(ns + 0.5) * scale);
-    vertexData.push_back(uint8_t(nt + 0.5) * scale);
+    vertexData.push_back(uint8_t(ns + fp_t(0.5)) * scale);
+    vertexData.push_back(uint8_t(nt + fp_t(0.5)) * scale);
 }
 
 void LandblockRenderData::initGeometry(const Landblock& landblock)

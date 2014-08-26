@@ -27,8 +27,8 @@ class Landblock : Noncopyable
 {
 public:
     static const int GRID_SIZE = 9;
-    static const double SQUARE_SIZE;
-    static const double LANDBLOCK_SIZE;
+    static const fp_t SQUARE_SIZE;
+    static const fp_t LANDBLOCK_SIZE;
     static const int OFFSET_MAP_SIZE = 64;
 
     PACK(struct RawData
@@ -45,8 +45,8 @@ public:
 
     void init();
 
-    double calcHeight(double x, double y) const;
-    double calcHeightUnbounded(double x, double y) const;
+    fp_t calcHeight(fp_t x, fp_t y) const;
+    fp_t calcHeightUnbounded(fp_t x, fp_t y) const;
 
     LandblockId id() const;
 
@@ -68,8 +68,8 @@ private:
     vector<Structure> _structures;
 
     vector<uint16_t> _offsetMap;
-    double _offsetMapBase;
-    double _offsetMapScale;
+    fp_t _offsetMapBase;
+    fp_t _offsetMapScale;
 
     vector<uint8_t> _normalMap;
 

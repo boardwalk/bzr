@@ -93,7 +93,7 @@ void Config::setInt(const char* name, int value)
     set(name, json_integer(value));
 }
 
-void Config::setDouble(const char* name, double value)
+void Config::setDouble(const char* name, fp_t value)
 {
     set(name, json_real(value));
 }
@@ -133,13 +133,13 @@ int Config::getInt(const char* name, int defaultValue)
     }
 }
 
-double Config::getDouble(const char* name, double defaultValue)
+fp_t Config::getDouble(const char* name, fp_t defaultValue)
 {
     auto value = get(name);
 
     if(json_is_real(value))
     {
-        return json_real_value(value);
+        return fp_t(json_real_value(value));
     }
     else
     {

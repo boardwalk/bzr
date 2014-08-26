@@ -18,12 +18,13 @@
 #include "graphics/LandblockRenderer.h"
 #include "graphics/Renderer.h"
 #include "graphics/util.h"
-#include "math/Mat3.h"
 #include "Camera.h"
 #include "Core.h"
 #include "LandblockManager.h"
 #include "ResourceCache.h"
 #include "Texture.h"
+#include <glm/gtc/matrix_inverse.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
 
 #include "graphics/shaders/LandVertexShader.h"
@@ -150,7 +151,7 @@ LandblockRenderer::~LandblockRenderer()
     glDeleteTextures(1, &_blendTexture);
 }
 
-void LandblockRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
+void LandblockRenderer::render(const glm::mat4& projectionMat, const glm::mat4& viewMat)
 {
     _program.use();
 
@@ -165,7 +166,7 @@ void LandblockRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
     auto cameraPosition = Core::get().camera().position();
     glUniform4f(_program.getUniform("cameraPosition"), GLfloat(cameraPosition.x), GLfloat(cameraPosition.y), GLfloat(cameraPosition.z), 1.0f);
 
-    auto viewLightPosition = viewMat * _lightPosition;
+    auto viewLightPosition = viewMat * glm::vec4(_lightPosition.x, _lightPosition.y, _lightPosition.z, 1.0);
     glUniform3f(_program.getUniform("lightPosition"), GLfloat(viewLightPosition.x), GLfloat(viewLightPosition.y), GLfloat(viewLightPosition.z));
 
     for(auto& pair : landblockManager)
@@ -173,13 +174,11 @@ void LandblockRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
         auto dx = pair.first.x() - landblockManager.center().x();
         auto dy = pair.first.y() - landblockManager.center().y();
 
-        Mat4 worldMat;
-        worldMat.makeTranslation(Vec3(dx * 192.0, dy * 192.0, 0.0));
-
+        auto worldMat = glm::translate(glm::mat4(), glm::vec3(dx * 192.0, dy * 192.0, 0.0));
         auto worldViewMat = viewMat * worldMat;
         auto worldViewProjectionMat = projectionMat * worldViewMat;
 
-        loadMat3ToUniform(Mat3(worldViewMat).inverse().transpose(), _program.getUniform("normalMatrix"));
+        loadMat3ToUniform(glm::inverseTranspose(glm::mat3(worldViewMat)), _program.getUniform("normalMatrix"));
         loadMat4ToUniform(worldMat, _program.getUniform("worldMatrix"));
         loadMat4ToUniform(worldViewMat, _program.getUniform("worldViewMatrix"));
         loadMat4ToUniform(worldViewProjectionMat, _program.getUniform("worldViewProjectionMatrix"));
@@ -199,7 +198,7 @@ void LandblockRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
     }
 }
 
-void LandblockRenderer::setLightPosition(const Vec3& lightPosition)
+void LandblockRenderer::setLightPosition(const glm::vec3& lightPosition)
 {
     _lightPosition = lightPosition;
 }

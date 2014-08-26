@@ -50,7 +50,7 @@ private:
 
     void run();
     void handleEvents();
-    void step(double dt);
+    void step(fp_t dt);
 
     bool _done;
     unique_ptr<Config> _config;

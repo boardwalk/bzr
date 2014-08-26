@@ -38,7 +38,7 @@ public:
     ~Renderer();
 
     void init();
-    void render(double interp);
+    void render(fp_t interp);
 
     GLenum textureMinFilter() const;
     GLfloat textureMaxAnisotropy() const;
@@ -52,10 +52,10 @@ private:
 #ifdef OCULUSVR
     void initOVR();
     void cleanupOVR();
-    void renderOVR(double interp);
+    void renderOVR(fp_t interp);
 #endif
 
-    double _fieldOfView;
+    fp_t _fieldOfView;
     GLenum _textureMinFilter;
     GLfloat _textureMaxAnisotropy;
 

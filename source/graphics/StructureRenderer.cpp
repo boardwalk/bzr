@@ -19,10 +19,10 @@
 #include "graphics/MeshRenderData.h"
 #include "graphics/Renderer.h"
 #include "graphics/util.h"
-#include "math/Mat4.h"
 #include "Camera.h"
 #include "Core.h"
 #include "LandblockManager.h"
+#include <glm/gtc/matrix_transform.hpp>
 
 // We're sharing shaders with the model renderer for now
 #include "graphics/shaders/ModelVertexShader.h"
@@ -47,7 +47,7 @@ StructureRenderer::~StructureRenderer()
     _program.destroy();
 }
 
-void StructureRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
+void StructureRenderer::render(const glm::mat4& projectionMat, const glm::mat4& viewMat)
 {
     _program.use();
 
@@ -61,7 +61,7 @@ void StructureRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
         auto dx = pair.first.x() - landblockManager.center().x();
         auto dy = pair.first.y() - landblockManager.center().y();
 
-        auto landblockPosition = Vec3(dx * 192.0, dy * 192.0, 0.0);
+        auto landblockPosition = glm::vec3(dx * 192.0, dy * 192.0, 0.0);
 
         for(auto& structure : pair.second.structures())
         {
@@ -70,15 +70,9 @@ void StructureRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
     }
 }
 
-void StructureRenderer::renderStructure(Structure& structure, const Mat4& projectionMat, const Mat4& viewMat, const Vec3& position, const Quat& rotation)
+void StructureRenderer::renderStructure(Structure& structure, const glm::mat4& projectionMat, const glm::mat4& viewMat, const glm::vec3& position, const glm::quat& rotation)
 {
-    Mat4 worldRotationMat;
-    worldRotationMat.makeRotation(rotation);
-
-    Mat4 worldTranslationMat;
-    worldTranslationMat.makeTranslation(position);
-
-    auto worldMat = worldTranslationMat * worldRotationMat;
+    auto worldMat = glm::translate(glm::mat4(), position) * glm::mat4_cast(rotation);
     auto worldViewProjectionMat = projectionMat * viewMat * worldMat;
 
     loadMat4ToUniform(worldMat, _program.getUniform("worldMatrix"));

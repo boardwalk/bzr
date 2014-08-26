@@ -169,8 +169,8 @@ void Image::scale(int newWidth, int newHeight)
     {
         for(auto dstX = 0; dstX < newWidth; dstX++)
         {
-            auto srcFX = double(dstX) / double(newWidth) * double(_width);
-            auto srcFY = double(dstY) / double(newHeight) * double(_height);
+            auto srcFX = fp_t(dstX) / fp_t(newWidth) * fp_t(_width);
+            auto srcFY = fp_t(dstY) / fp_t(newHeight) * fp_t(_height);
 
             auto srcX = (int)srcFX;
             auto srcY = (int)srcFY;
@@ -181,7 +181,7 @@ void Image::scale(int newWidth, int newHeight)
             auto xOpposite = 1.0 - xDiff;
             auto yOpposite = 1.0 - yDiff;
 
-#define SRCPX(x, y, cn) (double)_data[(min(x, _width - 1) + min(y, _height - 1) * _width) * nchannels + cn]
+#define SRCPX(x, y, cn) (fp_t)_data[(min(x, _width - 1) + min(y, _height - 1) * _width) * nchannels + cn]
 #define DSTPX(x, y, cn) newData[((x) + (y) * newWidth) * nchannels + cn]
 
             for(auto c = 0; c < nchannels; c++)

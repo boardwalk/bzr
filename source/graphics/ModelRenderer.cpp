@@ -19,12 +19,12 @@
 #include "graphics/MeshRenderData.h"
 #include "graphics/Renderer.h"
 #include "graphics/util.h"
-#include "math/Vec4.h"
 #include "Camera.h"
 #include "Core.h"
 #include "LandblockManager.h"
 #include "Model.h"
 #include "ModelGroup.h"
+#include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
 
 #include "graphics/shaders/ModelVertexShader.h"
@@ -40,10 +40,10 @@ struct CompareByDepth
     bool operator()(const ModelRenderer::DepthSortedModel& a, const ModelRenderer::DepthSortedModel& b) const
     {
         // descending order
-        return _cameraPos.squareDist(a.worldPos) > _cameraPos.squareDist(b.worldPos);
+        return (_cameraPos - a.worldPos).length() > (_cameraPos - b.worldPos).length();
     }
 
-    Vec3 _cameraPos;
+    glm::vec3 _cameraPos;
 };
 
 ModelRenderer::ModelRenderer() /* TEMPORARY */ : _submodelNum(0)
@@ -64,7 +64,7 @@ ModelRenderer::~ModelRenderer()
     _program.destroy();
 }
 
-void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
+void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& viewMat)
 {
     _program.use();
 
@@ -79,8 +79,8 @@ void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
     // TEMPORARY
     if(_theModel)
     {
-        Mat4 worldMat;
-        worldMat.makeTranslation(Vec3(96.0, 96.0, 0.0));
+        auto worldMat = glm::translate(glm::mat4(), glm::vec3(96.0, 96.0, 0.0));
+
         renderOne(_theModel, projectionMat, viewMat, worldMat);
     }
 
@@ -89,17 +89,11 @@ void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
         auto dx = pair.first.x() - landblockManager.center().x();
         auto dy = pair.first.y() - landblockManager.center().y();
 
-        auto landblockPosition = Vec3(dx * 192.0, dy * 192.0, 0.0);
+        auto landblockPosition = glm::vec3(dx * 192.0, dy * 192.0, 0.0);
 
         for(auto& object : pair.second.objects())
         {
-            Mat4 worldTransMat;
-            worldTransMat.makeTranslation(landblockPosition + object.position);
-
-            Mat4 worldRotMat;
-            worldRotMat.makeRotation(object.rotation);
-
-            auto worldMat = worldTransMat * worldRotMat;
+            auto worldMat = glm::translate(glm::mat4(), landblockPosition + object.position) * glm::mat4_cast(object.rotation);
 
             renderOne(const_cast<ResourcePtr&>(object.resource),
                 projectionMat,
@@ -111,13 +105,7 @@ void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
         {
             for(auto& object : structure.objects())
             {
-                Mat4 worldTransMat;
-                worldTransMat.makeTranslation(landblockPosition + object.position);
-
-                Mat4 worldRotMat;
-                worldRotMat.makeRotation(object.rotation);
-
-                auto worldMat = worldTransMat * worldRotMat;
+                auto worldMat = glm::translate(glm::mat4(), landblockPosition + object.position) * glm::mat4_cast(object.rotation);
 
                 renderOne(const_cast<ResourcePtr&>(object.resource),
                     projectionMat,
@@ -141,9 +129,9 @@ void ModelRenderer::render(const Mat4& projectionMat, const Mat4& viewMat)
 }
 
 void ModelRenderer::renderOne(ResourcePtr& resource,
-    const Mat4& projectionMat,
-    const Mat4& viewMat, 
-    const Mat4& worldMat)
+    const glm::mat4& projectionMat,
+    const glm::mat4& viewMat, 
+    const glm::mat4& worldMat)
 {
     if(resource->resourceType() == ResourceType::ModelGroup)
     {
@@ -163,42 +151,33 @@ void ModelRenderer::renderOne(ResourcePtr& resource,
 }
 
 void ModelRenderer::renderModelGroup(ModelGroup& modelGroup,
-    const Mat4& projectionMat,
-    const Mat4& viewMat,
-    const Mat4& worldMat)
+    const glm::mat4& projectionMat,
+    const glm::mat4& viewMat,
+    const glm::mat4& worldMat)
 {
     for(auto child = 0u; child < modelGroup.modelInfos().size(); child++)
     {
         auto& modelInfo = modelGroup.modelInfos()[child];
 
-        Mat4 subWorldTransMat;
-        subWorldTransMat.makeTranslation(modelInfo.position);
-
-        Mat4 subWorldRotMat;
-        subWorldRotMat.makeRotation(modelInfo.rotation);
-
-        Mat4 subWorldScaleMat;
-        subWorldScaleMat.makeScale(modelInfo.scale);
-
-        auto subWorldMat = worldMat * subWorldTransMat * subWorldRotMat * subWorldScaleMat;
+        auto subWorldMat = glm::translate(glm::mat4(), modelInfo.position) * glm::mat4_cast(modelInfo.rotation) * glm::scale(glm::mat4(), modelInfo.scale);
 
         renderOne(const_cast<ResourcePtr&>(modelInfo.resource),
             projectionMat,
             viewMat,
-            subWorldMat);
+            worldMat * subWorldMat);
     }
 }
 
 void ModelRenderer::renderModel(Model& model,
-    const Mat4& projectionMat,
-    const Mat4& viewMat,
-    const Mat4& worldMat,
+    const glm::mat4& projectionMat,
+    const glm::mat4& viewMat,
+    const glm::mat4& worldMat,
     bool firstPass)
 {
     if(firstPass && model.needsDepthSort())
     {
-        auto worldPos = worldMat * Vec4(0.0, 0.0, 0.0, 1.0);
-        DepthSortedModel depthSortedModel = { &model, worldMat, Vec3(worldPos.x, worldPos.y, worldPos.z) };
+        auto worldPos = worldMat * glm::vec4(0.0, 0.0, 0.0, 1.0);
+        DepthSortedModel depthSortedModel = { &model, worldMat, glm::vec3(worldPos.x, worldPos.y, worldPos.z) };
         _depthSortList.push_back(depthSortedModel);
         return;
     }

@@ -18,16 +18,13 @@
 #ifndef BZR_VERTEX_H
 #define BZR_VERTEX_H
 
-#include "math/Vec2.h"
-#include "math/Vec3.h"
-
 class BlobReader;
 
 struct Vertex
 {
-    Vec3 position;
-    Vec3 normal;
-    vector<Vec2> texCoords;
+    glm::vec3 position;
+    glm::vec3 normal;
+    vector<glm::vec2> texCoords;
 
     void read(BlobReader& reader);
 };

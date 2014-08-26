@@ -20,11 +20,9 @@
 
 #include "graphics/LandblockRenderData.h"
 #include "graphics/Program.h"
-#include "math/Vec3.h"
 #include "Noncopyable.h"
 
 class Landblock;
-struct Mat4;
 
 class LandblockRenderer : Noncopyable
 {
@@ -32,9 +30,9 @@ public:
     LandblockRenderer();
     ~LandblockRenderer();
 
-    void render(const Mat4& projectionMat, const Mat4& viewMat);
+    void render(const glm::mat4& projectionMat, const glm::mat4& viewMat);
 
-    void setLightPosition(const Vec3& lightPosition);
+    void setLightPosition(const glm::vec3& lightPosition);
 
 private:
     void initProgram();
@@ -46,7 +44,7 @@ private:
     GLuint _terrainTexture;
     GLuint _blendTexture;
 
-    Vec3 _lightPosition;
+    glm::vec3 _lightPosition;
 };
 
 #endif

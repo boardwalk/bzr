@@ -19,6 +19,7 @@
 #include "BlobReader.h"
 #include "Core.h"
 #include "ResourceCache.h"
+#include <glm/gtx/norm.hpp>
 
 //#define DEBUG_MODEL (resourceId == 0x02000120)
 #define DEBUG_MODEL ((resourceId & 0xFF000000) == 0x02000000)
@@ -72,13 +73,13 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
         reader.read<float>();
         reader.read<float>();
 
-        Quat q;
+        glm::quat q;
         q.w = reader.read<float>();
         q.x = reader.read<float>();
         q.y = reader.read<float>();
         q.z = reader.read<float>();
 
-        assert(q.norm() >= 0.999 && q.norm() <= 1.001);
+        assert(glm::length2(q) >= 0.99 && glm::length2(q) <= 1.01);
     }
 
     auto unk1 = reader.read<uint32_t>();
@@ -98,7 +99,7 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
         modelInfo.rotation.y = reader.read<float>();
         modelInfo.rotation.z = reader.read<float>();
 
-        assert(modelInfo.rotation.norm() >= 0.999 && modelInfo.rotation.norm() <= 1.001);
+        assert(glm::length2(modelInfo.rotation) >= 0.99 && glm::length2(modelInfo.rotation) <= 1.01);
     }
 
     if(DEBUG_MODEL)

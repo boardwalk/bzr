@@ -106,12 +106,12 @@ Structure::Structure(Structure&& other)
     _renderData = move(other._renderData);
 }
 
-const Vec3& Structure::position() const
+const glm::vec3& Structure::position() const
 {
     return _position;
 }
 
-const Quat& Structure::rotation() const
+const glm::quat& Structure::rotation() const
 {
     return _rotation;
 }

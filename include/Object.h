@@ -18,8 +18,6 @@
 #ifndef BZR_OBJECT_H
 #define BZR_OBJECT_H
 
-#include "math/Quat.h"
-#include "math/Vec3.h"
 #include "Resource.h"
 
 class BlobReader;
@@ -27,8 +25,8 @@ class BlobReader;
 struct Object
 {
     ResourcePtr resource;
-    Vec3 position;
-    Quat rotation;
+    glm::vec3 position;
+    glm::quat rotation;
 
     void read(BlobReader& reader);
 };

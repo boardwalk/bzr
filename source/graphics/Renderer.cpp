@@ -24,12 +24,11 @@
 #include "Config.h"
 #include "Core.h"
 #include "util.h"
+#include <glm/gtc/matrix_transform.hpp>
 #ifdef OCULUSVR
 #include <SDL_syswm.h>
 #include <algorithm>
 #endif
-
-#define UNITS_PER_METER 1.0
 
 Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 #ifdef OCULUSVR
@@ -165,10 +164,10 @@ void Renderer::init()
     _structureRenderer.reset(new StructureRenderer());
     _modelRenderer.reset(new ModelRenderer());
 
-    _landblockRenderer->setLightPosition(_skyRenderer->sunVector() * 1000.0);
+    _landblockRenderer->setLightPosition(_skyRenderer->sunVector() * fp_t(1000.0));
 }
 
-void Renderer::render(double interp)
+void Renderer::render(fp_t interp)
 {
     (void)interp;
 
@@ -183,10 +182,9 @@ void Renderer::render(double interp)
     SDL_GetWindowSize(_window, &windowWidth, &windowHeight);
 
     // projection * view * model * vertex
-    Mat4 projectionMat;
-    projectionMat.makePerspective(_fieldOfView, double(windowWidth)/double(windowHeight), 0.1, 1000.0);
+    auto projectionMat = glm::perspective(_fieldOfView / fp_t(180.0) * pi(), fp_t(windowWidth) / fp_t(windowHeight), fp_t(0.1), fp_t(1000.0));
 
-    const Mat4& viewMat = Core::get().camera().viewMatrix();
+    const glm::mat4& viewMat = Core::get().camera().viewMatrix();
 
     glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -274,27 +272,29 @@ void Renderer::createWindow()
 }
 
 #ifdef OCULUSVR
-static Quat convertOvrQuatf(const ovrQuatf& quat)
+#define UNITS_PER_METER fp_t(1.0)
+
+static glm::quat convertOvrQuatf(const ovrQuatf& quat)
 {
-    return Quat(quat.w, quat.x, quat.y, quat.z);
+    return glm::quat(quat.w, quat.x, quat.y, quat.z);
 }
 
-static Vec3 convertOvrVector3f(const ovrVector3f& vec)
+static glm::vec3 convertOvrVector3f(const ovrVector3f& vec)
 {
     // ovr has +x right, +y up, and +z back
     // we have +x right, +y forward, +z up,
-    return Vec3(vec.x, -vec.z, vec.y) * UNITS_PER_METER;
+    return glm::vec3(vec.x, -vec.z, vec.y) * UNITS_PER_METER;
 }
 
-static Mat4 convertOvrMatrix4f(const ovrMatrix4f& mat)
+static glm::mat4 convertOvrMatrix4f(const ovrMatrix4f& mat)
 {
-    Mat4 result;
+    glm::mat4 result;
 
     for(auto j = 0; j < 4; j++)
     {
         for(auto i = 0; i < 4; i++)
         {
-            result.m[i + j * 4] = mat.M[i][j];
+            result[i][j] = mat.M[i][j];
         }
     }
 
@@ -432,7 +432,7 @@ void Renderer::cleanupOVR()
     ovr_Shutdown();
 }
 
-void Renderer::renderOVR(double interp)
+void Renderer::renderOVR(fp_t interp)
 {
     (void)interp;
 
@@ -453,11 +453,10 @@ void Renderer::renderOVR(double interp)
         auto projectionMat = convertOvrMatrix4f(ovrMatrix4f_Projection(_eyeRenderDesc[eye].Fov, 0.1f, 1000.0f, /*rightHanded*/ true));
 
         eyePose[eye] = ovrHmd_GetEyePose(_hmd, eye);
-        Core::get().camera().setHeadOrientation(convertOvrQuatf(eyePose[eye].Orientation).conjugate());
+        Core::get().camera().setHeadOrientation(glm::conjugate(convertOvrQuatf(eyePose[eye].Orientation)));
         Core::get().camera().setHeadPosition(convertOvrVector3f(eyePose[eye].Position));
 
-        Mat4 viewMat;
-        viewMat.makeTranslation(convertOvrVector3f(_eyeRenderDesc[eye].ViewAdjust));
+        auto viewMat = glm::translate(glm::mat4(), convertOvrVector3f(_eyeRenderDesc[eye].ViewAdjust));
         viewMat = viewMat * Core::get().camera().viewMatrix();
 
         _skyRenderer->render();

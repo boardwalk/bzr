@@ -18,8 +18,6 @@
 #ifndef BZR_MODELGROUP_H
 #define BZR_MODELGROUP_H
 
-#include "math/Quat.h"
-#include "math/Vec3.h"
 #include "Resource.h"
 
 class ModelGroup : public ResourceImpl<ResourceType::ModelGroup>
@@ -32,9 +30,9 @@ public:
 
         ResourcePtr resource;
         uint32_t parent;
-        Vec3 position;
-        Quat rotation;
-        Vec3 scale;
+        glm::vec3 position;
+        glm::quat rotation;
+        glm::vec3 scale;
     };
 
     ModelGroup(uint32_t id, const void* data, size_t size);

@@ -30,12 +30,12 @@ public:
 
     void setBool(const char* name, bool value);
     void setInt(const char* name, int value);
-    void setDouble(const char* name, double value);
+    void setDouble(const char* name, fp_t value);
     void setString(const char* name, const string& value);
 
     bool getBool(const char* name, bool defaultValue);
     int getInt(const char* name, int defaultValue);
-    double getDouble(const char* name, double defaultValue);
+    fp_t getDouble(const char* name, fp_t defaultValue);
     string getString(const char* name, const string& defaultValue);
 
 private:

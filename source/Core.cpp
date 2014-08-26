@@ -24,7 +24,7 @@
 #include "ResourceCache.h"
 #include "util.h"
 
-static const double STEP_RATE = 60.0;
+static const auto STEP_RATE = fp_t(60.0);
 
 static unique_ptr<Core> g_singleton;
 
@@ -143,12 +143,12 @@ void Core::run()
         while(loopTime >= time + fixedStep)
         {
             handleEvents();
-            step(1.0 / STEP_RATE);
+            step(fp_t(1.0) / STEP_RATE);
             time += fixedStep;
         }
 
 #ifndef HEADLESS
-        double interp = (double)(loopTime - time) / (double)frequency;
+        fp_t interp = fp_t(loopTime - time) / fp_t(frequency);
         _renderer->render(interp);
 #else
         // simulate ~83 without game logic
@@ -234,11 +234,11 @@ void Core::handleEvents()
     }
 }
 
-void Core::step(double dt)
+void Core::step(fp_t dt)
 {
     const Uint8* state = SDL_GetKeyboardState(nullptr);
 
-    auto speed = 0.0;
+    auto speed = fp_t(0.0);
 
     if(state[SDL_SCANCODE_LSHIFT])
     {
@@ -251,8 +251,8 @@ void Core::step(double dt)
 
     _camera->setSpeed(speed);
 
-    auto lx = 0.0;
-    auto ly = 0.0;
+    auto lx = fp_t(0.0);
+    auto ly = fp_t(0.0);
 
     if(state[SDL_SCANCODE_LEFT])
     {
@@ -279,8 +279,8 @@ void Core::step(double dt)
         _camera->look(lx, ly);
     }
 
-    auto mx = 0.0;
-    auto my = 0.0;
+    auto mx = fp_t(0.0);
+    auto my = fp_t(0.0);
 
     if(state[SDL_SCANCODE_A])
     {
@@ -312,25 +312,25 @@ void Core::step(double dt)
 
     if(position.x < 0.0)
     {
-        _camera->setPosition(Vec3(position.x + Landblock::LANDBLOCK_SIZE, position.y, position.z));
+        _camera->setPosition(glm::vec3(position.x + Landblock::LANDBLOCK_SIZE, position.y, position.z));
         _landblockManager->setCenter(LandblockId(id.x() - 1, id.y()));
     }
 
     if(position.x >= Landblock::LANDBLOCK_SIZE)
     {
-        _camera->setPosition(Vec3(position.x - Landblock::LANDBLOCK_SIZE, position.y, position.z));
+        _camera->setPosition(glm::vec3(position.x - Landblock::LANDBLOCK_SIZE, position.y, position.z));
         _landblockManager->setCenter(LandblockId(id.x() + 1, id.y()));
     }
 
     if(position.y < 0.0)
     {
-        _camera->setPosition(Vec3(position.x, position.y + Landblock::LANDBLOCK_SIZE, position.z));
+        _camera->setPosition(glm::vec3(position.x, position.y + Landblock::LANDBLOCK_SIZE, position.z));
         _landblockManager->setCenter(LandblockId(id.x(), id.y() - 1));
     }
 
     if(position.y >= Landblock::LANDBLOCK_SIZE)
     {
-        _camera->setPosition(Vec3(position.x, position.y - Landblock::LANDBLOCK_SIZE, position.z));
+        _camera->setPosition(glm::vec3(position.x, position.y - Landblock::LANDBLOCK_SIZE, position.z));
         _landblockManager->setCenter(LandblockId(id.x(), id.y() + 1));
     }
 

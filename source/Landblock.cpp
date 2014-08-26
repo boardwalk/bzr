@@ -22,17 +22,17 @@
 #include "LandblockManager.h"
 #include <algorithm>
 
-const double Landblock::SQUARE_SIZE = 24.0;
-const double Landblock::LANDBLOCK_SIZE = (Landblock::GRID_SIZE - 1) * Landblock::SQUARE_SIZE;
+const fp_t Landblock::SQUARE_SIZE = 24.0;
+const fp_t Landblock::LANDBLOCK_SIZE = (Landblock::GRID_SIZE - 1) * Landblock::SQUARE_SIZE;
 
-static double cubic(double p[4], double x)
+static fp_t cubic(fp_t p[4], fp_t x)
 {
-    return p[1] + 0.5 * x * (p[2] - p[0] + x * (2.0 * p[0] - 5.0 * p[1] + 4.0 * p[2] - p[3] + x * (3.0 * (p[1] - p[2]) + p[3] - p[0])));
+    return p[1] + fp_t(0.5) * x * (p[2] - p[0] + x * (fp_t(2.0) * p[0] - fp_t(5.0) * p[1] + fp_t(4.0) * p[2] - p[3] + x * (fp_t(3.0) * (p[1] - p[2]) + p[3] - p[0])));
 }
 
-static double bicubic(double p[4][4], double x, double y)
+static fp_t bicubic(fp_t p[4][4], fp_t x, fp_t y)
 {
-    double arr[4];
+    fp_t arr[4];
     arr[0] = cubic(p[0], y);
     arr[1] = cubic(p[1], y);
     arr[2] = cubic(p[2], y);
@@ -78,29 +78,29 @@ void Landblock::init()
     static const int edgeSize = 2;
     static const int totalSampleSize = sampleSize + edgeSize * 2;
 
-    vector<double> sample(totalSampleSize * totalSampleSize);
+    vector<fp_t> sample(totalSampleSize * totalSampleSize);
 
     for(auto sy = 0; sy < totalSampleSize; sy++)
     {
         for(auto sx = 0; sx < totalSampleSize; sx++)
         {
-            auto lx = double(sx - edgeSize) / double(sampleSize - 1) * LANDBLOCK_SIZE;
-            auto ly = double(sy - edgeSize) / double(sampleSize - 1) * LANDBLOCK_SIZE;
+            auto lx = fp_t(sx - edgeSize) / fp_t(sampleSize - 1) * LANDBLOCK_SIZE;
+            auto ly = fp_t(sy - edgeSize) / fp_t(sampleSize - 1) * LANDBLOCK_SIZE;
             sample[sx + sy * totalSampleSize] = calcHeightUnbounded(lx, ly);
         }
     }
 
-    vector<double> resample(OFFSET_MAP_SIZE * OFFSET_MAP_SIZE);
+    vector<fp_t> resample(OFFSET_MAP_SIZE * OFFSET_MAP_SIZE);
 
-    auto minOffset = numeric_limits<double>::max();
-    auto maxOffset = numeric_limits<double>::min();
+    auto minOffset = numeric_limits<fp_t>::max();
+    auto maxOffset = numeric_limits<fp_t>::min();
 
     for(auto oy = 0; oy < OFFSET_MAP_SIZE; oy++)
     {
         for(auto ox = 0; ox < OFFSET_MAP_SIZE; ox++)
         {
-            auto sx = double(ox) / double(OFFSET_MAP_SIZE - 1) * double(sampleSize - 1);
-            auto sy = double(oy) / double(OFFSET_MAP_SIZE - 1) * double(sampleSize - 1);
+            auto sx = fp_t(ox) / fp_t(OFFSET_MAP_SIZE - 1) * fp_t(sampleSize - 1);
+            auto sy = fp_t(oy) / fp_t(OFFSET_MAP_SIZE - 1) * fp_t(sampleSize - 1);
 
             auto ix = (int)sx;
             auto iy = (int)sy;
@@ -108,7 +108,7 @@ void Landblock::init()
             auto fx = sx - ix;
             auto fy = sy - iy;
 
-            double p[4][4];
+            fp_t p[4][4];
 
             for(auto py = 0; py < 4; py++)
             {
@@ -118,8 +118,8 @@ void Landblock::init()
                 }
             }
 
-            auto lx = double(ox) / double(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
-            auto ly = double(oy) / double(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
+            auto lx = fp_t(ox) / fp_t(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
+            auto ly = fp_t(oy) / fp_t(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
 
             auto offset = bicubic(p, fx, fy) - calcHeight(lx, ly);
 
@@ -144,8 +144,8 @@ void Landblock::init()
         {
             for(auto ox = 0; ox < OFFSET_MAP_SIZE; ox++)
             {
-                double offset = resample[ox + oy * OFFSET_MAP_SIZE];
-                _offsetMap[ox + oy * OFFSET_MAP_SIZE] = (uint16_t)((offset - _offsetMapBase) / _offsetMapScale * double(0xFFFF));
+                fp_t offset = resample[ox + oy * OFFSET_MAP_SIZE];
+                _offsetMap[ox + oy * OFFSET_MAP_SIZE] = (uint16_t)((offset - _offsetMapBase) / _offsetMapScale * fp_t(0xFFFF));
             }
         }
     }
@@ -162,43 +162,43 @@ void Landblock::init()
             auto ox2 = min(ox + 1, OFFSET_MAP_SIZE - 1);
             auto oy2 = min(oy + 1, OFFSET_MAP_SIZE - 1);
 
-            auto lx1 = double(ox1) / double(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
-            auto lx2 = double(ox2) / double(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
-            auto ly1 = double(oy1) / double(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
-            auto ly2 = double(oy2) / double(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
+            auto lx1 = fp_t(ox1) / fp_t(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
+            auto lx2 = fp_t(ox2) / fp_t(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
+            auto ly1 = fp_t(oy1) / fp_t(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
+            auto ly2 = fp_t(oy2) / fp_t(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
 
-            double h1 = resample[ox1 + oy1 * OFFSET_MAP_SIZE] + calcHeight(lx1, ly1);
-            double h2 = resample[ox2 + oy1 * OFFSET_MAP_SIZE] + calcHeight(lx2, ly1);
-            double h3 = resample[ox1 + oy2 * OFFSET_MAP_SIZE] + calcHeight(lx1, ly2);
+            fp_t h1 = resample[ox1 + oy1 * OFFSET_MAP_SIZE] + calcHeight(lx1, ly1);
+            fp_t h2 = resample[ox2 + oy1 * OFFSET_MAP_SIZE] + calcHeight(lx2, ly1);
+            fp_t h3 = resample[ox1 + oy2 * OFFSET_MAP_SIZE] + calcHeight(lx1, ly2);
 
-            Vec3 a(lx2 - lx1, 0.0, h2 - h1);
-            Vec3 b(0.0, ly2 - ly1, h3 - h1);
+            glm::vec3 a(lx2 - lx1, 0.0, h2 - h1);
+            glm::vec3 b(0.0, ly2 - ly1, h3 - h1);
 
-            auto n = a.cross(b).normalize() * 0.5 + Vec3(0.5, 0.5, 0.5);
-            _normalMap[(ox + oy * OFFSET_MAP_SIZE) * 3] = (uint8_t)(n.x * double(0xFF));
-            _normalMap[(ox + oy * OFFSET_MAP_SIZE) * 3 + 1] = (uint8_t)(n.y * double(0xFF));
-            _normalMap[(ox + oy * OFFSET_MAP_SIZE) * 3 + 2] = (uint8_t)(n.z * double(0xFF));
+            auto n = glm::normalize(glm::cross(a, b)) * fp_t(0.5) + glm::vec3(0.5, 0.5, 0.5);
+            _normalMap[(ox + oy * OFFSET_MAP_SIZE) * 3] = (uint8_t)(n.x * fp_t(0xFF));
+            _normalMap[(ox + oy * OFFSET_MAP_SIZE) * 3 + 1] = (uint8_t)(n.y * fp_t(0xFF));
+            _normalMap[(ox + oy * OFFSET_MAP_SIZE) * 3 + 2] = (uint8_t)(n.z * fp_t(0xFF));
         }
     }
 }
 
-double Landblock::calcHeight(double x, double y) const
+fp_t Landblock::calcHeight(fp_t x, fp_t y) const
 {
     assert(x >= 0.0 && x <= LANDBLOCK_SIZE);
     assert(y >= 0.0 && y <= LANDBLOCK_SIZE);
 
-    double dix;
+    fp_t dix;
     auto fx = modf(x / SQUARE_SIZE, &dix);
     auto ix = (int)dix;
 
-    double diy; 
+    fp_t diy; 
     auto fy = modf(y / SQUARE_SIZE, &diy);
     auto iy = (int)diy;
 
-    double h1 = _rawData.heights[ix][iy] * 2.0;
-    double h2 = _rawData.heights[min(ix + 1, GRID_SIZE - 1)][iy] * 2.0;
-    double h3 = _rawData.heights[ix][min(iy + 1, GRID_SIZE - 1)] * 2.0;
-    double h4 = _rawData.heights[min(ix + 1, GRID_SIZE - 1)][min(iy + 1, GRID_SIZE - 1)] * 2.0;
+    auto h1 = _rawData.heights[ix][iy] * fp_t(2.0);
+    auto h2 = _rawData.heights[min(ix + 1, GRID_SIZE - 1)][iy] * fp_t(2.0);
+    auto h3 = _rawData.heights[ix][min(iy + 1, GRID_SIZE - 1)] * fp_t(2.0);
+    auto h4 = _rawData.heights[min(ix + 1, GRID_SIZE - 1)][min(iy + 1, GRID_SIZE - 1)] * fp_t(2.0);
 
     if(isSplitNESW(ix, iy))
     {
@@ -237,12 +237,12 @@ double Landblock::calcHeight(double x, double y) const
         }
     }
 
-    auto hb = h1 * (1.0 - fx) + h2 * fx;
-    auto ht = h3 * (1.0 - fx) + h4 * fx;
-    return hb * (1.0 - fy) + ht * fy;
+    auto hb = h1 * (fp_t(1.0) - fx) + h2 * fx;
+    auto ht = h3 * (fp_t(1.0) - fx) + h4 * fx;
+    return hb * (fp_t(1.0) - fy) + ht * fy;
 }
 
-double Landblock::calcHeightUnbounded(double x, double y) const
+fp_t Landblock::calcHeightUnbounded(fp_t x, fp_t y) const
 {
     auto thisId = id();
 

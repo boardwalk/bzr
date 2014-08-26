@@ -21,9 +21,6 @@
 #include "graphics/Program.h"
 #include "Noncopyable.h"
 
-struct Mat4;
-struct Vec3;
-struct Quat;
 class Structure;
 
 class StructureRenderer : Noncopyable
@@ -32,10 +29,10 @@ public:
     StructureRenderer();
     ~StructureRenderer();
 
-    void render(const Mat4& projectionMat, const Mat4& viewMat);
+    void render(const glm::mat4& projectionMat, const glm::mat4& viewMat);
 
 private:
-    void renderStructure(Structure& structure, const Mat4& projectionMat, const Mat4& view, const Vec3& position, const Quat& rotation);
+    void renderStructure(Structure& structure, const glm::mat4& projectionMat, const glm::mat4& view, const glm::vec3& position, const glm::quat& rotation);
 
     Program _program;
 };

@@ -47,8 +47,7 @@ void SkyRenderer::render()
 {
     _program.use();
 
-    Mat4 rotationMat;
-    rotationMat.makeRotation(Core::get().camera().rotationQuat().conjugate());
+    auto rotationMat = glm::mat4_cast(glm::conjugate(Core::get().camera().rotationQuat()));
 
     loadMat4ToUniform(rotationMat, _program.getUniform("rotationMat"));
 
@@ -125,11 +124,11 @@ void SkyRenderer::initTexture()
     SkyModel model;
 
     SkyModel::Params params;
-    params.dt = 180.0;
-    params.tm = 0.7;
-    params.lng = 0.0;
-    params.lat = 0.0;
-    params.tu = 5.0;
+    params.dt = fp_t(180.0);
+    params.tm = fp_t(0.7);
+    params.lng = fp_t(0.0);
+    params.lat = fp_t(0.0);
+    params.tu = fp_t(5.0);
     model.prepare(params);
 
     vector<uint8_t> data(CUBE_SIZE * CUBE_SIZE * 3);
@@ -141,29 +140,29 @@ void SkyRenderer::initTexture()
             for(auto i = 0; i < CUBE_SIZE; i++)
             {
                 // scale to cube face
-                auto fi = double(i) / double(CUBE_SIZE - 1) * 2.0 - 1.0;
-                auto fj = double(j) / double(CUBE_SIZE - 1) * 2.0 - 1.0;
+                auto fi = fp_t(i) / fp_t(CUBE_SIZE - 1) * 2.0 - 1.0;
+                auto fj = fp_t(j) / fp_t(CUBE_SIZE - 1) * 2.0 - 1.0;
 
                 // find point on the cube we're mapping
-                Vec3 cp;
+                glm::vec3 cp;
 
                 switch(face)
                 {
-                    case 0: cp = Vec3( 1.0,  -fj,  -fi); break; // +X
-                    case 1: cp = Vec3(-1.0,  -fj,   fi); break; // -X
-                    case 2: cp = Vec3(  fi,  1.0,   fj); break; // +Y
-                    case 3: cp = Vec3(  fi, -1.0,  -fj); break; // -Y
-                    case 4: cp = Vec3(  fi,  -fj,  1.0); break; // +Z
-                    case 5: cp = Vec3( -fi,  -fj, -1.0); break; // -Z
+                    case 0: cp = glm::vec3( 1.0,  -fj,  -fi); break; // +X
+                    case 1: cp = glm::vec3(-1.0,  -fj,   fi); break; // -X
+                    case 2: cp = glm::vec3(  fi,  1.0,   fj); break; // +Y
+                    case 3: cp = glm::vec3(  fi, -1.0,  -fj); break; // -Y
+                    case 4: cp = glm::vec3(  fi,  -fj,  1.0); break; // +Z
+                    case 5: cp = glm::vec3( -fi,  -fj, -1.0); break; // -Z
                 }
 
                 // map cube to sphere
                 // http://mathproofs.blogspot.com/2005/07/mapping-cube-to-sphere.html
-                Vec3 sp;
+                glm::vec3 sp;
 
-                sp.x = cp.x * sqrt(1.0 - cp.y * cp.y / 2.0 - cp.z * cp.z / 2.0 + cp.y * cp.y * cp.z * cp.z / 3.0);
-                sp.y = cp.y * sqrt(1.0 - cp.z * cp.z / 2.0 - cp.x * cp.x / 2.0 + cp.z * cp.z * cp.x * cp.x / 3.0);
-                sp.z = cp.z * sqrt(1.0 - cp.x * cp.x / 2.0 - cp.y * cp.y / 2.0 + cp.x * cp.x * cp.y * cp.y / 3.0);
+                sp.x = cp.x * glm::sqrt(fp_t(1.0) - cp.y * cp.y / fp_t(2.0) - cp.z * cp.z / fp_t(2.0) + cp.y * cp.y * cp.z * cp.z / fp_t(3.0));
+                sp.y = cp.y * glm::sqrt(fp_t(1.0) - cp.z * cp.z / fp_t(2.0) - cp.x * cp.x / fp_t(2.0) + cp.z * cp.z * cp.x * cp.x / fp_t(3.0));
+                sp.z = cp.z * glm::sqrt(fp_t(1.0) - cp.x * cp.x / fp_t(2.0) - cp.y * cp.y / fp_t(2.0) + cp.x * cp.x * cp.y * cp.y / fp_t(3.0));
 
                 // convert cartesian to spherical
                 // http://en.wikipedia.org/wiki/Spherical_coordinate_system#Cartesian_coordinates
@@ -172,7 +171,7 @@ void SkyRenderer::initTexture()
                 auto phi = atan2(sp.x, -sp.y);
 
                 // pull edge below landblock edge
-                theta *= 0.9;
+                theta *= fp_t(0.9);
 
                 // compute and store color
                 auto color = model.getColor(theta, phi);
@@ -196,8 +195,8 @@ void SkyRenderer::initTexture()
     {
         for(auto i = 0; i < DUMP_WIDTH; i++)
         {
-            auto theta = double(j) / double(DUMP_HEIGHT - 1) * 0.5 * PI;
-            auto phi = double(i) / double(DUMP_WIDTH - 1) * 2.0 * PI;
+            auto theta = fp_t(j) / fp_t(DUMP_HEIGHT - 1) * 0.5 * PI;
+            auto phi = fp_t(i) / fp_t(DUMP_WIDTH - 1) * 2.0 * PI;
             auto color = model.getColor(theta, phi);
 
             dump[(i + j * DUMP_WIDTH) * 3] = color.x * 0xFF;
@@ -217,7 +216,7 @@ void SkyRenderer::initTexture()
     _sunVector.z = cos(model.thetaSun());
 }
 
-const Vec3& SkyRenderer::sunVector() const
+const glm::vec3& SkyRenderer::sunVector() const
 {
     return _sunVector;
 }

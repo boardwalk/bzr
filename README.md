@@ -15,6 +15,7 @@
 * Python 2.7 or 3.0+
 * [Ninja](http://martine.github.io/ninja/)
 * [Jansson](http://www.digip.org/jansson/), developed with v2.6
+* [glm](http://glm.g-truc.net/), developed with v0.9.5.4
 
 #### Compiling Jansson on Windows
 

@@ -18,10 +18,6 @@
 #ifndef BZR_CAMERA_H
 #define BZR_CAMERA_H
 
-#include "math/Mat4.h"
-#include "math/Quat.h"
-#include "math/Vec3.h"
-
 class Camera
 {
 public:
@@ -31,40 +27,40 @@ public:
     // +dx strafe right
     // -dy move back
     // +dy move forward
-    void move(double dx, double dy);
+    void move(fp_t dx, fp_t dy);
 
     // -dx look left
     // +dx look right
     // -dy look down
     // +dy look up
-    void look(double dx, double dy);
+    void look(fp_t dx, fp_t dy);
 
-    void step(double dt);
+    void step(fp_t dt);
 
-    void setSpeed(double newSpeed);
-    void setPosition(const Vec3& newPosition);
-    void setHeadPosition(const Vec3& newHeadPosition);
-    void setHeadOrientation(const Quat& newHeadOrientation);
+    void setSpeed(fp_t newSpeed);
+    void setPosition(const glm::vec3& newPosition);
+    void setHeadPosition(const glm::vec3& newHeadPosition);
+    void setHeadOrientation(const glm::quat& newHeadOrientation);
 
-    const Vec3& position() const;
-    const Quat& rotationQuat() const;
-    const Mat4& viewMatrix() const;
+    const glm::vec3& position() const;
+    const glm::quat& rotationQuat() const;
+    const glm::mat4& viewMatrix() const;
 
 private:
     void updateRotationQuat();
     void updateViewMatrix();
     
-    double _speed;
-    Vec3 _position;
-    double _yaw;
-    double _pitch;
-    double _roll;
+    fp_t _speed;
+    glm::vec3 _position;
+    fp_t _yaw;
+    fp_t _pitch;
+    fp_t _roll;
     
-    Vec3 _headPosition;
-    Quat _headOrientation;
+    glm::vec3 _headPosition;
+    glm::quat _headOrientation;
 
-    Quat _rotationQuat;
-    Mat4 _viewMatrix;
+    glm::quat _rotationQuat;
+    glm::mat4 _viewMatrix;
 };
 
 #endif

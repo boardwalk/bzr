@@ -82,6 +82,7 @@ def main():
             cppflags += r' /MD /I{}\include'.format(sdl_dir)
             linkflags += r' /libpath:{}\lib\x64 SDL2.lib SDL2main.lib'.format(sdl_dir)
 
+            # TODO should not be linked against in headless mode
             glew_dir = os.path.expanduser(r'~\Documents\glew-1.10.0')
             cppflags += r' /I{}\include'.format(glew_dir)
             linkflags += r' /libpath:{}\lib\Release\x64 OpenGL32.lib glew32.lib'.format(glew_dir)
@@ -89,6 +90,9 @@ def main():
             jansson_dir = os.path.expanduser(r'~\Documents\jansson-2.6\VisualStudioSolution')
             cppflags += r' /I{}\include'.format(jansson_dir)
             linkflags += r' /libpath:{}\x64\Release jansson.lib advapi32.lib'.format(jansson_dir)
+
+            glm_dir = os.path.expanduser(r'~\Documents\glm')
+            cppflags += r' /I{}'.format(glm_dir)
 
             if args.oculusvr:
                 ovr_dir = os.path.expanduser(r'~\Documents\OculusSDK\LibOVR')

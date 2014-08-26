@@ -16,29 +16,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "graphics/util.h"
-#include "math/Mat3.h"
-#include "math/Mat4.h"
+#include <glm/gtc/type_ptr.hpp>
 
-void loadMat3ToUniform(const Mat3& mat, GLint location)
+void loadMat3ToUniform(const glm::mat3& mat, GLint location)
 {
-    GLfloat m[9];
-
-    for(auto i = 0; i < 9; i++)
-    {
-        m[i] = GLfloat(mat.m[i]);
-    }
-
-    glUniformMatrix3fv(location, 1, GL_FALSE, m);
+    glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(mat));
 }
 
-void loadMat4ToUniform(const Mat4& mat, GLint location)
+void loadMat4ToUniform(const glm::mat4& mat, GLint location)
 {
-    GLfloat m[16];
-
-    for(auto i = 0; i < 16; i++)
-    {
-       m[i] = GLfloat(mat.m[i]);
-    }
-
-    glUniformMatrix4fv(location, 1, GL_FALSE, m);
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(mat));
 }

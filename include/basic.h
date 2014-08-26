@@ -27,13 +27,8 @@
 #include <SDL_opengl.h>
 #endif
 
-#ifdef __GNUC__
-#define PACK(decl) decl __attribute__((__packed__))
-#elif _MSC_VER
-#define PACK(decl) __pragma(pack(push, 1)) decl __pragma(pack(pop))
-#else
-#error Implement PACK for this compiler.
-#endif
+#define GLM_FORCE_RADIANS
+#include <glm/gtc/quaternion.hpp> // includes mat3, mat4, vec3, vec4
 
 #include <cassert>
 #include <cstdint>
@@ -42,8 +37,18 @@
 #include <string>
 #include <vector>
 
+#ifdef __GNUC__
+#define PACK(decl) decl __attribute__((__packed__))
+#elif _MSC_VER
+#define PACK(decl) __pragma(pack(push, 1)) decl __pragma(pack(pop))
+#else
+#error Implement PACK for this compiler.
+#endif
+
 using namespace std;
 
-#define PI 3.14159265359
+typedef glm::float_t fp_t;
+
+inline fp_t pi() { return glm::pi<fp_t>(); }
 
 #endif

@@ -19,8 +19,6 @@
 #define BZR_GRAPHICS_MODELRENDERER_H
 
 #include "graphics/Program.h"
-#include "math/Mat4.h"
-#include "math/Vec3.h"
 #include "Noncopyable.h"
 #include "Resource.h"
 
@@ -33,14 +31,14 @@ public:
     struct DepthSortedModel
     {
         Model* model;
-        Mat4 worldMat;
-        Vec3 worldPos;
+        glm::mat4 worldMat;
+        glm::vec3 worldPos;
     };
 
     ModelRenderer();
     ~ModelRenderer();
 
-    void render(const Mat4& projectionMat, const Mat4& viewMat);
+    void render(const glm::mat4& projectionMat, const glm::mat4& viewMat);
 
     // TEMPORARY!
     ResourcePtr _theModel;
@@ -48,19 +46,19 @@ public:
 
 private:
     void renderOne(ResourcePtr& resource,
-        const Mat4& projectionMat,
-        const Mat4& viewMat,
-        const Mat4& worldMat);
+        const glm::mat4& projectionMat,
+        const glm::mat4& viewMat,
+        const glm::mat4& worldMat);
 
     void renderModelGroup(ModelGroup& modelGroup,
-        const Mat4& projectionMat,
-        const Mat4& viewMat,
-        const Mat4& worldMat);
+        const glm::mat4& projectionMat,
+        const glm::mat4& viewMat,
+        const glm::mat4& worldMat);
 
     void renderModel(Model& model,
-        const Mat4& projectionMat,
-        const Mat4& viewMat,
-        const Mat4& worldMat,
+        const glm::mat4& projectionMat,
+        const glm::mat4& viewMat,
+        const glm::mat4& worldMat,
         bool firstPass);
 
     Program _program;
