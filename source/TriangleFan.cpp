@@ -16,9 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "TriangleFan.h"
-#include "BlobReader.h"
+#include "BinReader.h"
 
-void TriangleFan::read(BlobReader& reader)
+void TriangleFan::read(BinReader& reader)
 {
     auto numIndices = reader.read<uint8_t>();
     indices.resize(numIndices);

@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "Landblock.h"
-#include "BlobReader.h"
+#include "BinReader.h"
 #include "Core.h"
 #include "DatFile.h"
 #include "LandblockManager.h"
@@ -327,7 +327,7 @@ void Landblock::initObjects()
 
     auto blob = Core::get().cellDat().read(baseFileId | 0xFFFE);
 
-    BlobReader reader(blob.data(), blob.size());
+    BinReader reader(blob.data(), blob.size());
 
     auto fid = reader.read<uint32_t>();
     assert(fid == _rawData.fileId - 1);

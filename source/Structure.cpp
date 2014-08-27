@@ -16,14 +16,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "Structure.h"
-#include "BlobReader.h"
+#include "BinReader.h"
 #include "Core.h"
 #include "ResourceCache.h"
 #include "StructureGeom.h"
 
 Structure::Structure(const void* data, size_t size)
 {
-    BlobReader reader(data, size);
+    BinReader reader(data, size);
 
     auto resourceId = reader.read<uint32_t>();
     // 0x1 above ground

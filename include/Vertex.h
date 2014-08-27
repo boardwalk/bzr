@@ -18,7 +18,7 @@
 #ifndef BZR_VERTEX_H
 #define BZR_VERTEX_H
 
-class BlobReader;
+class BinReader;
 
 struct Vertex
 {
@@ -26,7 +26,7 @@ struct Vertex
     glm::vec3 normal;
     vector<glm::vec2> texCoords;
 
-    void read(BlobReader& reader);
+    void read(BinReader& reader);
 };
 
 #endif

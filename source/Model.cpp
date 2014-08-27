@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "Model.h"
-#include "BlobReader.h"
+#include "BinReader.h"
 #include "BSP.h"
 #include "Core.h"
 #include "ResourceCache.h"
@@ -24,7 +24,7 @@
 #include "TextureLookup5.h"
 #include "TextureLookup8.h"
 
-static vector<TriangleFan> unpackTriangleFans(BlobReader& reader)
+static vector<TriangleFan> unpackTriangleFans(BinReader& reader)
 {
     auto numTriangleFans = reader.readVarInt();
 
@@ -43,7 +43,7 @@ static vector<TriangleFan> unpackTriangleFans(BlobReader& reader)
 
 Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _needsDepthSort(false)
 {
-    BlobReader reader(data, size);
+    BinReader reader(data, size);
 
     auto resourceId = reader.read<uint32_t>();
     assert(resourceId == id);

@@ -18,7 +18,7 @@
 #ifndef BZR_TRIANGLEFAN_H
 #define BZR_TRIANGLEFAN_H
 
-class BlobReader;
+class BinReader;
 
 struct TriangleFan
 {
@@ -37,7 +37,7 @@ struct TriangleFan
     int texIndex;
     vector<Index> indices;
 
-    void read(BlobReader& reader);
+    void read(BinReader& reader);
 };
 
 #endif

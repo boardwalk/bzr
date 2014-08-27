@@ -18,8 +18,8 @@
 #ifndef BZR_BSP_H
 #define BZR_BSP_H
 
-class BlobReader;
+class BinReader;
 
-void skipBSP(BlobReader& reader, int treeType);
+void skipBSP(BinReader& reader, int treeType);
 
 #endif

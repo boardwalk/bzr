@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "TextureLookup8.h"
-#include "BlobReader.h"
+#include "BinReader.h"
 #include "Core.h"
 #include "ResourceCache.h"
 #include "Texture.h"
@@ -24,7 +24,7 @@
 
 TextureLookup8::TextureLookup8(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 {
-    BlobReader reader(data, size);
+    BinReader reader(data, size);
 
     auto flags = reader.read<uint8_t>();
     assert(flags == 0x01 || flags == 0x02 || flags == 0x04 || flags == 0x11 || flags == 0x12 || flags == 0x14);

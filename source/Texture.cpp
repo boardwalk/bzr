@@ -16,14 +16,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "Texture.h"
-#include "BlobReader.h"
+#include "BinReader.h"
 #include "Core.h"
 #include "Palette.h"
 #include "ResourceCache.h"
 
 Texture::Texture(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 {
-    BlobReader reader(data, size);
+    BinReader reader(data, size);
 
     auto resourceId = reader.read<uint32_t>();
     assert(resourceId == id);

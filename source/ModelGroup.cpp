@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "ModelGroup.h"
-#include "BlobReader.h"
+#include "BinReader.h"
 #include "Core.h"
 #include "ResourceCache.h"
 #include <glm/gtx/norm.hpp>
@@ -26,7 +26,7 @@
 
 ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 {
-    BlobReader reader(data, size);
+    BinReader reader(data, size);
 
     auto resourceId = reader.read<uint32_t>();
     assert(resourceId == id);

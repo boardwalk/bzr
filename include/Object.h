@@ -20,7 +20,7 @@
 
 #include "Resource.h"
 
-class BlobReader;
+class BinReader;
 
 struct Object
 {
@@ -28,7 +28,7 @@ struct Object
     glm::vec3 position;
     glm::quat rotation;
 
-    void read(BlobReader& reader);
+    void read(BinReader& reader);
 };
 
 #endif

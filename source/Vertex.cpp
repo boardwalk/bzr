@@ -16,9 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "Vertex.h"
-#include "BlobReader.h"
+#include "BinReader.h"
 
-void Vertex::read(BlobReader& reader)
+void Vertex::read(BinReader& reader)
 {
     auto numTexCoords = reader.read<uint16_t>();
     texCoords.resize(numTexCoords);

@@ -16,11 +16,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "Object.h"
-#include "BlobReader.h"
+#include "BinReader.h"
 #include "Core.h"
 #include "ResourceCache.h"
 
-void Object::read(BlobReader& reader)
+void Object::read(BinReader& reader)
 {
     auto modelId = reader.read<uint32_t>();
     resource = Core::get().resourceCache().get(modelId);

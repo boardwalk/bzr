@@ -15,13 +15,13 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_BLOBREADER_H
-#define BZR_BLOBREADER_H
+#ifndef BZR_BINREADER_H
+#define BZR_BINREADER_H
 
-class BlobReader
+class BinReader
 {
 public:
-    BlobReader(const void* data, size_t size) : _data(data), _size(size), _position(0)
+    BinReader(const void* data, size_t size) : _data(data), _size(size), _position(0)
     {}
 
     template<class T>

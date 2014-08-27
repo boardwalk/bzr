@@ -16,9 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "BSP.h"
-#include "BlobReader.h"
+#include "BinReader.h"
 
-static void skipBSPLeaf(BlobReader& reader, int treeType)
+static void skipBSPLeaf(BinReader& reader, int treeType)
 {
     reader.read<uint32_t>(); // leaf index
 
@@ -42,7 +42,7 @@ static void skipBSPLeaf(BlobReader& reader, int treeType)
     }
 }
 
-static void skipBSPPortal(BlobReader& reader, int treeType)
+static void skipBSPPortal(BinReader& reader, int treeType)
 {
     reader.read<float>(); // px
     reader.read<float>(); // py
@@ -77,7 +77,7 @@ static void skipBSPPortal(BlobReader& reader, int treeType)
     }
 }
 
-static void skipBSPNode(BlobReader& reader, int treeType, uint32_t nodeType)
+static void skipBSPNode(BinReader& reader, int treeType, uint32_t nodeType)
 {
     reader.read<float>(); // px
     reader.read<float>(); // py
@@ -120,7 +120,7 @@ static void skipBSPNode(BlobReader& reader, int treeType, uint32_t nodeType)
     }
 }
 
-void skipBSP(BlobReader& reader, int treeType)
+void skipBSP(BinReader& reader, int treeType)
 {
     auto nodeType = reader.read<uint32_t>();
 
