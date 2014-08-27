@@ -20,11 +20,13 @@
 
 #include <SDL.h>
 
+#ifndef HEADLESS
 #ifdef _MSC_VER
 #include <GL/glew.h>
 #else
 #define GL_GLEXT_PROTOTYPES
 #include <SDL_opengl.h>
+#endif
 #endif
 
 #define GLM_FORCE_RADIANS

@@ -82,11 +82,6 @@ def main():
             cppflags += r' /MD /I{}\include'.format(sdl_dir)
             linkflags += r' /libpath:{}\lib\x64 SDL2.lib SDL2main.lib'.format(sdl_dir)
 
-            # TODO should not be linked against in headless mode
-            glew_dir = os.path.expanduser(r'~\Documents\glew-1.10.0')
-            cppflags += r' /I{}\include'.format(glew_dir)
-            linkflags += r' /libpath:{}\lib\Release\x64 OpenGL32.lib glew32.lib'.format(glew_dir)
-
             jansson_dir = os.path.expanduser(r'~\Documents\jansson-2.6\VisualStudioSolution')
             cppflags += r' /I{}\include'.format(jansson_dir)
             linkflags += r' /libpath:{}\x64\Release jansson.lib advapi32.lib'.format(jansson_dir)
@@ -94,14 +89,19 @@ def main():
             glm_dir = os.path.expanduser(r'~\Documents\glm')
             cppflags += r' /I{}'.format(glm_dir)
 
-            if args.oculusvr:
-                ovr_dir = os.path.expanduser(r'~\Documents\OculusSDK\LibOVR')
-                cppflags += r' /I{}\Src /DOVR_OS_WIN32 /DOCULUSVR'.format(ovr_dir)
-                # there are VS2010 and 2013 directories too
-                # i'm only testing this support with VS 2013 right now
-                # attn! libovr requires atls.lib, which is not provided by VS Express
-                # the version provided in the WDK does *not* work, you need the full version of VS
-                linkflags += r' /libpath:{}\Lib\x64\VS2013 libovr64.lib winmm.lib ws2_32.lib gdi32.lib'.format(ovr_dir)
+            if not args.headless:
+                glew_dir = os.path.expanduser(r'~\Documents\glew-1.10.0')
+                cppflags += r' /I{}\include'.format(glew_dir)
+                linkflags += r' /libpath:{}\lib\Release\x64 OpenGL32.lib glew32.lib'.format(glew_dir)
+
+                if args.oculusvr:
+                    ovr_dir = os.path.expanduser(r'~\Documents\OculusSDK\LibOVR')
+                    cppflags += r' /I{}\Src /DOVR_OS_WIN32 /DOCULUSVR'.format(ovr_dir)
+                    # there are VS2010 and 2013 directories too
+                    # i'm only testing this support with VS 2013 right now
+                    # attn! libovr requires atls.lib, which is not provided by VS Express
+                    # the version provided in the WDK does *not* work, you need the full version of VS
+                    linkflags += r' /libpath:{}\Lib\x64\VS2013 libovr64.lib winmm.lib ws2_32.lib gdi32.lib'.format(ovr_dir)
 
             if args.release:
                 cppflags += ' /O2 /GL'
@@ -134,9 +134,12 @@ def main():
             n.rule('copy', 'cmd /c copy $in $out')
 
             n.build(r'output\SDL2.dll', 'copy', r'{}\lib\x64\SDL2.dll'.format(sdl_dir))
-            n.build(r'output\glew32.dll', 'copy', r'{}\bin\Release\x64\glew32.dll'.format(glew_dir))
-            
-            n.default(r'output\SDL2.dll output\glew32.dll')
+            n.default(r'output\SDL2.dll')
+
+            if not args.headless:
+                n.build(r'output\glew32.dll', 'copy', r'{}\bin\Release\x64\glew32.dll'.format(glew_dir))
+                n.default(r'output\glew32.dll')
+
         else:
             # applied to 'c' rule only
             cflags = ''

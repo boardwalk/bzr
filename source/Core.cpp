@@ -16,7 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "Core.h"
+#ifndef HEADLESS
 #include "graphics/Renderer.h"
+#endif
 #include "Camera.h"
 #include "Config.h"
 #include "DatFile.h"
@@ -161,7 +163,9 @@ void Core::handleEvents()
 {
     SDL_Event event;
 
+#ifndef HEADLESS
     bool newModel = false; // TEMPORARY
+#endif
 
     while(SDL_PollEvent(&event) != 0)
     {
@@ -180,6 +184,7 @@ void Core::handleEvents()
                 }
 #endif
                 // TEMPORARY
+#ifndef HEADLESS
                 if(event.key.keysym.sym == SDLK_z)
                 {
                     while(_modelId > 0x02000000)
@@ -221,17 +226,20 @@ void Core::handleEvents()
                     printf("Submodel num %d\n", _submodelNum);
                     _renderer->setSubmodelNum(_submodelNum);
                 }
+#endif
 
                 break;
         }
     }
 
     // TEMPORARY
+#ifndef HEADLESS
     if(newModel)
     {
         printf("Loading model %08x\n", _modelId);
         _renderer->setModel( _resourceCache->get(_modelId) );
     }
+#endif
 }
 
 void Core::step(fp_t dt)
