@@ -22,7 +22,7 @@
 
 LandblockManager::LandblockManager()
 {
-    _radius = Core::get().config().getInt("LandblockManager.radius", 8);
+    _radius = Core::get().config().getInt("LandblockManager.radius", 5);
 }
 
 void LandblockManager::setCenter(LandblockId c)
