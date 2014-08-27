@@ -43,7 +43,7 @@ struct SortByTexIndex
 
 MeshRenderData::MeshRenderData(const Model& model)
 {
-    initGeometry(model.textures(),
+    init(model.textures(),
         model.vertices(),
         model.triangleFans(),
         model.collisionTriangleFans());
@@ -54,7 +54,7 @@ MeshRenderData::MeshRenderData(const Structure& structure)
     assert(structure.pieceNum() < structure.geometry().pieces().size());
     auto& piece = structure.geometry().pieces()[structure.pieceNum()];
 
-    initGeometry(structure.textures(),
+    init(structure.textures(),
         piece.vertices,
         piece.triangleFans,
         piece.collisionTriangleFans);
@@ -93,7 +93,7 @@ void MeshRenderData::render()
     }
 }
 
-void MeshRenderData::initGeometry(
+void MeshRenderData::init(
     const vector<ResourcePtr>& textures,
     const vector<Vertex>& vertices,
     const vector<TriangleFan>& triangleFans,
