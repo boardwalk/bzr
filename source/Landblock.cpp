@@ -53,7 +53,7 @@ Landblock::Landblock(const void* data, size_t length)
 Landblock::Landblock(Landblock&& other)
 {
     _rawData = other._rawData;
-    _objects = move(other._objects);
+    _doodads = move(other._doodads);
     _offsetMap = move(other._offsetMap);
     _offsetMapBase = other._offsetMapBase;
     _offsetMapScale = other._offsetMapScale;
@@ -70,7 +70,7 @@ void Landblock::init()
 
     if(_rawData.flags)
     {
-        initObjects();
+        initDoodads();
     }
 
     // sample another two times at the edges so we don't have to clamp our bicubic resample
@@ -292,9 +292,9 @@ const Landblock::RawData& Landblock::rawData() const
     return _rawData;
 }
 
-const vector<Object>& Landblock::objects() const
+const vector<Doodad>& Landblock::doodads() const
 {
-    return _objects;
+    return _doodads;
 }
 
 const vector<Structure>& Landblock::structures() const
@@ -321,7 +321,7 @@ unique_ptr<Destructable>& Landblock::renderData()
     return _renderData;
 }
 
-void Landblock::initObjects()
+void Landblock::initDoodads()
 {
     auto baseFileId = _rawData.fileId & 0xFFFF0000;
 
@@ -346,27 +346,27 @@ void Landblock::initObjects()
         _structures.emplace_back(structBlob.data(), structBlob.size());
     }
 
-    auto numObjects = reader.read<uint16_t>();
-    _objects.resize(numObjects);
+    auto numDoodads = reader.read<uint16_t>();
+    _doodads.resize(numDoodads);
 
     auto unk1 = reader.read<uint16_t>();
     assert(unk1 == 0);
 
-    for(auto oi = 0u; oi < numObjects; oi++)
+    for(auto di = 0u; di < numDoodads; di++)
     {
-        _objects[oi].read(reader);
+        _doodads[di].read(reader);
     }
 
-    auto numObjectsEx = reader.read<uint16_t>();
-    _objects.resize(numObjects + numObjectsEx);
+    auto numDoodadsEx = reader.read<uint16_t>();
+    _doodads.resize(numDoodads + numDoodadsEx);
 
     auto unk2 = reader.read<uint16_t>();
     // I don't know what this is, but it means there's more data
     assert(unk2 == 0 || unk2 == 1);
 
-    for(auto oi = 0u; oi < numObjectsEx; oi++)
+    for(auto di = 0u; di < numDoodadsEx; di++)
     {
-        _objects[numObjects + oi].read(reader);
+        _doodads[numDoodads + di].read(reader);
 
         reader.read<uint32_t>();
         auto numChunks = reader.read<uint32_t>();

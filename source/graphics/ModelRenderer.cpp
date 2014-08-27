@@ -91,11 +91,11 @@ void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& view
 
         auto landblockPosition = glm::vec3(dx * 192.0, dy * 192.0, 0.0);
 
-        for(auto& object : pair.second.objects())
+        for(auto& doodad : pair.second.doodads())
         {
-            auto worldMat = glm::translate(glm::mat4(), landblockPosition + object.position) * glm::mat4_cast(object.rotation);
+            auto worldMat = glm::translate(glm::mat4(), landblockPosition + doodad.position) * glm::mat4_cast(doodad.rotation);
 
-            renderOne(const_cast<ResourcePtr&>(object.resource),
+            renderOne(const_cast<ResourcePtr&>(doodad.resource),
                 projectionMat,
                 viewMat,
                 worldMat);
@@ -103,11 +103,11 @@ void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& view
 
         for(auto& structure : pair.second.structures())
         {
-            for(auto& object : structure.objects())
+            for(auto& doodad : structure.doodads())
             {
-                auto worldMat = glm::translate(glm::mat4(), landblockPosition + object.position) * glm::mat4_cast(object.rotation);
+                auto worldMat = glm::translate(glm::mat4(), landblockPosition + doodad.position) * glm::mat4_cast(doodad.rotation);
 
-                renderOne(const_cast<ResourcePtr&>(object.resource),
+                renderOne(const_cast<ResourcePtr&>(doodad.resource),
                     projectionMat,
                     viewMat,
                     worldMat);

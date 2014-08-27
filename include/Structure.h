@@ -20,7 +20,7 @@
 
 #include "Destructable.h"
 #include "Noncopyable.h"
-#include "Object.h"
+#include "Doodad.h"
 
 class StructureGeom;
 
@@ -33,7 +33,7 @@ public:
     const glm::vec3& position() const;
     const glm::quat& rotation() const;
     const vector<ResourcePtr>& textures() const;
-    const vector<Object>& objects() const;
+    const vector<Doodad>& doodads() const;
     const StructureGeom& geometry() const;
     uint16_t pieceNum() const;
 
@@ -43,7 +43,7 @@ private:
     glm::vec3 _position;
     glm::quat _rotation;
     vector<ResourcePtr> _textures;
-    vector<Object> _objects;
+    vector<Doodad> _doodads;
     ResourcePtr _geometry;
     uint16_t _pieceNum;
     unique_ptr<Destructable> _renderData;

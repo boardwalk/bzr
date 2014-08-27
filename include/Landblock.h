@@ -51,7 +51,7 @@ public:
     LandblockId id() const;
 
     const RawData& rawData() const;
-    const vector<Object>& objects() const;
+    const vector<Doodad>& doodads() const;
     const vector<Structure>& structures() const;
 
     const uint8_t* normalMap() const;
@@ -61,10 +61,10 @@ public:
     unique_ptr<Destructable>& renderData();
 
 private:
-    void initObjects();
+    void initDoodads();
 
     RawData _rawData;
-    vector<Object> _objects;
+    vector<Doodad> _doodads;
     vector<Structure> _structures;
 
     vector<uint16_t> _offsetMap;

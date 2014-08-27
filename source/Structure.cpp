@@ -77,12 +77,12 @@ Structure::Structure(const void* data, size_t size)
 
     if(flags & 2)
     {
-        auto numObjects = reader.read<uint32_t>();
-        _objects.resize(numObjects);
+        auto numDoodads = reader.read<uint32_t>();
+        _doodads.resize(numDoodads);
 
-        for(auto& object : _objects)
+        for(auto& doodad : _doodads)
         {
-            object.read(reader);
+            doodad.read(reader);
         }
     }
 
@@ -100,7 +100,7 @@ Structure::Structure(Structure&& other)
     _position = other._position;
     _rotation = other._rotation;
     _textures = move(other._textures);
-    _objects = move(other._objects);
+    _doodads = move(other._doodads);
     _geometry = move(other._geometry);
     _pieceNum = other._pieceNum;
     _renderData = move(other._renderData);
@@ -121,9 +121,9 @@ const vector<ResourcePtr>& Structure::textures() const
     return _textures;
 }
 
-const vector<Object>& Structure::objects() const
+const vector<Doodad>& Structure::doodads() const
 {
-    return _objects;
+    return _doodads;
 }
 
 const StructureGeom& Structure::geometry() const

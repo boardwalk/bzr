@@ -15,22 +15,20 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "Object.h"
-#include "BinReader.h"
-#include "Core.h"
-#include "ResourceCache.h"
+#ifndef BZR_DOODAD_H
+#define BZR_DOODAD_H
 
-void Object::read(BinReader& reader)
+#include "Resource.h"
+
+class BinReader;
+
+struct Doodad
 {
-    auto modelId = reader.read<uint32_t>();
-    resource = Core::get().resourceCache().get(modelId);
+    ResourcePtr resource;
+    glm::vec3 position;
+    glm::quat rotation;
 
-    position.x = reader.read<float>();
-    position.y = reader.read<float>();
-    position.z = reader.read<float>();
+    void read(BinReader& reader);
+};
 
-    rotation.w = reader.read<float>();
-    rotation.x = reader.read<float>();
-    rotation.y = reader.read<float>();
-    rotation.z = reader.read<float>();
-}
+#endif
