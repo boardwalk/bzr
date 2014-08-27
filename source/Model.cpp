@@ -90,7 +90,7 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _ne
 
     if(flags & 0x1)
     {
-        unpackTriangleFans(reader);
+        _collisionTriangleFans = unpackTriangleFans(reader);
         skipBSP(reader, 1);
     }
 
@@ -109,10 +109,17 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _ne
 
     if(flags & 0x8)
     {
+        // Seems to be a reference to an 0x11 file? No idea what these are!
         reader.read<uint32_t>();
     }
 
     reader.assertEnd();
+
+    // Build bounding box from all vertices
+    for(auto& vertex : _vertices)
+    {
+        _bounds.grow(vertex.position);
+    }
 }
 
 const vector<ResourcePtr>& Model::textures() const
@@ -128,6 +135,16 @@ const vector<Vertex>& Model::vertices() const
 const vector<TriangleFan>& Model::triangleFans() const
 {
     return _triangleFans;
+}
+
+const vector<TriangleFan>& Model::collisionTriangleFans() const
+{
+    return _collisionTriangleFans;
+}
+
+const AABB& Model::bounds() const
+{
+    return _bounds;
 }
 
 bool Model::needsDepthSort() const

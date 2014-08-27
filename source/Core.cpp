@@ -23,6 +23,7 @@
 #include "Config.h"
 #include "DatFile.h"
 #include "LandblockManager.h"
+#include "ObjectManager.h"
 #include "ResourceCache.h"
 #include "util.h"
 
@@ -74,6 +75,11 @@ LandblockManager& Core::landblockManager()
     return *_landblockManager;
 }
 
+ObjectManager& Core::objectManager()
+{
+    return *_objectManager;
+}
+
 Camera& Core::camera()
 {
     return *_camera;
@@ -102,6 +108,7 @@ void Core::init()
     _highresDat.reset(new DatFile("data/client_highres.dat"));
     _resourceCache.reset(new ResourceCache());
     _landblockManager.reset(new LandblockManager());
+    _objectManager.reset(new ObjectManager());
     _camera.reset(new Camera());
 #ifndef HEADLESS
     _renderer.reset(new Renderer());
@@ -116,6 +123,7 @@ void Core::cleanup()
     _renderer.reset();
 #endif
     _camera.reset();
+    _objectManager.reset();
     _landblockManager.reset();
     _resourceCache.reset();
     _portalDat.reset();

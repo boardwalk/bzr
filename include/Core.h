@@ -22,6 +22,7 @@ class Camera;
 class Config;
 class DatFile;
 class LandblockManager;
+class ObjectManager;
 class Renderer;
 class ResourceCache;
 
@@ -37,6 +38,7 @@ public:
     const DatFile& highresDat() const;
     ResourceCache& resourceCache();
     LandblockManager& landblockManager();
+    ObjectManager& objectManager();
     Camera& camera();
 #ifndef HEADLESS
     Renderer& renderer();
@@ -59,6 +61,7 @@ private:
     unique_ptr<DatFile> _highresDat;
     unique_ptr<ResourceCache> _resourceCache;
     unique_ptr<LandblockManager> _landblockManager;
+    unique_ptr<ObjectManager> _objectManager;
     unique_ptr<Camera> _camera;
 #ifndef HEADLESS
     unique_ptr<Renderer> _renderer;
