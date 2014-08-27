@@ -93,7 +93,7 @@ void Config::setInt(const char* name, int value)
     set(name, json_integer(value));
 }
 
-void Config::setDouble(const char* name, fp_t value)
+void Config::setFloat(const char* name, fp_t value)
 {
     set(name, json_real(value));
 }
@@ -133,7 +133,7 @@ int Config::getInt(const char* name, int defaultValue)
     }
 }
 
-fp_t Config::getDouble(const char* name, fp_t defaultValue)
+fp_t Config::getFloat(const char* name, fp_t defaultValue)
 {
     auto value = get(name);
 
@@ -143,7 +143,7 @@ fp_t Config::getDouble(const char* name, fp_t defaultValue)
     }
     else
     {
-        setDouble(name, defaultValue);
+        setFloat(name, defaultValue);
         return defaultValue;
     }
 }

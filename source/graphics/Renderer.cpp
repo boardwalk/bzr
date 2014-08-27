@@ -78,7 +78,7 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     }
 #endif
 
-    _fieldOfView = config.getDouble("Renderer.fieldOfView", 90.0);
+    _fieldOfView = config.getFloat("Renderer.fieldOfView", 90.0);
 
     auto textureFiltering = config.getString("Renderer.textureFiltering", "trilinear");
 
@@ -95,7 +95,7 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
         throw runtime_error("Bad value for Renderer.textureFiltering");
     }
 
-    _textureMaxAnisotropy = (GLfloat)config.getDouble("Renderer.anisotropyLevel", 0.0);
+    _textureMaxAnisotropy = (GLfloat)config.getFloat("Renderer.anisotropyLevel", 0.0);
 
     if(_textureMaxAnisotropy != 0.0f)
     {
