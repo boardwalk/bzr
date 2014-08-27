@@ -23,7 +23,7 @@ void TriangleFan::read(BinReader& reader)
     auto numIndices = reader.read<uint8_t>();
     indices.resize(numIndices);
 
-    auto flags = reader.read<uint8_t>();
+    flags = reader.read<uint8_t>();
     assert(flags == 0x0 || flags == 0x1 || flags == 0x4);
 
     auto flags2 = reader.read<uint32_t>();
@@ -44,11 +44,6 @@ void TriangleFan::read(BinReader& reader)
         {
             index.texCoordIndex = reader.read<uint8_t>();
         }
-    }
-    else
-    {
-        // This is some sort of lighting/partitioning poly, don't render it
-        indices.clear();
     }
 
     if(flags2 == 0x02)

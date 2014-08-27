@@ -15,30 +15,9 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_TRIANGLEFAN_H
-#define BZR_TRIANGLEFAN_H
+#include "physics/Body.h"
 
-class BinReader;
-
-struct TriangleFan
+void Body::integrate(fp_t dt)
 {
-    struct Index
-    {
-        Index() : vertexIndex(0), texCoordIndex(0)
-        {}
-
-        int vertexIndex;
-        int texCoordIndex;
-    };
-
-    TriangleFan() : texIndex(0)
-    {}
-
-    int flags;
-    int texIndex;
-    vector<Index> indices;
-
-    void read(BinReader& reader);
-};
-
-#endif
+    (void)dt;
+}

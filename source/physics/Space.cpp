@@ -15,30 +15,23 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_TRIANGLEFAN_H
-#define BZR_TRIANGLEFAN_H
+#include "physics/Space.h"
+#include "physics/Body.h"
 
-class BinReader;
-
-struct TriangleFan
+void Space::step(fp_t dt)
 {
-    struct Index
+    for(auto it = _bodies.begin(); it != _bodies.end(); /**/)
     {
-        Index() : vertexIndex(0), texCoordIndex(0)
-        {}
+        auto body = it->lock();
 
-        int vertexIndex;
-        int texCoordIndex;
-    };
-
-    TriangleFan() : texIndex(0)
-    {}
-
-    int flags;
-    int texIndex;
-    vector<Index> indices;
-
-    void read(BinReader& reader);
-};
-
-#endif
+        if(body)
+        {
+            body->integrate(dt);
+            ++it;
+        }
+        else
+        {
+            it = _bodies.erase(it);
+        }
+    }
+}

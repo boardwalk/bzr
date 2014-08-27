@@ -19,6 +19,7 @@
 #ifndef HEADLESS
 #include "graphics/Renderer.h"
 #endif
+#include "physics/Space.h"
 #include "Camera.h"
 #include "Config.h"
 #include "DatFile.h"
@@ -80,6 +81,11 @@ ObjectManager& Core::objectManager()
     return *_objectManager;
 }
 
+Space& Core::space()
+{
+    return *_space;
+}
+
 Camera& Core::camera()
 {
     return *_camera;
@@ -92,7 +98,7 @@ Renderer& Core::renderer()
 }
 #endif
 
-Core::Core() : _done(false) /* TEMPORARY */, _modelId(0x02001960), _submodelNum(0)
+Core::Core() : _done(false) /* TEMPORARY */, _modelId(0x02000120), _submodelNum(0)
 {}
 
 void Core::init()
@@ -109,6 +115,7 @@ void Core::init()
     _resourceCache.reset(new ResourceCache());
     _landblockManager.reset(new LandblockManager());
     _objectManager.reset(new ObjectManager());
+    _space.reset(new Space());
     _camera.reset(new Camera());
 #ifndef HEADLESS
     _renderer.reset(new Renderer());
@@ -123,6 +130,7 @@ void Core::cleanup()
     _renderer.reset();
 #endif
     _camera.reset();
+    _space.reset();
     _objectManager.reset();
     _landblockManager.reset();
     _resourceCache.reset();
@@ -350,5 +358,6 @@ void Core::step(fp_t dt)
         _landblockManager->setCenter(LandblockId(id.x(), id.y() + 1));
     }
 
+    _space->step(dt);
     _camera->step(dt);
 }

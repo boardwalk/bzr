@@ -15,30 +15,13 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_TRIANGLEFAN_H
-#define BZR_TRIANGLEFAN_H
+#ifndef BZR_PHYSICS_SHAPE_H
+#define BZR_PHYSICS_SHAPE_H
 
-class BinReader;
+#include "Noncopyable.h"
 
-struct TriangleFan
+class Shape : Noncopyable
 {
-    struct Index
-    {
-        Index() : vertexIndex(0), texCoordIndex(0)
-        {}
-
-        int vertexIndex;
-        int texCoordIndex;
-    };
-
-    TriangleFan() : texIndex(0)
-    {}
-
-    int flags;
-    int texIndex;
-    vector<Index> indices;
-
-    void read(BinReader& reader);
 };
 
 #endif

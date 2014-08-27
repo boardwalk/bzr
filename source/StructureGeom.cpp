@@ -41,6 +41,7 @@ StructureGeom::StructureGeom(uint32_t id, const void* data, size_t size) : Resou
         piece.triangleFans.resize(numTriangleFans);
 
         auto numCollisionTriangleFans = reader.read<uint32_t>();
+        piece.collisionTriangleFans.resize(numCollisionTriangleFans);
 
         auto numShorts = reader.read<uint32_t>();
 
@@ -79,7 +80,7 @@ StructureGeom::StructureGeom(uint32_t id, const void* data, size_t size) : Resou
             auto triangleFanNum = reader.read<uint16_t>();
             assert(triangleFanNum == ctfi);
 
-            TriangleFan().read(reader);
+            piece.collisionTriangleFans[ctfi].read(reader);
         }
 
         skipBSP(reader, 1);

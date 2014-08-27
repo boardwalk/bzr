@@ -68,6 +68,11 @@ TextureLookup8::TextureLookup8(uint32_t id, const void* data, size_t size) : Res
     reader.assertEnd();
 }
 
+TextureLookup8::TextureLookup8(ResourcePtr textureLookup5) : ResourceImpl(0), _textureLookup5(textureLookup5)
+{
+    assert(_textureLookup5->resourceType() == ResourceType::TextureLookup5);
+}
+
 const TextureLookup5& TextureLookup8::textureLookup5() const
 {
     return _textureLookup5->cast<TextureLookup5>();

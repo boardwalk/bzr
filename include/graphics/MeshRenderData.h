@@ -43,7 +43,10 @@ private:
         int indexCount;
     };
 
-    void initGeometry(const vector<ResourcePtr>& textures, const vector<Vertex>& vertices, const vector<TriangleFan>& triangleFans);
+    void initGeometry(const vector<ResourcePtr>& textures,
+        const vector<Vertex>& vertices,
+        const vector<TriangleFan>& triangleFans,
+        const vector<TriangleFan>& collisionTriangleFans);
     
     GLuint _vertexArray;
     GLuint _vertexBuffer;

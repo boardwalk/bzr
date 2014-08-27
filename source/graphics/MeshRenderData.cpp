@@ -19,13 +19,19 @@
 #include "graphics/Renderer.h"
 #include "graphics/TextureRenderData.h"
 #include "Core.h"
+#include "Config.h"
 #include "Model.h"
+#include "ResourceCache.h"
 #include "Structure.h"
 #include "StructureGeom.h"
 #include "Texture.h"
 #include "TextureLookup5.h"
 #include "TextureLookup8.h"
 #include <algorithm>
+
+// FIXME Not the neatest thing in the world
+// Ought to find an existing 0x08 file with a nice transparent texture
+static weak_ptr<Resource> collisionTexture;
 
 struct SortByTexIndex
 {
@@ -37,14 +43,21 @@ struct SortByTexIndex
 
 MeshRenderData::MeshRenderData(const Model& model)
 {
-    initGeometry(model.textures(), model.vertices(), model.triangleFans());
+    initGeometry(model.textures(),
+        model.vertices(),
+        model.triangleFans(),
+        model.collisionTriangleFans());
 }
 
 MeshRenderData::MeshRenderData(const Structure& structure)
 {
     assert(structure.pieceNum() < structure.geometry().pieces().size());
     auto& piece = structure.geometry().pieces()[structure.pieceNum()];
-    initGeometry(structure.textures(), piece.vertices, piece.triangleFans);
+
+    initGeometry(structure.textures(),
+        piece.vertices,
+        piece.triangleFans,
+        piece.collisionTriangleFans);
 }
 
 MeshRenderData::~MeshRenderData()
@@ -83,7 +96,8 @@ void MeshRenderData::render()
 void MeshRenderData::initGeometry(
     const vector<ResourcePtr>& textures,
     const vector<Vertex>& vertices,
-    const vector<TriangleFan>& triangleFans)
+    const vector<TriangleFan>& triangleFans,
+    const vector<TriangleFan>& collisionTriangleFans)
 {
     // vx, vy, vz, nx, ny, nz, s, t
     static const int COMPONENTS_PER_VERTEX = 8;
@@ -104,6 +118,12 @@ void MeshRenderData::initGeometry(
 
     for(auto triangleFan : sortedTriangleFans)
     {
+        // Skip portal/lighting polygons
+        if(triangleFan->flags == 0x04)
+        {
+            continue;
+        }
+
         if(_batches.empty() || textures[triangleFan->texIndex].get() != _batches.back().texture.get())
         {
             // Start a new batch
@@ -141,6 +161,50 @@ void MeshRenderData::initGeometry(
             {
                 vertexData.push_back(float(vertex.texCoords[index.texCoordIndex].x));
                 vertexData.push_back(float(vertex.texCoords[index.texCoordIndex].y));
+            }
+        }
+    }
+
+    if(Core::get().config().getBool("MeshRenderData.renderCollisionGeometry", false))
+    {
+        auto textureLookup8 = collisionTexture.lock();
+
+        if(!textureLookup8)
+        {
+            ResourcePtr texture(new Texture(0x800000FF));
+            ResourcePtr textureLookup5(new TextureLookup5(texture));
+            textureLookup8.reset(new TextureLookup8(textureLookup5));
+            collisionTexture = textureLookup8;
+        }
+
+        Batch batch = { textureLookup8, 0 };
+        _batches.push_back(batch);
+
+        for(auto& triangleFan : collisionTriangleFans)
+        {
+            if(_batches.back().indexCount != 0)
+            {
+                indexData.push_back(0xFFFF);
+                _batches.back().indexCount++;
+            }
+
+            for(auto& index : triangleFan.indices)
+            {
+                indexData.push_back(uint16_t(vertexData.size() / COMPONENTS_PER_VERTEX));
+                _batches.back().indexCount++;
+
+                auto& vertex = vertices[index.vertexIndex];
+
+                vertexData.push_back(float(vertex.position.x));
+                vertexData.push_back(float(vertex.position.y));
+                vertexData.push_back(float(vertex.position.z));
+
+                vertexData.push_back(float(vertex.normal.x));
+                vertexData.push_back(float(vertex.normal.y));
+                vertexData.push_back(float(vertex.normal.z));
+
+                vertexData.push_back(0.0f);
+                vertexData.push_back(0.0f);
             }
         }
     }

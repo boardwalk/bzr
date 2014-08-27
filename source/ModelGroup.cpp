@@ -21,9 +21,6 @@
 #include "ResourceCache.h"
 #include <glm/gtx/norm.hpp>
 
-//#define DEBUG_MODEL (resourceId == 0x02000120)
-#define DEBUG_MODEL ((resourceId & 0xFF000000) == 0x02000000)
-
 ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 {
     BinReader reader(data, size);
@@ -85,8 +82,8 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
     auto unk1 = reader.read<uint32_t>();
     assert(unk1 == 0);
 
-    auto unk2 = reader.read<uint32_t>();
-    auto unk3 = reader.read<uint32_t>();
+    reader.read<uint32_t>();
+    reader.read<uint32_t>();
 
     for(auto& modelInfo : _modelInfos)
     {
@@ -100,27 +97,6 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
         modelInfo.rotation.z = reader.read<float>();
 
         assert(glm::length2(modelInfo.rotation) >= 0.99 && glm::length2(modelInfo.rotation) <= 1.01);
-    }
-
-    if(DEBUG_MODEL)
-    {
-        printf("ModelGroup::ModelGroup(%08x): flags=%08x\n", resourceId, flags);
-        printf("ModelGroup::ModelGroup(%08x): unk2=%08x unk3=%08x\n", resourceId, unk2, unk3);
-
-        int i = 0;
-
-        for(auto& modelInfo : _modelInfos)
-        {
-            printf("ModelGroup::ModelGroup(%08x): %02x model=%08x\n", resourceId, i, modelInfo.resource->resourceId());
-            printf("ModelGroup::ModelGroup(%08x): %02x parent=%08x\n", resourceId, i, modelInfo.parent);
-            printf("ModelGroup::ModelGroup(%08x): %02x scale=%.2f %.2f %.2f\n", resourceId, i, modelInfo.scale.x, modelInfo.scale.y, modelInfo.scale.z);
-            printf("ModelGroup::ModelGroup(%08x): %02x pos=%.2f %.2f %.2f rot=%.2f %.2f %.2f %.2f\n\n", resourceId, i,
-                modelInfo.position.x, modelInfo.position.y, modelInfo.position.z,
-                modelInfo.rotation.w, modelInfo.rotation.x, modelInfo.rotation.y, modelInfo.rotation.z);
-
-            i++;
-        }
-
     }
 }
 
