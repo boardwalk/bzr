@@ -24,6 +24,8 @@
 #include "Vertex.h"
 #include "TriangleFan.h"
 
+class BSPNode;
+
 class Model : public ResourceImpl<ResourceType::Model>
 {
 public:
@@ -33,6 +35,7 @@ public:
     const vector<Vertex>& vertices() const;
     const vector<TriangleFan>& triangleFans() const;
     const vector<TriangleFan>& hitTriangleFans() const;
+    const BSPNode* hitTree() const;
     const AABB& bounds() const;
 
     // If true, the model has transparent or translucent elements and must be depth sorted before rendering
@@ -45,6 +48,7 @@ private:
     vector<Vertex> _vertices;
     vector<TriangleFan> _triangleFans;
     vector<TriangleFan> _hitTriangleFans;
+    unique_ptr<BSPNode> _hitTree;
     AABB _bounds;
     bool _needsDepthSort;
 

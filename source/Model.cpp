@@ -91,7 +91,7 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _ne
     if(flags & 0x1)
     {
         _hitTriangleFans = readTriangleFans(reader);
-        readBSP(reader, 1);
+        _hitTree = readBSP(reader, 1);
     }
 
     if(flags == 0x3 || flags == 0xB)
@@ -140,6 +140,11 @@ const vector<TriangleFan>& Model::triangleFans() const
 const vector<TriangleFan>& Model::hitTriangleFans() const
 {
     return _hitTriangleFans;
+}
+
+const BSPNode* Model::hitTree() const
+{
+    return _hitTree.get();
 }
 
 const AABB& Model::bounds() const
