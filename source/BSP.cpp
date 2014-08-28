@@ -18,121 +18,146 @@
 #include "BSP.h"
 #include "BinReader.h"
 
-static void skipBSPLeaf(BinReader& reader, int treeType)
+BSPInternal::BSPInternal(BinReader& reader, int treeType, uint32_t nodeType)
 {
-    reader.read<uint32_t>(); // leaf index
+    _partition.normal.x = reader.read<float>();
+    _partition.normal.y = reader.read<float>();
+    _partition.normal.z = reader.read<float>();
+    _partition.dist = reader.read<float>();
+
+    if(nodeType == 0x42506e6e || nodeType == 0x4250496e) // BPnn, BPIn
+    {
+        // TODO I don't know if this is front or back
+        _frontChild = readBSP(reader, treeType);
+    }
+    else if(nodeType == 0x4270494e || nodeType == 0x42706e4e) // BpIN, BpnN
+    {
+        // TODO I don't know if this is front or back
+        _backChild = readBSP(reader, treeType);
+    }
+    else if(nodeType == 0x4250494e || nodeType == 0x42506e4e) // BPIN, BPnN
+    {
+        // TODO I don't know if front or back is first
+        _frontChild = readBSP(reader, treeType);
+        _backChild = readBSP(reader, treeType);
+    }
+
+    if(treeType == 0 || treeType == 1)
+    {
+        _bounds.center.x = reader.read<float>();
+        _bounds.center.y = reader.read<float>();
+        _bounds.center.z = reader.read<float>();
+        _bounds.radius = reader.read<float>();
+    }
+
+    if(treeType != 0)
+    {
+        return;
+    }
+
+    auto triCount = reader.read<uint32_t>();
+    _triangleIndices.resize(triCount);
+
+    for(auto& index : _triangleIndices)
+    {
+        index = reader.read<uint16_t>();
+    }
+}
+
+BSPNode::Type BSPInternal::type() const
+{
+    return Internal;
+}
+
+BSPExternal::BSPExternal(BinReader& reader, int treeType)
+{
+    _index = reader.read<uint32_t>();
 
     if(treeType != 1)
     {
         return;
     }
 
-    reader.read<uint32_t>(); // if 1, sphere parameters are valid and there are indices
+    // if 1, sphere parameters are valid and there are indices
+    _empty = (reader.read<uint32_t>() == 0);
 
-    reader.read<float>(); // sx
-    reader.read<float>(); // sy
-    reader.read<float>(); // sz
-    reader.read<float>(); // sr
-
-    auto indexCount = reader.read<uint32_t>();
-
-    for(auto i = 0u; i < indexCount; i++)
-    {
-        reader.read<uint16_t>();
-    }
-}
-
-static void skipBSPPortal(BinReader& reader, int treeType)
-{
-    reader.read<float>(); // px
-    reader.read<float>(); // py
-    reader.read<float>(); // pz
-    reader.read<float>(); // pd
-
-    skipBSP(reader, treeType);
-    skipBSP(reader, treeType);
-
-    if(treeType != 0)
-    {
-        return;
-    }
-
-    reader.read<float>(); // sx
-    reader.read<float>(); // sy
-    reader.read<float>(); // sz
-    reader.read<float>(); // sr
+    _bounds.center.x = reader.read<float>();
+    _bounds.center.y = reader.read<float>();
+    _bounds.center.z = reader.read<float>();
+    _bounds.radius = reader.read<float>();
 
     auto triCount = reader.read<uint32_t>();
-    auto polyCount = reader.read<uint32_t>();
+    _triangleIndices.resize(triCount);
 
-    for(auto i = 0u; i < triCount; i++)
+    for(auto& index : _triangleIndices)
     {
-        reader.read<uint16_t>(); // wTriIndex
-    }
-
-    for(auto i = 0u; i < polyCount; i++)
-    {
-        reader.read<uint16_t>(); // wIndex
-        reader.read<uint16_t>(); // wWhat
+        index = reader.read<uint16_t>();
     }
 }
 
-static void skipBSPNode(BinReader& reader, int treeType, uint32_t nodeType)
+BSPNode::Type BSPExternal::type() const
 {
-    reader.read<float>(); // px
-    reader.read<float>(); // py
-    reader.read<float>(); // pz
-    reader.read<float>(); // pd
+    return External;
+}
 
-    if(nodeType == 0x42506e6e || nodeType == 0x4250496e) // BPnn, BPIn
-    {
-        skipBSP(reader, treeType);
-    }
-    else if(nodeType == 0x4270494e || nodeType == 0x42706e4e) // BpIN, BpnN
-    {
-        skipBSP(reader, treeType);
-    }
-    else if(nodeType == 0x4250494e || nodeType == 0x42506e4e) // BPIN, BPnN
-    {
-        skipBSP(reader, treeType);
-        skipBSP(reader, treeType);
-    }
+BSPPortal::BSPPortal(BinReader& reader, int treeType)
+{
+    _partition.normal.x = reader.read<float>();
+    _partition.normal.y = reader.read<float>();
+    _partition.normal.z = reader.read<float>();
+    _partition.dist = reader.read<float>();
 
-    if(treeType == 0 || treeType == 1)
-    {
-        reader.read<float>(); // sx
-        reader.read<float>(); // sy
-        reader.read<float>(); // sz
-        reader.read<float>(); // sr
-    }
+    // TODO I don't know if front or back is first
+    _frontChild = readBSP(reader, treeType);
+    _backChild = readBSP(reader, treeType);
 
     if(treeType != 0)
     {
         return;
     }
 
-    auto indexCount = reader.read<uint32_t>();
+    _bounds.center.x = reader.read<float>();
+    _bounds.center.y = reader.read<float>();
+    _bounds.center.z = reader.read<float>();
+    _bounds.radius = reader.read<float>();
 
-    for(auto i = 0u; i < indexCount; i++)
+    auto triCount = reader.read<uint32_t>();
+    _triangleIndices.resize(triCount);
+
+    auto polyCount = reader.read<uint32_t>();
+    _portalPolys.resize(polyCount);
+
+    for(auto& index : _triangleIndices)
     {
-        reader.read<uint16_t>();
+        index = reader.read<uint16_t>();
+    }
+
+    for(auto& poly : _portalPolys)
+    {
+        poly.index = reader.read<uint16_t>();
+        poly.what = reader.read<uint16_t>();
     }
 }
 
-void skipBSP(BinReader& reader, int treeType)
+BSPNode::Type BSPPortal::type() const
+{
+    return Portal;
+}
+
+unique_ptr<BSPNode> readBSP(BinReader& reader, int treeType)
 {
     auto nodeType = reader.read<uint32_t>();
 
     if(nodeType == 0x4c454146) // LEAF
     {
-        skipBSPLeaf(reader, treeType);
+        return unique_ptr<BSPNode>(new BSPExternal(reader, treeType));
     }
     else if(nodeType == 0x504f5254) // PORT
     {
-        skipBSPPortal(reader, treeType);
+        return unique_ptr<BSPNode>(new BSPPortal(reader, treeType));
     }
     else
     {
-        skipBSPNode(reader, treeType, nodeType);
+        return unique_ptr<BSPNode>(new BSPInternal(reader, treeType, nodeType));
     }
 }

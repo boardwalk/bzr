@@ -91,7 +91,7 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _ne
     if(flags & 0x1)
     {
         _collisionTriangleFans = unpackTriangleFans(reader);
-        skipBSP(reader, 1);
+        readBSP(reader, 1);
     }
 
     if(flags == 0x3 || flags == 0xB)
@@ -104,7 +104,7 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _ne
     if(flags & 0x2)
     {
         _triangleFans = unpackTriangleFans(reader);
-        skipBSP(reader, 0);
+        readBSP(reader, 0);
     }
 
     if(flags & 0x8)

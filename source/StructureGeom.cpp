@@ -73,7 +73,7 @@ StructureGeom::StructureGeom(uint32_t id, const void* data, size_t size) : Resou
         }
         reader.align();
 
-        skipBSP(reader, 2);
+        readBSP(reader, 2);
 
         for(auto ctfi = 0u; ctfi < numCollisionTriangleFans; ctfi++)
         {
@@ -83,14 +83,14 @@ StructureGeom::StructureGeom(uint32_t id, const void* data, size_t size) : Resou
             piece.collisionTriangleFans[ctfi].read(reader);
         }
 
-        skipBSP(reader, 1);
+        readBSP(reader, 1);
 
         auto unk7 = reader.read<uint32_t>();
         assert(unk7 == 0 || unk7 == 1);
 
         if(unk7)
         {
-            skipBSP(reader, 0);
+            readBSP(reader, 0);
         }
 
         reader.align();

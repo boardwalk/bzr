@@ -18,8 +18,72 @@
 #ifndef BZR_BSP_H
 #define BZR_BSP_H
 
+#include <physics/Plane.h>
+#include <physics/Sphere.h>
+
 class BinReader;
 
-void skipBSP(BinReader& reader, int treeType);
+class BSPNode
+{
+public:
+    enum Type { Internal, External, Portal };
+
+    virtual ~BSPNode() {}
+    virtual Type type() const = 0;
+};
+
+class BSPInternal : public BSPNode
+{
+public:
+    BSPInternal(BinReader& reader, int treeType, uint32_t nodeType);
+    Type type() const override;
+
+private:
+    Plane _partition;
+    unique_ptr<BSPNode> _frontChild; // may be null
+    unique_ptr<BSPNode> _backChild; // may be null
+    // if treeType == 0 or 1
+    Sphere _bounds;
+    // if treeType == 0
+    vector<uint16_t> _triangleIndices;
+};
+
+class BSPExternal : public BSPNode
+{
+public:
+    BSPExternal(BinReader& reader, int treeType);
+    Type type() const override;
+
+private:
+    uint32_t _index;
+    // if treeType == 1
+    bool _empty;
+    Sphere _bounds;
+    vector<uint16_t> _triangleIndices;
+};
+
+class BSPPortal : public BSPNode
+{
+public:
+    BSPPortal(BinReader& reader, int treeType);
+    Type type() const override;
+
+private:
+    struct PortalPoly
+    {
+        uint16_t index;
+        uint16_t what;
+    };
+
+    Plane _partition;
+    unique_ptr<BSPNode> _frontChild;
+    unique_ptr<BSPNode> _backChild;
+    // if treeType == 0
+    Sphere _bounds;
+    vector<uint16_t> _triangleIndices;
+    vector<PortalPoly> _portalPolys;
+};
+
+unique_ptr<BSPNode> readBSP(BinReader& reader, int treeType);
 
 #endif
