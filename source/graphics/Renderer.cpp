@@ -46,7 +46,8 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     // Apple's drivers don't support the compatibility profile on GL >v2.1
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 #endif
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32);
+    // 32 crashes mysteriously on my laptop
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
     auto& config = Core::get().config();
 
