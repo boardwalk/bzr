@@ -84,13 +84,12 @@ static void skipBSPNode(BinReader& reader, int treeType, uint32_t nodeType)
     reader.read<float>(); // pz
     reader.read<float>(); // pd
 
-
-   if(nodeType == 0x42506e6e || nodeType == 0x4250496e) // BPnn, BPIn
-   {
+    if(nodeType == 0x42506e6e || nodeType == 0x4250496e) // BPnn, BPIn
+    {
         skipBSP(reader, treeType);
-   }
-   else if(nodeType == 0x4270494e || nodeType == 0x42706e4e) // BpIN, BpnN
-   {
+    }
+    else if(nodeType == 0x4270494e || nodeType == 0x42706e4e) // BpIN, BpnN
+    {
         skipBSP(reader, treeType);
     }
     else if(nodeType == 0x4250494e || nodeType == 0x42506e4e) // BPIN, BPnN
