@@ -40,8 +40,8 @@ StructureGeom::StructureGeom(uint32_t id, const void* data, size_t size) : Resou
         auto numTriangleFans = reader.read<uint32_t>();
         piece.triangleFans.resize(numTriangleFans);
 
-        auto numCollisionTriangleFans = reader.read<uint32_t>();
-        piece.collisionTriangleFans.resize(numCollisionTriangleFans);
+        auto numHitTriangleFans = reader.read<uint32_t>();
+        piece.hitTriangleFans.resize(numHitTriangleFans);
 
         auto numShorts = reader.read<uint32_t>();
 
@@ -75,12 +75,12 @@ StructureGeom::StructureGeom(uint32_t id, const void* data, size_t size) : Resou
 
         readBSP(reader, 2);
 
-        for(auto ctfi = 0u; ctfi < numCollisionTriangleFans; ctfi++)
+        for(auto htfi = 0u; htfi < numHitTriangleFans; htfi++)
         {
             auto triangleFanNum = reader.read<uint16_t>();
-            assert(triangleFanNum == ctfi);
+            assert(triangleFanNum == htfi);
 
-            piece.collisionTriangleFans[ctfi].read(reader);
+            piece.hitTriangleFans[htfi].read(reader);
         }
 
         readBSP(reader, 1);

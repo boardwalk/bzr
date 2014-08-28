@@ -46,7 +46,7 @@ private:
     void init(const vector<ResourcePtr>& textures,
         const vector<Vertex>& vertices,
         const vector<TriangleFan>& triangleFans,
-        const vector<TriangleFan>& collisionTriangleFans);
+        const vector<TriangleFan>& hitTriangleFans);
     
     GLuint _vertexArray;
     GLuint _vertexBuffer;

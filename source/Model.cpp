@@ -90,7 +90,7 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _ne
 
     if(flags & 0x1)
     {
-        _collisionTriangleFans = readTriangleFans(reader);
+        _hitTriangleFans = readTriangleFans(reader);
         readBSP(reader, 1);
     }
 
@@ -137,9 +137,9 @@ const vector<TriangleFan>& Model::triangleFans() const
     return _triangleFans;
 }
 
-const vector<TriangleFan>& Model::collisionTriangleFans() const
+const vector<TriangleFan>& Model::hitTriangleFans() const
 {
-    return _collisionTriangleFans;
+    return _hitTriangleFans;
 }
 
 const AABB& Model::bounds() const

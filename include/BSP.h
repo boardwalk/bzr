@@ -57,7 +57,7 @@ public:
 private:
     uint32_t _index;
     // if treeType == 1
-    bool _empty;
+    uint32_t _solid;
     Sphere _bounds;
     vector<uint16_t> _triangleIndices;
 };

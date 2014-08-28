@@ -79,7 +79,7 @@ BSPExternal::BSPExternal(BinReader& reader, int treeType)
     }
 
     // if 1, sphere parameters are valid and there are indices
-    _empty = (reader.read<uint32_t>() == 0);
+    _solid = reader.read<uint32_t>();
 
     _bounds.center.x = reader.read<float>();
     _bounds.center.y = reader.read<float>();

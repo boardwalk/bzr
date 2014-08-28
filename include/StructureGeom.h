@@ -29,7 +29,7 @@ public:
     {
         vector<Vertex> vertices;
         vector<TriangleFan> triangleFans;
-        vector<TriangleFan> collisionTriangleFans;
+        vector<TriangleFan> hitTriangleFans;
     };
 
     StructureGeom(uint32_t id, const void* data, size_t size);

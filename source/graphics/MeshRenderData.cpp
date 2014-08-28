@@ -31,7 +31,7 @@
 
 // FIXME Not the neatest thing in the world
 // Ought to find an existing 0x08 file with a nice transparent texture
-static weak_ptr<Resource> collisionTexture;
+static weak_ptr<Resource> hitTexture;
 
 struct SortByTexIndex
 {
@@ -46,7 +46,7 @@ MeshRenderData::MeshRenderData(const Model& model)
     init(model.textures(),
         model.vertices(),
         model.triangleFans(),
-        model.collisionTriangleFans());
+        model.hitTriangleFans());
 }
 
 MeshRenderData::MeshRenderData(const Structure& structure)
@@ -57,7 +57,7 @@ MeshRenderData::MeshRenderData(const Structure& structure)
     init(structure.textures(),
         piece.vertices,
         piece.triangleFans,
-        piece.collisionTriangleFans);
+        piece.hitTriangleFans);
 }
 
 MeshRenderData::~MeshRenderData()
@@ -97,7 +97,7 @@ void MeshRenderData::init(
     const vector<ResourcePtr>& textures,
     const vector<Vertex>& vertices,
     const vector<TriangleFan>& triangleFans,
-    const vector<TriangleFan>& collisionTriangleFans)
+    const vector<TriangleFan>& hitTriangleFans)
 {
     // vx, vy, vz, nx, ny, nz, s, t
     static const int COMPONENTS_PER_VERTEX = 8;
@@ -165,22 +165,22 @@ void MeshRenderData::init(
         }
     }
 
-    if(Core::get().config().getBool("MeshRenderData.renderCollisionGeometry", false))
+    if(Core::get().config().getBool("MeshRenderData.renderHitGeometry", false))
     {
-        auto textureLookup8 = collisionTexture.lock();
+        auto textureLookup8 = hitTexture.lock();
 
         if(!textureLookup8)
         {
             ResourcePtr texture(new Texture(0x800000FF));
             ResourcePtr textureLookup5(new TextureLookup5(texture));
             textureLookup8.reset(new TextureLookup8(textureLookup5));
-            collisionTexture = textureLookup8;
+            hitTexture = textureLookup8;
         }
 
         Batch batch = { textureLookup8, 0 };
         _batches.push_back(batch);
 
-        for(auto& triangleFan : collisionTriangleFans)
+        for(auto& triangleFan : hitTriangleFans)
         {
             if(_batches.back().indexCount != 0)
             {

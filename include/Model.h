@@ -32,7 +32,7 @@ public:
     const vector<ResourcePtr>& textures() const;
     const vector<Vertex>& vertices() const;
     const vector<TriangleFan>& triangleFans() const;
-    const vector<TriangleFan>& collisionTriangleFans() const;
+    const vector<TriangleFan>& hitTriangleFans() const;
     const AABB& bounds() const;
 
     // If true, the model has transparent or translucent elements and must be depth sorted before rendering
@@ -44,7 +44,7 @@ private:
     vector<ResourcePtr> _textures;
     vector<Vertex> _vertices;
     vector<TriangleFan> _triangleFans;
-    vector<TriangleFan> _collisionTriangleFans;
+    vector<TriangleFan> _hitTriangleFans;
     AABB _bounds;
     bool _needsDepthSort;
 
