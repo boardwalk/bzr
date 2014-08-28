@@ -18,6 +18,7 @@
 #ifndef BZR_BSP_H
 #define BZR_BSP_H
 
+#include <physics/LineSegment.h>
 #include <physics/Plane.h>
 #include <physics/Sphere.h>
 
@@ -26,17 +27,18 @@ class BinReader;
 class BSPNode
 {
 public:
-    enum Type { Internal, External, Portal };
-
     virtual ~BSPNode() {}
-    virtual Type type() const = 0;
+
+    // Collide a line segment against the BSP tree
+    // If the segment contacts a solid volume, returns true and the point of impact
+    virtual bool collide(const LineSegment& segment, glm::vec3& impact) const = 0;
 };
 
 class BSPInternal : public BSPNode
 {
 public:
     BSPInternal(BinReader& reader, int treeType, uint32_t nodeType);
-    Type type() const override;
+    bool collide(const LineSegment& segment, glm::vec3& impact) const override;
 
 private:
     Plane _partition;
@@ -52,7 +54,7 @@ class BSPExternal : public BSPNode
 {
 public:
     BSPExternal(BinReader& reader, int treeType);
-    Type type() const override;
+    bool collide(const LineSegment& segment, glm::vec3& impact) const override;
 
 private:
     uint32_t _index;
@@ -66,7 +68,7 @@ class BSPPortal : public BSPNode
 {
 public:
     BSPPortal(BinReader& reader, int treeType);
-    Type type() const override;
+    bool collide(const LineSegment& segment, glm::vec3& impact) const override;
 
 private:
     struct PortalPoly

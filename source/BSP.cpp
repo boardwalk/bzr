@@ -64,9 +64,13 @@ BSPInternal::BSPInternal(BinReader& reader, int treeType, uint32_t nodeType)
     }
 }
 
-BSPNode::Type BSPInternal::type() const
+bool BSPInternal::collide(const LineSegment& segment, glm::vec3& impact) const
 {
-    return Internal;
+    // TODO
+    (void)segment;
+    (void)impact;
+
+    return false;
 }
 
 BSPExternal::BSPExternal(BinReader& reader, int treeType)
@@ -95,9 +99,15 @@ BSPExternal::BSPExternal(BinReader& reader, int treeType)
     }
 }
 
-BSPNode::Type BSPExternal::type() const
+bool BSPExternal::collide(const LineSegment& segment, glm::vec3& impact) const
 {
-    return External;
+    if(_solid)
+    {
+        impact = segment.begin;
+        return true;
+    }
+
+    return false;
 }
 
 BSPPortal::BSPPortal(BinReader& reader, int treeType)
@@ -139,9 +149,13 @@ BSPPortal::BSPPortal(BinReader& reader, int treeType)
     }
 }
 
-BSPNode::Type BSPPortal::type() const
+bool BSPPortal::collide(const LineSegment& segment, glm::vec3& impact) const
 {
-    return Portal;
+    // TODO
+    (void)segment;
+    (void)impact;
+    
+    return false;
 }
 
 unique_ptr<BSPNode> readBSP(BinReader& reader, int treeType)
