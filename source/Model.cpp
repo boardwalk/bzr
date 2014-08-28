@@ -24,7 +24,7 @@
 #include "TextureLookup5.h"
 #include "TextureLookup8.h"
 
-static vector<TriangleFan> unpackTriangleFans(BinReader& reader)
+static vector<TriangleFan> readTriangleFans(BinReader& reader)
 {
     auto numTriangleFans = reader.readVarInt();
 
@@ -90,7 +90,7 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _ne
 
     if(flags & 0x1)
     {
-        _collisionTriangleFans = unpackTriangleFans(reader);
+        _collisionTriangleFans = readTriangleFans(reader);
         readBSP(reader, 1);
     }
 
@@ -103,7 +103,7 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _ne
 
     if(flags & 0x2)
     {
-        _triangleFans = unpackTriangleFans(reader);
+        _triangleFans = readTriangleFans(reader);
         readBSP(reader, 0);
     }
 
