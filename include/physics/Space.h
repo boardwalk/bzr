@@ -91,13 +91,6 @@ class Space : Noncopyable
 {
 public:
     void step(fp_t dt);
-
-    void insert(const shared_ptr<Body>& body);
-    void insert(const shared_ptr<Shape>& shape);
-
-private:
-    vector<weak_ptr<Body>> _bodies;
-    vector<weak_ptr<Shape>> _shapes;
 };
 
 #endif

@@ -16,22 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "physics/Space.h"
-#include "physics/Body.h"
 
 void Space::step(fp_t dt)
 {
-    for(auto it = _bodies.begin(); it != _bodies.end(); /**/)
-    {
-        auto body = it->lock();
-
-        if(body)
-        {
-            body->integrate(dt);
-            ++it;
-        }
-        else
-        {
-            it = _bodies.erase(it);
-        }
-    }
+    (void)dt;
 }
