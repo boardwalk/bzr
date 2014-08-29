@@ -15,38 +15,35 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_STRUCTURE_H
-#define BZR_STRUCTURE_H
+#ifndef BZR_STRUCTUREGEOMPART_H
+#define BZR_STRUCTUREGEOMPART_H
 
-#include "Destructable.h"
-#include "Noncopyable.h"
-#include "Doodad.h"
+#include "TriangleFan.h"
+#include "Vertex.h"
 
-class StructureGeom;
+class BinReader;
+class BSPNode;
 
-class Structure : Noncopyable
+class StructureGeomPart
 {
 public:
-    Structure(const void* data, size_t size);
-    Structure(Structure&& other);
+    StructureGeomPart();
+    StructureGeomPart(StructureGeomPart&&);
+    ~StructureGeomPart();
+    StructureGeomPart& operator=(StructureGeomPart&&);
 
-    const glm::vec3& position() const;
-    const glm::quat& rotation() const;
-    const vector<ResourcePtr>& textures() const;
-    const vector<Doodad>& doodads() const;
-    const StructureGeom& geometry() const;
-    uint16_t partNum() const;
+    void read(BinReader& reader);
 
-    unique_ptr<Destructable>& renderData();
+    const vector<Vertex>& vertices() const;
+    const vector<TriangleFan>& triangleFans() const;
+    const vector<TriangleFan>& hitTriangleFans() const;
+    const BSPNode* hitTree() const;
 
 private:
-    glm::vec3 _position;
-    glm::quat _rotation;
-    vector<ResourcePtr> _textures;
-    vector<Doodad> _doodads;
-    ResourcePtr _geometry;
-    uint16_t _partNum;
-    unique_ptr<Destructable> _renderData;
+    vector<Vertex> _vertices;
+    vector<TriangleFan> _triangleFans;
+    vector<TriangleFan> _hitTriangleFans;
+    unique_ptr<BSPNode> _hitTree;
 };
 
 #endif

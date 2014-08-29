@@ -35,7 +35,7 @@ uint8_t LandblockId::y() const
 
 uint32_t LandblockId::fileId() const
 {
-    return (uint32_t)_x << 24 | (uint32_t)_y << 16 | 0xFFFF;
+    return uint32_t(_x) << 24 | uint32_t(_y) << 16 | 0xFFFF;
 }
 
 int LandblockId::calcSquareDistance(LandblockId other) const

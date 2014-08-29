@@ -19,25 +19,18 @@
 #define BZR_STRUCTUREGEOM_H
 
 #include "Resource.h"
-#include "TriangleFan.h"
-#include "Vertex.h"
+#include "StructureGeomPart.h"
 
 class StructureGeom : public ResourceImpl<ResourceType::StructureGeom>
 {
 public:
-    struct Piece
-    {
-        vector<Vertex> vertices;
-        vector<TriangleFan> triangleFans;
-        vector<TriangleFan> hitTriangleFans;
-    };
-
     StructureGeom(uint32_t id, const void* data, size_t size);
 
-    const vector<Piece>& pieces() const;
+    const StructureGeomPart& operator[](size_t i) const;
+    size_t size() const;
 
 private:
-    vector<Piece> _pieces;
+    vector<StructureGeomPart> _parts;
 };
 
 #endif

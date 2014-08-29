@@ -17,7 +17,6 @@
  */
 #include "StructureGeom.h"
 #include "BinReader.h"
-#include "BSP.h"
 
 StructureGeom::StructureGeom(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 {
@@ -27,79 +26,28 @@ StructureGeom::StructureGeom(uint32_t id, const void* data, size_t size) : Resou
     assert(resourceId == id);
     assert((resourceId & 0xFF000000) == 0x0D000000);
 
-    auto numPieces = reader.read<uint32_t>();
-    _pieces.resize(numPieces);
+    auto numParts = reader.read<uint32_t>();
+    _parts.resize(numParts);
 
-    for(auto pi = 0u; pi < numPieces; pi++)
+    for(auto pi = 0u; pi < numParts; pi++)
     {
-        auto& piece = _pieces[pi];
+        auto& part = _parts[pi];
 
-        auto pieceNum = reader.read<uint32_t>();
-        assert(pieceNum == pi);
+        auto partNum = reader.read<uint32_t>();
+        assert(partNum == pi);
 
-        auto numTriangleFans = reader.read<uint32_t>();
-        piece.triangleFans.resize(numTriangleFans);
-
-        auto numHitTriangleFans = reader.read<uint32_t>();
-        piece.hitTriangleFans.resize(numHitTriangleFans);
-
-        auto numShorts = reader.read<uint32_t>();
-
-        auto unk5 = reader.read<uint32_t>();
-        assert(unk5 == 1);
-
-        auto numVertices = reader.read<uint32_t>();
-        piece.vertices.resize(numVertices);
-
-        for(auto vi = 0u; vi < numVertices; vi++)
-        {
-            auto vertexNum = reader.read<uint16_t>();
-            assert(vertexNum == vi);
-
-            piece.vertices[vi].read(reader);
-        }
-
-        for(auto tfi = 0u; tfi < numTriangleFans; tfi++)
-        {
-            auto triangleFanNum = reader.read<uint16_t>();
-            assert(triangleFanNum == tfi);
-
-            piece.triangleFans[tfi].read(reader);
-        }
-
-        for(auto si = 0u; si < numShorts; si++)
-        {
-            reader.read<uint16_t>();
-        }
-        reader.align();
-
-        readBSP(reader, 2);
-
-        for(auto htfi = 0u; htfi < numHitTriangleFans; htfi++)
-        {
-            auto triangleFanNum = reader.read<uint16_t>();
-            assert(triangleFanNum == htfi);
-
-            piece.hitTriangleFans[htfi].read(reader);
-        }
-
-        readBSP(reader, 1);
-
-        auto unk7 = reader.read<uint32_t>();
-        assert(unk7 == 0 || unk7 == 1);
-
-        if(unk7)
-        {
-            readBSP(reader, 0);
-        }
-
-        reader.align();
+        part.read(reader);
     }
 
     reader.assertEnd();
 }
 
-const vector<StructureGeom::Piece>& StructureGeom::pieces() const
+const StructureGeomPart& StructureGeom::operator[](size_t i) const
 {
-    return _pieces;
+    return _parts[i];
+}
+
+size_t StructureGeom::size() const
+{
+    return _parts.size();
 }

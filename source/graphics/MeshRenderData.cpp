@@ -51,13 +51,13 @@ MeshRenderData::MeshRenderData(const Model& model)
 
 MeshRenderData::MeshRenderData(const Structure& structure)
 {
-    assert(structure.pieceNum() < structure.geometry().pieces().size());
-    auto& piece = structure.geometry().pieces()[structure.pieceNum()];
+    assert(structure.partNum() < structure.geometry().size());
+    auto& part = structure.geometry()[structure.partNum()];
 
     init(structure.textures(),
-        piece.vertices,
-        piece.triangleFans,
-        piece.hitTriangleFans);
+        part.vertices(),
+        part.triangleFans(),
+        part.hitTriangleFans());
 }
 
 MeshRenderData::~MeshRenderData()

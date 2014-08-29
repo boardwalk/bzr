@@ -51,7 +51,7 @@ Structure::Structure(const void* data, size_t size)
     auto geometryId = reader.read<uint16_t>();
     _geometry = Core::get().resourceCache().get(0x0D000000 | geometryId);
 
-    _pieceNum = reader.read<uint16_t>();
+    _partNum = reader.read<uint16_t>();
 
     _position.x = reader.read<float>();
     _position.y = reader.read<float>();
@@ -102,7 +102,7 @@ Structure::Structure(Structure&& other)
     _textures = move(other._textures);
     _doodads = move(other._doodads);
     _geometry = move(other._geometry);
-    _pieceNum = other._pieceNum;
+    _partNum = other._partNum;
     _renderData = move(other._renderData);
 }
 
@@ -131,9 +131,9 @@ const StructureGeom& Structure::geometry() const
     return _geometry->cast<StructureGeom>();
 }
 
-uint16_t Structure::pieceNum() const
+uint16_t Structure::partNum() const
 {
-    return _pieceNum;
+    return _partNum;
 }
 
 unique_ptr<Destructable>& Structure::renderData()
