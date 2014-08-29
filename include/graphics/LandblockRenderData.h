@@ -22,7 +22,6 @@
 #include "Noncopyable.h"
 
 class Landblock;
-class Program;
 
 class LandblockRenderData : public Destructable, Noncopyable
 {

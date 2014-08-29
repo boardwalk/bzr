@@ -122,6 +122,9 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _ne
     }
 }
 
+Model::~Model()
+{}
+
 const vector<ResourcePtr>& Model::textures() const
 {
     return _textures;

@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "graphics/LandblockRenderer.h"
+#include "graphics/LandblockRenderData.h"
 #include "graphics/Renderer.h"
 #include "graphics/util.h"
 #include "Camera.h"

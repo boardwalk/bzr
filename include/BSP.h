@@ -18,11 +18,11 @@
 #ifndef BZR_BSP_H
 #define BZR_BSP_H
 
-#include <physics/LineSegment.h>
 #include <physics/Plane.h>
 #include <physics/Sphere.h>
 
 class BinReader;
+struct LineSegment;
 
 class BSPNode
 {

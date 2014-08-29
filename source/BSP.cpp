@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "BSP.h"
+#include <physics/LineSegment.h>
 #include "BinReader.h"
 
 BSPInternal::BSPInternal(BinReader& reader, int treeType, uint32_t nodeType)
@@ -27,17 +28,14 @@ BSPInternal::BSPInternal(BinReader& reader, int treeType, uint32_t nodeType)
 
     if(nodeType == 0x42506e6e || nodeType == 0x4250496e) // BPnn, BPIn
     {
-        // TODO I don't know if this is front or back
         _frontChild = readBSP(reader, treeType);
     }
     else if(nodeType == 0x4270494e || nodeType == 0x42706e4e) // BpIN, BpnN
     {
-        // TODO I don't know if this is front or back
         _backChild = readBSP(reader, treeType);
     }
     else if(nodeType == 0x4250494e || nodeType == 0x42506e4e) // BPIN, BPnN
     {
-        // TODO I don't know if front or back is first
         _frontChild = readBSP(reader, treeType);
         _backChild = readBSP(reader, treeType);
     }
@@ -117,7 +115,6 @@ BSPPortal::BSPPortal(BinReader& reader, int treeType)
     _partition.normal.z = reader.read<float>();
     _partition.dist = reader.read<float>();
 
-    // TODO I don't know if front or back is first
     _frontChild = readBSP(reader, treeType);
     _backChild = readBSP(reader, treeType);
 

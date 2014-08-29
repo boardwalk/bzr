@@ -18,11 +18,8 @@
 #ifndef BZR_GRAPHICS_LANDBLOCKRENDERER_H
 #define BZR_GRAPHICS_LANDBLOCKRENDERER_H
 
-#include "graphics/LandblockRenderData.h"
 #include "graphics/Program.h"
 #include "Noncopyable.h"
-
-class Landblock;
 
 class LandblockRenderer : Noncopyable
 {

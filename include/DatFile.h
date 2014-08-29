@@ -20,7 +20,6 @@
 
 #include "Noncopyable.h"
 #include <fstream>
-#include <string>
 
 class DatFile : Noncopyable
 {
