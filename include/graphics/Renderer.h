@@ -42,6 +42,7 @@ public:
 
     GLenum textureMinFilter() const;
     GLfloat textureMaxAnisotropy() const;
+    bool renderHitGeometry() const;
 
     // TEMPORARY
     void setModel(ResourcePtr model);
@@ -58,6 +59,7 @@ private:
     fp_t _fieldOfView;
     GLenum _textureMinFilter;
     GLfloat _textureMaxAnisotropy;
+    bool _renderHitGeometry;
 
     bool _videoInit;
     SDL_Window* _window;

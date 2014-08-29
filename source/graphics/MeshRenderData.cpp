@@ -165,7 +165,7 @@ void MeshRenderData::init(
         }
     }
 
-    if(Core::get().config().getBool("MeshRenderData.renderHitGeometry", false))
+    if(Core::get().renderer().renderHitGeometry())
     {
         auto textureLookup8 = hitTexture.lock();
 

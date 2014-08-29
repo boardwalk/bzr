@@ -116,6 +116,8 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
             throw runtime_error("Bad value for Renderer.maxAnisotropyLevel");
         }
     }
+
+    _renderHitGeometry = config.getBool("Renderer.renderHitGeometry", false);
 }
 
 Renderer::~Renderer()
@@ -218,6 +220,11 @@ GLenum Renderer::textureMinFilter() const
 GLfloat Renderer::textureMaxAnisotropy() const
 {
     return _textureMaxAnisotropy;
+}
+
+bool Renderer::renderHitGeometry() const
+{
+    return _renderHitGeometry;
 }
 
 void Renderer::createWindow()
