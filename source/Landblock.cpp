@@ -369,18 +369,18 @@ void Landblock::initDoodads()
         _doodads[numDoodads + di].read(reader);
 
         reader.read<uint32_t>();
-        auto numChunks = reader.read<uint32_t>();
+        auto numPortals = reader.read<uint32_t>();
 
         // credits to Akilla
-        for(auto ci = 0u; ci < numChunks; ci++)
+        for(auto pi = 0u; pi < numPortals; pi++)
         {
             reader.read<uint32_t>();
             reader.read<uint16_t>();
-            auto numSubChunks = reader.read<uint16_t>();
+            auto numVisible = reader.read<uint16_t>();
 
-            for(auto sci = 0; sci < numSubChunks; sci++)
+            for(auto vi = 0; vi < numVisible; vi++)
             {
-                reader.read<uint16_t>();
+                reader.read<uint16_t>(); // structure index
             }
 
             reader.align();
