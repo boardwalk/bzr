@@ -330,8 +330,8 @@ void Landblock::initDoodads()
     BinReader reader(blob.data(), blob.size());
 
     auto fid = reader.read<uint32_t>();
-    assert(fid == _rawData.fileId - 1);
-
+    assert(fid == (baseFileId | 0xFFFE));
+    
     auto numStructures = reader.read<uint32_t>();
 
     for(auto si = 0u; si < numStructures; si++)
