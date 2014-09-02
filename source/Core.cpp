@@ -98,6 +98,16 @@ Renderer& Core::renderer()
 }
 #endif
 
+ObjectId Core::playerObjectId() const
+{
+    return _playerObjectId;
+}
+
+void Core::setPlayerObjectId(ObjectId playerObjectId)
+{
+    _playerObjectId = playerObjectId;
+}
+
 Core::Core() : _done(false) /* TEMPORARY */, _modelId(0x02000120), _submodelNum(0)
 {}
 
