@@ -20,14 +20,16 @@
 
 #include "Noncopyable.h"
 #include "Object.h"
+#include "ObjectId.h"
 #include <unordered_map>
 
 class ObjectManager : Noncopyable
 {
 public:
-    typedef unordered_map<ObjectId, Object> container_type;
+    typedef unordered_map<ObjectId, unique_ptr<Object>> container_type;
     typedef container_type::iterator iterator;
 
+    Object& operator[](ObjectId id);
     iterator find(ObjectId id);
     iterator begin();
     iterator end();

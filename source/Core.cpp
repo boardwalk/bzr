@@ -98,14 +98,14 @@ Renderer& Core::renderer()
 }
 #endif
 
-ObjectId Core::playerObjectId() const
+ObjectId Core::playerId() const
 {
-    return _playerObjectId;
+    return _playerId;
 }
 
-void Core::setPlayerObjectId(ObjectId playerObjectId)
+void Core::setPlayerId(ObjectId playerId)
 {
-    _playerObjectId = playerObjectId;
+    _playerId = playerId;
 }
 
 Core::Core() : _done(false) /* TEMPORARY */, _modelId(0x02000120), _submodelNum(0)
@@ -132,6 +132,9 @@ void Core::init()
     _renderer->init();
 #endif
     _landblockManager->setCenter(LandblockId(0x31, 0xD6));
+    
+    (*_objectManager)[ObjectId(1)];
+    setPlayerId(ObjectId(1));
 }
 
 void Core::cleanup()

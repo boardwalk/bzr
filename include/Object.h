@@ -20,23 +20,18 @@
 
 #include "Noncopyable.h"
 #include "Location.h"
-#include "ObjectId.h"
 #include "Resource.h"
 
 class Object : Noncopyable
 {
 public:
-    explicit Object(ObjectId id);
-
     void setModel(ResourcePtr model);
     void setLocation(const Location& location);
 
-    ObjectId id() const;
     const ResourcePtr& model() const;
     const Location& location() const;
 
 private:
-    ObjectId _id;
     ResourcePtr _model;
     Location _location;
 };

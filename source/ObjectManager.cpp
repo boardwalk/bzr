@@ -17,6 +17,18 @@
  */
 #include "ObjectManager.h"
 
+Object& ObjectManager::operator[](ObjectId id)
+{
+    auto& ptr = _data[id];
+
+    if(!ptr)
+    {
+        ptr.reset(new Object());
+    }
+
+    return *ptr;
+}
+
 ObjectManager::iterator ObjectManager::find(ObjectId id)
 {
     return _data.find(id);

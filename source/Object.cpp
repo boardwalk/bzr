@@ -17,9 +17,6 @@
  */
 #include "Object.h"
 
-Object::Object(ObjectId id) : _id(id)
-{}
-
 void Object::setModel(ResourcePtr model)
 {
     _model = model;
@@ -28,11 +25,6 @@ void Object::setModel(ResourcePtr model)
 void Object::setLocation(const Location& location)
 {
     _location = location;
-}
-
-ObjectId Object::id() const
-{
-    return _id;
 }
 
 const ResourcePtr& Object::model() const

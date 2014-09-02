@@ -18,11 +18,11 @@
 #ifndef BZR_LOCATION_H
 #define BZR_LOCATION_H
 
-#include "LandblockId.h"
+#include "LandcellId.h"
 
 struct Location
 {
-    LandblockId landblock;
+    LandcellId landcell;
     glm::vec3 offset;
     glm::quat orientation;
 };

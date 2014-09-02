@@ -47,8 +47,8 @@ public:
 #ifndef HEADLESS
     Renderer& renderer();
 #endif
-    ObjectId playerObjectId() const;
-    void setPlayerObjectId(ObjectId playerObjectId);
+    ObjectId playerId() const;
+    void setPlayerId(ObjectId playerId);
 
 private:
     Core();
@@ -73,7 +73,7 @@ private:
 #ifndef HEADLESS
     unique_ptr<Renderer> _renderer;
 #endif
-    ObjectId _playerObjectId;
+    ObjectId _playerId;
     // TEMPORARY
     uint32_t _modelId;
     uint32_t _submodelNum;
