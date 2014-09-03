@@ -15,13 +15,14 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_PHYSICS_Body_H
-#define BZR_PHYSICS_Body_H
+#ifndef BZR_PHYSICS_BODY_H
+#define BZR_PHYSICS_BODY_H
 
 #include "physics/AABB.h"
 #include "physics/Cylinder.h"
 #include "Location.h"
 #include "Noncopyable.h"
+#include "ilist.h"
 
 class BSPNode;
 class Landblock;
@@ -50,7 +51,14 @@ struct BodyFlags
     };
 };
 
-class Body : Noncopyable
+struct XAxisTag;
+struct YAxisTag;
+struct ZAxisTag;
+
+class Body : Noncopyable,
+    public ilist_node<Body, XAxisTag>,
+    public ilist_node<Body, YAxisTag>,
+    public ilist_node<Body, ZAxisTag>
 {
 public:
     Body();

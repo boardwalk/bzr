@@ -76,5 +76,9 @@ void Space::stepBody(Body& body, fp_t dt)
 
         body.setVelocity(velocity);
     }
-    
+
+    for(auto& e : _xAxisList)
+    {
+        (void)e;
+    }
 }

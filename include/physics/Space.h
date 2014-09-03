@@ -18,7 +18,12 @@
 #ifndef BZR_PHYSICS_SPACE_H
 #define BZR_PHYSICS_SPACE_H
 
+#include "ilist.h"
 #include "Noncopyable.h"
+
+struct XAxisTag;
+struct YAxisTag;
+struct ZAxisTag;
 
 class Body;
 
@@ -95,6 +100,10 @@ private:
     void stepBody(Body& object, fp_t dt);
 
     vector<weak_ptr<Body>> _bodies;
+
+    ilist<Body, XAxisTag> _xAxisList;
+    ilist<Body, YAxisTag> _yAxisList;
+    ilist<Body, ZAxisTag> _zAxisList;
 };
 
 #endif
