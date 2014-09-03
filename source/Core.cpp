@@ -51,17 +51,17 @@ Config& Core::config()
     return *_config;
 }
 
-const DatFile& Core::portalDat() const
+DatFile& Core::portalDat()
 {
     return *_portalDat;
 }
 
-const DatFile& Core::cellDat() const
+DatFile& Core::cellDat()
 {
     return *_cellDat;
 }
 
-const DatFile& Core::highresDat() const
+DatFile& Core::highresDat()
 {
     return *_highresDat;
 }

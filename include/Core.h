@@ -36,9 +36,9 @@ public:
     static Core& get();
 
     Config& config();
-    const DatFile& portalDat() const;
-    const DatFile& cellDat() const;
-    const DatFile& highresDat() const;
+    DatFile& portalDat();
+    DatFile& cellDat();
+    DatFile& highresDat();
     ResourceCache& resourceCache();
     LandblockManager& landblockManager();
     ObjectManager& objectManager();
