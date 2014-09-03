@@ -32,17 +32,14 @@ LandblockRenderData::~LandblockRenderData()
     glDeleteTextures(1, &_normalTexture);
 }
 
-void LandblockRenderData::bind()
+void LandblockRenderData::render()
 {
     glBindVertexArray(_vertexArray);
 
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, _normalTexture);
-}
 
-GLsizei LandblockRenderData::vertexCount() const
-{
-    return _vertexCount;
+    glDrawArrays(GL_TRIANGLES, 0, _vertexCount);
 }
 
 static void pushRotatedCoord(vector<uint8_t>& vertexData, fp_t s, fp_t t, int rotations, uint8_t scale)

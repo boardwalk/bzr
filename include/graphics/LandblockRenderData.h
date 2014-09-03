@@ -29,9 +29,7 @@ public:
     LandblockRenderData(const Landblock& landblock);
     ~LandblockRenderData();
 
-    void bind();
-
-    GLsizei vertexCount() const;
+    void render();
 
 private:
     void initGeometry(const Landblock& landblock);
