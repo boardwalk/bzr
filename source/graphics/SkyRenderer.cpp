@@ -184,33 +184,6 @@ void SkyRenderer::initTexture()
         glTexImage2D(FACES[face], 0, GL_RGB8, CUBE_SIZE, CUBE_SIZE, 0, GL_RGB, GL_UNSIGNED_BYTE, data.data());
     }
 
-/*
-    //const int DUMP_WIDTH = 32;
-    //const int DUMP_HEIGHT = 8;
-    const int DUMP_WIDTH = 1024;
-    const int DUMP_HEIGHT = 256;
-
-    vector<uint8_t> dump(DUMP_WIDTH * DUMP_HEIGHT * 3);
-    for(auto j = 0; j < DUMP_HEIGHT; j++)
-    {
-        for(auto i = 0; i < DUMP_WIDTH; i++)
-        {
-            auto theta = fp_t(j) / fp_t(DUMP_HEIGHT - 1) * 0.5 * PI;
-            auto phi = fp_t(i) / fp_t(DUMP_WIDTH - 1) * 2.0 * PI;
-            auto color = model.getColor(theta, phi);
-
-            dump[(i + j * DUMP_WIDTH) * 3] = color.x * 0xFF;
-            dump[(i + j * DUMP_WIDTH) * 3 + 1] = color.y * 0xFF;
-            dump[(i + j * DUMP_WIDTH) * 3 + 2] = color.z * 0xFF;
-        }
-    }
-
-    {
-        fstream f("skymodel.raw", ios_base::out|ios_base::binary);
-        f.write((char*)dump.data(), dump.size());
-    }
-*/
-   
     _sunVector.x = sin(model.thetaSun()) * sin(model.phiSun());
     _sunVector.y = -sin(model.thetaSun()) * cos(model.phiSun());
     _sunVector.z = cos(model.thetaSun());

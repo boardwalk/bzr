@@ -69,54 +69,6 @@ static const uint32_t LANDSCAPE_TEXTURES[] =
     0x06006d3f  // 0x20
 };
 
-// 6d3e
-// 6d49
-// 6d51
-// 6d06
-// 6d3d
-// 6d3f
-// 6d48
-// 6d46
-// 6d42
-// 6d41
-// 6d6f
-// 6d55
-// 6d40
-// 6d53
-// 6d44
-// 6d3c
-// 6d50
-// 6d4c
-// 6d45
-// 6bb5
-// 6f48
-// 6d54
-// 6d56
-// 6d4b
-// 6d43
-// 6810
-// 6844
-// 74d8
-// 6d4d
-// 680e
-// 6d4f
-// 6d4e
-// 6d6a
-// 6d4a
-// 6b9c
-// 6d47
-// ----
-// 74d9
-// 3824
-// 72b3
-// 3835
-// 382c
-// 3828
-// 382a
-// 72b2
-// 3821
-// ....
-
 static const int TERRAIN_ARRAY_SIZE = 512;
 static const int TERRAIN_ARRAY_DEPTH = sizeof(LANDSCAPE_TEXTURES) / sizeof(LANDSCAPE_TEXTURES[0]);
 

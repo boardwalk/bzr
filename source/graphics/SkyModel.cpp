@@ -33,8 +33,6 @@ static fp_t tonemap(fp_t luminance)
     luminance *= 16.0;
     fp_t x = max(fp_t(0.0), luminance - fp_t(0.004));
     return (x * (fp_t(6.2) * x + fp_t(0.5))) / (x * (fp_t(6.2) * x + fp_t(1.7)) + fp_t(0.06));
-    //const fp_t whiteLuminance = 8000.0;
-    //return luminance * (1.0 + luminance / (whiteLuminance * whiteLuminance)) / (1.0 + luminance);
 }
 
 void SkyModel::prepare(const Params& p)
