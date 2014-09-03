@@ -71,6 +71,11 @@ bool BSPInternal::collide(const LineSegment& segment, glm::vec3& impact) const
     return false;
 }
 
+const Sphere& BSPInternal::bounds() const
+{
+    return _bounds;
+}
+
 BSPExternal::BSPExternal(BinReader& reader, int treeType)
 {
     _index = reader.read<uint32_t>();
@@ -106,6 +111,11 @@ bool BSPExternal::collide(const LineSegment& segment, glm::vec3& impact) const
     }
 
     return false;
+}
+
+const Sphere& BSPExternal::bounds() const
+{
+    return _bounds;
 }
 
 BSPPortal::BSPPortal(BinReader& reader, int treeType)
@@ -153,6 +163,11 @@ bool BSPPortal::collide(const LineSegment& segment, glm::vec3& impact) const
     (void)impact;
     
     return false;
+}
+
+const Sphere& BSPPortal::bounds() const
+{
+    return _bounds;
 }
 
 unique_ptr<BSPNode> readBSP(BinReader& reader, int treeType)

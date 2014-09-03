@@ -16,8 +16,85 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "physics/Body.h"
+#include "BSP.h"
 
-void Body::integrate(fp_t dt)
+Body::Body() : _type(ShapeType::Unknown)
+{}
+
+ShapeType::Value Body::type() const
 {
-    (void)dt;
+    return _type;
+}
+
+void Body::setFlags(BodyFlags::Value flags)
+{
+    _flags = flags;
+}
+
+BodyFlags::Value Body::flags() const
+{
+    return _flags;
+}
+
+void Body::setBSPTree(const BSPNode* tree)
+{
+    _type = ShapeType::BSPTree;
+    _data.tree = tree;
+    auto sphereBounds = tree->bounds();
+    _bounds.min = sphereBounds.center - glm::vec3(sphereBounds.radius);
+    _bounds.max = sphereBounds.center + glm::vec3(sphereBounds.radius);
+}
+
+const BSPNode* Body::getBSPTree() const
+{
+    assert(_type == ShapeType::BSPTree);
+    return _data.tree;
+}
+
+void Body::setLandblock(const Landblock* landblock)
+{
+    _type = ShapeType::Landblock;
+    _data.landblock = landblock;
+    _bounds.min = glm::vec3(0.0, 0.0, 0.0);
+    _bounds.max = glm::vec3(192.0, 192.0, 512.0);
+}
+
+const Landblock* Body::getLandblock() const
+{
+    assert(_type == ShapeType::Landblock);
+    return _data.landblock;
+}
+
+void Body::setCylinder(const Cylinder& cylinder)
+{
+    _type = ShapeType::Cylinder;
+    _data.cylinder = cylinder;
+    _bounds.min = glm::vec3(-cylinder.radius, -cylinder.radius, -cylinder.halfHeight);
+    _bounds.max = glm::vec3(cylinder.radius, cylinder.radius, cylinder.halfHeight);
+}
+
+const Cylinder& Body::getCylinder() const
+{
+    assert(_type == ShapeType::Cylinder);
+    return _data.cylinder;
+}
+
+void Body::setLocation(const Location& location)
+{
+    _location = location;
+}
+
+const Location& Body::location() const
+{
+    return _location;
+}
+
+void Body::setVelocity(const glm::vec3& velocity)
+{
+    _velocity = velocity;
+}
+
+const glm::vec3& Body::velocity() const
+{
+    return _velocity;
 }

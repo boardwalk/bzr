@@ -15,15 +15,85 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_PHYSICS_BODY_H
-#define BZR_PHYSICS_BODY_H
+#ifndef BZR_PHYSICS_Body_H
+#define BZR_PHYSICS_Body_H
 
+#include "physics/AABB.h"
+#include "physics/Cylinder.h"
+#include "Location.h"
 #include "Noncopyable.h"
+
+class BSPNode;
+class Landblock;
+
+struct ShapeType
+{
+    enum Value
+    {
+        Unknown,
+        BSPTree,
+        Landblock,
+        Cylinder
+    };
+};
+
+struct BodyFlags
+{
+    enum Value
+    {
+        // This body never moves
+        Static = 0x1,
+        // This body collides with other objects, but other objects pass through it
+        Ghost = 0x2,
+        // This body is effected by gravity
+        HasGravity = 0x4
+    };
+};
 
 class Body : Noncopyable
 {
 public:
-    void integrate(fp_t dt);
+    Body();
+
+    ShapeType::Value type() const;
+
+    void setFlags(BodyFlags::Value flags);
+    BodyFlags::Value flags() const;
+
+    void setBSPTree(const BSPNode* tree);
+    const BSPNode* getBSPTree() const;
+
+    void setLandblock(const Landblock* landblock);
+    const Landblock* getLandblock() const;
+
+    void setCylinder(const Cylinder& cylinder);
+    const Cylinder& getCylinder() const;
+
+    const AABB& bounds() const;
+
+    void setLocation(const Location& location);
+    const Location& location() const;
+
+    void setVelocity(const glm::vec3& velocity);
+    const glm::vec3& velocity() const;    
+
+private:
+    union Data
+    {
+        // when _type == BSPTree
+        const BSPNode* tree;
+        // when _type == Landblock
+        const Landblock* landblock;
+        // when _type == Cylinder
+        Cylinder cylinder;
+    };
+
+    ShapeType::Value _type;
+    BodyFlags::Value _flags;
+    Data _data;
+    AABB _bounds;
+    Location _location;
+    glm::vec3 _velocity;
 };
 
 #endif

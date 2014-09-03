@@ -21,7 +21,6 @@
 #include "Noncopyable.h"
 
 class Body;
-class Shape;
 
 /*
  * Asheron's Call uses a very simple physics model
@@ -91,6 +90,11 @@ class Space : Noncopyable
 {
 public:
     void step(fp_t dt);
+
+private:
+    void stepBody(Body& object, fp_t dt);
+
+    vector<weak_ptr<Body>> _bodies;
 };
 
 #endif
