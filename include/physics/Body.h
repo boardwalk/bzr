@@ -51,14 +51,16 @@ struct BodyFlags
     };
 };
 
-struct XAxisTag;
-struct YAxisTag;
-struct ZAxisTag;
+struct BeginXAxisTag;
+struct BeginYAxisTag;
+struct EndXAxisTag;
+struct EndYAxisTag;
 
 class Body : Noncopyable,
-    public ilist_node<Body, XAxisTag>,
-    public ilist_node<Body, YAxisTag>,
-    public ilist_node<Body, ZAxisTag>
+    public ilist_node<Body, BeginXAxisTag>,
+    public ilist_node<Body, BeginYAxisTag>,
+    public ilist_node<Body, EndXAxisTag>,
+    public ilist_node<Body, EndYAxisTag>
 {
 public:
     Body();
@@ -83,7 +85,10 @@ public:
     const Location& location() const;
 
     void setVelocity(const glm::vec3& velocity);
-    const glm::vec3& velocity() const;    
+    const glm::vec3& velocity() const;
+
+    void setTag(uint64_t tag);
+    uint64_t tag() const;
 
 private:
     union Data
@@ -102,6 +107,7 @@ private:
     AABB _bounds;
     Location _location;
     glm::vec3 _velocity;
+    uint64_t _tag;
 };
 
 #endif

@@ -21,9 +21,10 @@
 #include "ilist.h"
 #include "Noncopyable.h"
 
-struct XAxisTag;
-struct YAxisTag;
-struct ZAxisTag;
+struct BeginXAxisTag;
+struct BeginYAxisTag;
+struct EndXAxisTag;
+struct EndYAxisTag;
 
 class Body;
 
@@ -101,9 +102,10 @@ private:
 
     vector<weak_ptr<Body>> _bodies;
 
-    ilist<Body, XAxisTag> _xAxisList;
-    ilist<Body, YAxisTag> _yAxisList;
-    ilist<Body, ZAxisTag> _zAxisList;
+    ilist<Body, BeginXAxisTag> _beginXAxisList;
+    ilist<Body, BeginYAxisTag> _beginYAxisList;
+    ilist<Body, EndXAxisTag> _endXAxisList;
+    ilist<Body, EndYAxisTag> _endYAxisList;
 };
 
 #endif

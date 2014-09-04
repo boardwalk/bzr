@@ -98,3 +98,13 @@ const glm::vec3& Body::velocity() const
 {
     return _velocity;
 }
+
+void Body::setTag(uint64_t tag)
+{
+    _tag = tag;
+}
+
+uint64_t Body::tag() const
+{
+    return _tag;
+}

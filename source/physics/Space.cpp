@@ -17,9 +17,11 @@
  */
 #include "physics/Space.h"
 #include "physics/Body.h"
+#include "physics/LineSegment.h"
 
 static const auto GRAVITY_ACCEL = fp_t(-9.81);
 static const auto TERMINAL_VELOCITY = fp_t(-54.0);
+static const auto REST_EPSILON = fp_t(0.002);
 
 void Space::step(fp_t dt)
 {
@@ -77,8 +79,17 @@ void Space::stepBody(Body& body, fp_t dt)
         body.setVelocity(velocity);
     }
 
-    for(auto& e : _xAxisList)
+    if(glm::length(body.velocity()) < REST_EPSILON)
     {
-        (void)e;
+        body.setVelocity(glm::vec3());
     }
+
+    if(body.velocity() == glm::vec3())
+    {
+        return;
+    }
+
+    auto segment = LineSegment();
+    segment.begin = body.location().normalize();
+    segment.end = segment.begin + body.velocity() * dt;
 }

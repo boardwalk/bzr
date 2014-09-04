@@ -15,18 +15,10 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_LOCATION_H
-#define BZR_LOCATION_H
+#include "Location.h"
 
-#include "LandcellId.h"
-
-struct Location
+glm::vec3 Location::normalize() const
 {
-	glm::vec3 normalize() const;
-
-    LandcellId landcell;
-    glm::vec3 offset;
-    glm::quat orientation;
-};
-
-#endif
+	// FIXME
+	return offset;
+}
