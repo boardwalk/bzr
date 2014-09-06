@@ -18,6 +18,9 @@
 #ifndef BZR_ILIST_H
 #define BZR_ILIST_H
 
+// clang's __builtin_offsetof doesn't understand ::
+#define my_offsetof(st, m) ((intptr_t)(&((st*)0)->m))
+
 template<class Elem, class Tag>
 class ilist;
 
@@ -74,12 +77,12 @@ public:
 
     elem& operator*()
     {
-        return *(elem*)((byte*)_node - offsetof(elem, node::_prev));
+        return *(elem*)((byte*)_node - my_offsetof(elem, node::_prev));
     }
 
     elem* operator->()
     {
-        return (elem*)((byte*)_node - offsetof(elem, node::_prev));
+        return (elem*)((byte*)_node - my_offsetof(elem, node::_prev));
     }
 
     bool operator==(const ilist_iterator& rhs) const
