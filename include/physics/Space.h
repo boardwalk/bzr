@@ -32,6 +32,8 @@ public:
 private:
     bool step(fp_t dt, Body& body);
 
+    void resort(Body& body);
+
     ilist<Body, BeginXTag> _beginXList;
     ilist<Body, BeginYTag> _beginYList;
     ilist<Body, EndXTag> _endXList;

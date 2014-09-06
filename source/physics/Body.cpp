@@ -79,6 +79,11 @@ const Cylinder& Body::getCylinder() const
     return _data.cylinder;
 }
 
+const AABB& Body::bounds() const
+{
+    return _bounds;
+}
+
 void Body::setLocation(const Location& location)
 {
     _location = location;

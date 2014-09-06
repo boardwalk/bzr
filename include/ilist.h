@@ -122,6 +122,7 @@ public:
     typedef ilist_node<Elem, Tag> node;
     typedef ilist_iterator<Elem, Tag, false> iterator;
     typedef ilist_iterator<Elem, Tag, true> const_iterator;
+    typedef Elem value_type;
 
     ilist()
     {
