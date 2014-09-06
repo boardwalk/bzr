@@ -30,6 +30,20 @@ class ilist_iterator;
 template<class Elem, class Tag>
 class ilist_node
 {
+public:
+    ilist_node() : _prev(nullptr), _next(nullptr)
+    {}
+
+    ~ilist_node()
+    {
+        if(_prev)
+        {
+            _prev->_next = _next;
+            _next->_prev = _prev;
+        }
+    }
+
+private:
     ilist_node* _prev;
     ilist_node* _next;
 
@@ -135,12 +149,12 @@ public:
         return const_iterator(&_root);
     }
 
-    void insert(iterator position, Elem* elem)
+    void insert(iterator position, Elem& elem)
     {
-        elem->node::_prev = _root._prev;
-        elem->node::_next = &_root;
-        _root._prev->_next = elem;
-        _root._prev = elem;
+        elem.node::_prev = _root._prev;
+        elem.node::_next = &_root;
+        _root._prev->_next = &elem;
+        _root._prev = &elem;
     }
 
     iterator erase(iterator position)
@@ -152,12 +166,12 @@ public:
         return iterator(n->_next);
     }
 
-    void push_front(Elem* elem)
+    void push_front(Elem& elem)
     {
         insert(begin(), elem);
     }
 
-    void push_back(Elem* elem)
+    void push_back(Elem& elem)
     {
         insert(end(), elem);
     }

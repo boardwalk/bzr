@@ -16,7 +16,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "physics/Space.h"
-#include "physics/Body.h"
 #include "physics/LineSegment.h"
 
 static const auto GRAVITY_ACCEL = fp_t(-9.81);
@@ -25,56 +24,40 @@ static const auto REST_EPSILON = fp_t(0.002);
 
 void Space::step(fp_t dt)
 {
-    auto numDeadBodies = 0u; // teehee
-
-    for(auto& weakPtr : _bodies)
+    for(auto it = _activeList.begin(); it != _activeList.end(); ++it)
     {
-        auto ptr = weakPtr.lock();
-
-        if(ptr)
+        if(step(dt, *it))
         {
-            stepBody(*ptr, dt);
+            ++it;
         }
         else
         {
-            numDeadBodies++;
+            it = _activeList.erase(it);
         }
-    }
-
-    if(numDeadBodies * 3 > _bodies.size())
-    {
-        decltype(_bodies) newBodies;
-        newBodies.reserve(_bodies.size() - numDeadBodies);
-
-        for(auto& weakPtr : _bodies)
-        {
-            if(!weakPtr.expired())
-            {
-                newBodies.push_back(weakPtr);
-            }
-        }
-
-        _bodies = move(newBodies);
     }
 }
 
-void Space::stepBody(Body& body, fp_t dt)
+void Space::insert(Body& body)
 {
-    if(body.flags() & BodyFlags::Static)
-    {
-        return;
-    }
+    _beginXList.push_back(body);
+    _beginYList.push_back(body);
+    _endXList.push_back(body);
+    _endYList.push_back(body);
+    // TODO keep lists sorted
 
+    if(!(body.flags() & BodyFlags::Static))
+    {
+        _activeList.push_back(body);
+    }
+}
+
+bool Space::step(fp_t dt, Body& body)
+{
     if(body.flags() & BodyFlags::HasGravity)
     {
         auto velocity = body.velocity();
 
-        velocity.z = velocity.z + GRAVITY_ACCEL * dt;
-
-        if(velocity.z < TERMINAL_VELOCITY)
-        {
-            velocity.z = TERMINAL_VELOCITY;
-        }
+        velocity.z = max(velocity.z + GRAVITY_ACCEL * dt, TERMINAL_VELOCITY);
 
         body.setVelocity(velocity);
     }
@@ -86,10 +69,12 @@ void Space::stepBody(Body& body, fp_t dt)
 
     if(body.velocity() == glm::vec3())
     {
-        return;
+        return false;
     }
 
     auto segment = LineSegment();
     segment.begin = body.location().normalize();
     segment.end = segment.begin + body.velocity() * dt;
+
+    return true;
 }

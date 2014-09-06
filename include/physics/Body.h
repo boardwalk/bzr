@@ -51,16 +51,18 @@ struct BodyFlags
     };
 };
 
-struct BeginXAxisTag;
-struct BeginYAxisTag;
-struct EndXAxisTag;
-struct EndYAxisTag;
+struct BeginXTag;
+struct BeginYTag;
+struct EndXTag;
+struct EndYTag;
+struct ActiveTag;
 
 class Body : Noncopyable,
-    public ilist_node<Body, BeginXAxisTag>,
-    public ilist_node<Body, BeginYAxisTag>,
-    public ilist_node<Body, EndXAxisTag>,
-    public ilist_node<Body, EndYAxisTag>
+    public ilist_node<Body, BeginXTag>,
+    public ilist_node<Body, BeginYTag>,
+    public ilist_node<Body, EndXTag>,
+    public ilist_node<Body, EndYTag>,
+    public ilist_node<Body, ActiveTag>
 {
 public:
     Body();
