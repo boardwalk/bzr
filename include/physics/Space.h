@@ -21,24 +21,47 @@
 #include "Body.h"
 #include "ilist.h"
 #include "Noncopyable.h"
+#include <unordered_map>
+
+template<class T>
+inline void hash_combine(size_t& seed, const T& v)
+{
+    hash<T> hasher;
+    seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+}
+
+namespace std
+{
+    template<class T, class U>
+    struct hash<pair<T, U>>
+    {
+        size_t operator()(const pair<T, U>& value)
+        {
+            auto result = size_t(0);
+            hash_combine(result, value.first);
+            hash_combine(result, value.second);
+            return result;
+        }
+    };
+}
 
 class Space : Noncopyable
 {
 public:
+    Space();
     void step(fp_t dt);
-
     void insert(Body& body);
 
 private:
-    bool step(fp_t dt, Body& body);
+    typedef unordered_map<pair<Body*, Body*>, bool[2]> OverlapMap;
 
+    bool step(fp_t dt, Body& body);
     void resort(Body& body);
 
-    ilist<Body, BeginXTag> _beginXList;
-    ilist<Body, BeginYTag> _beginYList;
-    ilist<Body, EndXTag> _endXList;
-    ilist<Body, EndYTag> _endYList;
-    ilist<Body, ActiveTag> _activeList;
+    ilist<Body> _xAxisList;
+    ilist<Body> _yAxisList;
+    ilist<Body> _activeList;
+    OverlapMap _overlapMap;
 };
 
 #endif

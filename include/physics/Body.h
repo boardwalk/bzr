@@ -51,18 +51,24 @@ struct BodyFlags
     };
 };
 
-struct BeginXTag;
-struct BeginYTag;
-struct EndXTag;
-struct EndYTag;
-struct ActiveTag;
+struct BodyHooks
+{
+    enum Value
+    {
+        BeginX,
+        BeginY,
+        EndX,
+        EndY,
+        Active
+    };
+};
 
 class Body : Noncopyable,
-    public ilist_node<Body, BeginXTag>,
-    public ilist_node<Body, BeginYTag>,
-    public ilist_node<Body, EndXTag>,
-    public ilist_node<Body, EndYTag>,
-    public ilist_node<Body, ActiveTag>
+    public ilist_hook<Body, BodyHooks::BeginX>,
+    public ilist_hook<Body, BodyHooks::BeginY>,
+    public ilist_hook<Body, BodyHooks::EndX>,
+    public ilist_hook<Body, BodyHooks::EndY>,
+    public ilist_hook<Body, BodyHooks::Active>
 {
 public:
     Body();

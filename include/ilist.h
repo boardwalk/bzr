@@ -18,45 +18,57 @@
 #ifndef BZR_ILIST_H
 #define BZR_ILIST_H
 
-// clang's __builtin_offsetof doesn't understand ::
-#define my_offsetof(st, m) ((intptr_t)(&((st*)0)->m))
+#include "Noncopyable.h"
 
-template<class Elem, class Tag>
+template<class Elem>
 class ilist;
 
-template<class Elem, class Tag, bool IsConst>
-class ilist_iterator;
-
-template<class Elem, class Tag>
-class ilist_node
+struct ilist_node : Noncopyable
 {
-public:
-    ilist_node() : _prev(nullptr), _next(nullptr)
-    {}
+    explicit ilist_node(size_t off) : _prev(nullptr), _next(nullptr), _offset(off)
+    {
+        assert(off <= numeric_limits<uint8_t>::max());
+    }
 
     ~ilist_node()
     {
-        if(_prev)
+        if(_prev != nullptr)
         {
             _prev->_next = _next;
             _next->_prev = _prev;
         }
     }
 
-private:
     ilist_node* _prev;
     ilist_node* _next;
-
-    friend class ilist<Elem, Tag>;
-    friend class ilist_iterator<Elem, Tag, false>;
-    friend class ilist_iterator<Elem, Tag, true>;
+    const uint8_t _offset;
 };
 
-template<class Elem, class Tag, bool IsConst>
+template<class Elem, int Num>
+class ilist_hook
+{
+public:
+    ilist_hook() : _node(offset())
+    {}
+
+    static size_t offset()
+    {
+        auto elem = (Elem*)nullptr;
+        auto node = static_cast<ilist_hook<Elem, Num>*>(elem);
+        return (uint8_t*)node - (uint8_t*)elem;       
+    }
+
+private:
+    ilist_node _node;
+
+    friend class ilist<Elem>;
+};
+
+template<class Elem, bool IsConst>
 class ilist_iterator : public iterator<bidirectional_iterator_tag, Elem>
 {
 public:
-    typedef typename conditional<IsConst, ilist_node<Elem, Tag>, const ilist_node<Elem, Tag>>::type node;
+    typedef typename conditional<IsConst, const ilist_node, ilist_node>::type node;
     typedef typename conditional<IsConst, const Elem, Elem>::type elem;
     typedef typename conditional<IsConst, const uint8_t, uint8_t>::type byte;
 
@@ -72,7 +84,7 @@ public:
     ilist_iterator operator--(int)
     {
         auto tmp = *this;
-        operator--();
+        _node = _node->_prev;
         return tmp;
     }
 
@@ -85,18 +97,23 @@ public:
     ilist_iterator operator++(int)
     {
         auto tmp = *this;
-        operator++();
+        _node = _node->_next;
         return tmp;
     }
 
-    elem& operator*()
+    elem& operator*() const
     {
-        return *(elem*)((byte*)_node - my_offsetof(elem, node::_prev));
+        return *(elem*)((byte*)_node - _node->_offset);
     }
 
-    elem* operator->()
+    elem* operator->() const
     {
-        return (elem*)((byte*)_node - my_offsetof(elem, node::_prev));
+        return (elem*)((byte*)_node - _node->_offset);
+    }
+
+    size_t hook_offset() const
+    {
+        return _node->_offset;
     }
 
     bool operator==(const ilist_iterator& rhs) const
@@ -112,23 +129,21 @@ public:
 private:
     node* _node;
 
-    friend class ilist<Elem, Tag>;
+    friend class ilist<Elem>;
 };
 
-template<class Elem, class Tag>
-class ilist
+template<class Elem>
+class ilist : Noncopyable
 {
 public:
-    typedef ilist_node<Elem, Tag> node;
-    typedef ilist_iterator<Elem, Tag, false> iterator;
-    typedef ilist_iterator<Elem, Tag, true> const_iterator;
-    typedef Elem value_type;
+    typedef ilist_iterator<Elem, false> iterator;
+    typedef ilist_iterator<Elem, true> const_iterator;
 
-    ilist()
+    ilist() : _root(0)
     {
         _root._prev = &_root;
         _root._next = &_root;
-    };
+    }
 
     iterator begin()
     {
@@ -150,35 +165,46 @@ public:
         return const_iterator(&_root);
     }
 
-    void insert(iterator position, Elem& elem)
+    void insert(iterator position, iterator it)
     {
-        elem.node::_prev = _root._prev;
-        elem.node::_next = &_root;
-        _root._prev->_next = &elem;
-        _root._prev = &elem;
+        it._node->_prev = position._node->_prev;
+        it._node->_next = position._node;
+
+        position._node->_prev->_next = it._node;
+        position._node->_prev = it._node;
     }
 
     iterator erase(iterator position)
     {
         assert(position != end());
-        auto n = position._node;
-        n->_prev->_next = n->_next;
-        n->_next->_prev = n->_prev;
-        return iterator(n->_next);
+
+        auto& node = *position._node;
+
+        node._prev->_next = node._next;
+        node._next->_prev = node._prev;
+
+        return iterator(node._next);
     }
 
-    void push_front(Elem& elem)
+    void push_front(iterator it)
     {
-        insert(begin(), elem);
+        insert(begin(), it);
     }
 
-    void push_back(Elem& elem)
+    void push_back(iterator it)
     {
-        insert(end(), elem);
+        insert(end(), it);
+    }
+
+    template<int Num>
+    iterator iterator_for(Elem& elem) const
+    {
+        auto& node = static_cast<ilist_hook<Elem, Num>&>(elem)._node;
+        return iterator(&node);
     }
 
 private:
-    node _root;
+    ilist_node _root;
 };
 
 #endif

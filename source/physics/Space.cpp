@@ -22,40 +22,59 @@ static const auto GRAVITY_ACCEL = fp_t(-9.81);
 static const auto TERMINAL_VELOCITY = fp_t(-54.0);
 static const auto REST_EPSILON = fp_t(0.002);
 
+static bool compareByX(ilist<Body>::iterator a, ilist<Body>::iterator b)
+{
+    return false;
+}
+
+static bool compareByY(ilist<Body>::iterator a, ilist<Body>::iterator b)
+{
+    return false;
+}
+
+/*
 static bool compareByBeginX(const Body& a, const Body& b)
 {
     auto blockDiff = ((int)b.location().landcell.x() - (int)a.location().landcell.x()) * fp_t(192.0);
     return a.location().offset.x + a.bounds().min.x < blockDiff + b.location().offset.x + b.bounds().min.x;
 }
 
-bool compareByBeginY(const Body& a, const Body& b)
+static bool compareByBeginY(const Body& a, const Body& b)
 {
     auto blockDiff = ((int)b.location().landcell.y() - (int)a.location().landcell.y()) * fp_t(192.0);
     return a.location().offset.y + a.bounds().min.y < blockDiff + b.location().offset.y + b.bounds().min.y;
 }
 
-bool compareByEndX(const Body& a, const Body& b)
+static bool compareByEndX(const Body& a, const Body& b)
 {
     auto blockDiff = ((int)b.location().landcell.x() - (int)a.location().landcell.x()) * fp_t(192.0);
     return a.location().offset.x + a.bounds().max.x < blockDiff + b.location().offset.x + b.bounds().max.x;
 }
 
-bool compareByEndY(const Body& a, const Body& b)
+static bool compareByEndY(const Body& a, const Body& b)
 {
     auto blockDiff = ((int)b.location().landcell.y() - (int)a.location().landcell.y()) * fp_t(192.0);
     return a.location().offset.y + a.bounds().max.y < blockDiff + b.location().offset.y + b.bounds().max.y;
 }
-
-template<class Container, class Compare>
-static void insertionSort(Container& container, typename Container::value_type& value, Compare comp)
+*/
+ 
+template<class Compare>
+static void insertionSort(ilist<Body>& container, ilist<Body>::iterator bodyIt, Compare comp)
 {
-    auto it = container.erase(typename Container::iterator(&value));
-
     // value < it, compare(value, *it)
     // value >= it, !compare(value, *it)
     // value > it, compare(*it, value)
     // value <= it, !compare(*it, value)
     // FIXME make sure this is correct
+
+    auto prevIt = container.erase(bodyIt);
+
+    container.insert(prevIt, bodyIt);
+
+    /*
+    auto it = container.erase(it);
+
+
 
     while(comp(value, *it))
     {
@@ -68,7 +87,11 @@ static void insertionSort(Container& container, typename Container::value_type& 
     }
 
     container.insert(it, value);
+    */
 }
+
+Space::Space()
+{}
 
 void Space::step(fp_t dt)
 {
@@ -87,15 +110,15 @@ void Space::step(fp_t dt)
 
 void Space::insert(Body& body)
 {
-    _beginXList.push_back(body);
-    _beginYList.push_back(body);
-    _endXList.push_back(body);
-    _endYList.push_back(body);
+    //_beginXList.push_back(body);
+    //_beginYList.push_back(body);
+    //_endXList.push_back(body);
+    //_endYList.push_back(body);
     resort(body);
 
     if(!(body.flags() & BodyFlags::Static))
     {
-        _activeList.push_back(body);
+        //_activeList.push_back(body);
     }
 }
 
@@ -116,17 +139,33 @@ bool Space::step(fp_t dt, Body& body)
         return false;
     }
 
-    auto segment = LineSegment();
-    segment.begin = body.location().normalize();
-    segment.end = segment.begin + body.velocity() * dt;
+    auto oldLocation = body.location();
+
+    auto newLocation = body.location();
+    newLocation.offset += body.velocity() * dt;
+
+    body.setLocation(newLocation);
+    resort(body);
+
+    //auto beginXIt = decltype(_beginXList)::iterator(&body);
+
+    //while(beginXIt != _beginXList.end())
+    //{
+        // exit condition
+    //    ++beginXIt;
+    //}
+
+    //auto segment = LineSegment();
+    //segment.begin = body.location().normalize();
+    //segment.end = segment.begin + body.velocity() * dt;
 
     return true;
 }
 
 void Space::resort(Body& body)
 {
-    insertionSort(_beginXList, body, compareByBeginX);
-    insertionSort(_beginYList, body, compareByBeginY);
-    insertionSort(_endXList, body, compareByEndX);
-    insertionSort(_endYList, body, compareByEndY);
+    insertionSort(_xAxisList, _xAxisList.iterator_for<BodyHooks::BeginX>(body), compareByX);
+    insertionSort(_xAxisList, _xAxisList.iterator_for<BodyHooks::EndX>(body), compareByX);
+    insertionSort(_yAxisList, _yAxisList.iterator_for<BodyHooks::BeginY>(body), compareByY);
+    insertionSort(_yAxisList, _yAxisList.iterator_for<BodyHooks::EndY>(body), compareByY);
 }
