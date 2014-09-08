@@ -24,11 +24,17 @@ static const auto REST_EPSILON = fp_t(0.002);
 
 static bool compareByX(ilist<Body>::iterator a, ilist<Body>::iterator b)
 {
+    // TODO
+    (void)a;
+    (void)b;
     return false;
 }
 
 static bool compareByY(ilist<Body>::iterator a, ilist<Body>::iterator b)
 {
+    // TODO
+    (void)a;
+    (void)b;
     return false;
 }
 
@@ -67,9 +73,11 @@ static void insertionSort(ilist<Body>& container, ilist<Body>::iterator bodyIt, 
     // value <= it, !compare(*it, value)
     // FIXME make sure this is correct
 
-    auto prevIt = container.erase(bodyIt);
+    (void)comp;
 
-    container.insert(prevIt, bodyIt);
+    auto nextIt = container.erase(bodyIt);
+
+    container.insert(nextIt, bodyIt);
 
     /*
     auto it = container.erase(it);

@@ -18,7 +18,7 @@
 #ifndef BZR_PHYSICS_SPACE_H
 #define BZR_PHYSICS_SPACE_H
 
-#include "Body.h"
+#include "physics/Body.h"
 #include "ilist.h"
 #include "Noncopyable.h"
 #include <unordered_map>

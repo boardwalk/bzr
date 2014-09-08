@@ -25,7 +25,7 @@ class ilist;
 
 struct ilist_node : Noncopyable
 {
-    explicit ilist_node(size_t off) : _prev(nullptr), _next(nullptr), _offset(off)
+    explicit ilist_node(size_t off) : _prev(nullptr), _next(nullptr), _offset(uint8_t(off))
     {
         assert(off <= numeric_limits<uint8_t>::max());
     }
