@@ -2,7 +2,6 @@
 import argparse
 import os
 import re
-import sys
 
 def escape_c_string(s):
     s = s.replace("\n", "\\n")
