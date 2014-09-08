@@ -53,7 +53,7 @@ public:
 
     static size_t offset()
     {
-        auto elem = (Elem*)nullptr;
+        auto elem = reinterpret_cast<Elem*>(nullptr);
         auto node = static_cast<ilist_hook<Elem, Num>*>(elem);
         return (uint8_t*)node - (uint8_t*)elem;       
     }
@@ -111,9 +111,10 @@ public:
         return (elem*)((byte*)_node - _node->_offset);
     }
 
-    size_t hook_offset() const
+    template<int Num>
+    bool on_hook() const
     {
-        return _node->_offset;
+        return _node->_offset == ilist_hook<Elem, Num>::offset();
     }
 
     bool operator==(const ilist_iterator& rhs) const

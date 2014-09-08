@@ -23,47 +23,53 @@ static const auto GRAVITY_ACCEL = fp_t(-9.81);
 static const auto TERMINAL_VELOCITY = fp_t(-54.0);
 static const auto REST_EPSILON = fp_t(0.002);
 
+static fp_t getBoundValueX(ilist<Body>::iterator it)
+{
+    if(it.on_hook<BodyHooks::BeginX>())
+    {
+        return it->bounds().min.x;
+    }
+    
+    if(it.on_hook<BodyHooks::EndX>())
+    {
+        return it->bounds().max.x;
+    }
+    
+    assert(!"Iterator for X axis associated with unknown hook");
+    return 0.0;
+}
+
+static fp_t getBoundValueY(ilist<Body>::iterator it)
+{
+    if(it.on_hook<BodyHooks::BeginY>())
+    {
+        return it->bounds().min.y;
+    }
+
+    if(it.on_hook<BodyHooks::EndY>())
+    {
+        return it->bounds().max.y;
+    }
+
+    assert(!"Iterator for Y axis associated with unknown hook");
+    return 0.0;
+}
+
 static bool compareByX(ilist<Body>::iterator a, ilist<Body>::iterator b)
 {
-    // TODO
-    (void)a;
-    (void)b;
-    return false;
+    auto aValue = a->location().offset.x + getBoundValueX(a);
+    auto bValue = b->location().offset.x + getBoundValueX(b);
+    auto blockDiff = static_cast<int>(b->location().landcell.x()) - static_cast<int>(a->location().landcell.x());
+    return aValue < bValue + blockDiff * fp_t(192.0);
 }
 
 static bool compareByY(ilist<Body>::iterator a, ilist<Body>::iterator b)
 {
-    // TODO
-    (void)a;
-    (void)b;
-    return false;
+    auto aValue = a->location().offset.y + getBoundValueY(a);
+    auto bValue = b->location().offset.y + getBoundValueY(b);
+    auto blockDiff = static_cast<int>(b->location().landcell.y()) - static_cast<int>(a->location().landcell.y());
+    return aValue < bValue + blockDiff * fp_t(192.0);
 }
-
-/*
-static bool compareByBeginX(const Body& a, const Body& b)
-{
-    auto blockDiff = ((int)b.location().landcell.x() - (int)a.location().landcell.x()) * fp_t(192.0);
-    return a.location().offset.x + a.bounds().min.x < blockDiff + b.location().offset.x + b.bounds().min.x;
-}
-
-static bool compareByBeginY(const Body& a, const Body& b)
-{
-    auto blockDiff = ((int)b.location().landcell.y() - (int)a.location().landcell.y()) * fp_t(192.0);
-    return a.location().offset.y + a.bounds().min.y < blockDiff + b.location().offset.y + b.bounds().min.y;
-}
-
-static bool compareByEndX(const Body& a, const Body& b)
-{
-    auto blockDiff = ((int)b.location().landcell.x() - (int)a.location().landcell.x()) * fp_t(192.0);
-    return a.location().offset.x + a.bounds().max.x < blockDiff + b.location().offset.x + b.bounds().max.x;
-}
-
-static bool compareByEndY(const Body& a, const Body& b)
-{
-    auto blockDiff = ((int)b.location().landcell.y() - (int)a.location().landcell.y()) * fp_t(192.0);
-    return a.location().offset.y + a.bounds().max.y < blockDiff + b.location().offset.y + b.bounds().max.y;
-}
-*/
  
 template<class Compare>
 static void insertionSort(ilist<Body>& container, ilist<Body>::iterator bodyIt, Compare comp)
