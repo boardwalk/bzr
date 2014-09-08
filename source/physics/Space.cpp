@@ -17,6 +17,7 @@
  */
 #include "physics/Space.h"
 #include "physics/LineSegment.h"
+#include <algorithm>
 
 static const auto GRAVITY_ACCEL = fp_t(-9.81);
 static const auto TERMINAL_VELOCITY = fp_t(-54.0);
