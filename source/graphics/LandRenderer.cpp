@@ -133,33 +133,43 @@ void LandRenderer::render(const glm::mat4& projectionMat, const glm::mat4& viewM
         auto dx = pair.first.x() - landcellManager.center().x();
         auto dy = pair.first.y() - landcellManager.center().y();
 
-        auto worldMat = glm::translate(glm::mat4(), glm::vec3(dx * 192.0, dy * 192.0, 0.0));
-        auto worldViewMat = viewMat * worldMat;
-        auto worldViewProjectionMat = projectionMat * worldViewMat;
-
-        loadMat3ToUniform(glm::inverseTranspose(glm::mat3(worldViewMat)), _program.getUniform("normalMatrix"));
-        loadMat4ToUniform(worldMat, _program.getUniform("worldMatrix"));
-        loadMat4ToUniform(worldViewMat, _program.getUniform("worldViewMatrix"));
-        loadMat4ToUniform(worldViewProjectionMat, _program.getUniform("worldViewProjectionMatrix"));
+        auto blockPosition = glm::vec3(dx * 192.0, dy * 192.0, 0.0);
 
         auto& land = static_cast<const Land&>(*pair.second);
 
-        auto& renderData = land.renderData();
-
-        if(!renderData)
-        {
-            renderData.reset(new LandRenderData(land));
-        }
-
-        auto& landRenderData = *(LandRenderData*)renderData.get();
-
-        landRenderData.render();
+        renderLand(land, projectionMat, viewMat, blockPosition + land.position(), land.rotation());
     }
 }
 
 void LandRenderer::setLightPosition(const glm::vec3& lightPosition)
 {
     _lightPosition = lightPosition;
+}
+
+void LandRenderer::renderLand(
+    const Land& land,
+    const glm::mat4& projectionMat,
+    const glm::mat4& viewMat,
+    const glm::vec3& position,
+    const glm::quat& rotation)
+{
+    auto worldMat = glm::translate(glm::mat4(), position) * glm::mat4_cast(rotation);
+    auto worldViewMat = viewMat * worldMat;
+    auto worldViewProjectionMat = projectionMat * worldViewMat;
+
+    loadMat3ToUniform(glm::inverseTranspose(glm::mat3(worldViewMat)), _program.getUniform("normalMatrix"));
+    loadMat4ToUniform(worldMat, _program.getUniform("worldMatrix"));
+    loadMat4ToUniform(worldViewMat, _program.getUniform("worldViewMatrix"));
+    loadMat4ToUniform(worldViewProjectionMat, _program.getUniform("worldViewProjectionMatrix"));
+
+    if(!land.renderData())
+    {
+        land.renderData().reset(new LandRenderData(land));
+    }
+
+    auto& landRenderData = (LandRenderData&)*land.renderData();
+
+    landRenderData.render();
 }
 
 void LandRenderer::initProgram()

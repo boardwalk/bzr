@@ -21,6 +21,8 @@
 #include "graphics/Program.h"
 #include "Noncopyable.h"
 
+class Land;
+
 class LandRenderer : Noncopyable
 {
 public:
@@ -32,6 +34,12 @@ public:
     void setLightPosition(const glm::vec3& lightPosition);
 
 private:
+    void renderLand(
+        const Land& land,
+        const glm::mat4& projectionMat,
+        const glm::mat4& viewMat,
+        const glm::vec3& position,
+        const glm::quat& rotation);
     void initProgram();
     void initTerrainTexture();
     void initBlendTexture();

@@ -32,7 +32,12 @@ public:
     void render(const glm::mat4& projectionMat, const glm::mat4& viewMat);
 
 private:
-    void renderStructure(const Structure& structure, const glm::mat4& projectionMat, const glm::mat4& view, const glm::vec3& position, const glm::quat& rotation);
+    void renderStructure(
+        const Structure& structure,
+        const glm::mat4& projectionMat,
+        const glm::mat4& view,
+        const glm::vec3& position,
+        const glm::quat& rotation);
 
     Program _program;
 };

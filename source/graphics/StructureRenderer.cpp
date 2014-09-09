@@ -76,7 +76,12 @@ void StructureRenderer::render(const glm::mat4& projectionMat, const glm::mat4& 
     }
 }
 
-void StructureRenderer::renderStructure(const Structure& structure, const glm::mat4& projectionMat, const glm::mat4& viewMat, const glm::vec3& position, const glm::quat& rotation)
+void StructureRenderer::renderStructure(
+    const Structure& structure,
+    const glm::mat4& projectionMat,
+    const glm::mat4& viewMat,
+    const glm::vec3& position,
+    const glm::quat& rotation)
 {
     auto worldMat = glm::translate(glm::mat4(), position) * glm::mat4_cast(rotation);
     auto worldViewProjectionMat = projectionMat * viewMat * worldMat;
