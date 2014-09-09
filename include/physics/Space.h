@@ -21,6 +21,7 @@
 #include "physics/Body.h"
 #include "ilist.h"
 #include "Noncopyable.h"
+#include <array>
 #include <unordered_map>
 
 template<class T>
@@ -53,10 +54,11 @@ public:
     void insert(Body& body);
 
 private:
-    typedef unordered_map<pair<Body*, Body*>, bool[2]> OverlapMap;
+    typedef unordered_map<pair<Body*, Body*>, array<bool, 2>> OverlapMap;
 
     bool step(fp_t dt, Body& body);
     void resort(Body& body);
+    void collide(Body& bodyA, Body& bodyB);
 
     ilist<Body> _xAxisList;
     ilist<Body> _yAxisList;

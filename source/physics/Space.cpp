@@ -17,67 +17,58 @@
  */
 #include "physics/Space.h"
 #include "physics/LineSegment.h"
+#include "Landblock.h"
 #include <algorithm>
 
 static const auto GRAVITY_ACCEL = fp_t(-9.81);
 static const auto TERMINAL_VELOCITY = fp_t(-54.0);
 static const auto REST_EPSILON = fp_t(0.002);
 
-static fp_t getBoundValueX(ilist<Body>::iterator it)
+template<int Axis>
+struct AxisTraits;
+
+template<>
+struct AxisTraits<0>
 {
-    if(it.on_hook<BodyHooks::BeginX>())
-    {
-        return it->bounds().min.x;
-    }
-    
-    if(it.on_hook<BodyHooks::EndX>())
-    {
-        return it->bounds().max.x;
-    }
-    
-    assert(!"Iterator for X axis associated with unknown hook");
-    return 0.0;
-}
+    static const int BeginHook = BodyHooks::BeginX;
+    static const int EndHook = BodyHooks::EndX;
+};
 
-static fp_t getBoundValueY(ilist<Body>::iterator it)
+template<>
+struct AxisTraits<1>
 {
-    if(it.on_hook<BodyHooks::BeginY>())
+    static const int BeginHook = BodyHooks::BeginY;
+    static const int EndHook = BodyHooks::EndY;
+};
+
+template<int Axis>
+fp_t getBoundValue(ilist<Body>::iterator it)
+{
+    if(it.on_hook<AxisTraits<Axis>::BeginHook>())
     {
-        return it->bounds().min.y;
+        return it->bounds().min[Axis];
     }
 
-    if(it.on_hook<BodyHooks::EndY>())
+    if(it.on_hook<AxisTraits<Axis>::EndHook>())
     {
-        return it->bounds().max.y;
+        return it->bounds().max[Axis];
     }
 
-    assert(!"Iterator for Y axis associated with unknown hook");
+    assert(!"Iterator for axis associated with unknown hook");
     return 0.0;
 }
 
 template<int Axis>
-bool compareBody1D(ilist<Body>::iterator, ilist<Body>::iterator);
-
-template<>
-bool compareBody1D<0>(ilist<Body>::iterator a, ilist<Body>::iterator b)
+bool compare(ilist<Body>::iterator a, ilist<Body>::iterator b)
 {
-    fp_t aValue = a->location().offset.x + getBoundValueX(a);
-    fp_t bValue = b->location().offset.x + getBoundValueX(b);
-    int blockDiff = static_cast<int>(b->location().landcell.x()) - static_cast<int>(a->location().landcell.x());
-    return aValue < bValue + blockDiff * fp_t(192.0);
+    fp_t aValue = a->location().offset[Axis] + getBoundValue<Axis>(a);
+    fp_t bValue = b->location().offset[Axis] + getBoundValue<Axis>(b);
+    int blockDiff = static_cast<int>(b->location().landcell[Axis]) - static_cast<int>(a->location().landcell[Axis]);
+    return aValue < bValue + blockDiff * Landblock::LANDBLOCK_SIZE;
 }
 
-template<>
-bool compareBody1D<1>(ilist<Body>::iterator a, ilist<Body>::iterator b)
-{
-    fp_t aValue = a->location().offset.y + getBoundValueY(a);
-    fp_t bValue = b->location().offset.y + getBoundValueY(b);
-    int blockDiff = static_cast<int>(b->location().landcell.y()) - static_cast<int>(a->location().landcell.y());
-    return aValue < bValue + blockDiff * fp_t(192.0);
-}
-
-template<int Axis>
-static void insertionSort(ilist<Body>& container, ilist<Body>::iterator bodyIt)
+template<int Axis, class OverlapMap>
+static void insertionSort(ilist<Body>& container, ilist<Body>::iterator bodyIt, OverlapMap& overlapMap)
 {
     // a < b, compare(a, b)
     // a >= b, !compare(a, b)
@@ -87,9 +78,9 @@ static void insertionSort(ilist<Body>& container, ilist<Body>::iterator bodyIt)
 
     auto nextIt = container.erase(bodyIt);
 
-    while(nextIt != container.end() && !compareBody1D<Axis>(nextIt, bodyIt)) // bodyIt <= nextIt
+    while(nextIt != container.end() && !compare<Axis>(nextIt, bodyIt)) // bodyIt <= nextIt
     {
-        pair<Body*, Body*> key = { &*nextIt, &*bodyIt };
+        pair<Body*, Body*> key(&*nextIt, &*bodyIt);
 
         if(key.first > key.second)
         {
@@ -109,13 +100,13 @@ static void insertionSort(ilist<Body>& container, ilist<Body>::iterator bodyIt)
         // if bodyIt == end hook and nextIt == end hook
         //   nothing happens
 
-        if(bodyIt.on_hook<BodyHooks::BeginX>() && nextIt.on_hook<BodyHooks::EndX>())
+        if(bodyIt.on_hook<AxisTraits<Axis>::BeginHook>() && nextIt.on_hook<AxisTraits<Axis>::EndHook>())
         {
-            //_overlapMap[key][axis] = false;
+            overlapMap[key][Axis] = false;
         }
-        else if(bodyIt.on_hook<BodyHooks::EndX>() && nextIt.on_hook<BodyHooks::BeginX>())
+        else if(bodyIt.on_hook<AxisTraits<Axis>::EndHook>() && nextIt.on_hook<AxisTraits<Axis>::BeginHook>())
         {
-            //_overlapMap[key] = true;
+            overlapMap[key][Axis] = true;
         }
 
         ++nextIt;
@@ -133,7 +124,8 @@ Space::Space()
 
 void Space::step(fp_t dt)
 {
-    for(auto it = _activeList.begin(); it != _activeList.end(); ++it)
+    // loop through active list and step bodies
+    for(auto it = _activeList.begin(); it != _activeList.end(); /**/)
     {
         if(step(dt, *it))
         {
@@ -142,6 +134,24 @@ void Space::step(fp_t dt)
         else
         {
             it = _activeList.erase(it);
+        }
+    }
+
+    // scan our overlap map and process possible collisions
+    for(auto it = _overlapMap.begin(); it != _overlapMap.end(); /**/)
+    {
+        if(it->second[0] && it->second[1])
+        {
+            collide(*it->first.first, *it->first.second);
+            ++it;
+        }
+        else if(!it->second[0] && !it->second[1])
+        {
+            it = _overlapMap.erase(it);
+        }
+        else
+        {
+            ++it;
         }
     }
 }
@@ -178,33 +188,26 @@ bool Space::step(fp_t dt, Body& body)
         return false;
     }
 
-    auto oldLocation = body.location();
+    auto location = body.location();
+    location.offset += body.velocity() * dt;
+    body.setLocation(location);
 
-    auto newLocation = body.location();
-    newLocation.offset += body.velocity() * dt;
-
-    body.setLocation(newLocation);
     resort(body);
-
-    //auto beginXIt = decltype(_beginXList)::iterator(&body);
-
-    //while(beginXIt != _beginXList.end())
-    //{
-        // exit condition
-    //    ++beginXIt;
-    //}
-
-    //auto segment = LineSegment();
-    //segment.begin = body.location().normalize();
-    //segment.end = segment.begin + body.velocity() * dt;
 
     return true;
 }
 
 void Space::resort(Body& body)
 {
-    insertionSort<0>(_xAxisList, _xAxisList.iterator_for<BodyHooks::BeginX>(body));
-    insertionSort<0>(_xAxisList, _xAxisList.iterator_for<BodyHooks::EndX>(body));
-    insertionSort<1>(_yAxisList, _yAxisList.iterator_for<BodyHooks::BeginY>(body));
-    insertionSort<1>(_yAxisList, _yAxisList.iterator_for<BodyHooks::EndY>(body));
+    insertionSort<0>(_xAxisList, _xAxisList.iterator_for<BodyHooks::BeginX>(body), _overlapMap);
+    insertionSort<0>(_xAxisList, _xAxisList.iterator_for<BodyHooks::EndX>(body), _overlapMap);
+    insertionSort<1>(_yAxisList, _yAxisList.iterator_for<BodyHooks::BeginY>(body), _overlapMap);
+    insertionSort<1>(_yAxisList, _yAxisList.iterator_for<BodyHooks::EndY>(body), _overlapMap);
+}
+
+void Space::collide(Body& bodyA, Body& bodyB)
+{
+    // TODO
+    (void)bodyA;
+    (void)bodyB;
 }

@@ -40,6 +40,11 @@ uint16_t LandcellId::n() const
     return uint16_t(_value);
 }
 
+uint8_t LandcellId::operator[](int axis) const
+{
+    return uint8_t(_value >> (24 - axis * 8));
+}
+
 uint32_t LandcellId::value() const
 {
     return _value;

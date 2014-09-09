@@ -27,8 +27,8 @@ class Landblock : Noncopyable
 {
 public:
     static const int GRID_SIZE = 9;
-    static constexpr fp_t SQUARE_SIZE = 24.0;
-    static constexpr fp_t LANDBLOCK_SIZE = 192.0;
+    static const fp_t SQUARE_SIZE;
+    static const fp_t LANDBLOCK_SIZE;
     static const int OFFSET_MAP_SIZE = 64;
 
     PACK(struct Data

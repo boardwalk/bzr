@@ -22,6 +22,9 @@
 #include "LandblockManager.h"
 #include <algorithm>
 
+const fp_t Landblock::SQUARE_SIZE = fp_t(24.0);
+const fp_t Landblock::LANDBLOCK_SIZE = fp_t(192.0);
+
 static fp_t cubic(fp_t p[4], fp_t x)
 {
     return p[1] + fp_t(0.5) * x * (p[2] - p[0] + x * (fp_t(2.0) * p[0] - fp_t(5.0) * p[1] + fp_t(4.0) * p[2] - p[3] + x * (fp_t(3.0) * (p[1] - p[2]) + p[3] - p[0])));
