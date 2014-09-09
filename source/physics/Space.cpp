@@ -55,24 +55,29 @@ static fp_t getBoundValueY(ilist<Body>::iterator it)
     return 0.0;
 }
 
-static bool compareByX(ilist<Body>::iterator a, ilist<Body>::iterator b)
+template<int Axis>
+bool compareBody1D(ilist<Body>::iterator, ilist<Body>::iterator);
+
+template<>
+bool compareBody1D<0>(ilist<Body>::iterator a, ilist<Body>::iterator b)
 {
-    auto aValue = a->location().offset.x + getBoundValueX(a);
-    auto bValue = b->location().offset.x + getBoundValueX(b);
-    auto blockDiff = static_cast<int>(b->location().landcell.x()) - static_cast<int>(a->location().landcell.x());
+    fp_t aValue = a->location().offset.x + getBoundValueX(a);
+    fp_t bValue = b->location().offset.x + getBoundValueX(b);
+    int blockDiff = static_cast<int>(b->location().landcell.x()) - static_cast<int>(a->location().landcell.x());
     return aValue < bValue + blockDiff * fp_t(192.0);
 }
 
-static bool compareByY(ilist<Body>::iterator a, ilist<Body>::iterator b)
+template<>
+bool compareBody1D<1>(ilist<Body>::iterator a, ilist<Body>::iterator b)
 {
-    auto aValue = a->location().offset.y + getBoundValueY(a);
-    auto bValue = b->location().offset.y + getBoundValueY(b);
-    auto blockDiff = static_cast<int>(b->location().landcell.y()) - static_cast<int>(a->location().landcell.y());
+    fp_t aValue = a->location().offset.y + getBoundValueY(a);
+    fp_t bValue = b->location().offset.y + getBoundValueY(b);
+    int blockDiff = static_cast<int>(b->location().landcell.y()) - static_cast<int>(a->location().landcell.y());
     return aValue < bValue + blockDiff * fp_t(192.0);
 }
 
-template<class Compare>
-static void insertionSort(ilist<Body>& container, ilist<Body>::iterator bodyIt, Compare comp)
+template<int Axis>
+static void insertionSort(ilist<Body>& container, ilist<Body>::iterator bodyIt)
 {
     // a < b, compare(a, b)
     // a >= b, !compare(a, b)
@@ -82,28 +87,43 @@ static void insertionSort(ilist<Body>& container, ilist<Body>::iterator bodyIt, 
 
     auto nextIt = container.erase(bodyIt);
 
-    while(nextIt != container.end())
+    while(nextIt != container.end() && !compareBody1D<Axis>(nextIt, bodyIt)) // bodyIt <= nextIt
     {
-        if(comp(nextIt, bodyIt))
-        {
-            --nextIt;
-            break;
-        }
-    }
+        pair<Body*, Body*> key = { &*nextIt, &*bodyIt };
 
-    while(nextIt != container.end() && !comp(nextIt, bodyIt)) // bodyIt <= nextIt
-    {
+        if(key.first > key.second)
+        {
+            swap(key.first, key.second);
+        }
+
+        // (bodyIt) (nextIt before)< (nextIt after)
+        // (nextIt before)  (bodyIt) (nextIt after)<
+        // We're moving bodyIt *past* nextIt (before we increment it)
+
+        // if bodyIt == begin hook and nextIt == begin hook
+        //   nothing happens
+        // if bodyIt == end hook and nextIt == begin hook
+        //   set to true!
+        // if bodyIt == begin hook and nextIt == end hook
+        //   set to false!
+        // if bodyIt == end hook and nextIt == end hook
+        //   nothing happens
+
+        if(bodyIt.on_hook<BodyHooks::BeginX>() && nextIt.on_hook<BodyHooks::EndX>())
+        {
+            //_overlapMap[key][axis] = false;
+        }
+        else if(bodyIt.on_hook<BodyHooks::EndX>() && nextIt.on_hook<BodyHooks::BeginX>())
+        {
+            //_overlapMap[key] = true;
+        }
+
         ++nextIt;
     }
 
     // now bodyIt > nextIt, one past bodyIt <= nextIt
     --nextIt;
     // now bodyIt <= nextIt
-
-    //while(nextIt != container.begin() && ) // bodyIt > nextIt
-    //{
-    //    --nextIt;
-    //}
 
     container.insert(nextIt, bodyIt);
 }
@@ -137,7 +157,7 @@ void Space::insert(Body& body)
     {
         _activeList.push_back(_activeList.iterator_for<BodyHooks::Active>(body));
     }
-    
+
     resort(body);
 }
 
@@ -183,8 +203,8 @@ bool Space::step(fp_t dt, Body& body)
 
 void Space::resort(Body& body)
 {
-    insertionSort(_xAxisList, _xAxisList.iterator_for<BodyHooks::BeginX>(body), compareByX);
-    insertionSort(_xAxisList, _xAxisList.iterator_for<BodyHooks::EndX>(body), compareByX);
-    insertionSort(_yAxisList, _yAxisList.iterator_for<BodyHooks::BeginY>(body), compareByY);
-    insertionSort(_yAxisList, _yAxisList.iterator_for<BodyHooks::EndY>(body), compareByY);
+    insertionSort<0>(_xAxisList, _xAxisList.iterator_for<BodyHooks::BeginX>(body));
+    insertionSort<0>(_xAxisList, _xAxisList.iterator_for<BodyHooks::EndX>(body));
+    insertionSort<1>(_yAxisList, _yAxisList.iterator_for<BodyHooks::BeginY>(body));
+    insertionSort<1>(_yAxisList, _yAxisList.iterator_for<BodyHooks::EndY>(body));
 }
