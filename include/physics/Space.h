@@ -52,6 +52,7 @@ public:
     Space();
     void step(fp_t dt);
     void insert(Body& body);
+    void erase(Body& body);
 
 private:
     typedef unordered_map<pair<Body*, Body*>, array<bool, 2>> OverlapMap;

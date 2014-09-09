@@ -171,6 +171,34 @@ void Space::insert(Body& body)
     resort(body);
 }
 
+void Space::erase(Body& body)
+{
+    _xAxisList.erase(_xAxisList.iterator_for<BodyHooks::BeginX>(body));
+    _xAxisList.erase(_xAxisList.iterator_for<BodyHooks::EndX>(body));
+    _yAxisList.erase(_yAxisList.iterator_for<BodyHooks::BeginY>(body));
+    _yAxisList.erase(_yAxisList.iterator_for<BodyHooks::EndY>(body));
+
+    auto activeIt = _activeList.iterator_for<BodyHooks::Active>(body);
+
+    if(activeIt.in_list())
+    {
+        _activeList.erase(activeIt);
+    }
+
+    // TODO not all that efficient!
+    for(auto it = _overlapMap.begin(); it != _overlapMap.end(); /**/)
+    {
+        if(it->first.first == &body || it->first.second == &body)
+        {
+            it = _overlapMap.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+}
+
 bool Space::step(fp_t dt, Body& body)
 {
     if(body.flags() & BodyFlags::HasGravity)

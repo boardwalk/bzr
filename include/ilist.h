@@ -117,6 +117,11 @@ public:
         return _node->_offset == ilist_hook<Elem, Num>::offset();
     }
 
+    bool in_list() const
+    {
+        return _node->_prev != nullptr;
+    }
+
     bool operator==(const ilist_iterator& rhs) const
     {
         return _node == rhs._node;
