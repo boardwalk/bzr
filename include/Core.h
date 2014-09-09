@@ -73,7 +73,6 @@ private:
     ObjectId _playerId;
     // TEMPORARY
     uint32_t _modelId;
-    uint32_t _submodelNum;
 };
 
 #endif

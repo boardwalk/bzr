@@ -23,8 +23,6 @@
 #include <OVR_CAPI.h>
 #include <OVR_CAPI_GL.h>
 #endif
- // TEMPORARY
- #include "Resource.h"
 
 class LandRenderer;
 class ModelRenderer;
@@ -43,10 +41,6 @@ public:
     GLenum textureMinFilter() const;
     GLfloat textureMaxAnisotropy() const;
     bool renderHitGeometry() const;
-
-    // TEMPORARY
-    void setModel(ResourcePtr model);
-    void setSubmodelNum(int submodelNum);
 
 private:
     void createWindow();

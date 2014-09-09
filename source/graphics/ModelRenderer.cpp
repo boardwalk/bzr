@@ -21,9 +21,11 @@
 #include "graphics/util.h"
 #include "Camera.h"
 #include "Core.h"
+#include "Land.h"
 #include "LandcellManager.h"
 #include "Model.h"
 #include "ModelGroup.h"
+#include "ObjectManager.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
 
@@ -46,7 +48,7 @@ struct CompareByDepth
     glm::vec3 _cameraPos;
 };
 
-ModelRenderer::ModelRenderer() /* TEMPORARY */ : _submodelNum(0)
+ModelRenderer::ModelRenderer()
 {
     _program.create();
     _program.attach(GL_VERTEX_SHADER, ModelVertexShader);
@@ -69,6 +71,7 @@ void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& view
     _program.use();
 
     auto& landcellManager = Core::get().landcellManager();
+    auto& objectManager = Core::get().objectManager();
 
     auto cameraPosition = Core::get().camera().position();
     glUniform4f(_program.getUniform("cameraPosition"), GLfloat(cameraPosition.x), GLfloat(cameraPosition.y), GLfloat(cameraPosition.z), 1.0f);
@@ -76,12 +79,23 @@ void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& view
     // first pass, render solid objects and collect objects that need depth sorting
     _depthSortList.clear();
 
-    // TEMPORARY
-    if(_theModel)
+    for(auto& pair : objectManager)
     {
-        auto worldMat = glm::translate(glm::mat4(), glm::vec3(96.0, 96.0, 0.0));
+        auto& object = *pair.second;
 
-        renderOne(_theModel, projectionMat, viewMat, worldMat);
+        if(!object.model())
+        {
+            continue;
+        }
+
+        auto dx = object.location().landcell.x() - landcellManager.center().x();
+        auto dy = object.location().landcell.y() - landcellManager.center().y();
+
+        auto blockPosition = glm::vec3(dx * Land::BLOCK_SIZE, dy * Land::BLOCK_SIZE, 0.0);
+
+        auto worldMat = glm::translate(glm::mat4(), blockPosition + object.location().offset) * glm::mat4_cast(object.location().rotation);
+
+        renderOne(object.model(), projectionMat, viewMat, worldMat);
     }
 
     for(auto& pair : landcellManager)
@@ -89,7 +103,7 @@ void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& view
         auto dx = pair.first.x() - landcellManager.center().x();
         auto dy = pair.first.y() - landcellManager.center().y();
 
-        auto blockPosition = glm::vec3(dx * 192.0, dy * 192.0, 0.0);
+        auto blockPosition = glm::vec3(dx * Land::BLOCK_SIZE, dy * Land::BLOCK_SIZE, 0.0);
 
         for(auto& doodad : pair.second->doodads())
         {

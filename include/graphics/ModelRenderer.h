@@ -40,10 +40,6 @@ public:
 
     void render(const glm::mat4& projectionMat, const glm::mat4& viewMat);
 
-    // TEMPORARY!
-    ResourcePtr _theModel;
-    int _submodelNum;
-
 private:
     void renderOne(const ResourcePtr& resource,
         const glm::mat4& projectionMat,

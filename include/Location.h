@@ -26,7 +26,7 @@ struct Location
 
     LandcellId landcell;
     glm::vec3 offset;
-    glm::quat orientation;
+    glm::quat rotation;
 };
 
 #endif

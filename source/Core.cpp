@@ -103,7 +103,7 @@ void Core::setPlayerId(ObjectId playerId)
     _playerId = playerId;
 }
 
-Core::Core() : _done(false) /* TEMPORARY */, _modelId(0x02000120), _submodelNum(0)
+Core::Core() : _done(false) /* TEMPORARY */, _modelId(0x02000120)
 {}
 
 void Core::init()
@@ -126,8 +126,7 @@ void Core::init()
     _renderer->init();
 #endif
     _landcellManager->setCenter(LandcellId(0x31, 0xD6));
-    
-    (*_objectManager)[ObjectId(1)];
+
     setPlayerId(ObjectId(1));
 }
 
@@ -234,20 +233,6 @@ void Core::handleEvents()
                         }
                     }
                 }
-
-                if(event.key.keysym.sym == SDLK_c)
-                {
-                    _submodelNum--;
-                    printf("Submodel num %d\n", _submodelNum);
-                    _renderer->setSubmodelNum(_submodelNum);
-                }
-
-                if(event.key.keysym.sym == SDLK_v)
-                {
-                    _submodelNum++;
-                    printf("Submodel num %d\n", _submodelNum);
-                    _renderer->setSubmodelNum(_submodelNum);
-                }
 #endif
 
                 break;
@@ -259,7 +244,15 @@ void Core::handleEvents()
     if(newModel)
     {
         printf("Loading model %08x\n", _modelId);
-        _renderer->setModel( _resourceCache->get(_modelId) );
+
+        auto& object = (*_objectManager)[ObjectId(1)];
+
+        object.setModel(_resourceCache->get(_modelId));
+
+        Location loc;
+        loc.landcell = _landcellManager->center();
+        loc.offset = glm::vec3(92.0, 92.0, 0.0);
+        object.setLocation(loc);
     }
 #endif
 }

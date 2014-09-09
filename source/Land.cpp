@@ -20,6 +20,7 @@
 #include "Core.h"
 #include "DatFile.h"
 #include "LandcellManager.h"
+#include <algorithm>
 
 const fp_t Land::CELL_SIZE = fp_t(24.0);
 const fp_t Land::BLOCK_SIZE = fp_t(192.0);
