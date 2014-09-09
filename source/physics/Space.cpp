@@ -70,39 +70,42 @@ static bool compareByY(ilist<Body>::iterator a, ilist<Body>::iterator b)
     auto blockDiff = static_cast<int>(b->location().landcell.y()) - static_cast<int>(a->location().landcell.y());
     return aValue < bValue + blockDiff * fp_t(192.0);
 }
- 
+
 template<class Compare>
 static void insertionSort(ilist<Body>& container, ilist<Body>::iterator bodyIt, Compare comp)
 {
-    // value < it, compare(value, *it)
-    // value >= it, !compare(value, *it)
-    // value > it, compare(*it, value)
-    // value <= it, !compare(*it, value)
+    // a < b, compare(a, b)
+    // a >= b, !compare(a, b)
+    // a > b, compare(b, a)
+    // a <= b, !compare(b, a)
     // FIXME make sure this is correct
-
-    (void)comp;
 
     auto nextIt = container.erase(bodyIt);
 
+    while(nextIt != container.end())
+    {
+        if(comp(nextIt, bodyIt))
+        {
+            --nextIt;
+            break;
+        }
+    }
+
+    while(nextIt != container.end() && !comp(nextIt, bodyIt)) // bodyIt <= nextIt
+    {
+        ++nextIt;
+    }
+
+    // now bodyIt > nextIt, one past bodyIt <= nextIt
+    --nextIt;
+    // now bodyIt <= nextIt
+
+    //while(nextIt != container.begin() && ) // bodyIt > nextIt
+    //{
+    //    --nextIt;
+    //}
+
     container.insert(nextIt, bodyIt);
-
-    /*
-    auto it = container.erase(it);
-
-
-
-    while(comp(value, *it))
-    {
-        --it;
-    }
-
-    while(comp(*it, value))
-    {
-        ++it;
-    }
-
-    container.insert(it, value);
-    */
 }
 
 Space::Space()
@@ -125,16 +128,17 @@ void Space::step(fp_t dt)
 
 void Space::insert(Body& body)
 {
-    //_beginXList.push_back(body);
-    //_beginYList.push_back(body);
-    //_endXList.push_back(body);
-    //_endYList.push_back(body);
-    resort(body);
+    _xAxisList.push_back(_xAxisList.iterator_for<BodyHooks::BeginX>(body));
+    _xAxisList.push_back(_xAxisList.iterator_for<BodyHooks::EndX>(body));
+    _yAxisList.push_back(_yAxisList.iterator_for<BodyHooks::BeginY>(body));
+    _yAxisList.push_back(_yAxisList.iterator_for<BodyHooks::EndY>(body));
 
     if(!(body.flags() & BodyFlags::Static))
     {
-        //_activeList.push_back(body);
+        _activeList.push_back(_activeList.iterator_for<BodyHooks::Active>(body));
     }
+    
+    resort(body);
 }
 
 bool Space::step(fp_t dt, Body& body)

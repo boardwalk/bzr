@@ -53,7 +53,7 @@ public:
 
     static size_t offset()
     {
-        auto elem = reinterpret_cast<Elem*>(nullptr);
+        auto elem = reinterpret_cast<Elem*>(0);
         auto node = static_cast<ilist_hook<Elem, Num>*>(elem);
         return (uint8_t*)node - (uint8_t*)elem;       
     }
@@ -103,12 +103,12 @@ public:
 
     elem& operator*() const
     {
-        return *(elem*)((byte*)_node - _node->_offset);
+        return *reinterpret_cast<elem*>(reinterpret_cast<byte*>(_node) - _node->_offset);
     }
 
     elem* operator->() const
     {
-        return (elem*)((byte*)_node - _node->_offset);
+        return reinterpret_cast<elem*>(reinterpret_cast<byte*>(_node) - _node->_offset);
     }
 
     template<int Num>
