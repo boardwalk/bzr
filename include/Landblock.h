@@ -27,11 +27,11 @@ class Landblock : Noncopyable
 {
 public:
     static const int GRID_SIZE = 9;
-    static const fp_t SQUARE_SIZE;
-    static const fp_t LANDBLOCK_SIZE;
+    static constexpr fp_t SQUARE_SIZE = 24.0;
+    static constexpr fp_t LANDBLOCK_SIZE = 192.0;
     static const int OFFSET_MAP_SIZE = 64;
 
-    PACK(struct RawData
+    PACK(struct Data
     {
         uint32_t fileId;
         uint32_t flags;
@@ -50,7 +50,7 @@ public:
 
     LandblockId id() const;
 
-    const RawData& rawData() const;
+    const Data& data() const;
     const vector<Doodad>& doodads() const;
     const vector<Structure>& structures() const;
 
@@ -63,7 +63,7 @@ public:
 private:
     void initDoodads();
 
-    RawData _rawData;
+    Data _data;
     vector<Doodad> _doodads;
     vector<Structure> _structures;
 

@@ -56,7 +56,7 @@ static void pushRotatedCoord(vector<uint8_t>& vertexData, fp_t s, fp_t t, int ro
 
 void LandblockRenderData::initGeometry(const Landblock& landblock)
 {
-    auto& data = landblock.rawData();
+    auto& data = landblock.data();
 
     vector<uint8_t> vertexData;
 

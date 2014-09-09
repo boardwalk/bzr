@@ -22,9 +22,6 @@
 #include "LandblockManager.h"
 #include <algorithm>
 
-const fp_t Landblock::SQUARE_SIZE = 24.0;
-const fp_t Landblock::LANDBLOCK_SIZE = (Landblock::GRID_SIZE - 1) * Landblock::SQUARE_SIZE;
-
 static fp_t cubic(fp_t p[4], fp_t x)
 {
     return p[1] + fp_t(0.5) * x * (p[2] - p[0] + x * (fp_t(2.0) * p[0] - fp_t(5.0) * p[1] + fp_t(4.0) * p[2] - p[3] + x * (fp_t(3.0) * (p[1] - p[2]) + p[3] - p[0])));
@@ -42,17 +39,17 @@ static fp_t bicubic(fp_t p[4][4], fp_t x, fp_t y)
 
 Landblock::Landblock(const void* data, size_t length)
 {
-    if(length != sizeof(RawData))
+    if(length != sizeof(Data))
     {
         throw runtime_error("Bad landblock data length");
     }
 
-    memcpy(&_rawData, data, sizeof(_rawData));
+    memcpy(&_data, data, sizeof(_data));
 }
 
 Landblock::Landblock(Landblock&& other)
 {
-    _rawData = other._rawData;
+    _data = other._data;
     _doodads = move(other._doodads);
     _offsetMap = move(other._offsetMap);
     _offsetMapBase = other._offsetMapBase;
@@ -68,7 +65,7 @@ void Landblock::init()
         return;
     }
 
-    if(_rawData.flags)
+    if(_data.flags)
     {
         initDoodads();
     }
@@ -195,10 +192,10 @@ fp_t Landblock::calcHeight(fp_t x, fp_t y) const
     auto fy = modf(y / SQUARE_SIZE, &diy);
     auto iy = (int)diy;
 
-    auto h1 = _rawData.heights[ix][iy] * fp_t(2.0);
-    auto h2 = _rawData.heights[min(ix + 1, GRID_SIZE - 1)][iy] * fp_t(2.0);
-    auto h3 = _rawData.heights[ix][min(iy + 1, GRID_SIZE - 1)] * fp_t(2.0);
-    auto h4 = _rawData.heights[min(ix + 1, GRID_SIZE - 1)][min(iy + 1, GRID_SIZE - 1)] * fp_t(2.0);
+    auto h1 = _data.heights[ix][iy] * fp_t(2.0);
+    auto h2 = _data.heights[min(ix + 1, GRID_SIZE - 1)][iy] * fp_t(2.0);
+    auto h3 = _data.heights[ix][min(iy + 1, GRID_SIZE - 1)] * fp_t(2.0);
+    auto h4 = _data.heights[min(ix + 1, GRID_SIZE - 1)][min(iy + 1, GRID_SIZE - 1)] * fp_t(2.0);
 
     if(isSplitNESW(ix, iy))
     {
@@ -282,14 +279,14 @@ fp_t Landblock::calcHeightUnbounded(fp_t x, fp_t y) const
 
 LandblockId Landblock::id() const
 {
-    uint8_t x = uint8_t((_rawData.fileId >> 24) & 0xFF);
-    uint8_t y = uint8_t((_rawData.fileId >> 16) & 0xFF);
+    uint8_t x = uint8_t((_data.fileId >> 24) & 0xFF);
+    uint8_t y = uint8_t((_data.fileId >> 16) & 0xFF);
     return LandblockId(x, y);
 }
 
-const Landblock::RawData& Landblock::rawData() const
+const Landblock::Data& Landblock::data() const
 {
-    return _rawData;
+    return _data;
 }
 
 const vector<Doodad>& Landblock::doodads() const
@@ -310,8 +307,8 @@ const uint8_t* Landblock::normalMap() const
 bool Landblock::isSplitNESW(int x, int y) const
 {
     // credits to Akilla
-    uint32_t tx = ((_rawData.fileId >> 24) & 0xFF) * 8 + x;
-    uint32_t ty = ((_rawData.fileId >> 16) & 0xFF) * 8 + y;
+    uint32_t tx = ((_data.fileId >> 24) & 0xFF) * 8 + x;
+    uint32_t ty = ((_data.fileId >> 16) & 0xFF) * 8 + y;
     uint32_t v = tx * ty * 0x0CCAC033 - tx * 0x421BE3BD + ty * 0x6C1AC587 - 0x519B8F25;
     return (v & 0x80000000) != 0;
 }
@@ -323,7 +320,7 @@ unique_ptr<Destructable>& Landblock::renderData()
 
 void Landblock::initDoodads()
 {
-    auto baseFileId = _rawData.fileId & 0xFFFF0000;
+    auto baseFileId = _data.fileId & 0xFFFF0000;
 
     auto blob = Core::get().cellDat().read(baseFileId | 0xFFFE);
 
