@@ -27,7 +27,6 @@ class LandblockManager;
 class ObjectManager;
 class Renderer;
 class ResourceCache;
-class Space;
 
 class Core
 {
@@ -42,7 +41,6 @@ public:
     ResourceCache& resourceCache();
     LandblockManager& landblockManager();
     ObjectManager& objectManager();
-    Space& space();
     Camera& camera();
 #ifndef HEADLESS
     Renderer& renderer();
@@ -68,7 +66,6 @@ private:
     unique_ptr<ResourceCache> _resourceCache;
     unique_ptr<LandblockManager> _landblockManager;
     unique_ptr<ObjectManager> _objectManager;
-    unique_ptr<Space> _space;
     unique_ptr<Camera> _camera;
 #ifndef HEADLESS
     unique_ptr<Renderer> _renderer;

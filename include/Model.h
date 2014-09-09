@@ -18,7 +18,6 @@
 #ifndef BZR_MODEL_H
 #define BZR_MODEL_H
 
-#include "physics/AABB.h"
 #include "Destructable.h"
 #include "Resource.h"
 #include "Vertex.h"
@@ -37,7 +36,6 @@ public:
     const vector<TriangleFan>& triangleFans() const;
     const vector<TriangleFan>& hitTriangleFans() const;
     const BSPNode* hitTree() const;
-    const AABB& bounds() const;
 
     // If true, the model has transparent or translucent elements and must be depth sorted before rendering
     bool needsDepthSort() const;
@@ -50,7 +48,6 @@ private:
     vector<TriangleFan> _triangleFans;
     vector<TriangleFan> _hitTriangleFans;
     unique_ptr<BSPNode> _hitTree;
-    AABB _bounds;
     bool _needsDepthSort;
 
     unique_ptr<Destructable> _renderData;

@@ -114,12 +114,6 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _ne
     }
 
     reader.assertEnd();
-
-    // Build bounding box from all vertices
-    for(auto& vertex : _vertices)
-    {
-        _bounds.grow(vertex.position);
-    }
 }
 
 Model::~Model()
@@ -148,11 +142,6 @@ const vector<TriangleFan>& Model::hitTriangleFans() const
 const BSPNode* Model::hitTree() const
 {
     return _hitTree.get();
-}
-
-const AABB& Model::bounds() const
-{
-    return _bounds;
 }
 
 bool Model::needsDepthSort() const

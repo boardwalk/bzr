@@ -29,8 +29,6 @@ public:
     uint16_t n() const;
     uint32_t value() const;
 
-    uint8_t operator[](int axis) const;
-
     bool operator==(LandcellId other) const;
     bool operator!=(LandcellId other) const;
 
