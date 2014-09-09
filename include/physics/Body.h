@@ -95,9 +95,6 @@ public:
     void setVelocity(const glm::vec3& velocity);
     const glm::vec3& velocity() const;
 
-    void setTag(uint64_t tag);
-    uint64_t tag() const;
-
 private:
     union Data
     {
@@ -115,7 +112,6 @@ private:
     AABB _bounds;
     Location _location;
     glm::vec3 _velocity;
-    uint64_t _tag;
 };
 
 #endif
