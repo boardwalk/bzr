@@ -15,13 +15,14 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "graphics/LandblockRenderer.h"
-#include "graphics/LandblockRenderData.h"
+#include "graphics/LandRenderer.h"
+#include "graphics/LandRenderData.h"
 #include "graphics/Renderer.h"
 #include "graphics/util.h"
 #include "Camera.h"
 #include "Core.h"
-#include "LandblockManager.h"
+#include "Land.h"
+#include "LandcellManager.h"
 #include "ResourceCache.h"
 #include "Texture.h"
 #include <glm/gtc/matrix_inverse.hpp>
@@ -90,21 +91,21 @@ static const uint32_t BLEND_TEXTURES[] =
 static const int BLEND_ARRAY_SIZE = 512;
 static const int BLEND_ARRAY_DEPTH = sizeof(BLEND_TEXTURES) / sizeof(BLEND_TEXTURES[0]);
 
-LandblockRenderer::LandblockRenderer()
+LandRenderer::LandRenderer()
 {
     initProgram();
     initTerrainTexture();
     initBlendTexture();
 }
 
-LandblockRenderer::~LandblockRenderer()
+LandRenderer::~LandRenderer()
 {
     _program.destroy();
     glDeleteTextures(1, &_terrainTexture);
     glDeleteTextures(1, &_blendTexture);
 }
 
-void LandblockRenderer::render(const glm::mat4& projectionMat, const glm::mat4& viewMat)
+void LandRenderer::render(const glm::mat4& projectionMat, const glm::mat4& viewMat)
 {
     _program.use();
 
@@ -114,7 +115,7 @@ void LandblockRenderer::render(const glm::mat4& projectionMat, const glm::mat4& 
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D_ARRAY, _blendTexture);
 
-    auto& landblockManager = Core::get().landblockManager();
+    auto& landcellManager = Core::get().landcellManager();
 
     auto cameraPosition = Core::get().camera().position();
     glUniform4f(_program.getUniform("cameraPosition"), GLfloat(cameraPosition.x), GLfloat(cameraPosition.y), GLfloat(cameraPosition.z), 1.0f);
@@ -122,10 +123,15 @@ void LandblockRenderer::render(const glm::mat4& projectionMat, const glm::mat4& 
     auto viewLightPosition = viewMat * glm::vec4(_lightPosition.x, _lightPosition.y, _lightPosition.z, 1.0);
     glUniform3f(_program.getUniform("lightPosition"), GLfloat(viewLightPosition.x), GLfloat(viewLightPosition.y), GLfloat(viewLightPosition.z));
 
-    for(auto& pair : landblockManager)
+    for(auto& pair : landcellManager)
     {
-        auto dx = pair.first.x() - landblockManager.center().x();
-        auto dy = pair.first.y() - landblockManager.center().y();
+        if(pair.first.isStructure())
+        {
+            continue;
+        }
+
+        auto dx = pair.first.x() - landcellManager.center().x();
+        auto dy = pair.first.y() - landcellManager.center().y();
 
         auto worldMat = glm::translate(glm::mat4(), glm::vec3(dx * 192.0, dy * 192.0, 0.0));
         auto worldViewMat = viewMat * worldMat;
@@ -136,25 +142,27 @@ void LandblockRenderer::render(const glm::mat4& projectionMat, const glm::mat4& 
         loadMat4ToUniform(worldViewMat, _program.getUniform("worldViewMatrix"));
         loadMat4ToUniform(worldViewProjectionMat, _program.getUniform("worldViewProjectionMatrix"));
 
-        auto& renderData = pair.second.renderData();
+        auto& land = static_cast<const Land&>(*pair.second);
+
+        auto& renderData = land.renderData();
 
         if(!renderData)
         {
-            renderData.reset(new LandblockRenderData(pair.second));
+            renderData.reset(new LandRenderData(land));
         }
 
-        auto& landblockRenderData = *(LandblockRenderData*)renderData.get();
+        auto& landRenderData = *(LandRenderData*)renderData.get();
 
-        landblockRenderData.render();
+        landRenderData.render();
     }
 }
 
-void LandblockRenderer::setLightPosition(const glm::vec3& lightPosition)
+void LandRenderer::setLightPosition(const glm::vec3& lightPosition)
 {
     _lightPosition = lightPosition;
 }
 
-void LandblockRenderer::initProgram()
+void LandRenderer::initProgram()
 {
     _program.create();
     _program.attach(GL_VERTEX_SHADER, LandVertexShader);
@@ -181,7 +189,7 @@ void LandblockRenderer::initProgram()
     glUniform1f(_program.getUniform("shininess"), 1.0);
 }
 
-void LandblockRenderer::initTerrainTexture()
+void LandRenderer::initTerrainTexture()
 {
     // allocate terrain texture
     glGenTextures(1, &_terrainTexture);
@@ -234,7 +242,7 @@ void LandblockRenderer::initTerrainTexture()
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 }
 
-void LandblockRenderer::initBlendTexture()
+void LandRenderer::initBlendTexture()
 {
     // allocate terrain texture
     glGenTextures(1, &_blendTexture);

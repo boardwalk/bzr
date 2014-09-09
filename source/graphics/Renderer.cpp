@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "graphics/Renderer.h"
-#include "graphics/LandblockRenderer.h"
+#include "graphics/LandRenderer.h"
 #include "graphics/ModelRenderer.h"
 #include "graphics/SkyRenderer.h"
 #include "graphics/StructureRenderer.h"
@@ -123,7 +123,7 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 Renderer::~Renderer()
 {
     _modelRenderer.reset();
-    _landblockRenderer.reset();
+    _landRenderer.reset();
     _structureRenderer.reset();
     _skyRenderer.reset();
 
@@ -164,11 +164,11 @@ void Renderer::init()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     _skyRenderer.reset(new SkyRenderer());
-    _landblockRenderer.reset(new LandblockRenderer());
+    _landRenderer.reset(new LandRenderer());
     _structureRenderer.reset(new StructureRenderer());
     _modelRenderer.reset(new ModelRenderer());
 
-    _landblockRenderer->setLightPosition(_skyRenderer->sunVector() * fp_t(1000.0));
+    _landRenderer->setLightPosition(_skyRenderer->sunVector() * fp_t(1000.0));
 }
 
 void Renderer::render(fp_t interp)
@@ -193,7 +193,7 @@ void Renderer::render(fp_t interp)
     glClear(GL_DEPTH_BUFFER_BIT);
 
     _skyRenderer->render();
-    _landblockRenderer->render(projectionMat, viewMat);
+    _landRenderer->render(projectionMat, viewMat);
     _structureRenderer->render(projectionMat, viewMat);
     _modelRenderer->render(projectionMat, viewMat);
 
@@ -469,7 +469,7 @@ void Renderer::renderOVR(fp_t interp)
         viewMat = viewMat * Core::get().camera().viewMatrix();
 
         _skyRenderer->render();
-        _landblockRenderer->render(projectionMat, viewMat);
+        _landRenderer->render(projectionMat, viewMat);
         _structureRenderer->render(projectionMat, viewMat);
         _modelRenderer->render(projectionMat, viewMat);
     }

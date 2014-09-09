@@ -21,7 +21,9 @@
 #include "graphics/util.h"
 #include "Camera.h"
 #include "Core.h"
-#include "LandblockManager.h"
+#include "LandcellManager.h"
+#include "Landcell.h"
+#include "Structure.h"
 #include <glm/gtc/matrix_transform.hpp>
 
 // We're sharing shaders with the model renderer for now
@@ -51,26 +53,30 @@ void StructureRenderer::render(const glm::mat4& projectionMat, const glm::mat4& 
 {
     _program.use();
 
-    auto& landblockManager = Core::get().landblockManager();
+    auto& landcellManager = Core::get().landcellManager();
 
     auto cameraPosition = Core::get().camera().position();
     glUniform4f(_program.getUniform("cameraPosition"), GLfloat(cameraPosition.x), GLfloat(cameraPosition.y), GLfloat(cameraPosition.z), 1.0f);
 
-    for(auto& pair : landblockManager)
+    for(auto& pair : landcellManager)
     {
-        auto dx = pair.first.x() - landblockManager.center().x();
-        auto dy = pair.first.y() - landblockManager.center().y();
-
-        auto landblockPosition = glm::vec3(dx * 192.0, dy * 192.0, 0.0);
-
-        for(auto& structure : pair.second.structures())
+        if(!pair.first.isStructure())
         {
-            renderStructure(const_cast<Structure&>(structure), projectionMat, viewMat, landblockPosition + structure.position(), structure.rotation());
+            continue;
         }
+
+        auto dx = pair.first.x() - landcellManager.center().x();
+        auto dy = pair.first.y() - landcellManager.center().y();
+
+        auto blockPosition = glm::vec3(dx * 192.0, dy * 192.0, 0.0);
+
+        auto& structure = static_cast<const Structure&>(*pair.second);
+
+        renderStructure(structure, projectionMat, viewMat, blockPosition + structure.position(), structure.rotation());
     }
 }
 
-void StructureRenderer::renderStructure(Structure& structure, const glm::mat4& projectionMat, const glm::mat4& viewMat, const glm::vec3& position, const glm::quat& rotation)
+void StructureRenderer::renderStructure(const Structure& structure, const glm::mat4& projectionMat, const glm::mat4& viewMat, const glm::vec3& position, const glm::quat& rotation)
 {
     auto worldMat = glm::translate(glm::mat4(), position) * glm::mat4_cast(rotation);
     auto worldViewProjectionMat = projectionMat * viewMat * worldMat;

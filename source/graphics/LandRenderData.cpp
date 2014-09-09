@@ -15,24 +15,24 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "graphics/LandblockRenderData.h"
+#include "graphics/LandRenderData.h"
 #include "graphics/Program.h"
-#include "Landblock.h"
+#include "Land.h"
 
-LandblockRenderData::LandblockRenderData(const Landblock& landblock)
+LandRenderData::LandRenderData(const Land& land)
 {
-    initGeometry(landblock);
-    initNormalTexture(landblock);
+    initGeometry(land);
+    initNormalTexture(land);
 }
 
-LandblockRenderData::~LandblockRenderData()
+LandRenderData::~LandRenderData()
 {
     glDeleteVertexArrays(1, &_vertexArray);
     glDeleteBuffers(1, &_vertexBuffer);
     glDeleteTextures(1, &_normalTexture);
 }
 
-void LandblockRenderData::render()
+void LandRenderData::render()
 {
     glBindVertexArray(_vertexArray);
 
@@ -54,15 +54,15 @@ static void pushRotatedCoord(vector<uint8_t>& vertexData, fp_t s, fp_t t, int ro
     vertexData.push_back(uint8_t(nt + fp_t(0.5)) * scale);
 }
 
-void LandblockRenderData::initGeometry(const Landblock& landblock)
+void LandRenderData::initGeometry(const Land& land)
 {
-    auto& data = landblock.data();
+    auto& data = land.data();
 
     vector<uint8_t> vertexData;
 
-    for(uint8_t y = 0; y < Landblock::GRID_SIZE - 1; y++)
+    for(uint8_t y = 0; y < Land::GRID_SIZE - 1; y++)
     {
-        for(uint8_t x = 0; x < Landblock::GRID_SIZE - 1; x++)
+        for(uint8_t x = 0; x < Land::GRID_SIZE - 1; x++)
         {
             uint8_t terrain[4];
 
@@ -231,7 +231,7 @@ void LandblockRenderData::initGeometry(const Landblock& landblock)
     vertexData.push_back(blendTextures[4]); \
     vertexData.push_back(textures[4]);
 
-            if(landblock.isSplitNESW(x, y))
+            if(land.isSplitNESW(x, y))
             {
                 // lower right triangle
                 V(0, 0) V(1, 0) V(1, 1)
@@ -279,11 +279,11 @@ void LandblockRenderData::initGeometry(const Landblock& landblock)
     glEnableVertexAttribArray(6);
 }
 
-void LandblockRenderData::initNormalTexture(const Landblock& landblock)
+void LandRenderData::initNormalTexture(const Land& land)
 {
     glGenTextures(1, &_normalTexture);
     glBindTexture(GL_TEXTURE_2D, _normalTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, Landblock::OFFSET_MAP_SIZE, Landblock::OFFSET_MAP_SIZE, 0, GL_RGB, GL_UNSIGNED_BYTE, landblock.normalMap());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, Land::OFFSET_MAP_SIZE, Land::OFFSET_MAP_SIZE, 0, GL_RGB, GL_UNSIGNED_BYTE, land.normalMap());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // default is GL_NEAREST_MIPMAP_LINEAR
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);

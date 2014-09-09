@@ -26,7 +26,7 @@
  // TEMPORARY
  #include "Resource.h"
 
-class LandblockRenderer;
+class LandRenderer;
 class ModelRenderer;
 class SkyRenderer;
 class StructureRenderer;
@@ -77,7 +77,7 @@ private:
 #endif
 
     unique_ptr<SkyRenderer> _skyRenderer;
-    unique_ptr<LandblockRenderer> _landblockRenderer;
+    unique_ptr<LandRenderer> _landRenderer;
     unique_ptr<StructureRenderer> _structureRenderer;
     unique_ptr<ModelRenderer> _modelRenderer;
 };

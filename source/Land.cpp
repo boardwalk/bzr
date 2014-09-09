@@ -15,15 +15,14 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "Landblock.h"
+#include "Land.h"
 #include "BinReader.h"
 #include "Core.h"
 #include "DatFile.h"
-#include "LandblockManager.h"
-#include <algorithm>
+#include "LandcellManager.h"
 
-const fp_t Landblock::SQUARE_SIZE = fp_t(24.0);
-const fp_t Landblock::LANDBLOCK_SIZE = fp_t(192.0);
+const fp_t Land::CELL_SIZE = fp_t(24.0);
+const fp_t Land::BLOCK_SIZE = fp_t(192.0);
 
 static fp_t cubic(fp_t p[4], fp_t x)
 {
@@ -40,28 +39,17 @@ static fp_t bicubic(fp_t p[4][4], fp_t x, fp_t y)
     return cubic(arr, x);
 }
 
-Landblock::Landblock(const void* data, size_t length)
+Land::Land(const void* data, size_t size) : _numStructures(0)
 {
-    if(length != sizeof(Data))
+    if(size != sizeof(Data))
     {
-        throw runtime_error("Bad landblock data length");
+        throw runtime_error("Bad land data length");
     }
 
     memcpy(&_data, data, sizeof(_data));
 }
 
-Landblock::Landblock(Landblock&& other)
-{
-    _data = other._data;
-    _doodads = move(other._doodads);
-    _offsetMap = move(other._offsetMap);
-    _offsetMapBase = other._offsetMapBase;
-    _offsetMapScale = other._offsetMapScale;
-    _normalMap = move(other._normalMap);
-    _renderData = move(other._renderData);
-}
-
-void Landblock::init()
+void Land::init()
 {
     if(!_offsetMap.empty())
     {
@@ -84,8 +72,8 @@ void Landblock::init()
     {
         for(auto sx = 0; sx < totalSampleSize; sx++)
         {
-            auto lx = fp_t(sx - edgeSize) / fp_t(sampleSize - 1) * LANDBLOCK_SIZE;
-            auto ly = fp_t(sy - edgeSize) / fp_t(sampleSize - 1) * LANDBLOCK_SIZE;
+            auto lx = fp_t(sx - edgeSize) / fp_t(sampleSize - 1) * BLOCK_SIZE;
+            auto ly = fp_t(sy - edgeSize) / fp_t(sampleSize - 1) * BLOCK_SIZE;
             sample[sx + sy * totalSampleSize] = calcHeightUnbounded(lx, ly);
         }
     }
@@ -118,8 +106,8 @@ void Landblock::init()
                 }
             }
 
-            auto lx = fp_t(ox) / fp_t(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
-            auto ly = fp_t(oy) / fp_t(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
+            auto lx = fp_t(ox) / fp_t(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
+            auto ly = fp_t(oy) / fp_t(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
 
             auto offset = bicubic(p, fx, fy) - calcHeight(lx, ly);
 
@@ -162,10 +150,10 @@ void Landblock::init()
             auto ox2 = min(ox + 1, OFFSET_MAP_SIZE - 1);
             auto oy2 = min(oy + 1, OFFSET_MAP_SIZE - 1);
 
-            auto lx1 = fp_t(ox1) / fp_t(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
-            auto lx2 = fp_t(ox2) / fp_t(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
-            auto ly1 = fp_t(oy1) / fp_t(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
-            auto ly2 = fp_t(oy2) / fp_t(OFFSET_MAP_SIZE - 1) * LANDBLOCK_SIZE;
+            auto lx1 = fp_t(ox1) / fp_t(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
+            auto lx2 = fp_t(ox2) / fp_t(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
+            auto ly1 = fp_t(oy1) / fp_t(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
+            auto ly2 = fp_t(oy2) / fp_t(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
 
             fp_t h1 = resample[ox1 + oy1 * OFFSET_MAP_SIZE] + calcHeight(lx1, ly1);
             fp_t h2 = resample[ox2 + oy1 * OFFSET_MAP_SIZE] + calcHeight(lx2, ly1);
@@ -182,17 +170,17 @@ void Landblock::init()
     }
 }
 
-fp_t Landblock::calcHeight(fp_t x, fp_t y) const
+fp_t Land::calcHeight(fp_t x, fp_t y) const
 {
-    assert(x >= 0.0 && x <= LANDBLOCK_SIZE);
-    assert(y >= 0.0 && y <= LANDBLOCK_SIZE);
+    assert(x >= 0.0 && x <= BLOCK_SIZE);
+    assert(y >= 0.0 && y <= BLOCK_SIZE);
 
     fp_t dix;
-    auto fx = modf(x / SQUARE_SIZE, &dix);
+    auto fx = modf(x / CELL_SIZE, &dix);
     auto ix = (int)dix;
 
     fp_t diy; 
-    auto fy = modf(y / SQUARE_SIZE, &diy);
+    auto fy = modf(y / CELL_SIZE, &diy);
     auto iy = (int)diy;
 
     auto h1 = _data.heights[ix][iy] * fp_t(2.0);
@@ -242,109 +230,85 @@ fp_t Landblock::calcHeight(fp_t x, fp_t y) const
     return hb * (fp_t(1.0) - fy) + ht * fy;
 }
 
-fp_t Landblock::calcHeightUnbounded(fp_t x, fp_t y) const
+fp_t Land::calcHeightUnbounded(fp_t x, fp_t y) const
 {
     auto thisId = id();
 
     while(x < 0.0)
     {
-        thisId = LandblockId(thisId.x() - 1, thisId.y());
-        x += LANDBLOCK_SIZE;
+        thisId = LandcellId(thisId.x() - 1, thisId.y());
+        x += BLOCK_SIZE;
     }
 
-    while(x >= LANDBLOCK_SIZE)
+    while(x >= BLOCK_SIZE)
     {
-        thisId = LandblockId(thisId.x() + 1, thisId.y());
-        x -= LANDBLOCK_SIZE;
+        thisId = LandcellId(thisId.x() + 1, thisId.y());
+        x -= BLOCK_SIZE;
     }
 
     while(y < 0.0)
     {
-        thisId = LandblockId(thisId.x(), thisId.y() - 1);
-        y += LANDBLOCK_SIZE;
+        thisId = LandcellId(thisId.x(), thisId.y() - 1);
+        y += BLOCK_SIZE;
     }
 
-    while(y >= LANDBLOCK_SIZE)
+    while(y >= BLOCK_SIZE)
     {
-        thisId = LandblockId(thisId.x(), thisId.y() + 1);
-        y -= LANDBLOCK_SIZE;
+        thisId = LandcellId(thisId.x(), thisId.y() + 1);
+        y -= BLOCK_SIZE;
     }
 
-    auto it = Core::get().landblockManager().find(thisId);
+    auto it = Core::get().landcellManager().find(thisId);
 
-    if(it == Core::get().landblockManager().end())
+    if(it == Core::get().landcellManager().end())
     {
-        throw logic_error("landblock not found");
+        throw logic_error("landcell not found");
     }
-    
-    return it->second.calcHeight(x, y);
+
+    Land& land = static_cast<Land&>(*it->second);
+
+    return land.calcHeight(x, y);
 }
 
-LandblockId Landblock::id() const
+LandcellId Land::id() const
 {
-    uint8_t x = uint8_t((_data.fileId >> 24) & 0xFF);
-    uint8_t y = uint8_t((_data.fileId >> 16) & 0xFF);
-    return LandblockId(x, y);
+    return LandcellId(_data.fileId);
 }
 
-const Landblock::Data& Landblock::data() const
+const Land::Data& Land::data() const
 {
     return _data;
 }
 
-const vector<Doodad>& Landblock::doodads() const
+uint32_t Land::numStructures() const
 {
-    return _doodads;
+    return _numStructures;
 }
 
-const vector<Structure>& Landblock::structures() const
-{
-    return _structures;
-}
-
-const uint8_t* Landblock::normalMap() const
+const uint8_t* Land::normalMap() const
 {
     return _normalMap.data();
 }
 
-bool Landblock::isSplitNESW(int x, int y) const
+bool Land::isSplitNESW(int x, int y) const
 {
     // credits to Akilla
-    uint32_t tx = ((_data.fileId >> 24) & 0xFF) * 8 + x;
-    uint32_t ty = ((_data.fileId >> 16) & 0xFF) * 8 + y;
+    uint32_t tx = id().x() * 8 + x;
+    uint32_t ty = id().y() * 8 + y;
     uint32_t v = tx * ty * 0x0CCAC033 - tx * 0x421BE3BD + ty * 0x6C1AC587 - 0x519B8F25;
     return (v & 0x80000000) != 0;
 }
 
-unique_ptr<Destructable>& Landblock::renderData()
+void Land::initDoodads()
 {
-    return _renderData;
-}
-
-void Landblock::initDoodads()
-{
-    auto baseFileId = _data.fileId & 0xFFFF0000;
-
-    auto blob = Core::get().cellDat().read(baseFileId | 0xFFFE);
+    auto blob = Core::get().cellDat().read(_data.fileId - 1);
 
     BinReader reader(blob.data(), blob.size());
 
     auto fid = reader.read<uint32_t>();
-    assert(fid == (baseFileId | 0xFFFE));
+    assert(fid == _data.fileId - 1);
     
-    auto numStructures = reader.read<uint32_t>();
-
-    for(auto si = 0u; si < numStructures; si++)
-    {
-        auto structBlob = Core::get().cellDat().read(baseFileId | (0x0100 + si));
-
-        if(structBlob.empty())
-        {
-            throw runtime_error("Structure not found");
-        }
-
-        _structures.emplace_back(structBlob.data(), structBlob.size());
-    }
+    _numStructures = reader.read<uint32_t>();
 
     auto numDoodads = reader.read<uint16_t>();
     _doodads.resize(numDoodads);
@@ -360,8 +324,8 @@ void Landblock::initDoodads()
     auto numDoodadsEx = reader.read<uint16_t>();
     _doodads.resize(numDoodads + numDoodadsEx);
 
-    auto unk2 = reader.read<uint16_t>();
     // I don't know what this is, but it means there's more data
+    auto unk2 = reader.read<uint16_t>();    
     assert(unk2 == 0 || unk2 == 1);
 
     for(auto di = 0u; di < numDoodadsEx; di++)

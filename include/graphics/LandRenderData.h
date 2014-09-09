@@ -15,33 +15,31 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_GRAPHICS_LANDBLOCKRENDERER_H
-#define BZR_GRAPHICS_LANDBLOCKRENDERER_H
+#ifndef BZR_GRAPHICS_LANDRENDERDATA_H
+#define BZR_GRAPHICS_LANDRENDERDATA_H
 
-#include "graphics/Program.h"
+#include "Destructable.h"
 #include "Noncopyable.h"
 
-class LandblockRenderer : Noncopyable
+class Land;
+
+class LandRenderData : public Destructable, Noncopyable
 {
 public:
-    LandblockRenderer();
-    ~LandblockRenderer();
+    LandRenderData(const Land& land);
+    ~LandRenderData();
 
-    void render(const glm::mat4& projectionMat, const glm::mat4& viewMat);
-
-    void setLightPosition(const glm::vec3& lightPosition);
+    void render();
 
 private:
-    void initProgram();
-    void initTerrainTexture();
-    void initBlendTexture();
+    void initGeometry(const Land& land);
+    void initNormalTexture(const Land& land);
 
-    Program _program;
+    GLuint _vertexArray;
+    GLuint _vertexBuffer;
+    GLsizei _vertexCount;
 
-    GLuint _terrainTexture;
-    GLuint _blendTexture;
-
-    glm::vec3 _lightPosition;
+    GLuint _normalTexture;
 };
 
 #endif

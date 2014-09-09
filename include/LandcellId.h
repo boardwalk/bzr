@@ -22,12 +22,17 @@ class LandcellId
 {
 public:
     LandcellId();
+    explicit LandcellId(uint32_t value);
+    LandcellId(uint8_t x, uint8_t y);
     LandcellId(uint8_t x, uint8_t y, uint16_t n);
+
+    int calcSquareDistance(LandcellId other) const;
 
     uint8_t x() const;
     uint8_t y() const;
     uint16_t n() const;
     uint32_t value() const;
+    bool isStructure() const;
 
     bool operator==(LandcellId other) const;
     bool operator!=(LandcellId other) const;

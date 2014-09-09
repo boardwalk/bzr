@@ -15,42 +15,27 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "LandblockId.h"
+#include "Landcell.h"
 
-LandblockId::LandblockId() : _x(0), _y(0)
+Landcell::~Landcell()
 {}
 
-LandblockId::LandblockId(uint8_t lx, uint8_t ly) : _x(lx), _y(ly)
-{}
-
-uint8_t LandblockId::x() const
+const glm::vec3& Landcell::position() const
 {
-    return _x;
+    return _position;
 }
 
-uint8_t LandblockId::y() const
+const glm::quat& Landcell::rotation() const
 {
-    return _y;
+    return _rotation;
 }
 
-uint32_t LandblockId::fileId() const
+const vector<Doodad>& Landcell::doodads() const
 {
-    return uint32_t(_x) << 24 | uint32_t(_y) << 16 | 0xFFFF;
+    return _doodads;
 }
 
-int LandblockId::calcSquareDistance(LandblockId other) const
+unique_ptr<Destructable>& Landcell::renderData() const
 {
-    auto dx = other.x() - x();
-    auto dy = other.y() - y();
-    return dx * dx + dy * dy;
-}
-
-bool LandblockId::operator==(LandblockId other) const
-{
-    return _x == other._x && _y == other._y;
-}
-
-bool LandblockId::operator!=(LandblockId other) const
-{
-    return _x != other._x || _y != other._y;
+    return _renderData;
 }

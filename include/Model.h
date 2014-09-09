@@ -40,7 +40,7 @@ public:
     // If true, the model has transparent or translucent elements and must be depth sorted before rendering
     bool needsDepthSort() const;
 
-    unique_ptr<Destructable>& renderData();
+    unique_ptr<Destructable>& renderData() const;
 
 private:
     vector<ResourcePtr> _textures;
@@ -50,7 +50,7 @@ private:
     unique_ptr<BSPNode> _hitTree;
     bool _needsDepthSort;
 
-    unique_ptr<Destructable> _renderData;
+    mutable unique_ptr<Destructable> _renderData;
 };
 
 #endif

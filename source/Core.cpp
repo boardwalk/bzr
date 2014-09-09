@@ -22,7 +22,8 @@
 #include "Camera.h"
 #include "Config.h"
 #include "DatFile.h"
-#include "LandblockManager.h"
+#include "Land.h"
+#include "LandcellManager.h"
 #include "ObjectManager.h"
 #include "ResourceCache.h"
 #include "util.h"
@@ -70,9 +71,9 @@ ResourceCache& Core::resourceCache()
     return *_resourceCache;
 }
 
-LandblockManager& Core::landblockManager()
+LandcellManager& Core::landcellManager()
 {
-    return *_landblockManager;
+    return *_landcellManager;
 }
 
 ObjectManager& Core::objectManager()
@@ -117,14 +118,14 @@ void Core::init()
     _cellDat.reset(new DatFile("data/client_cell_1.dat"));
     _highresDat.reset(new DatFile("data/client_highres.dat"));
     _resourceCache.reset(new ResourceCache());
-    _landblockManager.reset(new LandblockManager());
+    _landcellManager.reset(new LandcellManager());
     _objectManager.reset(new ObjectManager());
     _camera.reset(new Camera());
 #ifndef HEADLESS
     _renderer.reset(new Renderer());
     _renderer->init();
 #endif
-    _landblockManager->setCenter(LandblockId(0x31, 0xD6));
+    _landcellManager->setCenter(LandcellId(0x31, 0xD6));
     
     (*_objectManager)[ObjectId(1)];
     setPlayerId(ObjectId(1));
@@ -137,7 +138,7 @@ void Core::cleanup()
 #endif
     _camera.reset();
     _objectManager.reset();
-    _landblockManager.reset();
+    _landcellManager.reset();
     _resourceCache.reset();
     _portalDat.reset();
     _cellDat.reset();
@@ -337,30 +338,30 @@ void Core::step(fp_t dt)
     }
 
     auto& position = _camera->position();    
-    auto id = _landblockManager->center();
+    auto id = _landcellManager->center();
 
     if(position.x < 0.0)
     {
-        _camera->setPosition(glm::vec3(position.x + Landblock::LANDBLOCK_SIZE, position.y, position.z));
-        _landblockManager->setCenter(LandblockId(id.x() - 1, id.y()));
+        _camera->setPosition(glm::vec3(position.x + Land::BLOCK_SIZE, position.y, position.z));
+        _landcellManager->setCenter(LandcellId(id.x() - 1, id.y()));
     }
 
-    if(position.x >= Landblock::LANDBLOCK_SIZE)
+    if(position.x >= Land::BLOCK_SIZE)
     {
-        _camera->setPosition(glm::vec3(position.x - Landblock::LANDBLOCK_SIZE, position.y, position.z));
-        _landblockManager->setCenter(LandblockId(id.x() + 1, id.y()));
+        _camera->setPosition(glm::vec3(position.x - Land::BLOCK_SIZE, position.y, position.z));
+        _landcellManager->setCenter(LandcellId(id.x() + 1, id.y()));
     }
 
     if(position.y < 0.0)
     {
-        _camera->setPosition(glm::vec3(position.x, position.y + Landblock::LANDBLOCK_SIZE, position.z));
-        _landblockManager->setCenter(LandblockId(id.x(), id.y() - 1));
+        _camera->setPosition(glm::vec3(position.x, position.y + Land::BLOCK_SIZE, position.z));
+        _landcellManager->setCenter(LandcellId(id.x(), id.y() - 1));
     }
 
-    if(position.y >= Landblock::LANDBLOCK_SIZE)
+    if(position.y >= Land::BLOCK_SIZE)
     {
-        _camera->setPosition(glm::vec3(position.x, position.y - Landblock::LANDBLOCK_SIZE, position.z));
-        _landblockManager->setCenter(LandblockId(id.x(), id.y() + 1));
+        _camera->setPosition(glm::vec3(position.x, position.y - Land::BLOCK_SIZE, position.z));
+        _landcellManager->setCenter(LandcellId(id.x(), id.y() + 1));
     }
 
     _camera->step(dt);

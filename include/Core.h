@@ -23,7 +23,7 @@
 class Camera;
 class Config;
 class DatFile;
-class LandblockManager;
+class LandcellManager;
 class ObjectManager;
 class Renderer;
 class ResourceCache;
@@ -39,7 +39,7 @@ public:
     DatFile& cellDat();
     DatFile& highresDat();
     ResourceCache& resourceCache();
-    LandblockManager& landblockManager();
+    LandcellManager& landcellManager();
     ObjectManager& objectManager();
     Camera& camera();
 #ifndef HEADLESS
@@ -64,7 +64,7 @@ private:
     unique_ptr<DatFile> _cellDat;
     unique_ptr<DatFile> _highresDat;
     unique_ptr<ResourceCache> _resourceCache;
-    unique_ptr<LandblockManager> _landblockManager;
+    unique_ptr<LandcellManager> _landcellManager;
     unique_ptr<ObjectManager> _objectManager;
     unique_ptr<Camera> _camera;
 #ifndef HEADLESS

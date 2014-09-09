@@ -26,6 +26,8 @@ Structure::Structure(const void* data, size_t size)
     BinReader reader(data, size);
 
     auto resourceId = reader.read<uint32_t>();
+    _id = LandcellId(resourceId);
+
     // 0x1 above ground
     // 0x2 has objects
     // 0x4 unknown
@@ -95,35 +97,14 @@ Structure::Structure(const void* data, size_t size)
     reader.assertEnd();
 }
 
-Structure::Structure(Structure&& other)
+LandcellId Structure::id() const
 {
-    _position = other._position;
-    _rotation = other._rotation;
-    _textures = move(other._textures);
-    _doodads = move(other._doodads);
-    _geometry = move(other._geometry);
-    _partNum = other._partNum;
-    _renderData = move(other._renderData);
-}
-
-const glm::vec3& Structure::position() const
-{
-    return _position;
-}
-
-const glm::quat& Structure::rotation() const
-{
-    return _rotation;
+    return _id;
 }
 
 const vector<ResourcePtr>& Structure::textures() const
 {
     return _textures;
-}
-
-const vector<Doodad>& Structure::doodads() const
-{
-    return _doodads;
 }
 
 const StructureGeom& Structure::geometry() const
@@ -134,9 +115,4 @@ const StructureGeom& Structure::geometry() const
 uint16_t Structure::partNum() const
 {
     return _partNum;
-}
-
-unique_ptr<Destructable>& Structure::renderData()
-{
-    return _renderData;
 }

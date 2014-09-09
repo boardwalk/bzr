@@ -170,7 +170,7 @@ void SkyRenderer::initTexture()
                 auto theta = acos(sp.z / sqrt(sp.x * sp.x + sp.y * sp.y + sp.z * sp.z));
                 auto phi = atan2(sp.x, -sp.y);
 
-                // pull edge below landblock edge
+                // pull sky edge below land edge
                 theta *= fp_t(0.9);
 
                 // compute and store color

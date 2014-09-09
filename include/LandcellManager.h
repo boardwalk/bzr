@@ -15,39 +15,36 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_LANDBLOCKID_H
-#define BZR_LANDBLOCKID_H
+#ifndef BZR_LANDCELLMANAGER_H
+#define BZR_LANDCELLMANAGER_H
 
-class LandblockId
+#include "Landcell.h"
+#include "Noncopyable.h"
+#include <unordered_map>
+
+class LandcellManager : Noncopyable
 {
 public:
-    LandblockId();
-    LandblockId(uint8_t lx, uint8_t ly);
+    typedef unordered_map<LandcellId, unique_ptr<Landcell>> container_type;
+    typedef container_type::iterator iterator;
 
-    uint8_t x() const;
-    uint8_t y() const;
-    uint32_t fileId() const;
+    LandcellManager();
 
-    int calcSquareDistance(LandblockId other) const;
+    void setCenter(LandcellId center);
+    LandcellId center() const;
 
-    bool operator==(LandblockId other) const;
-    bool operator!=(LandblockId other) const;
+    void setRadius(int radius);
+
+    iterator find(LandcellId id);
+    iterator begin();
+    iterator end();
 
 private:
-    uint8_t _x;
-    uint8_t _y;
-};
+    void load();
 
-namespace std
-{
-    template<>
-    struct hash<LandblockId>
-    {
-        size_t operator()(LandblockId id) const
-        {
-            return id.fileId();
-        }
-    };
-}
+    container_type _data;
+    LandcellId _center;
+    int _radius;
+};
 
 #endif

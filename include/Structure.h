@@ -18,35 +18,25 @@
 #ifndef BZR_STRUCTURE_H
 #define BZR_STRUCTURE_H
 
-#include "Destructable.h"
-#include "Noncopyable.h"
-#include "Doodad.h"
+#include "Landcell.h"
 
 class StructureGeom;
 
-class Structure : Noncopyable
+class Structure : public Landcell
 {
 public:
     Structure(const void* data, size_t size);
-    Structure(Structure&& other);
 
-    const glm::vec3& position() const;
-    const glm::quat& rotation() const;
+    LandcellId id() const override;
     const vector<ResourcePtr>& textures() const;
-    const vector<Doodad>& doodads() const;
     const StructureGeom& geometry() const;
     uint16_t partNum() const;
 
-    unique_ptr<Destructable>& renderData();
-
 private:
-    glm::vec3 _position;
-    glm::quat _rotation;
+    LandcellId _id;
     vector<ResourcePtr> _textures;
-    vector<Doodad> _doodads;
     ResourcePtr _geometry;
     uint16_t _partNum;
-    unique_ptr<Destructable> _renderData;
 };
 
 #endif

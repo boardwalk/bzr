@@ -21,7 +21,7 @@
 #include "graphics/util.h"
 #include "Camera.h"
 #include "Core.h"
-#include "LandblockManager.h"
+#include "LandcellManager.h"
 #include "Model.h"
 #include "ModelGroup.h"
 #include <glm/gtc/matrix_transform.hpp>
@@ -68,7 +68,7 @@ void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& view
 {
     _program.use();
 
-    auto& landblockManager = Core::get().landblockManager();
+    auto& landcellManager = Core::get().landcellManager();
 
     auto cameraPosition = Core::get().camera().position();
     glUniform4f(_program.getUniform("cameraPosition"), GLfloat(cameraPosition.x), GLfloat(cameraPosition.y), GLfloat(cameraPosition.z), 1.0f);
@@ -84,34 +84,18 @@ void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& view
         renderOne(_theModel, projectionMat, viewMat, worldMat);
     }
 
-    for(auto& pair : landblockManager)
+    for(auto& pair : landcellManager)
     {
-        auto dx = pair.first.x() - landblockManager.center().x();
-        auto dy = pair.first.y() - landblockManager.center().y();
+        auto dx = pair.first.x() - landcellManager.center().x();
+        auto dy = pair.first.y() - landcellManager.center().y();
 
-        auto landblockPosition = glm::vec3(dx * 192.0, dy * 192.0, 0.0);
+        auto blockPosition = glm::vec3(dx * 192.0, dy * 192.0, 0.0);
 
-        for(auto& doodad : pair.second.doodads())
+        for(auto& doodad : pair.second->doodads())
         {
-            auto worldMat = glm::translate(glm::mat4(), landblockPosition + doodad.position) * glm::mat4_cast(doodad.rotation);
+            auto worldMat = glm::translate(glm::mat4(), blockPosition + doodad.position) * glm::mat4_cast(doodad.rotation);
 
-            renderOne(const_cast<ResourcePtr&>(doodad.resource),
-                projectionMat,
-                viewMat,
-                worldMat);
-        }
-
-        for(auto& structure : pair.second.structures())
-        {
-            for(auto& doodad : structure.doodads())
-            {
-                auto worldMat = glm::translate(glm::mat4(), landblockPosition + doodad.position) * glm::mat4_cast(doodad.rotation);
-
-                renderOne(const_cast<ResourcePtr&>(doodad.resource),
-                    projectionMat,
-                    viewMat,
-                    worldMat);
-            }
+            renderOne(doodad.resource, projectionMat, viewMat, worldMat);
         }
     }
 
@@ -128,7 +112,7 @@ void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& view
     }
 }
 
-void ModelRenderer::renderOne(ResourcePtr& resource,
+void ModelRenderer::renderOne(const ResourcePtr& resource,
     const glm::mat4& projectionMat,
     const glm::mat4& viewMat, 
     const glm::mat4& worldMat)
@@ -150,7 +134,7 @@ void ModelRenderer::renderOne(ResourcePtr& resource,
     }
 }
 
-void ModelRenderer::renderModelGroup(ModelGroup& modelGroup,
+void ModelRenderer::renderModelGroup(const ModelGroup& modelGroup,
     const glm::mat4& projectionMat,
     const glm::mat4& viewMat,
     const glm::mat4& worldMat)
@@ -161,14 +145,14 @@ void ModelRenderer::renderModelGroup(ModelGroup& modelGroup,
 
         auto subWorldMat = glm::translate(glm::mat4(), modelInfo.position) * glm::mat4_cast(modelInfo.rotation) * glm::scale(glm::mat4(), modelInfo.scale);
 
-        renderOne(const_cast<ResourcePtr&>(modelInfo.resource),
+        renderOne(modelInfo.resource,
             projectionMat,
             viewMat,
             worldMat * subWorldMat);
     }
 }
 
-void ModelRenderer::renderModel(Model& model,
+void ModelRenderer::renderModel(const Model& model,
     const glm::mat4& projectionMat,
     const glm::mat4& viewMat,
     const glm::mat4& worldMat,

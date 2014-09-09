@@ -21,9 +21,24 @@ LandcellId::LandcellId() :
     _value(0)
 {}
 
+LandcellId::LandcellId(uint32_t value) :
+    _value(value)
+{}
+
+LandcellId::LandcellId(uint8_t x, uint8_t y) :
+    _value((uint32_t(x) << 24) | (uint32_t(y) << 16) | 0xFFFF)
+{}
+
 LandcellId::LandcellId(uint8_t x, uint8_t y, uint16_t n) :
     _value((uint32_t(x) << 24) | (uint32_t(y) << 16) | n)
 {}
+
+int LandcellId::calcSquareDistance(LandcellId other) const
+{
+    auto dx = other.x() - x();
+    auto dy = other.y() - y();
+    return dx * dx + dy * dy;
+}
 
 uint8_t LandcellId::x() const
 {
@@ -43,6 +58,11 @@ uint16_t LandcellId::n() const
 uint32_t LandcellId::value() const
 {
     return _value;
+}
+
+bool LandcellId::isStructure() const
+{
+    return n() >= 0x0100 && n() <= 0xFFFE;
 }
 
 bool LandcellId::operator==(LandcellId other) const

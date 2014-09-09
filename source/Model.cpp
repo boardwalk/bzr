@@ -149,7 +149,7 @@ bool Model::needsDepthSort() const
     return _needsDepthSort;
 }
 
-unique_ptr<Destructable>& Model::renderData()
+unique_ptr<Destructable>& Model::renderData() const
 {
     return _renderData;
 }

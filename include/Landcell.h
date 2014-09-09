@@ -15,36 +15,41 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_LANDBLOCKMANAGER_H
-#define BZR_LANDBLOCKMANAGER_H
+#ifndef BZR_LANDCELL_H
+#define BZR_LANDCELL_H
 
-#include "Landblock.h"
+#include "Destructable.h"
+#include "Doodad.h"
+#include "LandcellId.h"
 #include "Noncopyable.h"
-#include <unordered_map>
 
-class LandblockManager : Noncopyable
+struct LandcellType
+{
+    enum Value
+    {
+        Land,
+        Structure
+    };
+};
+
+class Landcell : Noncopyable
 {
 public:
-    typedef unordered_map<LandblockId, Landblock> container_type;
-    typedef container_type::iterator iterator;
+    virtual ~Landcell();
 
-    LandblockManager();
+    virtual LandcellId id() const = 0;
+    const glm::vec3& position() const;
+    const glm::quat& rotation() const;
+    const vector<Doodad>& doodads() const;
+    unique_ptr<Destructable>& renderData() const;
 
-    void setCenter(LandblockId center);
-    LandblockId center() const;
-
-    void setRadius(int radius);
-
-    iterator find(LandblockId id);
-    iterator begin();
-    iterator end();
+protected:
+    glm::vec3 _position;
+    glm::quat _rotation;
+    vector<Doodad> _doodads;
 
 private:
-    void load();
-
-    container_type _data;
-    LandblockId _center;
-    int _radius;
+    mutable unique_ptr<Destructable> _renderData;
 };
 
 #endif

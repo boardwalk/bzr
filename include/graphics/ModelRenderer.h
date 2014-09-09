@@ -30,7 +30,7 @@ class ModelRenderer : Noncopyable
 public:
     struct DepthSortedModel
     {
-        Model* model;
+        const Model* model;
         glm::mat4 worldMat;
         glm::vec3 worldPos;
     };
@@ -45,17 +45,17 @@ public:
     int _submodelNum;
 
 private:
-    void renderOne(ResourcePtr& resource,
+    void renderOne(const ResourcePtr& resource,
         const glm::mat4& projectionMat,
         const glm::mat4& viewMat,
         const glm::mat4& worldMat);
 
-    void renderModelGroup(ModelGroup& modelGroup,
+    void renderModelGroup(const ModelGroup& modelGroup,
         const glm::mat4& projectionMat,
         const glm::mat4& viewMat,
         const glm::mat4& worldMat);
 
-    void renderModel(Model& model,
+    void renderModel(const Model& model,
         const glm::mat4& projectionMat,
         const glm::mat4& viewMat,
         const glm::mat4& worldMat,

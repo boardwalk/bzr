@@ -15,20 +15,17 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_LANDBLOCK_H
-#define BZR_LANDBLOCK_H
+#ifndef BZR_LAND_H
+#define BZR_LAND_H
 
-#include "Destructable.h"
-#include "LandblockId.h"
-#include "Noncopyable.h"
-#include "Structure.h"
+#include "Landcell.h"
 
-class Landblock : Noncopyable
+class Land : public Landcell
 {
 public:
     static const int GRID_SIZE = 9;
-    static const fp_t SQUARE_SIZE;
-    static const fp_t LANDBLOCK_SIZE;
+    static const fp_t CELL_SIZE;
+    static const fp_t BLOCK_SIZE;
     static const int OFFSET_MAP_SIZE = 64;
 
     PACK(struct Data
@@ -40,40 +37,31 @@ public:
         uint8_t pad;
     });
 
-    Landblock(const void* data, size_t length);
-    Landblock(Landblock&& other);
+    Land(const void* data, size_t size);
 
     void init();
 
     fp_t calcHeight(fp_t x, fp_t y) const;
     fp_t calcHeightUnbounded(fp_t x, fp_t y) const;
 
-    LandblockId id() const;
-
+    LandcellId id() const override;
     const Data& data() const;
-    const vector<Doodad>& doodads() const;
-    const vector<Structure>& structures() const;
-
+    uint32_t numStructures() const;
     const uint8_t* normalMap() const;
 
     bool isSplitNESW(int x, int y) const;
-
-    unique_ptr<Destructable>& renderData();
 
 private:
     void initDoodads();
 
     Data _data;
-    vector<Doodad> _doodads;
-    vector<Structure> _structures;
+    uint32_t _numStructures;
 
     vector<uint16_t> _offsetMap;
     fp_t _offsetMapBase;
     fp_t _offsetMapScale;
 
     vector<uint8_t> _normalMap;
-
-    unique_ptr<Destructable> _renderData;
 };
 
 #endif
