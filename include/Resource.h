@@ -24,13 +24,13 @@ struct ResourceType
 {
     enum Value
     {
-        Model,
-        ModelGroup,
-        Palette,
-        TextureLookup5,
-        Texture,
-        TextureLookup8,
-        StructureGeom
+        Model = 0x01000000,
+        ModelGroup = 0x02000000,
+        Palette = 0x04000000,
+        TextureLookup5 = 0x05000000,
+        Texture = 0x06000000,
+        TextureLookup8 = 0x08000000,
+        StructureGeom = 0x0D000000
     };
 };
 

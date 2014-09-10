@@ -40,21 +40,21 @@ static Resource* loadResource(uint32_t resourceId)
         }
     }
 
-    switch(resourceId >> 24)
+    switch(resourceId & 0xFF000000)
     {
-        case 0x01:
+        case ResourceType::Model:
             return new Model(resourceId, data.data(), data.size());
-        case 0x02:
+        case ResourceType::ModelGroup:
             return new ModelGroup(resourceId, data.data(), data.size());
-        case 0x04:
+        case ResourceType::Palette:
             return new Palette(resourceId, data.data(), data.size());
-        case 0x05:
+        case ResourceType::TextureLookup5:
             return new TextureLookup5(resourceId, data.data(), data.size());
-        case 0x06:
+        case ResourceType::Texture:
             return new Texture(resourceId, data.data(), data.size());
-        case 0x08:
+        case ResourceType::TextureLookup8:
             return new TextureLookup8(resourceId, data.data(), data.size());
-        case 0x0D:
+        case ResourceType::StructureGeom:
             return new StructureGeom(resourceId, data.data(), data.size());
         default:
             throw runtime_error("Resource type not supported");
