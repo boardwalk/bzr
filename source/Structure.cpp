@@ -102,6 +102,16 @@ LandcellId Structure::id() const
     return _id;
 }
 
+const glm::vec3& Structure::position() const
+{
+    return _position;
+}
+
+const glm::quat& Structure::rotation() const
+{
+    return _rotation;
+}
+
 const vector<ResourcePtr>& Structure::textures() const
 {
     return _textures;

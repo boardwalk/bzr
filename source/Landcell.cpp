@@ -20,16 +20,6 @@
 Landcell::~Landcell()
 {}
 
-const glm::vec3& Landcell::position() const
-{
-    return _position;
-}
-
-const glm::quat& Landcell::rotation() const
-{
-    return _rotation;
-}
-
 const vector<Doodad>& Landcell::doodads() const
 {
     return _doodads;

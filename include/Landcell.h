@@ -38,14 +38,10 @@ public:
     virtual ~Landcell();
 
     virtual LandcellId id() const = 0;
-    const glm::vec3& position() const;
-    const glm::quat& rotation() const;
     const vector<Doodad>& doodads() const;
     unique_ptr<Destructable>& renderData() const;
 
 protected:
-    glm::vec3 _position;
-    glm::quat _rotation;
     vector<Doodad> _doodads;
 
 private:

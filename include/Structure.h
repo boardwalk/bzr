@@ -28,12 +28,16 @@ public:
     Structure(const void* data, size_t size);
 
     LandcellId id() const override;
+    const glm::vec3& position() const;
+    const glm::quat& rotation() const;
     const vector<ResourcePtr>& textures() const;
     const StructureGeom& geometry() const;
     uint16_t partNum() const;
 
 private:
     LandcellId _id;
+    glm::vec3 _position;
+    glm::quat _rotation;
     vector<ResourcePtr> _textures;
     ResourcePtr _geometry;
     uint16_t _partNum;

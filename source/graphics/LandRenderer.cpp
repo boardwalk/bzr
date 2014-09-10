@@ -137,7 +137,7 @@ void LandRenderer::render(const glm::mat4& projectionMat, const glm::mat4& viewM
 
         auto& land = static_cast<const Land&>(*pair.second);
 
-        renderLand(land, projectionMat, viewMat, blockPosition + land.position(), land.rotation());
+        renderLand(land, projectionMat, viewMat, blockPosition);
     }
 }
 
@@ -150,10 +150,9 @@ void LandRenderer::renderLand(
     const Land& land,
     const glm::mat4& projectionMat,
     const glm::mat4& viewMat,
-    const glm::vec3& position,
-    const glm::quat& rotation)
+    const glm::vec3& position)
 {
-    auto worldMat = glm::translate(glm::mat4(), position) * glm::mat4_cast(rotation);
+    auto worldMat = glm::translate(glm::mat4(), position);
     auto worldViewMat = viewMat * worldMat;
     auto worldViewProjectionMat = projectionMat * worldViewMat;
 

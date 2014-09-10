@@ -38,8 +38,7 @@ private:
         const Land& land,
         const glm::mat4& projectionMat,
         const glm::mat4& viewMat,
-        const glm::vec3& position,
-        const glm::quat& rotation);
+        const glm::vec3& position);
     void initProgram();
     void initTerrainTexture();
     void initBlendTexture();
