@@ -18,6 +18,18 @@
 #ifndef BZR_LANDCELLID_H
 #define BZR_LANDCELLID_H
 
+/*
+ * A landcell id is a 32-bit value identifying a cell
+ * Bits 24:31 are x, the 0-255, east to west position of the landblock container the landcell
+ * Bits 16:23 are y, the 0-255, south to north position
+ * Bits 0:15 are n, the index of the cell
+ * 0x0001 <= n <= 0x0040 specify a cell on land, with an origin in the south-west and column-major format
+ * 0x0100 <= n < 0xFFFE specify a structure, either above or below ground
+ * n = 0x0000 and 0x0040 < n < 0x0100 are not used
+ * n = 0xFFFE is reserved for the landblock doodad file
+ * n = 0xFFFF is reserved for the landblock landscape file
+ * n = 0xFFFF is also used to identify the landblock (the collection of landcells sharing an x and y)
+ */
 class LandcellId
 {
 public:

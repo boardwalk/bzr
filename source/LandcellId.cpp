@@ -62,7 +62,7 @@ uint32_t LandcellId::value() const
 
 bool LandcellId::isStructure() const
 {
-    return n() >= 0x0100 && n() <= 0xFFFE;
+    return n() >= 0x0100 && n() < 0xFFFE;
 }
 
 bool LandcellId::operator==(LandcellId other) const
