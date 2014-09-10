@@ -42,17 +42,6 @@ LandcellId LandcellManager::center() const
     return _center;
 }
 
-void LandcellManager::setRadius(int radius)
-{
-    assert(radius >= 0);
-
-    if(radius != _radius)
-    {
-        _radius = radius;
-        load();
-    }
-}
-
 LandcellManager::iterator LandcellManager::find(LandcellId id)
 {
     return _data.find(id);

@@ -33,8 +33,6 @@ public:
     void setCenter(LandcellId center);
     LandcellId center() const;
 
-    void setRadius(int radius);
-
     iterator find(LandcellId id);
     iterator begin();
     iterator end();
