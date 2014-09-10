@@ -22,9 +22,7 @@ class Program
 {
 public:
     Program();
-    Program(Program&& other);
     ~Program();
-    Program& operator=(Program&& other);
 
     void create();
     void attach(GLenum type, const GLchar* source);

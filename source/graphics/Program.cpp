@@ -20,23 +20,9 @@
 Program::Program() : _handle(0)
 {}
 
-Program::Program(Program&& other)
-{
-    _handle = other._handle;
-    other._handle = 0;
-}
-
 Program::~Program()
 {
     destroy();
-}
-
-Program& Program::operator=(Program&& other)
-{
-    destroy();
-    _handle = other._handle;
-    other._handle = 0;
-    return *this;
 }
 
 void Program::create()
