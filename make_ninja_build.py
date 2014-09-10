@@ -101,7 +101,7 @@ def main():
                     # i'm only testing this support with VS 2013 right now
                     # attn! libovr requires atls.lib, which is not provided by VS Express
                     # the version provided in the WDK does *not* work, you need the full version of VS
-                    linkflags += r' /libpath:{}\Lib\x64\VS2013 libovr64.lib winmm.lib ws2_32.lib gdi32.lib'.format(ovr_dir)
+                    linkflags += r' /libpath:{}\Lib\x64\VS2013 libovr64.lib winmm.lib ws2_32.lib gdi32.lib shell32.lib'.format(ovr_dir)
 
             if args.release:
                 cppflags += ' /O2 /GL'
