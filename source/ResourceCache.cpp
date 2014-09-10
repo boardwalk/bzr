@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "ResourceCache.h"
+#include "Animation.h"
 #include "Core.h"
 #include "DatFile.h"
 #include "Palette.h"
@@ -46,6 +47,8 @@ static Resource* loadResource(uint32_t resourceId)
             return new Model(resourceId, data.data(), data.size());
         case ResourceType::ModelGroup:
             return new ModelGroup(resourceId, data.data(), data.size());
+        case ResourceType::Animation:
+            return new Animation(resourceId, data.data(), data.size());
         case ResourceType::Palette:
             return new Palette(resourceId, data.data(), data.size());
         case ResourceType::TextureLookup5:

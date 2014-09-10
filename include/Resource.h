@@ -26,6 +26,7 @@ struct ResourceType
     {
         Model = 0x01000000,
         ModelGroup = 0x02000000,
+        Animation = 0x03000000,
         Palette = 0x04000000,
         TextureLookup5 = 0x05000000,
         Texture = 0x06000000,
