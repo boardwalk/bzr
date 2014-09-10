@@ -27,7 +27,6 @@ Texture::Texture(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 
     auto resourceId = reader.read<uint32_t>();
     assert(resourceId == id);
-    assert((resourceId & 0xFF000000) == ResourceType::Texture);
 
     auto unk1 = reader.read<uint32_t>();
     assert(unk1 <= 0xA);
@@ -61,7 +60,7 @@ Texture::Texture(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
     }
 }
 
-Texture::Texture(uint32_t bgra) : ResourceImpl(0)
+Texture::Texture(uint32_t bgra) : ResourceImpl(ResourceType::Texture | 0xFFFF)
 {
     _image.init(ImageFormat::BGRA32, 1, 1, &bgra);
 }

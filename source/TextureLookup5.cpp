@@ -27,7 +27,6 @@ TextureLookup5::TextureLookup5(uint32_t id,  const void* data, size_t size) : Re
 
     auto resourceId = reader.read<uint32_t>();
     assert(resourceId == id);
-    assert((resourceId & 0xFF000000) == ResourceType::TextureLookup5);
 
     auto zero = reader.read<uint32_t>();
     assert(zero == 0);
@@ -53,7 +52,7 @@ TextureLookup5::TextureLookup5(uint32_t id,  const void* data, size_t size) : Re
     reader.assertEnd();
 }
 
-TextureLookup5::TextureLookup5(ResourcePtr texture) : ResourceImpl(0), _texture(texture)
+TextureLookup5::TextureLookup5(ResourcePtr texture) : ResourceImpl(ResourceType::TextureLookup5 | 0xFFFF), _texture(texture)
 {
     assert(_texture->resourceType() == ResourceType::Texture);
 }

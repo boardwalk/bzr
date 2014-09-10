@@ -57,11 +57,14 @@ public:
         return (const T&)*this;
     }
 
-    virtual ResourceType::Value resourceType() const = 0;
-
     uint32_t resourceId() const
     {
         return _resourceId;
+    }
+
+    ResourceType::Value resourceType() const
+    {
+        return static_cast<ResourceType::Value>(_resourceId & 0xFF000000);
     }
 
 private:
@@ -73,11 +76,8 @@ class ResourceImpl : public Resource
 {
 public:
     ResourceImpl(uint32_t id) : Resource(id)
-    {}
-
-    ResourceType::Value resourceType() const override
     {
-        return RT;
+        assert((id & 0xFF000000) == RT);
     }
 
     static const ResourceType::Value RESOURCE_TYPE = RT;

@@ -27,7 +27,6 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
 
     auto resourceId = reader.read<uint32_t>();
     assert(resourceId == id);
-    assert((resourceId & 0xFF000000) == ResourceType::ModelGroup);
 
     auto flags = reader.read<uint32_t>();
     assert(flags <= 0xF);
