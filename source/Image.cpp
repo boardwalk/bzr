@@ -56,46 +56,8 @@ bool ImageFormat::hasAlpha(Value f)
     return f == BGRA32 || f == A8 || f == DXT3 || f == DXT5 || f == Paletted16;
 }
 
-Image::Image() : _format(ImageFormat::Invalid)
+Image::Image() : _format(ImageFormat::Invalid), _width(0), _height(0), _hasAlpha(false)
 {}
-
-Image::Image(const Image& other)
-{
-    _data = other._data;
-    _width = other._width;
-    _height = other._height;
-    _format = other._format;
-    _hasAlpha = other._hasAlpha;
-}
-
-Image::Image(Image&& other)
-{
-    _data = move(other._data);
-    _width = other._width;
-    _height = other._height;
-    _format = other._format;
-    _hasAlpha = other._hasAlpha;
-}
-
-Image& Image::operator=(const Image& other)
-{
-    _data = other._data;
-    _width = other._width;
-    _height = other._height;
-    _format = other._format;
-    _hasAlpha = other._hasAlpha;
-    return *this;
-}
-
-Image& Image::operator=(Image&& other)
-{
-    _data = move(other._data);
-    _width = other._width;
-    _height = other._height;
-    _format = other._format;
-    _hasAlpha = other._hasAlpha;
-    return *this;
-}
 
 void Image::init(ImageFormat::Value newFormat, int newWidth, int newHeight, const void* newData)
 {

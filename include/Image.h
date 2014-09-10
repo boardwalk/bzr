@@ -44,10 +44,6 @@ class Image
 {
 public:
     Image();
-    Image(const Image&);
-    Image(Image&&);
-    Image& operator=(const Image&);
-    Image& operator=(Image&&);
 
     void init(ImageFormat::Value newFormat, int newWidth, int newHeight, const void* newData);
 
