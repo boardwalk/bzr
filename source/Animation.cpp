@@ -16,9 +16,37 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "Animation.h"
+#include "BinReader.h"
 
 Animation::Animation(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 {
-    (void)data;
-    (void)size;
+    BinReader reader(data, size);
+
+    auto resourceId = reader.read<uint32_t>();
+    assert(resourceId == id);
+
+    auto type = reader.read<uint32_t>();
+    auto numModels = reader.read<uint32_t>();
+    auto numFrames = reader.read<uint32_t>();
+    _frames.resize(numFrames);
+
+    if(type == 1 || type == 3)
+    {
+        for(auto fi = 0u; fi < numFrames; fi++)
+        {
+            reader.readPointer<uint32_t>(7);
+        }
+    }
+
+    for(auto& frame : _frames)
+    {
+        frame.read(reader, numModels);
+    }
+
+    reader.assertEnd();
+}
+
+const vector<AnimationFrame>& Animation::frames() const
+{
+    return _frames;
 }

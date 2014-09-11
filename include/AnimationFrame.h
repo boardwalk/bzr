@@ -15,21 +15,30 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_ANIMATION_H
-#define BZR_ANIMATION_H
+#ifndef BZR_ANIMATIONFRAME_H
+#define BZR_ANIMATIONFRAME_H
 
-#include "AnimationFrame.h"
-#include "Resource.h"
+class BinReader;
 
-class Animation : public ResourceImpl<ResourceType::Animation>
+class AnimationFrame
 {
 public:
-    Animation(uint32_t id, const void* data, size_t size);
+    struct Orientation
+    {
+        glm::vec3 position;
+        glm::quat rotation;
+    };
+    
+    AnimationFrame();
+    AnimationFrame(AnimationFrame&&);
+    AnimationFrame& operator=(AnimationFrame&&);
 
-    const vector<AnimationFrame>& frames() const;
+    void read(BinReader& reader, uint32_t numModels);
+
+    const vector<Orientation>& orientations() const;
 
 private:
-    vector<AnimationFrame> _frames;
+    vector<Orientation> _orientations;
 };
 
 #endif
