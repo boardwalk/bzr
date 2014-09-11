@@ -31,8 +31,8 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
     auto flags = reader.read<uint32_t>();
     assert(flags <= 0xF);
 
-    auto modelCount = reader.read<uint32_t>();
-    _modelInfos.resize(modelCount);
+    auto numModels = reader.read<uint32_t>();
+    _modelInfos.resize(numModels);
 
     for(auto& modelInfo : _modelInfos)
     {
