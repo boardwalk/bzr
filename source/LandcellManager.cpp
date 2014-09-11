@@ -107,6 +107,11 @@ void LandcellManager::load()
             {
                 auto structId = LandcellId(land.id().x(), land.id().y(), (uint16_t)(0x0100 + i));
 
+                if(_data.find(structId) != _data.end())
+                {
+                    continue;
+                }
+
                 auto data = Core::get().cellDat().read(structId.value());
 
                 if(data.empty())
