@@ -33,12 +33,6 @@ uniform vec3 Ks;
 uniform float shininess;
 
 uniform mat3 normalMatrix;
-
-// model space to world space
 uniform mat4 worldMatrix;
-
-// model space to view space
-uniform mat4 worldViewMatrix;
-
-// model space to clip space
-uniform mat4 worldViewProjectionMatrix;
+uniform mat4 viewMatrix;
+uniform mat4 projectionMatrix;

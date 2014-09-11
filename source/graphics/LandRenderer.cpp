@@ -153,13 +153,11 @@ void LandRenderer::renderLand(
     const glm::vec3& position)
 {
     auto worldMat = glm::translate(glm::mat4(), position);
-    auto worldViewMat = viewMat * worldMat;
-    auto worldViewProjectionMat = projectionMat * worldViewMat;
 
-    loadMat3ToUniform(glm::inverseTranspose(glm::mat3(worldViewMat)), _program.getUniform("normalMatrix"));
+    loadMat3ToUniform(glm::inverseTranspose(glm::mat3(viewMat * worldMat)), _program.getUniform("normalMatrix"));
     loadMat4ToUniform(worldMat, _program.getUniform("worldMatrix"));
-    loadMat4ToUniform(worldViewMat, _program.getUniform("worldViewMatrix"));
-    loadMat4ToUniform(worldViewProjectionMat, _program.getUniform("worldViewProjectionMatrix"));
+    loadMat4ToUniform(viewMat, _program.getUniform("viewMatrix"));
+    loadMat4ToUniform(projectionMat, _program.getUniform("projectionMatrix"));
 
     if(!land.renderData())
     {

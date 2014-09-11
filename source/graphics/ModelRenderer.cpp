@@ -180,10 +180,9 @@ void ModelRenderer::renderModel(const Model& model,
         return;
     }
 
-    auto worldViewProjectionMat = projectionMat * viewMat * worldMat;
-
     loadMat4ToUniform(worldMat, _program.getUniform("worldMatrix"));
-    loadMat4ToUniform(worldViewProjectionMat, _program.getUniform("worldViewProjectionMatrix"));
+    loadMat4ToUniform(viewMat, _program.getUniform("viewMatrix"));
+    loadMat4ToUniform(projectionMat, _program.getUniform("projectionMatrix"));
 
     if(!model.renderData())
     {

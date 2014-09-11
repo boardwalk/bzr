@@ -39,7 +39,6 @@ StructureRenderer::StructureRenderer()
 
     _program.use();
 
-
     auto texLocation = _program.getUniform("tex");
     glUniform1i(texLocation, 0);
 }
@@ -84,10 +83,10 @@ void StructureRenderer::renderStructure(
     const glm::quat& rotation)
 {
     auto worldMat = glm::translate(glm::mat4(), position) * glm::mat4_cast(rotation);
-    auto worldViewProjectionMat = projectionMat * viewMat * worldMat;
 
     loadMat4ToUniform(worldMat, _program.getUniform("worldMatrix"));
-    loadMat4ToUniform(worldViewProjectionMat, _program.getUniform("worldViewProjectionMatrix"));
+    loadMat4ToUniform(viewMat, _program.getUniform("viewMatrix"));
+    loadMat4ToUniform(projectionMat, _program.getUniform("projectionMatrix"));
 
     if(!structure.renderData())
     {
