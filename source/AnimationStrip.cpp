@@ -31,6 +31,14 @@ AnimationStrip::AnimationStrip(AnimationStrip&& other)
     _animInfos = move(other._animInfos);
 }
 
+AnimationStrip& AnimationStrip::operator=(AnimationStrip&& other)
+{
+    _id = other._id;
+    _stanceId = other._stanceId;
+    _animInfos = move(other._animInfos);
+    return *this;
+}
+
 void AnimationStrip::read(BinReader& reader)
 {
     _id = reader.read<uint16_t>();
@@ -58,7 +66,7 @@ void AnimationStrip::read(BinReader& reader)
 
         if(animInfo.lastFrame == 0xffffffff)
         {
-            animInfo.lastFrame = animInfo.resource->cast<Animation>().frames().size() - 1;
+            animInfo.lastFrame = static_cast<uint32_t>(animInfo.resource->cast<Animation>().frames().size() - 1);
         }
 
         if(animInfo.framesPerSecond < 0.0f && animInfo.firstFrame < animInfo.lastFrame)

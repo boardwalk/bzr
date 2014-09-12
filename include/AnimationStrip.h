@@ -36,6 +36,7 @@ public:
     
     AnimationStrip();
     AnimationStrip(AnimationStrip&&);
+    AnimationStrip& operator=(AnimationStrip&&);
 
     void read(BinReader& reader);
 

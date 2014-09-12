@@ -31,6 +31,7 @@ public:
     StructureGeomPart();
     StructureGeomPart(StructureGeomPart&&);
     ~StructureGeomPart();
+    StructureGeomPart& operator=(StructureGeomPart&&);
 
     void read(BinReader& reader);
 

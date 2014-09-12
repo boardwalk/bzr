@@ -33,6 +33,7 @@ public:
     
     AnimationFrame();
     AnimationFrame(AnimationFrame&&);
+    AnimationFrame& operator=(AnimationFrame&&);
 
     void read(BinReader& reader, uint32_t numModels);
 
