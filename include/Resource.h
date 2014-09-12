@@ -32,6 +32,7 @@ struct ResourceType
         Texture = 0x06000000,
         TextureLookup8 = 0x08000000,
         AnimationSet = 0x09000000,
+        Sound = 0x0A000000,
         StructureGeom = 0x0D000000
     };
 };

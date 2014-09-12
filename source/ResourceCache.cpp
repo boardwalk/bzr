@@ -23,6 +23,7 @@
 #include "Palette.h"
 #include "Model.h"
 #include "ModelGroup.h"
+#include "Sound.h"
 #include "StructureGeom.h"
 #include "Texture.h"
 #include "TextureLookup5.h"
@@ -60,6 +61,8 @@ static Resource* loadResource(uint32_t resourceId)
             return new TextureLookup8(resourceId, data.data(), data.size());
         case ResourceType::AnimationSet:
             return new AnimationSet(resourceId, data.data(), data.size());
+        case ResourceType::Sound:
+            return new Sound(resourceId, data.data(), data.size());
         case ResourceType::StructureGeom:
             return new StructureGeom(resourceId, data.data(), data.size());
         default:
