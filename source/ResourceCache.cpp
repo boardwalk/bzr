@@ -17,6 +17,7 @@
  */
 #include "ResourceCache.h"
 #include "Animation.h"
+#include "AnimationSet.h"
 #include "Core.h"
 #include "DatFile.h"
 #include "Palette.h"
@@ -57,6 +58,8 @@ static Resource* loadResource(uint32_t resourceId)
             return new Texture(resourceId, data.data(), data.size());
         case ResourceType::TextureLookup8:
             return new TextureLookup8(resourceId, data.data(), data.size());
+        case ResourceType::AnimationSet:
+            return new AnimationSet(resourceId, data.data(), data.size());
         case ResourceType::StructureGeom:
             return new StructureGeom(resourceId, data.data(), data.size());
         default:

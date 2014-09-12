@@ -26,12 +26,6 @@ AnimationFrame::AnimationFrame(AnimationFrame&& other)
     _orientations = move(other._orientations);
 }
 
-AnimationFrame& AnimationFrame::operator=(AnimationFrame&& other)
-{
-    _orientations = move(other._orientations);
-    return *this;
-}
-
 void AnimationFrame::read(BinReader& reader, uint32_t numModels)
 {
     _orientations.resize(numModels);

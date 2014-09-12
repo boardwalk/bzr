@@ -33,15 +33,6 @@ StructureGeomPart::StructureGeomPart(StructureGeomPart&& other)
 StructureGeomPart::~StructureGeomPart()
 {}
 
-StructureGeomPart& StructureGeomPart::operator=(StructureGeomPart&& other)
-{
-    _vertices = move(other._vertices);
-    _triangleFans = move(other._triangleFans);
-    _hitTriangleFans = move(other._hitTriangleFans);
-    _hitTree = move(other._hitTree);
-    return *this;
-}
-
 void StructureGeomPart::read(BinReader& reader)
 {
     auto numTriangleFans = reader.read<uint32_t>();

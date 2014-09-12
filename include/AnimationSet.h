@@ -15,35 +15,21 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_STRUCTUREGEOMPART_H
-#define BZR_STRUCTUREGEOMPART_H
+#ifndef BZR_ANIMATIONSET_H
+#define BZR_ANIMATIONSET_H
 
-#include "Noncopyable.h"
-#include "TriangleFan.h"
-#include "Vertex.h"
+#include "AnimationStrip.h"
+#include "Resource.h"
 
-class BinReader;
-class BSPNode;
-
-class StructureGeomPart : Noncopyable
+class AnimationSet : public ResourceImpl<ResourceType::AnimationSet>
 {
 public:
-    StructureGeomPart();
-    StructureGeomPart(StructureGeomPart&&);
-    ~StructureGeomPart();
-
-    void read(BinReader& reader);
-
-    const vector<Vertex>& vertices() const;
-    const vector<TriangleFan>& triangleFans() const;
-    const vector<TriangleFan>& hitTriangleFans() const;
-    const BSPNode* hitTree() const;
+    AnimationSet(uint32_t id, const void* data, size_t size);
 
 private:
-    vector<Vertex> _vertices;
-    vector<TriangleFan> _triangleFans;
-    vector<TriangleFan> _hitTriangleFans;
-    unique_ptr<BSPNode> _hitTree;
+    vector<AnimationStrip> _strips1;
+    vector<AnimationStrip> _strips2;
+    vector<vector<AnimationStrip>> _comboStrips;
 };
 
 #endif

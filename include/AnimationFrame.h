@@ -18,9 +18,11 @@
 #ifndef BZR_ANIMATIONFRAME_H
 #define BZR_ANIMATIONFRAME_H
 
+#include "Noncopyable.h"
+
 class BinReader;
 
-class AnimationFrame
+class AnimationFrame : Noncopyable
 {
 public:
     struct Orientation
@@ -31,7 +33,6 @@ public:
     
     AnimationFrame();
     AnimationFrame(AnimationFrame&&);
-    AnimationFrame& operator=(AnimationFrame&&);
 
     void read(BinReader& reader, uint32_t numModels);
 
