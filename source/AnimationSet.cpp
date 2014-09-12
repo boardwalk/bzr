@@ -27,10 +27,10 @@ AnimationSet::AnimationSet(uint32_t id, const void* data, size_t size) : Resourc
 
     reader.read<uint32_t>();
     auto numUnknown = reader.read<uint32_t>();
-    reader.read<uint32_t>();
-
-    for(auto ui = 0u; ui < numUnknown * 2 - 1; ui++)
+    
+    for(auto ui = 0u; ui < numUnknown; ui++)
     {
+        reader.read<uint32_t>();
         reader.read<uint32_t>();
     }
 
