@@ -29,7 +29,9 @@ public:
     struct AnimInfo
     {
         ResourcePtr resource;
-        float playSpeed;
+        uint32_t firstFrame;
+        uint32_t lastFrame;
+        float framesPerSecond;
     };
     
     AnimationStrip();

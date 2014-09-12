@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "AnimationStrip.h"
+#include "Animation.h"
 #include "BinReader.h"
 #include "Core.h"
 #include "ResourceCache.h"
@@ -51,18 +52,26 @@ void AnimationStrip::read(BinReader& reader)
     {
         auto animId = reader.read<uint32_t>();
         animInfo.resource = Core::get().resourceCache().get(animId);
+        animInfo.firstFrame = reader.read<uint32_t>();
+        animInfo.lastFrame = reader.read<uint32_t>();
+        animInfo.framesPerSecond = reader.read<float>();
 
-        reader.read<uint32_t>();
-        reader.read<uint32_t>();
+        if(animInfo.lastFrame == 0xffffffff)
+        {
+            animInfo.lastFrame = animInfo.resource->cast<Animation>().frames().size() - 1;
+        }
 
-        animInfo.playSpeed = reader.read<float>();
+        if(animInfo.framesPerSecond < 0.0f && animInfo.firstFrame < animInfo.lastFrame)
+        {
+            swap(animInfo.firstFrame, animInfo.lastFrame);
+        }
     }
 
     if(unk2 == 1 || unk2 == 2)
     {
-        reader.read<uint32_t>();
-        reader.read<uint32_t>();
-        reader.read<uint32_t>();
+        reader.read<float>();
+        reader.read<float>();
+        reader.read<float>();
     }
 }
 
