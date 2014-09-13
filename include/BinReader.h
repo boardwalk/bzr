@@ -36,6 +36,18 @@ public:
         return result;
     }
 
+    template<class T>
+    const T* readPointer(size_t count = 1)
+    {
+        assertRemaining(sizeof(T) * count);
+
+        auto result = (const T*)((const uint8_t*)_data + _position);
+
+        _position += sizeof(T) * count;
+
+        return result;
+    }
+
     uint16_t readVarInt()
     {
         uint16_t val = read<uint8_t>();
@@ -48,16 +60,20 @@ public:
         return val;
     }
 
-    template<class T>
-    const T* readPointer(size_t count = 1)
+    string readString()
     {
-        assertRemaining(sizeof(T) * count);
+        uint32_t count = read<uint16_t>();
 
-        auto result = (const T*)((const uint8_t*)_data + _position);
+        if(count == 0xFFFF)
+        {
+            count = read<uint32_t>();
+        }
 
-        _position += sizeof(T) * count;
+        auto data = readPointer<char>(count);
 
-        return result;
+        align();
+
+        return string(data, data + count);
     }
 
     void align()
