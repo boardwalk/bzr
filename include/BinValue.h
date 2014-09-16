@@ -17,6 +17,97 @@
  */
 #ifndef BZR_BINVALUE_H
 
+struct BinKey
+{
+public:
+    BinKey(uint16_t structIndex, uint16_t fieldIndex)
+    {
+        _data = (uint32_t)structIndex | ((uint32_t)fieldIndex << 16);
+    }
+
+    uint16_t getStructIndex() const
+    {
+        return (uint16_t)_data;
+    }
+
+    uint16_t getFieldIndex() const
+    {
+        return (uint16_t)(_data >> 16);
+    }
+
+    uint32_t hashValue() const
+    {
+        return _data;
+    }
+
+private:
+    uint32_t _data;
+};
+
+class BinValue
+{
+public:
+    BinValue(uint8_t type, uint32_t offset, uint32_t length)
+    {
+        assert(offset <= 0xFFFFFFF);
+        assert(length <= 0xFFFFFFF);
+        _data = (uint64_t)type | ((uint64_t)offset << 8) | ((uint64_t)length << 36);
+    }
+
+    uint8_t getType() const
+    {
+        return (uint8_t)_data;
+    }
+
+    uint32_t getOffset() const
+    {
+        return (uint32_t)(_data >> 8) & 0xFFFFFFF;
+    }
+
+    uint32_t getLength() const
+    {
+        return (uint32_t)(_data >> 36);
+    }
+
+private:
+    uint64_t _data;
+};
+
+class BinIterator
+{
+public:
+    BinIterator(const BinData& data, BinKey key) : _data(data), _key(key)
+    {}
+
+    // Index an array
+    BinIterator operator[](size_t idx) const;
+
+    // Index a structure
+    BinIterator operator[](const string& key) const;
+
+    // Convert to a primitive
+    template<class T>
+    const T& cast() const
+    {
+        auto it = _data.getMapping().find(_key);
+        assert(it != _data.getMapping().end());
+        assert(it->getType() == BinTypeTraits<T>::type);
+        return *(const T*)(_data.getData().data() + it->getOffset());
+    }
+
+    // Returns the number of elements in the array or structure
+    size_t size() const
+    {
+    }
+
+private:
+    const BinData& _data;
+    BinKey _key;
+
+};
+
+class BinSchema
+
 class BinSchema
 {
 public:
