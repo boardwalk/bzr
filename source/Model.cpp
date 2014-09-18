@@ -26,13 +26,13 @@
 
 static vector<TriangleFan> readTriangleFans(BinReader& reader)
 {
-    auto numTriangleFans = reader.readVarInt();
+    uint16_t numTriangleFans = reader.readVarInt();
 
     vector<TriangleFan> triangleFans(numTriangleFans);
 
-    for(auto i = 0u; i < numTriangleFans; i++)
+    for(uint16_t i = 0; i < numTriangleFans; i++)
     {
-        auto triangleFanNum = reader.read<uint16_t>();
+        uint16_t triangleFanNum = reader.read<uint16_t>();
         assert(triangleFanNum == i);
 
         triangleFans[i].read(reader);
@@ -45,36 +45,36 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), nee
 {
     BinReader reader(data, size);
 
-    auto resourceId = reader.read<uint32_t>();
+    uint32_t resourceId = reader.read<uint32_t>();
     assert(resourceId == id);
 
-    auto flags = reader.read<uint32_t>();
+    uint32_t flags = reader.read<uint32_t>();
     assert(flags == 0x2 || flags == 0x3 || flags == 0xA || flags == 0xB);
 
-    auto numTextures = reader.read<uint8_t>();
+    uint8_t numTextures = reader.read<uint8_t>();
     textures_.resize(numTextures);
 
-    for(auto& texture : textures_)
+    for(ResourcePtr& texture : textures_)
     {
-        auto textureId = reader.read<uint32_t>();
+        uint32_t textureId = reader.read<uint32_t>();
         texture = Core::get().resourceCache().get(textureId);
 
-        auto hasAlpha = texture->cast<TextureLookup8>().textureLookup5().texture().image().hasAlpha();
+        bool hasAlpha = texture->cast<TextureLookup8>().textureLookup5().texture().image().hasAlpha();
         needsDepthSort_ = needsDepthSort_ || hasAlpha;
     }
 
-    auto one = reader.read<uint32_t>();
+    uint32_t one = reader.read<uint32_t>();
     assert(one == 1);
 
-    auto numVertices = reader.read<uint16_t>();
+    uint16_t numVertices = reader.read<uint16_t>();
     vertices_.resize(numVertices);
 
-    auto flags2 = reader.read<uint16_t>();
+    uint16_t flags2 = reader.read<uint16_t>();
     assert(flags2 == 0x0000 || flags2 == 0x8000);
 
-    for(auto i = 0u; i < numVertices; i++)
+    for(uint16_t i = 0; i < numVertices; i++)
     {
-        auto vertexNum = reader.read<uint16_t>();
+        uint16_t vertexNum = reader.read<uint16_t>();
         assert(vertexNum == i);
 
         vertices_[i].read(reader);

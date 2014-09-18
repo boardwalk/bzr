@@ -31,7 +31,7 @@
 
 static Resource* loadResource(uint32_t resourceId)
 {
-    auto data = Core::get().portalDat().read(resourceId);
+    vector<uint8_t> data = Core::get().portalDat().read(resourceId);
 
     if(data.empty())
     {
@@ -72,18 +72,14 @@ static Resource* loadResource(uint32_t resourceId)
 
 ResourcePtr ResourceCache::get(uint32_t resourceId)
 {
-    ResourcePtr sharedPtr;
+    weak_ptr<Resource>& weakPtr = data_[resourceId];
 
-    auto& weakPtr = data_[resourceId];
+    ResourcePtr sharedPtr = weakPtr.lock();
 
-    if(weakPtr.expired())
+    if(!sharedPtr)
     {
         sharedPtr.reset(loadResource(resourceId));
         weakPtr = sharedPtr;
-    }
-    else
-    {
-        sharedPtr = weakPtr.lock();
     }
 
     return sharedPtr;

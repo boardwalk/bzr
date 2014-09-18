@@ -128,7 +128,7 @@ void Core::init()
     landcellManager_->setCenter(LandcellId(0x31, 0xD6));
 
 #if 0
-    for(auto resourceId : portalDat_->list())
+    for(uint32_t resourceId : portalDat_->list())
     {
         if((resourceId & 0xFF000000) > 0x0D000000)
         {

@@ -26,7 +26,7 @@ TextureLookup8::TextureLookup8(uint32_t id, const void* data, size_t size) : Res
 {
     BinReader reader(data, size);
 
-    auto flags = reader.read<uint8_t>();
+    uint8_t flags = reader.read<uint8_t>();
     assert(flags == 0x01 || flags == 0x02 || flags == 0x04 || flags == 0x11 || flags == 0x12 || flags == 0x14);
 
     reader.read<uint8_t>();
@@ -42,16 +42,16 @@ TextureLookup8::TextureLookup8(uint32_t id, const void* data, size_t size) : Res
     }
     else
     {
-        auto textureId = reader.read<uint32_t>();
+        uint32_t textureId = reader.read<uint32_t>();
         textureLookup5_ = Core::get().resourceCache().get(textureId);
         assert(textureLookup5_->resourceType() == ResourceType::TextureLookup5);
 
-        auto zero = reader.read<uint32_t>();
+        uint32_t zero = reader.read<uint32_t>();
         assert(zero == 0);
     }
 
     // I suspect these may be texture coordinates within the texture
-    auto f1 = reader.read<float>();
+    float f1 = reader.read<float>();
 
     if(flags & 0x10)
     {

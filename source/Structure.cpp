@@ -25,32 +25,32 @@ Structure::Structure(const void* data, size_t size)
 {
     BinReader reader(data, size);
 
-    auto resourceId = reader.read<uint32_t>();
+    uint32_t resourceId = reader.read<uint32_t>();
     id_ = LandcellId(resourceId);
 
     // 0x1 above ground
     // 0x2 has objects
     // 0x4 unknown
     // 0x8 unknown, extra 4 bytes
-    auto flags = reader.read<uint32_t>();
+    uint32_t flags = reader.read<uint32_t>();
     assert(flags <= 0xF);
 
-    auto resourceId2 = reader.read<uint32_t>();
+    uint32_t resourceId2 = reader.read<uint32_t>();
     assert(resourceId2 == resourceId);
 
-    auto numTextures = reader.read<uint8_t>();
+    uint8_t numTextures = reader.read<uint8_t>();
     textures_.resize(numTextures);
 
-    auto numConnected = reader.read<uint8_t>();
-    auto numVisible = reader.read<uint16_t>();
+    uint8_t numConnected = reader.read<uint8_t>();
+    uint16_t numVisible = reader.read<uint16_t>();
 
-    for(auto& texture : textures_)
+    for(ResourcePtr& texture : textures_)
     {
-        auto textureId = reader.read<uint16_t>();
+        uint16_t textureId = reader.read<uint16_t>();
         texture = Core::get().resourceCache().get(ResourceType::TextureLookup8 | textureId);
     }
 
-    auto geometryId = reader.read<uint16_t>();
+    uint16_t geometryId = reader.read<uint16_t>();
     geometry_ = Core::get().resourceCache().get(ResourceType::StructureGeom | geometryId);
 
     partNum_ = reader.read<uint16_t>();
@@ -64,7 +64,7 @@ Structure::Structure(const void* data, size_t size)
     rotation_.y = reader.read<float>();
     rotation_.z = reader.read<float>();
 
-    for(auto ci = 0u; ci < numConnected; ci++)
+    for(uint8_t ci = 0; ci < numConnected; ci++)
     {
         reader.read<uint16_t>();
         reader.read<uint16_t>();
@@ -72,17 +72,17 @@ Structure::Structure(const void* data, size_t size)
         reader.read<uint16_t>();
     }
 
-    for(auto vi = 0u; vi < numVisible; vi++)
+    for(uint16_t vi = 0; vi < numVisible; vi++)
     {
         reader.read<uint16_t>(); // structure index
     }
 
     if(flags & 2)
     {
-        auto numDoodads = reader.read<uint32_t>();
+        uint32_t numDoodads = reader.read<uint32_t>();
         doodads_.resize(numDoodads);
 
-        for(auto& doodad : doodads_)
+        for(Doodad& doodad : doodads_)
         {
             doodad.read(reader);
         }

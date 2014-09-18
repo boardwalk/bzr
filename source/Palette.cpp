@@ -22,14 +22,14 @@ Palette::Palette(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 {
     BinReader reader(data, size);
 
-    auto resourceId = reader.read<uint32_t>();
+    uint32_t resourceId = reader.read<uint32_t>();
     assert(resourceId == id);
 
-    auto numColors = reader.read<uint32_t>();
+    uint32_t numColors = reader.read<uint32_t>();
     assert(numColors == 2048);
     colors_.resize(numColors);
 
-    for(auto& color : colors_)
+    for(Color& color : colors_)
     {
         color.blue = reader.read<uint8_t>();
         color.green = reader.read<uint8_t>();

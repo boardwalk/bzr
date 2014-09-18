@@ -20,7 +20,7 @@
 
 void Vertex::read(BinReader& reader)
 {
-    auto numTexCoords = reader.read<uint16_t>();
+    uint16_t numTexCoords = reader.read<uint16_t>();
     texCoords.resize(numTexCoords);
 
     position.x = reader.read<float>();
@@ -31,7 +31,7 @@ void Vertex::read(BinReader& reader)
     normal.y = reader.read<float>();
     normal.z = reader.read<float>();
 
-    for(auto& texCoord : texCoords)
+    for(glm::vec2& texCoord : texCoords)
     {
         texCoord.x = reader.read<float>();
         texCoord.y = reader.read<float>();

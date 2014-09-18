@@ -39,7 +39,7 @@ StructureRenderer::StructureRenderer()
 
     program_.use();
 
-    auto texLocation = program_.getUniform("tex");
+    GLuint texLocation = program_.getUniform("tex");
     glUniform1i(texLocation, 0);
 }
 

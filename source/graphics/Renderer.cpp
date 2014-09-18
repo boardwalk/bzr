@@ -51,7 +51,7 @@ Renderer::Renderer() : videoInit_(false), window_(nullptr), context_(nullptr)
 
     Config& config = Core::get().config();
 
-    auto multisamples = config.getInt("Renderer.multisamples", 16);
+    int multisamples = config.getInt("Renderer.multisamples", 16);
 
     if(multisamples != 0)
     {
@@ -70,7 +70,7 @@ Renderer::Renderer() : videoInit_(false), window_(nullptr), context_(nullptr)
     }
 
 #ifdef _MSC_VER
-    auto glewErr = glewInit();
+    GLenum glewErr = glewInit();
 
     if(glewErr != GLEW_OK)
     {
@@ -82,7 +82,7 @@ Renderer::Renderer() : videoInit_(false), window_(nullptr), context_(nullptr)
 
     fieldOfView_ = config.getFloat("Renderer.fieldOfView", 90.0);
 
-    auto textureFiltering = config.getString("Renderer.textureFiltering", "trilinear");
+    string textureFiltering = config.getString("Renderer.textureFiltering", "trilinear");
 
     if(textureFiltering == "bilinear")
     {
@@ -186,7 +186,7 @@ void Renderer::render(fp_t interp)
     SDL_GetWindowSize(window_, &windowWidth, &windowHeight);
 
     // projection * view * model * vertex
-    auto projectionMat = glm::perspective(fieldOfView_ / fp_t(180.0) * pi(), fp_t(windowWidth) / fp_t(windowHeight), fp_t(0.1), fp_t(1000.0));
+    glm::mat4 projectionMat = glm::perspective(fieldOfView_ / fp_t(180.0) * pi(), fp_t(windowWidth) / fp_t(windowHeight), fp_t(0.1), fp_t(1000.0));
 
     const glm::mat4& viewMat = Core::get().camera().viewMatrix();
 
@@ -217,11 +217,11 @@ bool Renderer::renderHitGeometry() const
 
 void Renderer::createWindow()
 {
-    auto& config = Core::get().config();
-    auto displayNum = config.getInt("Renderer.displayNum", 0);
-    auto windowMode = config.getString("Renderer.windowMode", "windowed");
-    auto width = config.getInt("Renderer.width", 1024);
-    auto height = config.getInt("Renderer.height", 768);
+    Config& config = Core::get().config();
+    int displayNum = config.getInt("Renderer.displayNum", 0);
+    string windowMode = config.getString("Renderer.windowMode", "windowed");
+    int width = config.getInt("Renderer.width", 1024);
+    int height = config.getInt("Renderer.height", 768);
 
     if(displayNum < 0 || displayNum >= SDL_GetNumVideoDisplays())
     {
@@ -287,9 +287,9 @@ static glm::mat4 convertOvrMatrix4f(const ovrMatrix4f& mat)
 {
     glm::mat4 result;
 
-    for(auto j = 0; j < 4; j++)
+    for(int j = 0; j < 4; j++)
     {
-        for(auto i = 0; i < 4; i++)
+        for(int i = 0; i < 4; i++)
         {
             result[i][j] = mat.M[i][j];
         }
@@ -302,7 +302,7 @@ void Renderer::initOVR()
 {
     ovr_Initialize();
 
-    auto& config = Core::get().config();
+    Config& config = Core::get().config();
 
     if(!config.getBool("Renderer.OVR", false))
     {
@@ -317,8 +317,8 @@ void Renderer::initOVR()
         hmd_ = ovrHmd_CreateDebug(ovrHmd_DK2);
     }
 
-    auto leftEyeTexSize = ovrHmd_GetFovTextureSize(hmd_, ovrEye_Left, hmd_->DefaultEyeFov[ovrEye_Left], 1.0f);
-    auto rightEyeTexSize = ovrHmd_GetFovTextureSize(hmd_, ovrEye_Right, hmd_->DefaultEyeFov[ovrEye_Right], 1.0f);
+    ovrSizei leftEyeTexSize = ovrHmd_GetFovTextureSize(hmd_, ovrEye_Left, hmd_->DefaultEyeFov[ovrEye_Left], 1.0f);
+    ovrSizei rightEyeTexSize = ovrHmd_GetFovTextureSize(hmd_, ovrEye_Right, hmd_->DefaultEyeFov[ovrEye_Right], 1.0f);
 
     renderTexSize_.w = leftEyeTexSize.w + rightEyeTexSize.w;
     renderTexSize_.h = max(leftEyeTexSize.h, rightEyeTexSize.h);
@@ -440,20 +440,20 @@ void Renderer::renderOVR(fp_t interp)
 
     ovrPosef eyePose[ovrEye_Count];
 
-    for(auto i = 0; i < ovrEye_Count; i++)
+    for(int i = 0; i < ovrEye_Count; i++)
     {
-        auto eye = hmd_->EyeRenderOrder[i];
+        ovrEyeType eye = hmd_->EyeRenderOrder[i];
 
         glViewport(eyeViewport_[eye].Pos.x, eyeViewport_[eye].Pos.y,
                    eyeViewport_[eye].Size.w, eyeViewport_[eye].Size.h);
 
-        auto projectionMat = convertOvrMatrix4f(ovrMatrix4f_Projection(eyeRenderDesc_[eye].Fov, 0.1f, 1000.0f, /*rightHanded*/ true));
+        glm::mat4 projectionMat = convertOvrMatrix4f(ovrMatrix4f_Projection(eyeRenderDesc_[eye].Fov, 0.1f, 1000.0f, /*rightHanded*/ true));
 
         eyePose[eye] = ovrHmd_GetEyePose(hmd_, eye);
         Core::get().camera().setHeadOrientation(glm::conjugate(convertOvrQuatf(eyePose[eye].Orientation)));
         Core::get().camera().setHeadPosition(convertOvrVector3f(eyePose[eye].Position));
 
-        auto viewMat = glm::translate(glm::mat4(), convertOvrVector3f(eyeRenderDesc_[eye].ViewAdjust));
+        glm::mat4 viewMat = glm::translate(glm::mat4(), convertOvrVector3f(eyeRenderDesc_[eye].ViewAdjust));
         viewMat = viewMat * Core::get().camera().viewMatrix();
 
         skyRenderer_->render();

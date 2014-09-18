@@ -44,37 +44,37 @@ StructureGeomPart& StructureGeomPart::operator=(StructureGeomPart&& other)
 
 void StructureGeomPart::read(BinReader& reader)
 {
-    auto numTriangleFans = reader.read<uint32_t>();
+    uint32_t numTriangleFans = reader.read<uint32_t>();
     triangleFans_.resize(numTriangleFans);
 
-    auto numHitTriangleFans = reader.read<uint32_t>();
+    uint32_t numHitTriangleFans = reader.read<uint32_t>();
     hitTriangleFans_.resize(numHitTriangleFans);
 
-    auto numShorts = reader.read<uint32_t>();
+    uint32_t numShorts = reader.read<uint32_t>();
 
-    auto unk5 = reader.read<uint32_t>();
+    uint32_t unk5 = reader.read<uint32_t>();
     assert(unk5 == 1);
 
-    auto numVertices = reader.read<uint32_t>();
+    uint32_t numVertices = reader.read<uint32_t>();
     vertices_.resize(numVertices);
 
-    for(auto vi = 0u; vi < numVertices; vi++)
+    for(uint32_t vi = 0; vi < numVertices; vi++)
     {
-        auto vertexNum = reader.read<uint16_t>();
+        uint16_t vertexNum = reader.read<uint16_t>();
         assert(vertexNum == vi);
 
         vertices_[vi].read(reader);
     }
 
-    for(auto tfi = 0u; tfi < numTriangleFans; tfi++)
+    for(uint32_t tfi = 0; tfi < numTriangleFans; tfi++)
     {
-        auto triangleFanNum = reader.read<uint16_t>();
+        uint16_t triangleFanNum = reader.read<uint16_t>();
         assert(triangleFanNum == tfi);
 
         triangleFans_[tfi].read(reader);
     }
 
-    for(auto si = 0u; si < numShorts; si++)
+    for(uint32_t si = 0; si < numShorts; si++)
     {
         reader.read<uint16_t>();
     }
@@ -82,9 +82,9 @@ void StructureGeomPart::read(BinReader& reader)
 
     readBSP(reader, 2);
 
-    for(auto htfi = 0u; htfi < numHitTriangleFans; htfi++)
+    for(uint32_t htfi = 0; htfi < numHitTriangleFans; htfi++)
     {
-        auto triangleFanNum = reader.read<uint16_t>();
+        uint16_t triangleFanNum = reader.read<uint16_t>();
         assert(triangleFanNum == htfi);
 
         hitTriangleFans_[htfi].read(reader);
@@ -92,7 +92,7 @@ void StructureGeomPart::read(BinReader& reader)
 
     readBSP(reader, 1);
 
-    auto unk7 = reader.read<uint32_t>();
+    uint32_t unk7 = reader.read<uint32_t>();
     assert(unk7 == 0 || unk7 == 1);
 
     if(unk7)

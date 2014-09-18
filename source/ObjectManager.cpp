@@ -19,7 +19,7 @@
 
 Object& ObjectManager::operator[](ObjectId id)
 {
-    auto& ptr = data_[id];
+    unique_ptr<Object>& ptr = data_[id];
 
     if(!ptr)
     {

@@ -16,7 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "DatFile.h"
-
+#include <algorithm>
+ 
 static const size_t HEADER_OFFSET = 0x140;
 static const uint32_t HEADER_MAGIC_NUMBER = 0x5442; // 'BT\0\0'
 static const int MAX_NODE_COUNT = 62;

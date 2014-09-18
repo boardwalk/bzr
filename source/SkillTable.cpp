@@ -22,22 +22,22 @@
 
 SkillTable::SkillTable()
 {
-    auto data = Core::get().portalDat().read(0x0e000004);
+    vector<uint8_t> data = Core::get().portalDat().read(0x0e000004);
 
     BinReader reader(data.data(), data.size());
 
-    auto resourceId = reader.read<uint32_t>();
+    uint32_t resourceId = reader.read<uint32_t>();
     assert(resourceId == 0x0e000004);
 
-    auto numSkills = reader.read<uint16_t>();
+    uint16_t numSkills = reader.read<uint16_t>();
 
-    auto unk1 = reader.read<uint16_t>();
+    uint16_t unk1 = reader.read<uint16_t>();
     assert(unk1 == 0x20);
 
-    for(auto si = 0u; si < numSkills; si++)
+    for(uint16_t si = 0; si < numSkills; si++)
     {
-        auto id = reader.read<uint32_t>();
-        auto& skill = skills_[id];
+        uint32_t id = reader.read<uint32_t>();
+        Skill& skill = skills_[id];
 
         skill.description = reader.readString();
         skill.name = reader.readString();
@@ -49,20 +49,20 @@ SkillTable::SkillTable()
         skill.specCost = reader.read<uint32_t>();
         skill.type = (SkillType::Value)reader.read<uint32_t>();
 
-        auto unk2 = reader.read<uint32_t>();
+        uint32_t unk2 = reader.read<uint32_t>();
         assert(unk2 == 1);
 
-        auto usableUntrained = reader.read<uint32_t>();
+        uint32_t usableUntrained = reader.read<uint32_t>();
         assert(usableUntrained == 1 || usableUntrained == 2);
         skill.usableUntrained = (usableUntrained == 1);
 
-        auto unk3 = reader.read<uint32_t>();
+        uint32_t unk3 = reader.read<uint32_t>();
         assert(unk3 == 0);
 
-        auto hasAttrib1 = reader.read<uint32_t>();
+        uint32_t hasAttrib1 = reader.read<uint32_t>();
         assert(hasAttrib1 == 0 || hasAttrib1 == 1);
 
-        auto hasAttrib2 = reader.read<uint32_t>();
+        uint32_t hasAttrib2 = reader.read<uint32_t>();
         assert(hasAttrib2 == 0 || hasAttrib2 == 1);
 
         skill.attribDivisor = reader.read<uint32_t>();
@@ -72,7 +72,7 @@ SkillTable::SkillTable()
         reader.read<double>();
         reader.read<double>();
 
-        auto unk4 = reader.read<double>();
+        double unk4 = reader.read<double>();
         assert(unk4 == 1.0);
     }
 

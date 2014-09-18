@@ -25,24 +25,24 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
 {
     BinReader reader(data, size);
 
-    auto resourceId = reader.read<uint32_t>();
+    uint32_t resourceId = reader.read<uint32_t>();
     assert(resourceId == id);
 
-    auto flags = reader.read<uint32_t>();
+    uint32_t flags = reader.read<uint32_t>();
     assert(flags <= 0xF);
 
-    auto numModels = reader.read<uint32_t>();
+    uint32_t numModels = reader.read<uint32_t>();
     modelInfos_.resize(numModels);
 
-    for(auto& modelInfo : modelInfos_)
+    for(ModelInfo& modelInfo : modelInfos_)
     {
-        auto modelId = reader.read<uint32_t>();
+        uint32_t modelId = reader.read<uint32_t>();
         modelInfo.resource = Core::get().resourceCache().get(modelId);
     }
 
     if(flags & 1)
     {
-        for(auto& modelInfo : modelInfos_)
+        for(ModelInfo& modelInfo : modelInfos_)
         {
             modelInfo.parent = reader.read<uint32_t>();
         }
@@ -50,7 +50,7 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
 
     if(flags & 2)
     {
-        for(auto& modelInfo : modelInfos_)
+        for(ModelInfo& modelInfo : modelInfos_)
         {
             modelInfo.scale.x = reader.read<float>();
             modelInfo.scale.y = reader.read<float>();
@@ -58,9 +58,9 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
         }
     }
 
-    auto numExtendedLocs = reader.read<uint32_t>();
+    uint32_t numExtendedLocs = reader.read<uint32_t>();
 
-    for(auto i = 0u; i < numExtendedLocs; i++)
+    for(uint32_t i = 0; i < numExtendedLocs; i++)
     {
         reader.read<uint32_t>();
         reader.read<uint32_t>();
@@ -78,13 +78,13 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
         assert(glm::length2(q) >= 0.99 && glm::length2(q) <= 1.01);
     }
 
-    auto unk1 = reader.read<uint32_t>();
+    uint32_t unk1 = reader.read<uint32_t>();
     assert(unk1 == 0);
 
     reader.read<uint32_t>();
     reader.read<uint32_t>();
 
-    for(auto& modelInfo : modelInfos_)
+    for(ModelInfo& modelInfo : modelInfos_)
     {
         modelInfo.position.x = reader.read<float>();
         modelInfo.position.y = reader.read<float>();

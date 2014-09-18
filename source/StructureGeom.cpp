@@ -22,17 +22,17 @@ StructureGeom::StructureGeom(uint32_t id, const void* data, size_t size) : Resou
 {
     BinReader reader(data, size);
 
-    auto resourceId = reader.read<uint32_t>();
+    uint32_t resourceId = reader.read<uint32_t>();
     assert(resourceId == id);
 
-    auto numParts = reader.read<uint32_t>();
+    uint32_t numParts = reader.read<uint32_t>();
     parts_.resize(numParts);
 
-    for(auto pi = 0u; pi < numParts; pi++)
+    for(uint32_t pi = 0; pi < numParts; pi++)
     {
-        auto& part = parts_[pi];
+        StructureGeomPart& part = parts_[pi];
 
-        auto partNum = reader.read<uint32_t>();
+        uint32_t partNum = reader.read<uint32_t>();
         assert(partNum == pi);
 
         part.read(reader);

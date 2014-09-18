@@ -30,12 +30,14 @@ public:
 
     const Image& image() const;
     const ResourcePtr& palette() const;
-    unique_ptr<Destructable>& renderData();
+
+    unique_ptr<Destructable>& renderData() const;
 
 private:
     Image image_;
     ResourcePtr palette_;
-    unique_ptr<Destructable> renderData_;
+
+    mutable unique_ptr<Destructable> renderData_;
 };
 
 #endif

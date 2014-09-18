@@ -75,7 +75,7 @@ void MeshRenderData::render()
 
     for(Batch& batch : batches_)
     {
-        auto& texture = const_cast<Texture&>(batch.texture->cast<TextureLookup8>().textureLookup5().texture());
+        const Texture& texture = batch.texture->cast<TextureLookup8>().textureLookup5().texture();
 
         if(!texture.renderData())
         {
