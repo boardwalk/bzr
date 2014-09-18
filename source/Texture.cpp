@@ -47,35 +47,35 @@ Texture::Texture(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
     if(format == ImageFormat::Paletted16)
     {
         auto paletteId = reader.read<uint32_t>();
-        _palette = Core::get().resourceCache().get(paletteId);
+        palette_ = Core::get().resourceCache().get(paletteId);
     }
 
     reader.assertEnd();
 
-    _image.init(format, width, height, pixels);
+    image_.init(format, width, height, pixels);
 
-    if(_palette)
+    if(palette_)
     {
-        _image.applyPalette(_palette->cast<Palette>());
+        image_.applyPalette(palette_->cast<Palette>());
     }
 }
 
 Texture::Texture(uint32_t bgra) : ResourceImpl(ResourceType::Texture | 0xFFFF)
 {
-    _image.init(ImageFormat::BGRA32, 1, 1, &bgra);
+    image_.init(ImageFormat::BGRA32, 1, 1, &bgra);
 }
 
 const Image& Texture::image() const
 {
-    return _image;
+    return image_;
 }
 
 const ResourcePtr& Texture::palette() const
 {
-    return _palette;
+    return palette_;
 }
 
 unique_ptr<Destructable>& Texture::renderData()
 {
-    return _renderData;
+    return renderData_;
 }

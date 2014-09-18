@@ -39,7 +39,7 @@ private:
         const glm::vec3& position,
         const glm::quat& rotation);
 
-    Program _program;
+    Program program_;
 };
 
 #endif

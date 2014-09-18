@@ -54,14 +54,14 @@ public:
 private:
     void initDoodads();
 
-    Data _data;
-    uint32_t _numStructures;
+    Data data_;
+    uint32_t numStructures_;
 
-    vector<uint16_t> _offsetMap;
-    fp_t _offsetMapBase;
-    fp_t _offsetMapScale;
+    vector<uint16_t> offsetMap_;
+    fp_t offsetMapBase_;
+    fp_t offsetMapScale_;
 
-    vector<uint8_t> _normalMap;
+    vector<uint8_t> normalMap_;
 };
 
 #endif

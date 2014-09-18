@@ -40,7 +40,7 @@ public:
     const vector<ModelInfo>& modelInfos() const;
 
 private:
-    vector<ModelInfo> _modelInfos;
+    vector<ModelInfo> modelInfos_;
 };
 
 #endif

@@ -41,7 +41,7 @@ static vector<TriangleFan> readTriangleFans(BinReader& reader)
     return triangleFans;
 }
 
-Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _needsDepthSort(false)
+Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), needsDepthSort_(false)
 {
     BinReader reader(data, size);
 
@@ -52,22 +52,22 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _ne
     assert(flags == 0x2 || flags == 0x3 || flags == 0xA || flags == 0xB);
 
     auto numTextures = reader.read<uint8_t>();
-    _textures.resize(numTextures);
+    textures_.resize(numTextures);
 
-    for(auto& texture : _textures)
+    for(auto& texture : textures_)
     {
         auto textureId = reader.read<uint32_t>();
         texture = Core::get().resourceCache().get(textureId);
 
         auto hasAlpha = texture->cast<TextureLookup8>().textureLookup5().texture().image().hasAlpha();
-        _needsDepthSort = _needsDepthSort || hasAlpha;
+        needsDepthSort_ = needsDepthSort_ || hasAlpha;
     }
 
     auto one = reader.read<uint32_t>();
     assert(one == 1);
 
     auto numVertices = reader.read<uint16_t>();
-    _vertices.resize(numVertices);
+    vertices_.resize(numVertices);
 
     auto flags2 = reader.read<uint16_t>();
     assert(flags2 == 0x0000 || flags2 == 0x8000);
@@ -77,7 +77,7 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _ne
         auto vertexNum = reader.read<uint16_t>();
         assert(vertexNum == i);
 
-        _vertices[i].read(reader);
+        vertices_[i].read(reader);
     }
 
     if(flags == 0x2 || flags == 0xA)
@@ -89,8 +89,8 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _ne
 
     if(flags & 0x1)
     {
-        _hitTriangleFans = readTriangleFans(reader);
-        _hitTree = readBSP(reader, 1);
+        hitTriangleFans_ = readTriangleFans(reader);
+        hitTree_ = readBSP(reader, 1);
     }
 
     if(flags == 0x3 || flags == 0xB)
@@ -102,7 +102,7 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), _ne
 
     if(flags & 0x2)
     {
-        _triangleFans = readTriangleFans(reader);
+        triangleFans_ = readTriangleFans(reader);
         readBSP(reader, 0);
     }
 
@@ -120,35 +120,35 @@ Model::~Model()
 
 const vector<ResourcePtr>& Model::textures() const
 {
-    return _textures;
+    return textures_;
 }
 
 const vector<Vertex>& Model::vertices() const
 {
-    return _vertices;
+    return vertices_;
 }
 
 const vector<TriangleFan>& Model::triangleFans() const
 {
-    return _triangleFans;
+    return triangleFans_;
 }
 
 const vector<TriangleFan>& Model::hitTriangleFans() const
 {
-    return _hitTriangleFans;
+    return hitTriangleFans_;
 }
 
 const BSPNode* Model::hitTree() const
 {
-    return _hitTree.get();
+    return hitTree_.get();
 }
 
 bool Model::needsDepthSort() const
 {
-    return _needsDepthSort;
+    return needsDepthSort_;
 }
 
 unique_ptr<Destructable>& Model::renderData() const
 {
-    return _renderData;
+    return renderData_;
 }

@@ -27,9 +27,9 @@ Palette::Palette(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 
     auto numColors = reader.read<uint32_t>();
     assert(numColors == 2048);
-    _colors.resize(numColors);
+    colors_.resize(numColors);
 
-    for(auto& color : _colors)
+    for(auto& color : colors_)
     {
         color.blue = reader.read<uint8_t>();
         color.green = reader.read<uint8_t>();
@@ -42,5 +42,5 @@ Palette::Palette(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 
 const vector<Palette::Color>& Palette::colors() const
 {
-    return _colors;
+    return colors_;
 }

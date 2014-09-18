@@ -19,7 +19,7 @@
 
 Object& ObjectManager::operator[](ObjectId id)
 {
-    auto& ptr = _data[id];
+    auto& ptr = data_[id];
 
     if(!ptr)
     {
@@ -31,15 +31,15 @@ Object& ObjectManager::operator[](ObjectId id)
 
 ObjectManager::iterator ObjectManager::find(ObjectId id)
 {
-    return _data.find(id);
+    return data_.find(id);
 }
 
 ObjectManager::iterator ObjectManager::begin()
 {
-    return _data.begin();
+    return data_.begin();
 }
 
 ObjectManager::iterator ObjectManager::end()
 {
-    return _data.end();
+    return data_.end();
 }

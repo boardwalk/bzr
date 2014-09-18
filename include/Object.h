@@ -32,8 +32,8 @@ public:
     const Location& location() const;
 
 private:
-    ResourcePtr _model;
-    Location _location;
+    ResourcePtr model_;
+    Location location_;
 };
 
 #endif

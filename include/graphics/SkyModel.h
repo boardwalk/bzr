@@ -59,20 +59,20 @@ public:
 
 private:
     // zenith angle of the sun
-    fp_t _theta_s;
+    fp_t theta_s_;
 
     // azimuth angle of the sun
-    fp_t _phi_s;
+    fp_t phi_s_;
 
     // A, B, C, D and E coefficients for F()
-    fp_t _coeffs_Y[5];
-    fp_t _coeffs_x[5];
-    fp_t _coeffs_y[5];
+    fp_t coeffs_Y_[5];
+    fp_t coeffs_x_[5];
+    fp_t coeffs_y_[5];
 
     // color at zenith
-    fp_t _Y_z;
-    fp_t _x_z;
-    fp_t _y_z;
+    fp_t Y_z_;
+    fp_t x_z_;
+    fp_t y_z_;
 };
 
 #endif

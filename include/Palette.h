@@ -36,7 +36,7 @@ public:
     const vector<Color>& colors() const;
 
 private:
-    vector<Color> _colors;
+    vector<Color> colors_;
 };
 
 #endif

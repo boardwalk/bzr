@@ -21,31 +21,31 @@
 #include "Core.h"
 #include "ResourceCache.h"
 
-AnimationStrip::AnimationStrip() : _id(0), _stanceId(0)
+AnimationStrip::AnimationStrip() : id_(0), stanceId_(0)
 {}
 
 AnimationStrip::AnimationStrip(AnimationStrip&& other)
 {
-    _id = other._id;
-    _stanceId = other._stanceId;
-    _animInfos = move(other._animInfos);
+    id_ = other.id_;
+    stanceId_ = other.stanceId_;
+    animInfos_ = move(other.animInfos_);
 }
 
 AnimationStrip& AnimationStrip::operator=(AnimationStrip&& other)
 {
-    _id = other._id;
-    _stanceId = other._stanceId;
-    _animInfos = move(other._animInfos);
+    id_ = other.id_;
+    stanceId_ = other.stanceId_;
+    animInfos_ = move(other.animInfos_);
     return *this;
 }
 
 void AnimationStrip::read(BinReader& reader)
 {
-    _id = reader.read<uint16_t>();
-    _stanceId = reader.read<uint16_t>();
+    id_ = reader.read<uint16_t>();
+    stanceId_ = reader.read<uint16_t>();
 
     auto numAnims = reader.read<uint8_t>();
-    _animInfos.resize(numAnims);
+    animInfos_.resize(numAnims);
 
     auto unk1 = reader.read<uint8_t>();
     assert(unk1 == 0 || unk1 == 1 || unk1 == 2);
@@ -56,7 +56,7 @@ void AnimationStrip::read(BinReader& reader)
     auto unk3 = reader.read<uint8_t>();
     assert(unk3 == 0);
 
-    for(auto& animInfo : _animInfos)
+    for(auto& animInfo : animInfos_)
     {
         auto animId = reader.read<uint32_t>();
         animInfo.resource = Core::get().resourceCache().get(animId);
@@ -85,15 +85,15 @@ void AnimationStrip::read(BinReader& reader)
 
 uint16_t AnimationStrip::id() const
 {
-    return _id;
+    return id_;
 }
 
 uint16_t AnimationStrip::stanceId() const
 {
-    return _stanceId;
+    return stanceId_;
 }
 
 const vector<AnimationStrip::AnimInfo>& AnimationStrip::animInfos() const
 {
-    return _animInfos;
+    return animInfos_;
 }

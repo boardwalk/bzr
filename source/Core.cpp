@@ -48,62 +48,62 @@ Core& Core::get()
 
 Config& Core::config()
 {
-    return *_config;
+    return *config_;
 }
 
 DatFile& Core::portalDat()
 {
-    return *_portalDat;
+    return *portalDat_;
 }
 
 DatFile& Core::cellDat()
 {
-    return *_cellDat;
+    return *cellDat_;
 }
 
 DatFile& Core::highresDat()
 {
-    return *_highresDat;
+    return *highresDat_;
 }
 
 ResourceCache& Core::resourceCache()
 {
-    return *_resourceCache;
+    return *resourceCache_;
 }
 
 LandcellManager& Core::landcellManager()
 {
-    return *_landcellManager;
+    return *landcellManager_;
 }
 
 ObjectManager& Core::objectManager()
 {
-    return *_objectManager;
+    return *objectManager_;
 }
 
 Camera& Core::camera()
 {
-    return *_camera;
+    return *camera_;
 }
 
 #ifndef HEADLESS
 Renderer& Core::renderer()
 {
-    return *_renderer;
+    return *renderer_;
 }
 #endif
 
 ObjectId Core::playerId() const
 {
-    return _playerId;
+    return playerId_;
 }
 
 void Core::setPlayerId(ObjectId playerId)
 {
-    _playerId = playerId;
+    playerId_ = playerId;
 }
 
-Core::Core() : _done(false) /* TEMPORARY */, _modelId(0x02000120)
+Core::Core() : done_(false) /* TEMPORARY */, modelId_(0x02000120)
 {}
 
 void Core::init()
@@ -113,19 +113,19 @@ void Core::init()
         throwSDLError();
     }
 
-    _config.reset(new Config());
-    _portalDat.reset(new DatFile("data/client_portal.dat"));
-    _cellDat.reset(new DatFile("data/client_cell_1.dat"));
-    _highresDat.reset(new DatFile("data/client_highres.dat"));
-    _resourceCache.reset(new ResourceCache());
-    _landcellManager.reset(new LandcellManager());
-    _objectManager.reset(new ObjectManager());
-    _camera.reset(new Camera());
+    config_.reset(new Config());
+    portalDat_.reset(new DatFile("data/client_portal.dat"));
+    cellDat_.reset(new DatFile("data/client_cell_1.dat"));
+    highresDat_.reset(new DatFile("data/client_highres.dat"));
+    resourceCache_.reset(new ResourceCache());
+    landcellManager_.reset(new LandcellManager());
+    objectManager_.reset(new ObjectManager());
+    camera_.reset(new Camera());
 #ifndef HEADLESS
-    _renderer.reset(new Renderer());
-    _renderer->init();
+    renderer_.reset(new Renderer());
+    renderer_->init();
 #endif
-    _landcellManager->setCenter(LandcellId(0x31, 0xD6));
+    landcellManager_->setCenter(LandcellId(0x31, 0xD6));
 
     setPlayerId(ObjectId(1));
 }
@@ -133,16 +133,16 @@ void Core::init()
 void Core::cleanup()
 {
 #ifndef HEADLESS
-    _renderer.reset();
+    renderer_.reset();
 #endif
-    _camera.reset();
-    _objectManager.reset();
-    _landcellManager.reset();
-    _resourceCache.reset();
-    _portalDat.reset();
-    _cellDat.reset();
-    _highresDat.reset();
-    _config.reset();
+    camera_.reset();
+    objectManager_.reset();
+    landcellManager_.reset();
+    resourceCache_.reset();
+    portalDat_.reset();
+    cellDat_.reset();
+    highresDat_.reset();
+    config_.reset();
 
     SDL_Quit();
 }
@@ -154,7 +154,7 @@ void Core::run()
     uint64_t maxTotalDelta = fixedStep * 6;
     uint64_t stepTime = SDL_GetPerformanceCounter();
 
-    while(!_done)
+    while(!done_)
     {
         uint64_t loopTime = SDL_GetPerformanceCounter();
 
@@ -172,7 +172,7 @@ void Core::run()
 
 #ifndef HEADLESS
         fp_t interp = fp_t(loopTime - stepTime) / fp_t(frequency);
-        _renderer->render(interp);
+        renderer_->render(interp);
 #else
         // simulate ~83 without game logic
         SDL_Delay(12);
@@ -193,7 +193,7 @@ void Core::handleEvents()
         switch(event.type)
         {
             case SDL_QUIT:
-                _done = true;
+                done_ = true;
                 break;
 
             case SDL_KEYDOWN:
@@ -201,18 +201,18 @@ void Core::handleEvents()
                 // SDL does not respond normally to alt-f4 on Windows, so handle it ourselves
                 if(event.key.keysym.sym == SDLK_F4 && (event.key.keysym.mod & KMOD_ALT) != 0)
                 {
-                    _done = true;
+                    done_ = true;
                 }
 #endif
                 // TEMPORARY
 #ifndef HEADLESS
                 if(event.key.keysym.sym == SDLK_z)
                 {
-                    while(_modelId > 0x02000000)
+                    while(modelId_ > 0x02000000)
                     {
-                        _modelId--;
+                        modelId_--;
 
-                        if(!_portalDat->read(_modelId).empty())
+                        if(!portalDat_->read(modelId_).empty())
                         {
                             newModel = true;
                             break;
@@ -222,11 +222,11 @@ void Core::handleEvents()
 
                 if(event.key.keysym.sym == SDLK_x)
                 {
-                    while(_modelId < 0x02005000)
+                    while(modelId_ < 0x02005000)
                     {
-                        _modelId++;
+                        modelId_++;
 
-                        if(!_portalDat->read(_modelId).empty())
+                        if(!portalDat_->read(modelId_).empty())
                         {
                             newModel = true;
                             break;
@@ -243,14 +243,14 @@ void Core::handleEvents()
 #ifndef HEADLESS
     if(newModel)
     {
-        printf("Loading model %08x\n", _modelId);
+        printf("Loading model %08x\n", modelId_);
 
-        auto& object = (*_objectManager)[ObjectId(1)];
+        auto& object = (*objectManager_)[ObjectId(1)];
 
-        object.setModel(_resourceCache->get(_modelId));
+        object.setModel(resourceCache_->get(modelId_));
 
         Location loc;
-        loc.landcell = _landcellManager->center();
+        loc.landcell = landcellManager_->center();
         loc.offset = glm::vec3(92.0, 92.0, 0.0);
         object.setLocation(loc);
     }
@@ -272,7 +272,7 @@ void Core::step(fp_t dt)
         speed = 10.0;
     }
 
-    _camera->setSpeed(speed);
+    camera_->setSpeed(speed);
 
     auto lx = fp_t(0.0);
     auto ly = fp_t(0.0);
@@ -299,7 +299,7 @@ void Core::step(fp_t dt)
 
     if(lx != 0.0 || ly != 0.0)
     {
-        _camera->look(lx, ly);
+        camera_->look(lx, ly);
     }
 
     auto mx = fp_t(0.0);
@@ -327,35 +327,35 @@ void Core::step(fp_t dt)
 
     if(mx != 0 || my != 0)
     {
-        _camera->move(mx, my);
+        camera_->move(mx, my);
     }
 
-    auto& position = _camera->position();    
-    auto id = _landcellManager->center();
+    auto& position = camera_->position();    
+    auto id = landcellManager_->center();
 
     if(position.x < 0.0)
     {
-        _camera->setPosition(glm::vec3(position.x + Land::BLOCK_SIZE, position.y, position.z));
-        _landcellManager->setCenter(LandcellId(id.x() - 1, id.y()));
+        camera_->setPosition(glm::vec3(position.x + Land::BLOCK_SIZE, position.y, position.z));
+        landcellManager_->setCenter(LandcellId(id.x() - 1, id.y()));
     }
 
     if(position.x >= Land::BLOCK_SIZE)
     {
-        _camera->setPosition(glm::vec3(position.x - Land::BLOCK_SIZE, position.y, position.z));
-        _landcellManager->setCenter(LandcellId(id.x() + 1, id.y()));
+        camera_->setPosition(glm::vec3(position.x - Land::BLOCK_SIZE, position.y, position.z));
+        landcellManager_->setCenter(LandcellId(id.x() + 1, id.y()));
     }
 
     if(position.y < 0.0)
     {
-        _camera->setPosition(glm::vec3(position.x, position.y + Land::BLOCK_SIZE, position.z));
-        _landcellManager->setCenter(LandcellId(id.x(), id.y() - 1));
+        camera_->setPosition(glm::vec3(position.x, position.y + Land::BLOCK_SIZE, position.z));
+        landcellManager_->setCenter(LandcellId(id.x(), id.y() - 1));
     }
 
     if(position.y >= Land::BLOCK_SIZE)
     {
-        _camera->setPosition(glm::vec3(position.x, position.y - Land::BLOCK_SIZE, position.z));
-        _landcellManager->setCenter(LandcellId(id.x(), id.y() + 1));
+        camera_->setPosition(glm::vec3(position.x, position.y - Land::BLOCK_SIZE, position.z));
+        landcellManager_->setCenter(LandcellId(id.x(), id.y() + 1));
     }
 
-    _camera->step(dt);
+    camera_->step(dt);
 }

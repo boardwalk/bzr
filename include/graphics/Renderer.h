@@ -50,30 +50,30 @@ private:
     void renderOVR(fp_t interp);
 #endif
 
-    fp_t _fieldOfView;
-    GLenum _textureMinFilter;
-    GLfloat _textureMaxAnisotropy;
-    bool _renderHitGeometry;
+    fp_t fieldOfView_;
+    GLenum textureMinFilter_;
+    GLfloat textureMaxAnisotropy_;
+    bool renderHitGeometry_;
 
-    bool _videoInit;
-    SDL_Window* _window;
-    SDL_GLContext _context;
+    bool videoInit_;
+    SDL_Window* window_;
+    SDL_GLContext context_;
 
 #ifdef OCULUSVR
-    ovrHmd _hmd;
-    ovrSizei _renderTexSize;
-    ovrRecti _eyeViewport[ovrEye_Count];
-    ovrGLTexture _eyeTexture[ovrEye_Count];
-    ovrEyeRenderDesc _eyeRenderDesc[ovrEye_Count];
-    GLuint _renderTex;
-    GLuint _depthTex;
-    GLuint _framebuffer;
+    ovrHmd hmd_;
+    ovrSizei renderTexSize_;
+    ovrRecti eyeViewport_[ovrEye_Count];
+    ovrGLTexture eyeTexture_[ovrEye_Count];
+    ovrEyeRenderDesc eyeRenderDesc_[ovrEye_Count];
+    GLuint renderTex_;
+    GLuint depthTex_;
+    GLuint framebuffer_;
 #endif
 
-    unique_ptr<SkyRenderer> _skyRenderer;
-    unique_ptr<LandRenderer> _landRenderer;
-    unique_ptr<StructureRenderer> _structureRenderer;
-    unique_ptr<ModelRenderer> _modelRenderer;
+    unique_ptr<SkyRenderer> skyRenderer_;
+    unique_ptr<LandRenderer> landRenderer_;
+    unique_ptr<StructureRenderer> structureRenderer_;
+    unique_ptr<ModelRenderer> modelRenderer_;
 };
 
 #endif

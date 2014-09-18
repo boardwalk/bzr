@@ -32,9 +32,9 @@ public:
 private:
     vector<uint8_t> readBlocks(uint32_t position) const;
 
-    mutable fstream _fs;
-    uint32_t _blockSize;
-    uint32_t _rootPosition;
+    mutable fstream fs_;
+    uint32_t blockSize_;
+    uint32_t rootPosition_;
 };
 
 #endif

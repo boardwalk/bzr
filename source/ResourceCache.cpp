@@ -74,7 +74,7 @@ ResourcePtr ResourceCache::get(uint32_t resourceId)
 {
     ResourcePtr sharedPtr;
 
-    auto& weakPtr = _data[resourceId];
+    auto& weakPtr = data_[resourceId];
 
     if(weakPtr.expired())
     {

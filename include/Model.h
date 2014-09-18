@@ -43,14 +43,14 @@ public:
     unique_ptr<Destructable>& renderData() const;
 
 private:
-    vector<ResourcePtr> _textures;
-    vector<Vertex> _vertices;
-    vector<TriangleFan> _triangleFans;
-    vector<TriangleFan> _hitTriangleFans;
-    unique_ptr<BSPNode> _hitTree;
-    bool _needsDepthSort;
+    vector<ResourcePtr> textures_;
+    vector<Vertex> vertices_;
+    vector<TriangleFan> triangleFans_;
+    vector<TriangleFan> hitTriangleFans_;
+    unique_ptr<BSPNode> hitTree_;
+    bool needsDepthSort_;
 
-    mutable unique_ptr<Destructable> _renderData;
+    mutable unique_ptr<Destructable> renderData_;
 };
 
 #endif

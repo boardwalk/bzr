@@ -42,10 +42,10 @@ public:
     unique_ptr<Destructable>& renderData() const;
 
 protected:
-    vector<Doodad> _doodads;
+    vector<Doodad> doodads_;
 
 private:
-    mutable unique_ptr<Destructable> _renderData;
+    mutable unique_ptr<Destructable> renderData_;
 };
 
 #endif

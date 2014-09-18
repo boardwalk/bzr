@@ -57,8 +57,8 @@ private:
         const glm::mat4& worldMat,
         bool firstPass);
 
-    Program _program;
-    vector<DepthSortedModel> _depthSortList;
+    Program program_;
+    vector<DepthSortedModel> depthSortList_;
 };
 
 #endif

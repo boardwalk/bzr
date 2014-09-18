@@ -30,9 +30,9 @@
 #include <algorithm>
 #endif
 
-Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
+Renderer::Renderer() : videoInit_(false), window_(nullptr), context_(nullptr)
 #ifdef OCULUSVR
-    , _hmd(nullptr), _renderTex(0), _depthTex(0), _framebuffer(0)
+    , hmd_(nullptr), renderTex_(0), depthTex_(0), framebuffer_(0)
 #endif
 {
     if(SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
@@ -40,7 +40,7 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
         throwSDLError();
     }
 
-    _videoInit = true;
+    videoInit_ = true;
 
 #ifdef __APPLE__
     // Apple's drivers don't support the compatibility profile on GL >v2.1
@@ -62,9 +62,9 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
 
     createWindow();
 
-    _context = SDL_GL_CreateContext(_window);
+    context_ = SDL_GL_CreateContext(window_);
 
-    if(_context == nullptr)
+    if(context_ == nullptr)
     {
         throwSDLError();
     }
@@ -80,26 +80,26 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
     }
 #endif
 
-    _fieldOfView = config.getFloat("Renderer.fieldOfView", 90.0);
+    fieldOfView_ = config.getFloat("Renderer.fieldOfView", 90.0);
 
     auto textureFiltering = config.getString("Renderer.textureFiltering", "trilinear");
 
     if(textureFiltering == "bilinear")
     {
-        _textureMinFilter = GL_LINEAR_MIPMAP_NEAREST;
+        textureMinFilter_ = GL_LINEAR_MIPMAP_NEAREST;
     }
     else if(textureFiltering == "trilinear")
     {
-        _textureMinFilter = GL_LINEAR_MIPMAP_LINEAR;
+        textureMinFilter_ = GL_LINEAR_MIPMAP_LINEAR;
     }
     else
     {
         throw runtime_error("Bad value for Renderer.textureFiltering");
     }
 
-    _textureMaxAnisotropy = (GLfloat)config.getFloat("Renderer.anisotropyLevel", 0.0);
+    textureMaxAnisotropy_ = (GLfloat)config.getFloat("Renderer.anisotropyLevel", 0.0);
 
-    if(_textureMaxAnisotropy != 0.0f)
+    if(textureMaxAnisotropy_ != 0.0f)
     {
 #ifdef _MSC_VER
         if(!GLEW_EXT_texture_filter_anisotropic)
@@ -111,37 +111,37 @@ Renderer::Renderer() : _videoInit(false), _window(nullptr), _context(nullptr)
         GLfloat driverMaxAnisotropy;
         glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &driverMaxAnisotropy);
 
-        if(_textureMaxAnisotropy < 0.0f || _textureMaxAnisotropy > driverMaxAnisotropy)
+        if(textureMaxAnisotropy_ < 0.0f || textureMaxAnisotropy_ > driverMaxAnisotropy)
         {
             throw runtime_error("Bad value for Renderer.maxAnisotropyLevel");
         }
     }
 
-    _renderHitGeometry = config.getBool("Renderer.renderHitGeometry", false);
+    renderHitGeometry_ = config.getBool("Renderer.renderHitGeometry", false);
 }
 
 Renderer::~Renderer()
 {
-    _modelRenderer.reset();
-    _landRenderer.reset();
-    _structureRenderer.reset();
-    _skyRenderer.reset();
+    modelRenderer_.reset();
+    landRenderer_.reset();
+    structureRenderer_.reset();
+    skyRenderer_.reset();
 
 #ifdef OCULUSVR
     cleanupOVR();
 #endif
 
-    if(_context != nullptr)
+    if(context_ != nullptr)
     {
-        SDL_GL_DeleteContext(_context);
+        SDL_GL_DeleteContext(context_);
     }
 
-    if(_window != nullptr)
+    if(window_ != nullptr)
     {
-        SDL_DestroyWindow(_window);
+        SDL_DestroyWindow(window_);
     }
 
-    if(_videoInit)
+    if(videoInit_)
     {
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
     }
@@ -163,12 +163,12 @@ void Renderer::init()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    _skyRenderer.reset(new SkyRenderer());
-    _landRenderer.reset(new LandRenderer());
-    _structureRenderer.reset(new StructureRenderer());
-    _modelRenderer.reset(new ModelRenderer());
+    skyRenderer_.reset(new SkyRenderer());
+    landRenderer_.reset(new LandRenderer());
+    structureRenderer_.reset(new StructureRenderer());
+    modelRenderer_.reset(new ModelRenderer());
 
-    _landRenderer->setLightPosition(_skyRenderer->sunVector() * fp_t(1000.0));
+    landRenderer_->setLightPosition(skyRenderer_->sunVector() * fp_t(1000.0));
 }
 
 void Renderer::render(fp_t interp)
@@ -176,43 +176,43 @@ void Renderer::render(fp_t interp)
     (void)interp;
 
 #ifdef OCULUSVR
-    if(_hmd != nullptr)
+    if(hmd_ != nullptr)
     {
         return renderOVR(interp);
     }
 #endif
 
     int windowWidth, windowHeight;
-    SDL_GetWindowSize(_window, &windowWidth, &windowHeight);
+    SDL_GetWindowSize(window_, &windowWidth, &windowHeight);
 
     // projection * view * model * vertex
-    auto projectionMat = glm::perspective(_fieldOfView / fp_t(180.0) * pi(), fp_t(windowWidth) / fp_t(windowHeight), fp_t(0.1), fp_t(1000.0));
+    auto projectionMat = glm::perspective(fieldOfView_ / fp_t(180.0) * pi(), fp_t(windowWidth) / fp_t(windowHeight), fp_t(0.1), fp_t(1000.0));
 
     const glm::mat4& viewMat = Core::get().camera().viewMatrix();
 
     glClear(GL_DEPTH_BUFFER_BIT);
 
-    _skyRenderer->render();
-    _landRenderer->render(projectionMat, viewMat);
-    _structureRenderer->render(projectionMat, viewMat);
-    _modelRenderer->render(projectionMat, viewMat);
+    skyRenderer_->render();
+    landRenderer_->render(projectionMat, viewMat);
+    structureRenderer_->render(projectionMat, viewMat);
+    modelRenderer_->render(projectionMat, viewMat);
 
-    SDL_GL_SwapWindow(_window);
+    SDL_GL_SwapWindow(window_);
 }
 
 GLenum Renderer::textureMinFilter() const
 {
-    return _textureMinFilter;
+    return textureMinFilter_;
 }
 
 GLfloat Renderer::textureMaxAnisotropy() const
 {
-    return _textureMaxAnisotropy;
+    return textureMaxAnisotropy_;
 }
 
 bool Renderer::renderHitGeometry() const
 {
-    return _renderHitGeometry;
+    return renderHitGeometry_;
 }
 
 void Renderer::createWindow()
@@ -259,10 +259,10 @@ void Renderer::createWindow()
         throw runtime_error("Bad value for Renderer.windowMode");
     }
 
-    _window = SDL_CreateWindow("Bael'Zharon's Respite",
+    window_ = SDL_CreateWindow("Bael'Zharon's Respite",
         windowBounds.x, windowBounds.y, windowBounds.w, windowBounds.h, windowFlags);
 
-    if(_window == nullptr)
+    if(window_ == nullptr)
     {
         throwSDLError();
     }
@@ -309,58 +309,58 @@ void Renderer::initOVR()
         return;
     }
 
-    _hmd = ovrHmd_Create(0);
+    hmd_ = ovrHmd_Create(0);
 
-    if(!_hmd)
+    if(!hmd_)
     {
         fprintf(stderr, "Failed to create OVR HMD, falling back to fake one\n");
-        _hmd = ovrHmd_CreateDebug(ovrHmd_DK2);
+        hmd_ = ovrHmd_CreateDebug(ovrHmd_DK2);
     }
 
-    auto leftEyeTexSize = ovrHmd_GetFovTextureSize(_hmd, ovrEye_Left, _hmd->DefaultEyeFov[ovrEye_Left], 1.0f);
-    auto rightEyeTexSize = ovrHmd_GetFovTextureSize(_hmd, ovrEye_Right, _hmd->DefaultEyeFov[ovrEye_Right], 1.0f);
+    auto leftEyeTexSize = ovrHmd_GetFovTextureSize(hmd_, ovrEye_Left, hmd_->DefaultEyeFov[ovrEye_Left], 1.0f);
+    auto rightEyeTexSize = ovrHmd_GetFovTextureSize(hmd_, ovrEye_Right, hmd_->DefaultEyeFov[ovrEye_Right], 1.0f);
 
-    _renderTexSize.w = leftEyeTexSize.w + rightEyeTexSize.w;
-    _renderTexSize.h = max(leftEyeTexSize.h, rightEyeTexSize.h);
+    renderTexSize_.w = leftEyeTexSize.w + rightEyeTexSize.w;
+    renderTexSize_.h = max(leftEyeTexSize.h, rightEyeTexSize.h);
 
-    glGenTextures(1, &_renderTex);
-    glBindTexture(GL_TEXTURE_2D, _renderTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, _renderTexSize.w, _renderTexSize.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glGenTextures(1, &renderTex_);
+    glBindTexture(GL_TEXTURE_2D, renderTex_);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, renderTexSize_.w, renderTexSize_.h, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &_renderTexSize.w);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &_renderTexSize.h);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &renderTexSize_.w);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &renderTexSize_.h);
 
-    glGenTextures(1, &_depthTex);
-    glBindTexture(GL_TEXTURE_2D, _depthTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, _renderTexSize.w, _renderTexSize.h, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
+    glGenTextures(1, &depthTex_);
+    glBindTexture(GL_TEXTURE_2D, depthTex_);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, renderTexSize_.w, renderTexSize_.h, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, nullptr);
 
-    _eyeViewport[ovrEye_Left].Pos.x = 0;
-    _eyeViewport[ovrEye_Left].Pos.y = 0;
-    _eyeViewport[ovrEye_Left].Size.w = _renderTexSize.w / 2;
-    _eyeViewport[ovrEye_Left].Size.h = _renderTexSize.h;
+    eyeViewport_[ovrEye_Left].Pos.x = 0;
+    eyeViewport_[ovrEye_Left].Pos.y = 0;
+    eyeViewport_[ovrEye_Left].Size.w = renderTexSize_.w / 2;
+    eyeViewport_[ovrEye_Left].Size.h = renderTexSize_.h;
 
-    _eyeViewport[ovrEye_Right].Pos.x = _renderTexSize.w / 2;
-    _eyeViewport[ovrEye_Right].Pos.y = 0;
-    _eyeViewport[ovrEye_Right].Size.w = _renderTexSize.w / 2;
-    _eyeViewport[ovrEye_Right].Size.h = _renderTexSize.h;
+    eyeViewport_[ovrEye_Right].Pos.x = renderTexSize_.w / 2;
+    eyeViewport_[ovrEye_Right].Pos.y = 0;
+    eyeViewport_[ovrEye_Right].Size.w = renderTexSize_.w / 2;
+    eyeViewport_[ovrEye_Right].Size.h = renderTexSize_.h;
 
-    _eyeTexture[ovrEye_Left].OGL.Header.API = ovrRenderAPI_OpenGL;
-    _eyeTexture[ovrEye_Left].OGL.Header.TextureSize = _renderTexSize;
-    _eyeTexture[ovrEye_Left].OGL.Header.RenderViewport = _eyeViewport[ovrEye_Left];
-    _eyeTexture[ovrEye_Left].OGL.TexId = _renderTex;
+    eyeTexture_[ovrEye_Left].OGL.Header.API = ovrRenderAPI_OpenGL;
+    eyeTexture_[ovrEye_Left].OGL.Header.TextureSize = renderTexSize_;
+    eyeTexture_[ovrEye_Left].OGL.Header.RenderViewport = eyeViewport_[ovrEye_Left];
+    eyeTexture_[ovrEye_Left].OGL.TexId = renderTex_;
 
-    _eyeTexture[ovrEye_Right].OGL.Header.API = ovrRenderAPI_OpenGL;
-    _eyeTexture[ovrEye_Right].OGL.Header.TextureSize = _renderTexSize;
-    _eyeTexture[ovrEye_Right].OGL.Header.RenderViewport = _eyeViewport[ovrEye_Right];
-    _eyeTexture[ovrEye_Right].OGL.TexId = _renderTex;
+    eyeTexture_[ovrEye_Right].OGL.Header.API = ovrRenderAPI_OpenGL;
+    eyeTexture_[ovrEye_Right].OGL.Header.TextureSize = renderTexSize_;
+    eyeTexture_[ovrEye_Right].OGL.Header.RenderViewport = eyeViewport_[ovrEye_Right];
+    eyeTexture_[ovrEye_Right].OGL.TexId = renderTex_;
 
     ovrSizei targetSize;
-    SDL_GetWindowSize(_window, &targetSize.w, &targetSize.h);
+    SDL_GetWindowSize(window_, &targetSize.w, &targetSize.h);
 
     SDL_SysWMinfo wmInfo;
     SDL_VERSION(&wmInfo.version);
 
-    if(!SDL_GetWindowWMInfo(_window, &wmInfo))
+    if(!SDL_GetWindowWMInfo(window_, &wmInfo))
     {
         throw runtime_error("Failed to get window info");
     }
@@ -380,22 +380,22 @@ void Renderer::initOVR()
 
     unsigned int distortionCaps = ovrDistortionCap_Chromatic|ovrDistortionCap_TimeWarp|ovrDistortionCap_Overdrive;
 
-    if(!ovrHmd_ConfigureRendering(_hmd, &cfg.Config, distortionCaps, _hmd->DefaultEyeFov, _eyeRenderDesc))
+    if(!ovrHmd_ConfigureRendering(hmd_, &cfg.Config, distortionCaps, hmd_->DefaultEyeFov, eyeRenderDesc_))
     {
         throw runtime_error("Failed to configure HMD rendering");
     }
 
 #ifdef OVR_OS_WIN32
-    if(!ovrHmd_AttachToWindow(_hmd, wmInfo.info.win.window, nullptr, nullptr))
+    if(!ovrHmd_AttachToWindow(hmd_, wmInfo.info.win.window, nullptr, nullptr))
     {
         throw runtime_error("Failed to attach HMD to window");
     }
 #endif
 
-    glGenFramebuffers(1, &_framebuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _renderTex, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _depthTex, 0);
+    glGenFramebuffers(1, &framebuffer_);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTex_, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTex_, 0);
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     {
@@ -406,24 +406,24 @@ void Renderer::initOVR()
 
     unsigned int trackingCaps = ovrTrackingCap_Orientation|ovrTrackingCap_Position;
 
-    if(!ovrHmd_ConfigureTracking(_hmd, trackingCaps, 0))
+    if(!ovrHmd_ConfigureTracking(hmd_, trackingCaps, 0))
     {
         throw runtime_error("Failed to configure HMD tracking");
     }
 
     // warning will disappear as soon as the timeout expires
-    ovrHmd_DismissHSWDisplay(_hmd);
+    ovrHmd_DismissHSWDisplay(hmd_);
 }
 
 void Renderer::cleanupOVR()
 {
-    if(_hmd)
+    if(hmd_)
     {
-        glDeleteFramebuffers(1, &_framebuffer);
-        glDeleteTextures(1, &_renderTex);
-        glDeleteTextures(1, &_depthTex);
+        glDeleteFramebuffers(1, &framebuffer_);
+        glDeleteTextures(1, &renderTex_);
+        glDeleteTextures(1, &depthTex_);
 
-        ovrHmd_Destroy(_hmd);
+        ovrHmd_Destroy(hmd_);
     }
 
     ovr_Shutdown();
@@ -433,37 +433,37 @@ void Renderer::renderOVR(fp_t interp)
 {
     (void)interp;
 
-    ovrHmd_BeginFrame(_hmd, 0);
+    ovrHmd_BeginFrame(hmd_, 0);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_);
     glClear(GL_DEPTH_BUFFER_BIT);
 
     ovrPosef eyePose[ovrEye_Count];
 
     for(auto i = 0; i < ovrEye_Count; i++)
     {
-        auto eye = _hmd->EyeRenderOrder[i];
+        auto eye = hmd_->EyeRenderOrder[i];
 
-        glViewport(_eyeViewport[eye].Pos.x, _eyeViewport[eye].Pos.y,
-                   _eyeViewport[eye].Size.w, _eyeViewport[eye].Size.h);
+        glViewport(eyeViewport_[eye].Pos.x, eyeViewport_[eye].Pos.y,
+                   eyeViewport_[eye].Size.w, eyeViewport_[eye].Size.h);
 
-        auto projectionMat = convertOvrMatrix4f(ovrMatrix4f_Projection(_eyeRenderDesc[eye].Fov, 0.1f, 1000.0f, /*rightHanded*/ true));
+        auto projectionMat = convertOvrMatrix4f(ovrMatrix4f_Projection(eyeRenderDesc_[eye].Fov, 0.1f, 1000.0f, /*rightHanded*/ true));
 
-        eyePose[eye] = ovrHmd_GetEyePose(_hmd, eye);
+        eyePose[eye] = ovrHmd_GetEyePose(hmd_, eye);
         Core::get().camera().setHeadOrientation(glm::conjugate(convertOvrQuatf(eyePose[eye].Orientation)));
         Core::get().camera().setHeadPosition(convertOvrVector3f(eyePose[eye].Position));
 
-        auto viewMat = glm::translate(glm::mat4(), convertOvrVector3f(_eyeRenderDesc[eye].ViewAdjust));
+        auto viewMat = glm::translate(glm::mat4(), convertOvrVector3f(eyeRenderDesc_[eye].ViewAdjust));
         viewMat = viewMat * Core::get().camera().viewMatrix();
 
-        _skyRenderer->render();
-        _landRenderer->render(projectionMat, viewMat);
-        _structureRenderer->render(projectionMat, viewMat);
-        _modelRenderer->render(projectionMat, viewMat);
+        skyRenderer_->render();
+        landRenderer_->render(projectionMat, viewMat);
+        structureRenderer_->render(projectionMat, viewMat);
+        modelRenderer_->render(projectionMat, viewMat);
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    ovrHmd_EndFrame(_hmd, eyePose, (ovrTexture*)_eyeTexture);    
+    ovrHmd_EndFrame(hmd_, eyePose, (ovrTexture*)eyeTexture_);    
 }
 #endif

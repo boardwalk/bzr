@@ -19,20 +19,20 @@
 
 void Object::setModel(ResourcePtr model)
 {
-    _model = model;
+    model_ = model;
 }
 
 void Object::setLocation(const Location& location)
 {
-    _location = location;
+    location_ = location;
 }
 
 const ResourcePtr& Object::model() const
 {
-    return _model;
+    return model_;
 }
 
 const Location& Object::location() const
 {
-    return _location;
+    return location_;
 }

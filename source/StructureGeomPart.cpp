@@ -24,10 +24,10 @@ StructureGeomPart::StructureGeomPart()
 
 StructureGeomPart::StructureGeomPart(StructureGeomPart&& other)
 {
-    _vertices = move(other._vertices);
-    _triangleFans = move(other._triangleFans);
-    _hitTriangleFans = move(other._hitTriangleFans);
-    _hitTree = move(other._hitTree);
+    vertices_ = move(other.vertices_);
+    triangleFans_ = move(other.triangleFans_);
+    hitTriangleFans_ = move(other.hitTriangleFans_);
+    hitTree_ = move(other.hitTree_);
 }
 
 StructureGeomPart::~StructureGeomPart()
@@ -35,20 +35,20 @@ StructureGeomPart::~StructureGeomPart()
 
 StructureGeomPart& StructureGeomPart::operator=(StructureGeomPart&& other)
 {
-    _vertices = move(other._vertices);
-    _triangleFans = move(other._triangleFans);
-    _hitTriangleFans = move(other._hitTriangleFans);
-    _hitTree = move(other._hitTree);
+    vertices_ = move(other.vertices_);
+    triangleFans_ = move(other.triangleFans_);
+    hitTriangleFans_ = move(other.hitTriangleFans_);
+    hitTree_ = move(other.hitTree_);
     return *this;
 }
 
 void StructureGeomPart::read(BinReader& reader)
 {
     auto numTriangleFans = reader.read<uint32_t>();
-    _triangleFans.resize(numTriangleFans);
+    triangleFans_.resize(numTriangleFans);
 
     auto numHitTriangleFans = reader.read<uint32_t>();
-    _hitTriangleFans.resize(numHitTriangleFans);
+    hitTriangleFans_.resize(numHitTriangleFans);
 
     auto numShorts = reader.read<uint32_t>();
 
@@ -56,14 +56,14 @@ void StructureGeomPart::read(BinReader& reader)
     assert(unk5 == 1);
 
     auto numVertices = reader.read<uint32_t>();
-    _vertices.resize(numVertices);
+    vertices_.resize(numVertices);
 
     for(auto vi = 0u; vi < numVertices; vi++)
     {
         auto vertexNum = reader.read<uint16_t>();
         assert(vertexNum == vi);
 
-        _vertices[vi].read(reader);
+        vertices_[vi].read(reader);
     }
 
     for(auto tfi = 0u; tfi < numTriangleFans; tfi++)
@@ -71,7 +71,7 @@ void StructureGeomPart::read(BinReader& reader)
         auto triangleFanNum = reader.read<uint16_t>();
         assert(triangleFanNum == tfi);
 
-        _triangleFans[tfi].read(reader);
+        triangleFans_[tfi].read(reader);
     }
 
     for(auto si = 0u; si < numShorts; si++)
@@ -87,7 +87,7 @@ void StructureGeomPart::read(BinReader& reader)
         auto triangleFanNum = reader.read<uint16_t>();
         assert(triangleFanNum == htfi);
 
-        _hitTriangleFans[htfi].read(reader);
+        hitTriangleFans_[htfi].read(reader);
     }
 
     readBSP(reader, 1);
@@ -105,20 +105,20 @@ void StructureGeomPart::read(BinReader& reader)
 
 const vector<Vertex>& StructureGeomPart::vertices() const
 {
-    return _vertices;
+    return vertices_;
 }
 
 const vector<TriangleFan>& StructureGeomPart::triangleFans() const
 {
-    return _triangleFans;
+    return triangleFans_;
 }
 
 const vector<TriangleFan>& StructureGeomPart::hitTriangleFans() const
 {
-    return _hitTriangleFans;
+    return hitTriangleFans_;
 }
 
 const BSPNode* StructureGeomPart::hitTree() const
 {
-    return _hitTree.get();
+    return hitTree_.get();
 }

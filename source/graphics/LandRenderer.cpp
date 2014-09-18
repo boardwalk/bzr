@@ -100,28 +100,28 @@ LandRenderer::LandRenderer()
 
 LandRenderer::~LandRenderer()
 {
-    _program.destroy();
-    glDeleteTextures(1, &_terrainTexture);
-    glDeleteTextures(1, &_blendTexture);
+    program_.destroy();
+    glDeleteTextures(1, &terrainTexture_);
+    glDeleteTextures(1, &blendTexture_);
 }
 
 void LandRenderer::render(const glm::mat4& projectionMat, const glm::mat4& viewMat)
 {
-    _program.use();
+    program_.use();
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, _terrainTexture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, terrainTexture_);
 
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, _blendTexture);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, blendTexture_);
 
     auto& landcellManager = Core::get().landcellManager();
 
     auto cameraPosition = Core::get().camera().position();
-    glUniform4f(_program.getUniform("cameraPosition"), GLfloat(cameraPosition.x), GLfloat(cameraPosition.y), GLfloat(cameraPosition.z), 1.0f);
+    glUniform4f(program_.getUniform("cameraPosition"), GLfloat(cameraPosition.x), GLfloat(cameraPosition.y), GLfloat(cameraPosition.z), 1.0f);
 
-    auto viewLightPosition = viewMat * glm::vec4(_lightPosition.x, _lightPosition.y, _lightPosition.z, 1.0);
-    glUniform3f(_program.getUniform("lightPosition"), GLfloat(viewLightPosition.x), GLfloat(viewLightPosition.y), GLfloat(viewLightPosition.z));
+    auto viewLightPosition = viewMat * glm::vec4(lightPosition_.x, lightPosition_.y, lightPosition_.z, 1.0);
+    glUniform3f(program_.getUniform("lightPosition"), GLfloat(viewLightPosition.x), GLfloat(viewLightPosition.y), GLfloat(viewLightPosition.z));
 
     for(auto& pair : landcellManager)
     {
@@ -143,7 +143,7 @@ void LandRenderer::render(const glm::mat4& projectionMat, const glm::mat4& viewM
 
 void LandRenderer::setLightPosition(const glm::vec3& lightPosition)
 {
-    _lightPosition = lightPosition;
+    lightPosition_ = lightPosition;
 }
 
 void LandRenderer::renderLand(
@@ -154,10 +154,10 @@ void LandRenderer::renderLand(
 {
     auto worldMat = glm::translate(glm::mat4(), position);
 
-    loadMat3ToUniform(glm::inverseTranspose(glm::mat3(viewMat * worldMat)), _program.getUniform("normalMatrix"));
-    loadMat4ToUniform(worldMat, _program.getUniform("worldMatrix"));
-    loadMat4ToUniform(viewMat, _program.getUniform("viewMatrix"));
-    loadMat4ToUniform(projectionMat, _program.getUniform("projectionMatrix"));
+    loadMat3ToUniform(glm::inverseTranspose(glm::mat3(viewMat * worldMat)), program_.getUniform("normalMatrix"));
+    loadMat4ToUniform(worldMat, program_.getUniform("worldMatrix"));
+    loadMat4ToUniform(viewMat, program_.getUniform("viewMatrix"));
+    loadMat4ToUniform(projectionMat, program_.getUniform("projectionMatrix"));
 
     if(!land.renderData())
     {
@@ -171,36 +171,36 @@ void LandRenderer::renderLand(
 
 void LandRenderer::initProgram()
 {
-    _program.create();
-    _program.attach(GL_VERTEX_SHADER, LandVertexShader);
-    _program.attach(GL_FRAGMENT_SHADER, LandFragmentShader);
-    _program.link();
+    program_.create();
+    program_.attach(GL_VERTEX_SHADER, LandVertexShader);
+    program_.attach(GL_FRAGMENT_SHADER, LandFragmentShader);
+    program_.link();
 
-    _program.use();
+    program_.use();
 
     // samplers
-    auto terrainTexLocation = _program.getUniform("terrainTex");
+    auto terrainTexLocation = program_.getUniform("terrainTex");
     glUniform1i(terrainTexLocation, 0); // corresponds to GL_TEXTURE0
 
-    auto blendTexLocation = _program.getUniform("blendTex");
+    auto blendTexLocation = program_.getUniform("blendTex");
     glUniform1i(blendTexLocation, 1);
 
-    auto normalTexLocation = _program.getUniform("normalTex");
+    auto normalTexLocation = program_.getUniform("normalTex");
     glUniform1i(normalTexLocation, 2);
 
     // lighting parameters
-    glUniform3f(_program.getUniform("lightIntensity"), 1.0f, 1.0f, 1.0f);
-    glUniform3f(_program.getUniform("Kd"), 0.7f, 0.7f, 0.7f);
-    glUniform3f(_program.getUniform("Ka"), 0.5f, 0.5f, 0.5f);
-    glUniform3f(_program.getUniform("Ks"), 0.0f, 0.0f, 0.0f);
-    glUniform1f(_program.getUniform("shininess"), 1.0);
+    glUniform3f(program_.getUniform("lightIntensity"), 1.0f, 1.0f, 1.0f);
+    glUniform3f(program_.getUniform("Kd"), 0.7f, 0.7f, 0.7f);
+    glUniform3f(program_.getUniform("Ka"), 0.5f, 0.5f, 0.5f);
+    glUniform3f(program_.getUniform("Ks"), 0.0f, 0.0f, 0.0f);
+    glUniform1f(program_.getUniform("shininess"), 1.0);
 }
 
 void LandRenderer::initTerrainTexture()
 {
     // allocate terrain texture
-    glGenTextures(1, &_terrainTexture);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, _terrainTexture);
+    glGenTextures(1, &terrainTexture_);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, terrainTexture_);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, Core::get().renderer().textureMinFilter());
@@ -252,8 +252,8 @@ void LandRenderer::initTerrainTexture()
 void LandRenderer::initBlendTexture()
 {
     // allocate terrain texture
-    glGenTextures(1, &_blendTexture);
-    glBindTexture(GL_TEXTURE_2D_ARRAY, _blendTexture);
+    glGenTextures(1, &blendTexture_);
+    glBindTexture(GL_TEXTURE_2D_ARRAY, blendTexture_);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

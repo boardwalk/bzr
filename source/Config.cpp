@@ -47,40 +47,40 @@ static vector<string> splitName(const string& name)
 Config::Config()
 {
     auto prefPath = SDL_GetPrefPath("boardwalk", "Bael'Zharon's Revenge");
-    _path = string(prefPath) + "config.json";
+    path_ = string(prefPath) + "config.json";
     SDL_free(prefPath);
 
-    auto fp = fopen(_path.c_str(), "r");
+    auto fp = fopen(path_.c_str(), "r");
 
     if(fp != nullptr)
     {
         json_error_t err;
-        _root = json_loadf(fp, 0, &err);
+        root_ = json_loadf(fp, 0, &err);
 
         fclose(fp);
 
-        if(_root == nullptr)
+        if(root_ == nullptr)
         {
             stringstream errStream;
             errStream << "Configuration parsing error on line " << err.line << ", column " << err.column << ": " << err.text;
             throw runtime_error(errStream.str());
         }
 
-        if(!json_is_object(_root))
+        if(!json_is_object(root_))
         {
             throw runtime_error("Configuration must be an object");
         }
     }
     else
     {
-        _root = json_object();
+        root_ = json_object();
     }
 }
 
 Config::~Config()
 {
-    json_dump_file(_root, _path.c_str(), JSON_INDENT(2) | JSON_SORT_KEYS);
-    json_decref(_root);
+    json_dump_file(root_, path_.c_str(), JSON_INDENT(2) | JSON_SORT_KEYS);
+    json_decref(root_);
 }
 
 void Config::setBool(const char* name, bool value)
@@ -170,7 +170,7 @@ void Config::set(const char* name, json_t* value)
     auto lastPart = nameParts.back();
     nameParts.pop_back();
 
-    auto node = _root;
+    auto node = root_;
 
     for(auto& part : nameParts)
     {
@@ -192,7 +192,7 @@ json_t* Config::get(const char* name) const
 {
     auto nameParts = splitName(name);
 
-    auto node = _root;
+    auto node = root_;
 
     for(auto& part : nameParts)
     {

@@ -36,48 +36,48 @@ struct CompareByDepth
 {
     CompareByDepth()
     {
-        _cameraPos = Core::get().camera().position();
+        cameraPos_ = Core::get().camera().position();
     }
 
     bool operator()(const ModelRenderer::DepthSortedModel& a, const ModelRenderer::DepthSortedModel& b) const
     {
         // descending order
-        return (_cameraPos - a.worldPos).length() > (_cameraPos - b.worldPos).length();
+        return (cameraPos_ - a.worldPos).length() > (cameraPos_ - b.worldPos).length();
     }
 
-    glm::vec3 _cameraPos;
+    glm::vec3 cameraPos_;
 };
 
 ModelRenderer::ModelRenderer()
 {
-    _program.create();
-    _program.attach(GL_VERTEX_SHADER, ModelVertexShader);
-    _program.attach(GL_FRAGMENT_SHADER, ModelFragmentShader);
-    _program.link();
+    program_.create();
+    program_.attach(GL_VERTEX_SHADER, ModelVertexShader);
+    program_.attach(GL_FRAGMENT_SHADER, ModelFragmentShader);
+    program_.link();
 
-    _program.use();
+    program_.use();
 
-    auto texLocation = _program.getUniform("tex");
+    auto texLocation = program_.getUniform("tex");
     glUniform1i(texLocation, 0);
 }
 
 ModelRenderer::~ModelRenderer()
 {
-    _program.destroy();
+    program_.destroy();
 }
 
 void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& viewMat)
 {
-    _program.use();
+    program_.use();
 
     auto& landcellManager = Core::get().landcellManager();
     auto& objectManager = Core::get().objectManager();
 
     auto cameraPosition = Core::get().camera().position();
-    glUniform4f(_program.getUniform("cameraPosition"), GLfloat(cameraPosition.x), GLfloat(cameraPosition.y), GLfloat(cameraPosition.z), 1.0f);
+    glUniform4f(program_.getUniform("cameraPosition"), GLfloat(cameraPosition.x), GLfloat(cameraPosition.y), GLfloat(cameraPosition.z), 1.0f);
 
     // first pass, render solid objects and collect objects that need depth sorting
-    _depthSortList.clear();
+    depthSortList_.clear();
 
     for(auto& pair : objectManager)
     {
@@ -114,9 +114,9 @@ void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& view
     }
 
     // second pass, sort and render objects that need depth sorting
-    sort(_depthSortList.begin(), _depthSortList.end(), CompareByDepth());
+    sort(depthSortList_.begin(), depthSortList_.end(), CompareByDepth());
 
-    for(auto& depthSortedModel : _depthSortList)
+    for(auto& depthSortedModel : depthSortList_)
     {
         renderModel(*depthSortedModel.model,
             projectionMat,
@@ -176,13 +176,13 @@ void ModelRenderer::renderModel(const Model& model,
     {
         auto worldPos = worldMat * glm::vec4(0.0, 0.0, 0.0, 1.0);
         DepthSortedModel depthSortedModel = { &model, worldMat, glm::vec3(worldPos.x, worldPos.y, worldPos.z) };
-        _depthSortList.push_back(depthSortedModel);
+        depthSortList_.push_back(depthSortedModel);
         return;
     }
 
-    loadMat4ToUniform(worldMat, _program.getUniform("worldMatrix"));
-    loadMat4ToUniform(viewMat, _program.getUniform("viewMatrix"));
-    loadMat4ToUniform(projectionMat, _program.getUniform("projectionMatrix"));
+    loadMat4ToUniform(worldMat, program_.getUniform("worldMatrix"));
+    loadMat4ToUniform(viewMat, program_.getUniform("viewMatrix"));
+    loadMat4ToUniform(projectionMat, program_.getUniform("projectionMatrix"));
 
     if(!model.renderData())
     {

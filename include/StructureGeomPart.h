@@ -41,10 +41,10 @@ public:
     const BSPNode* hitTree() const;
 
 private:
-    vector<Vertex> _vertices;
-    vector<TriangleFan> _triangleFans;
-    vector<TriangleFan> _hitTriangleFans;
-    unique_ptr<BSPNode> _hitTree;
+    vector<Vertex> vertices_;
+    vector<TriangleFan> triangleFans_;
+    vector<TriangleFan> hitTriangleFans_;
+    unique_ptr<BSPNode> hitTree_;
 };
 
 #endif

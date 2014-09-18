@@ -31,7 +31,7 @@ public:
     const TextureLookup5& textureLookup5() const;
 
 private:
-    ResourcePtr _textureLookup5;
+    ResourcePtr textureLookup5_;
 };
 
 #endif

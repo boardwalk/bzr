@@ -40,9 +40,9 @@ public:
 private:
     void load();
 
-    container_type _data;
-    LandcellId _center;
-    int _radius;
+    container_type data_;
+    LandcellId center_;
+    int radius_;
 };
 
 #endif

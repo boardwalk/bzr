@@ -24,8 +24,8 @@ TextureRenderData::TextureRenderData(const Texture& texture)
 {
     auto& image = texture.image();
 
-    glGenTextures(1, &_handle);
-    glBindTexture(GL_TEXTURE_2D, _handle);
+    glGenTextures(1, &handle_);
+    glBindTexture(GL_TEXTURE_2D, handle_);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, Core::get().renderer().textureMinFilter());
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, Core::get().renderer().textureMaxAnisotropy());
 
@@ -55,10 +55,10 @@ TextureRenderData::TextureRenderData(const Texture& texture)
 
 TextureRenderData::~TextureRenderData()
 {
-    glDeleteTextures(1, &_handle);
+    glDeleteTextures(1, &handle_);
 }
 
 void TextureRenderData::bind()
 {
-    glBindTexture(GL_TEXTURE_2D, _handle);
+    glBindTexture(GL_TEXTURE_2D, handle_);
 }

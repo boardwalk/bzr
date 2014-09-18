@@ -48,10 +48,10 @@ private:
         const vector<TriangleFan>& triangleFans,
         const vector<TriangleFan>& hitTriangleFans);
     
-    GLuint _vertexArray;
-    GLuint _vertexBuffer;
-    GLuint _indexBuffer;
-    vector<Batch> _batches;
+    GLuint vertexArray_;
+    GLuint vertexBuffer_;
+    GLuint indexBuffer_;
+    vector<Batch> batches_;
 };
 
 #endif

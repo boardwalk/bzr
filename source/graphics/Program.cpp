@@ -17,7 +17,7 @@
  */
 #include "graphics/Program.h"
 
-Program::Program() : _handle(0)
+Program::Program() : handle_(0)
 {}
 
 Program::~Program()
@@ -28,7 +28,7 @@ Program::~Program()
 void Program::create()
 {
     destroy();
-    _handle = glCreateProgram();
+    handle_ = glCreateProgram();
 }
 
 void Program::attach(GLenum type, const GLchar* source)
@@ -55,24 +55,24 @@ void Program::attach(GLenum type, const GLchar* source)
         throw runtime_error(err);
     }
 
-    glAttachShader(_handle, shader);
+    glAttachShader(handle_, shader);
     glDeleteShader(shader);
 }
 
 void Program::link()
 {
-    glLinkProgram(_handle);
+    glLinkProgram(handle_);
 
     GLint success = GL_FALSE;
-    glGetProgramiv(_handle, GL_LINK_STATUS, &success);
+    glGetProgramiv(handle_, GL_LINK_STATUS, &success);
 
     if(!success)
     {
         GLint logLength;
-        glGetProgramiv(_handle, GL_INFO_LOG_LENGTH, &logLength);
+        glGetProgramiv(handle_, GL_INFO_LOG_LENGTH, &logLength);
 
         vector<GLchar> log(logLength);
-        glGetProgramInfoLog(_handle, logLength, &logLength, log.data());
+        glGetProgramInfoLog(handle_, logLength, &logLength, log.data());
 
         string err("Failed to link program: ");
         err.append(log.data(), logLength);
@@ -82,15 +82,15 @@ void Program::link()
 
 void Program::use()
 {
-    assert(_handle != 0);
-    glUseProgram(_handle);
+    assert(handle_ != 0);
+    glUseProgram(handle_);
 }
 
 GLint Program::getUniform(const GLchar* name)
 {
-    assert(_handle != 0);
+    assert(handle_ != 0);
 
-    auto loc = glGetUniformLocation(_handle, name);
+    auto loc = glGetUniformLocation(handle_, name);
 
     if(loc < 0)
     {
@@ -105,9 +105,9 @@ GLint Program::getUniform(const GLchar* name)
 
 void Program::destroy()
 {
-    if(_handle != 0)
+    if(handle_ != 0)
     {
-        glDeleteProgram(_handle);
-        _handle = 0;
+        glDeleteProgram(handle_);
+        handle_ = 0;
     }
 }

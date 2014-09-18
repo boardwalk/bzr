@@ -41,8 +41,8 @@ TextureLookup5::TextureLookup5(uint32_t id,  const void* data, size_t size) : Re
     // We're just going to pick the first and roll with it
 
     auto textureId = reader.read<uint32_t>();
-    _texture = Core::get().resourceCache().get(textureId);
-    assert(_texture->resourceType() == ResourceType::Texture);
+    texture_ = Core::get().resourceCache().get(textureId);
+    assert(texture_->resourceType() == ResourceType::Texture);
 
     for(auto i = 1u; i < numTextures; i++)
     {
@@ -52,12 +52,12 @@ TextureLookup5::TextureLookup5(uint32_t id,  const void* data, size_t size) : Re
     reader.assertEnd();
 }
 
-TextureLookup5::TextureLookup5(ResourcePtr texture) : ResourceImpl(ResourceType::TextureLookup5 | 0xFFFF), _texture(texture)
+TextureLookup5::TextureLookup5(ResourcePtr texture) : ResourceImpl(ResourceType::TextureLookup5 | 0xFFFF), texture_(texture)
 {
-    assert(_texture->resourceType() == ResourceType::Texture);
+    assert(texture_->resourceType() == ResourceType::Texture);
 }
 
 const Texture& TextureLookup5::texture() const
 {
-    return _texture->cast<Texture>();
+    return texture_->cast<Texture>();
 }

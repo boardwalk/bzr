@@ -56,23 +56,23 @@ bool ImageFormat::hasAlpha(Value f)
     return f == BGRA32 || f == A8 || f == DXT3 || f == DXT5 || f == Paletted16;
 }
 
-Image::Image() : _format(ImageFormat::Invalid), _width(0), _height(0), _hasAlpha(false)
+Image::Image() : format_(ImageFormat::Invalid), width_(0), height_(0), hasAlpha_(false)
 {}
 
 void Image::init(ImageFormat::Value newFormat, int newWidth, int newHeight, const void* newData)
 {
-    _format = newFormat;
-    _width = newWidth;
-    _height = newHeight;
+    format_ = newFormat;
+    width_ = newWidth;
+    height_ = newHeight;
 
     if(newData == nullptr)
     {
-        _data.clear();
-        _data.resize(_width * _height * ImageFormat::bitsPerPixel(_format) / 8);
+        data_.clear();
+        data_.resize(width_ * height_ * ImageFormat::bitsPerPixel(format_) / 8);
     }
     else
     {
-        _data.assign((const uint8_t*)newData, (const uint8_t*)newData + _width * _height * ImageFormat::bitsPerPixel(_format) / 8);
+        data_.assign((const uint8_t*)newData, (const uint8_t*)newData + width_ * height_ * ImageFormat::bitsPerPixel(format_) / 8);
     }
 
     updateHasAlpha();
@@ -80,15 +80,15 @@ void Image::init(ImageFormat::Value newFormat, int newWidth, int newHeight, cons
 
 void Image::applyPalette(const Palette& palette)
 {
-    if(_format != ImageFormat::Paletted16)
+    if(format_ != ImageFormat::Paletted16)
     {
         return;
     }
 
-    vector<uint8_t> newData(_width * _height * 4);
+    vector<uint8_t> newData(width_ * height_ * 4);
 
-    auto input = (const uint16_t*)_data.data();
-    auto inputEnd = (const uint16_t*)_data.data() + _width * _height;
+    auto input = (const uint16_t*)data_.data();
+    auto inputEnd = (const uint16_t*)data_.data() + width_ * height_;
 
     auto output = (uint8_t*)newData.data();
 
@@ -106,24 +106,24 @@ void Image::applyPalette(const Palette& palette)
         input++;
     }
 
-    _data = move(newData);
-    _format = ImageFormat::BGRA32;
+    data_ = move(newData);
+    format_ = ImageFormat::BGRA32;
     updateHasAlpha();
 }
 
 void Image::scale(int newWidth, int newHeight)
 {
-    if(newWidth == _width && newHeight == _height)
+    if(newWidth == width_ && newHeight == height_)
     {
         return;
     }
 
-    if(ImageFormat::isCompressed(_format))
+    if(ImageFormat::isCompressed(format_))
     {
         throw runtime_error("Cannot scale compressed image");
     }
 
-    auto nchannels = ImageFormat::bitsPerPixel(_format) / 8;
+    auto nchannels = ImageFormat::bitsPerPixel(format_) / 8;
 
     vector<uint8_t> newData(newWidth * newHeight * nchannels);
 
@@ -131,8 +131,8 @@ void Image::scale(int newWidth, int newHeight)
     {
         for(auto dstX = 0; dstX < newWidth; dstX++)
         {
-            auto srcFX = fp_t(dstX) / fp_t(newWidth) * fp_t(_width);
-            auto srcFY = fp_t(dstY) / fp_t(newHeight) * fp_t(_height);
+            auto srcFX = fp_t(dstX) / fp_t(newWidth) * fp_t(width_);
+            auto srcFY = fp_t(dstY) / fp_t(newHeight) * fp_t(height_);
 
             auto srcX = (int)srcFX;
             auto srcY = (int)srcFY;
@@ -143,7 +143,7 @@ void Image::scale(int newWidth, int newHeight)
             auto xOpposite = 1.0 - xDiff;
             auto yOpposite = 1.0 - yDiff;
 
-#define SRCPX(x, y, cn) (fp_t)_data[(min(x, _width - 1) + min(y, _height - 1) * _width) * nchannels + cn]
+#define SRCPX(x, y, cn) (fp_t)data_[(min(x, width_ - 1) + min(y, height_ - 1) * width_) * nchannels + cn]
 #define DSTPX(x, y, cn) newData[((x) + (y) * newWidth) * nchannels + cn]
 
             for(auto c = 0; c < nchannels; c++)
@@ -158,87 +158,87 @@ void Image::scale(int newWidth, int newHeight)
         }
     }
 
-    _data = move(newData);
-    _width = newWidth;
-    _height = newHeight;
+    data_ = move(newData);
+    width_ = newWidth;
+    height_ = newHeight;
 }
 
 void Image::flipVertical()
 {
-    if(ImageFormat::isCompressed(_format))
+    if(ImageFormat::isCompressed(format_))
     {
         throw runtime_error("Cannot flip compressed image");
     }
 
-    auto stride = _width * ImageFormat::bitsPerPixel(_format) / 8;
+    auto stride = width_ * ImageFormat::bitsPerPixel(format_) / 8;
 
     vector<uint8_t> rowBuf(stride);
 
-    for(auto y = 0; y < _height / 2; y++)
+    for(auto y = 0; y < height_ / 2; y++)
     {
-        memcpy(rowBuf.data(), _data.data() + y * stride, stride);
-        memcpy(_data.data() + stride * y, _data.data() + (_height - y - 1) * stride, stride);
-        memcpy(_data.data() + (_height - y - 1) * stride, rowBuf.data(), stride);
+        memcpy(rowBuf.data(), data_.data() + y * stride, stride);
+        memcpy(data_.data() + stride * y, data_.data() + (height_ - y - 1) * stride, stride);
+        memcpy(data_.data() + (height_ - y - 1) * stride, rowBuf.data(), stride);
     }
 }
 
 void Image::fill(int value)
 {
-    memset(_data.data(), value, _data.size());
+    memset(data_.data(), value, data_.size());
     updateHasAlpha();
 }
 
 ImageFormat::Value Image::format() const
 {
-    return _format;
+    return format_;
 }
 
 int Image::width() const
 {
-    return _width;
+    return width_;
 }
 
 int Image::height() const
 {
-    return _height;
+    return height_;
 }
 
 size_t Image::size() const
 {
-    return _data.size();
+    return data_.size();
 }
 
 const uint8_t* Image::data() const
 {
-    return _data.data();
+    return data_.data();
 }
 
 bool Image::hasAlpha() const
 {
-    return _hasAlpha;
+    return hasAlpha_;
 }
 
 void Image::updateHasAlpha()
 {
-    _hasAlpha = false;
+    hasAlpha_ = false;
 
-    auto input = _data.data();
-    auto inputEnd = _data.data() + _data.size();
+    auto input = data_.data();
+    auto inputEnd = data_.data() + data_.size();
 
-    if(_format == ImageFormat::BGRA32)
+    if(format_ == ImageFormat::BGRA32)
     {
         while(input < inputEnd)
         {
             if(input[3] != 0xFF)
             {
-                _hasAlpha = true;
+                hasAlpha_ = true;
                 return;
             }
 
             input += 4;
         }
     }
-    else if(_format == ImageFormat::DXT1)
+    else if(format_ == ImageFormat::DXT1)
     {
         while(input < inputEnd)
         {
@@ -252,7 +252,7 @@ void Image::updateHasAlpha()
                 {
                     if((ctab & 0x3) == 0x3)
                     {
-                        _hasAlpha = true;
+                        hasAlpha_ = true;
                         return;
                     }
 
@@ -263,10 +263,10 @@ void Image::updateHasAlpha()
             input += 8;
         }
     }
-    else if(_format == ImageFormat::A8 || _format == ImageFormat::DXT3 || _format == ImageFormat::DXT5)
+    else if(format_ == ImageFormat::A8 || format_ == ImageFormat::DXT3 || format_ == ImageFormat::DXT5)
     {
         // There's no reason to use these formats unless you have alpha
         // So let's just assume it's they do
-        _hasAlpha = true;
+        hasAlpha_ = true;
     }
 }

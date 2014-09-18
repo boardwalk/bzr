@@ -23,20 +23,20 @@ AnimationFrame::AnimationFrame()
 
 AnimationFrame::AnimationFrame(AnimationFrame&& other)
 {
-    _orientations = move(other._orientations);
+    orientations_ = move(other.orientations_);
 }
 
 AnimationFrame& AnimationFrame::operator=(AnimationFrame&& other)
 {
-    _orientations = move(other._orientations);
+    orientations_ = move(other.orientations_);
     return *this;
 }
 
 void AnimationFrame::read(BinReader& reader, uint32_t numModels)
 {
-    _orientations.resize(numModels);
+    orientations_.resize(numModels);
 
-    for(auto& orientation : _orientations)
+    for(auto& orientation : orientations_)
     {
         orientation.position.x = reader.read<float>();
         orientation.position.y = reader.read<float>();
@@ -80,5 +80,5 @@ void AnimationFrame::read(BinReader& reader, uint32_t numModels)
 
 const vector<AnimationFrame::Orientation>& AnimationFrame::orientations() const
 {
-    return _orientations;
+    return orientations_;
 }

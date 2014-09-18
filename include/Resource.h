@@ -40,7 +40,7 @@ struct ResourceType
 class Resource : Noncopyable
 {
 public:
-    Resource(uint32_t id) : _resourceId(id)
+    Resource(uint32_t id) : resourceId_(id)
     {}
 
     virtual ~Resource()
@@ -62,16 +62,16 @@ public:
 
     uint32_t resourceId() const
     {
-        return _resourceId;
+        return resourceId_;
     }
 
     ResourceType::Value resourceType() const
     {
-        return static_cast<ResourceType::Value>(_resourceId & 0xFF000000);
+        return static_cast<ResourceType::Value>(resourceId_ & 0xFF000000);
     }
 
 private:
-    const uint32_t _resourceId;
+    const uint32_t resourceId_;
 };
 
 template<ResourceType::Value RT>

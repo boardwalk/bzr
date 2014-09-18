@@ -46,13 +46,13 @@ public:
     const Sphere& bounds() const override;
 
 private:
-    Plane _partition;
-    unique_ptr<BSPNode> _frontChild; // may be null
-    unique_ptr<BSPNode> _backChild; // may be null
+    Plane partition_;
+    unique_ptr<BSPNode> frontChild_; // may be null
+    unique_ptr<BSPNode> backChild_; // may be null
     // if treeType == 0 or 1
-    Sphere _bounds;
+    Sphere bounds_;
     // if treeType == 0
-    vector<uint16_t> _triangleIndices;
+    vector<uint16_t> triangleIndices_;
 };
 
 class BSPExternal : public BSPNode
@@ -65,11 +65,11 @@ public:
     const Sphere& bounds() const override;
 
 private:
-    uint32_t _index;
+    uint32_t index_;
     // if treeType == 1
-    uint32_t _solid;
-    Sphere _bounds;
-    vector<uint16_t> _triangleIndices;
+    uint32_t solid_;
+    Sphere bounds_;
+    vector<uint16_t> triangleIndices_;
 };
 
 class BSPPortal : public BSPNode
@@ -88,13 +88,13 @@ private:
         uint16_t what;
     };
 
-    Plane _partition;
-    unique_ptr<BSPNode> _frontChild;
-    unique_ptr<BSPNode> _backChild;
+    Plane partition_;
+    unique_ptr<BSPNode> frontChild_;
+    unique_ptr<BSPNode> backChild_;
     // if treeType == 0
-    Sphere _bounds;
-    vector<uint16_t> _triangleIndices;
-    vector<PortalPoly> _portalPolys;
+    Sphere bounds_;
+    vector<uint16_t> triangleIndices_;
+    vector<PortalPoly> portalPolys_;
 };
 
 unique_ptr<BSPNode> readBSP(BinReader& reader, int treeType);

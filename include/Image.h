@@ -62,11 +62,11 @@ public:
 private:
     void updateHasAlpha();
 
-    ImageFormat::Value _format;
-    int _width;
-    int _height;
-    vector<uint8_t> _data;
-    bool _hasAlpha;
+    ImageFormat::Value format_;
+    int width_;
+    int height_;
+    vector<uint8_t> data_;
+    bool hasAlpha_;
 };
 
 #endif

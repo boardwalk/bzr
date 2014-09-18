@@ -30,7 +30,7 @@ public:
     size_t size() const;
 
 private:
-    vector<StructureGeomPart> _parts;
+    vector<StructureGeomPart> parts_;
 };
 
 #endif

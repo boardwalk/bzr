@@ -32,7 +32,7 @@ public:
     void bind();
 
 private:
-    GLuint _handle;
+    GLuint handle_;
 };
 
 #endif

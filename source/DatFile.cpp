@@ -52,14 +52,14 @@ PACK(struct DatNode
 });
 
 DatFile::DatFile(const string& path) :
-    _fs(path.c_str(), ios_base::in|ios_base::binary)
+    fs_(path.c_str(), ios_base::in|ios_base::binary)
 {
     DatHeader header;
 
-    _fs.seekg(HEADER_OFFSET);
-    _fs.read((char*)&header, sizeof(header));
+    fs_.seekg(HEADER_OFFSET);
+    fs_.read((char*)&header, sizeof(header));
 
-    if(!_fs.good())
+    if(!fs_.good())
     {
         throw runtime_error("Could not read dat file header");
     }
@@ -69,8 +69,8 @@ DatFile::DatFile(const string& path) :
         throw runtime_error("Dat file header has bad magic number");
     }
 
-    _blockSize = header.blockSize - sizeof(uint32_t); // exclude next block position
-    _rootPosition = header.rootPosition;
+    blockSize_ = header.blockSize - sizeof(uint32_t); // exclude next block position
+    rootPosition_ = header.rootPosition;
 }
 
 DatFile::~DatFile()
@@ -78,7 +78,7 @@ DatFile::~DatFile()
 
 vector<uint8_t> DatFile::read(uint32_t id) const
 {
-    auto nodePosition = _rootPosition;
+    auto nodePosition = rootPosition_;
 
     for(;;)
     {
@@ -122,13 +122,13 @@ vector<uint8_t> DatFile::readBlocks(uint32_t position) const
 
     while(position != 0)
     {
-        result.resize(result.size() + _blockSize);
+        result.resize(result.size() + blockSize_);
 
-        _fs.seekg(position);
-        _fs.read((char*)&position, sizeof(position));
-        _fs.read((char*)result.data() + result.size() - _blockSize, _blockSize);
+        fs_.seekg(position);
+        fs_.read((char*)&position, sizeof(position));
+        fs_.read((char*)result.data() + result.size() - blockSize_, blockSize_);
 
-        if(!_fs.good())
+        if(!fs_.good())
         {
             throw runtime_error("Failed to read block");
         }

@@ -36,13 +36,13 @@ private:
     void initGeometry();
     void initTexture();
 
-    Program _program;
-    GLuint _vertexArray;
-    GLuint _vertexBuffer;
-    GLsizei _vertexCount;
-    GLuint _texture;
+    Program program_;
+    GLuint vertexArray_;
+    GLuint vertexBuffer_;
+    GLsizei vertexCount_;
+    GLuint texture_;
 
-    glm::vec3 _sunVector;
+    glm::vec3 sunVector_;
 };
 
 #endif

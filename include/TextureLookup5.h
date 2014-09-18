@@ -32,7 +32,7 @@ public:
     const Texture& texture() const;
 
 private:
-    ResourcePtr _texture;
+    ResourcePtr texture_;
 };
 
 #endif

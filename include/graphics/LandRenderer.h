@@ -43,12 +43,12 @@ private:
     void initTerrainTexture();
     void initBlendTexture();
 
-    Program _program;
+    Program program_;
 
-    GLuint _terrainTexture;
-    GLuint _blendTexture;
+    GLuint terrainTexture_;
+    GLuint blendTexture_;
 
-    glm::vec3 _lightPosition;
+    glm::vec3 lightPosition_;
 };
 
 #endif

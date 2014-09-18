@@ -42,8 +42,8 @@ private:
     void set(const char* name, json_t* value);
     json_t* get(const char* name) const;
 
-    string _path;
-    json_t* _root;
+    string path_;
+    json_t* root_;
 };
 
 #endif

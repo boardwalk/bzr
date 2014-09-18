@@ -26,11 +26,11 @@ StructureGeom::StructureGeom(uint32_t id, const void* data, size_t size) : Resou
     assert(resourceId == id);
 
     auto numParts = reader.read<uint32_t>();
-    _parts.resize(numParts);
+    parts_.resize(numParts);
 
     for(auto pi = 0u; pi < numParts; pi++)
     {
-        auto& part = _parts[pi];
+        auto& part = parts_[pi];
 
         auto partNum = reader.read<uint32_t>();
         assert(partNum == pi);
@@ -43,10 +43,10 @@ StructureGeom::StructureGeom(uint32_t id, const void* data, size_t size) : Resou
 
 const StructureGeomPart& StructureGeom::operator[](size_t i) const
 {
-    return _parts[i];
+    return parts_[i];
 }
 
 size_t StructureGeom::size() const
 {
-    return _parts.size();
+    return parts_.size();
 }

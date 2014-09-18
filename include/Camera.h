@@ -50,17 +50,17 @@ private:
     void updateRotationQuat();
     void updateViewMatrix();
     
-    fp_t _speed;
-    glm::vec3 _position;
-    fp_t _yaw;
-    fp_t _pitch;
-    fp_t _roll;
+    fp_t speed_;
+    glm::vec3 position_;
+    fp_t yaw_;
+    fp_t pitch_;
+    fp_t roll_;
     
-    glm::vec3 _headPosition;
-    glm::quat _headOrientation;
+    glm::vec3 headPosition_;
+    glm::quat headOrientation_;
 
-    glm::quat _rotationQuat;
-    glm::mat4 _viewMatrix;
+    glm::quat rotationQuat_;
+    glm::mat4 viewMatrix_;
 };
 
 #endif

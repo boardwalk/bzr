@@ -40,7 +40,7 @@ public:
     const vector<Orientation>& orientations() const;
 
 private:
-    vector<Orientation> _orientations;
+    vector<Orientation> orientations_;
 };
 
 #endif

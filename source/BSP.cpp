@@ -21,31 +21,31 @@
 
 BSPInternal::BSPInternal(BinReader& reader, int treeType, uint32_t nodeType)
 {
-    _partition.normal.x = reader.read<float>();
-    _partition.normal.y = reader.read<float>();
-    _partition.normal.z = reader.read<float>();
-    _partition.dist = reader.read<float>();
+    partition_.normal.x = reader.read<float>();
+    partition_.normal.y = reader.read<float>();
+    partition_.normal.z = reader.read<float>();
+    partition_.dist = reader.read<float>();
 
     if(nodeType == 0x42506e6e || nodeType == 0x4250496e) // BPnn, BPIn
     {
-        _frontChild = readBSP(reader, treeType);
+        frontChild_ = readBSP(reader, treeType);
     }
     else if(nodeType == 0x4270494e || nodeType == 0x42706e4e) // BpIN, BpnN
     {
-        _backChild = readBSP(reader, treeType);
+        backChild_ = readBSP(reader, treeType);
     }
     else if(nodeType == 0x4250494e || nodeType == 0x42506e4e) // BPIN, BPnN
     {
-        _frontChild = readBSP(reader, treeType);
-        _backChild = readBSP(reader, treeType);
+        frontChild_ = readBSP(reader, treeType);
+        backChild_ = readBSP(reader, treeType);
     }
 
     if(treeType == 0 || treeType == 1)
     {
-        _bounds.center.x = reader.read<float>();
-        _bounds.center.y = reader.read<float>();
-        _bounds.center.z = reader.read<float>();
-        _bounds.radius = reader.read<float>();
+        bounds_.center.x = reader.read<float>();
+        bounds_.center.y = reader.read<float>();
+        bounds_.center.z = reader.read<float>();
+        bounds_.radius = reader.read<float>();
     }
 
     if(treeType != 0)
@@ -54,9 +54,9 @@ BSPInternal::BSPInternal(BinReader& reader, int treeType, uint32_t nodeType)
     }
 
     auto triCount = reader.read<uint32_t>();
-    _triangleIndices.resize(triCount);
+    triangleIndices_.resize(triCount);
 
-    for(auto& index : _triangleIndices)
+    for(auto& index : triangleIndices_)
     {
         index = reader.read<uint16_t>();
     }
@@ -73,12 +73,12 @@ bool BSPInternal::collide(const LineSegment& segment, glm::vec3& impact) const
 
 const Sphere& BSPInternal::bounds() const
 {
-    return _bounds;
+    return bounds_;
 }
 
 BSPExternal::BSPExternal(BinReader& reader, int treeType)
 {
-    _index = reader.read<uint32_t>();
+    index_ = reader.read<uint32_t>();
 
     if(treeType != 1)
     {
@@ -86,17 +86,17 @@ BSPExternal::BSPExternal(BinReader& reader, int treeType)
     }
 
     // if 1, sphere parameters are valid and there are indices
-    _solid = reader.read<uint32_t>();
+    solid_ = reader.read<uint32_t>();
 
-    _bounds.center.x = reader.read<float>();
-    _bounds.center.y = reader.read<float>();
-    _bounds.center.z = reader.read<float>();
-    _bounds.radius = reader.read<float>();
+    bounds_.center.x = reader.read<float>();
+    bounds_.center.y = reader.read<float>();
+    bounds_.center.z = reader.read<float>();
+    bounds_.radius = reader.read<float>();
 
     auto triCount = reader.read<uint32_t>();
-    _triangleIndices.resize(triCount);
+    triangleIndices_.resize(triCount);
 
-    for(auto& index : _triangleIndices)
+    for(auto& index : triangleIndices_)
     {
         index = reader.read<uint16_t>();
     }
@@ -104,7 +104,7 @@ BSPExternal::BSPExternal(BinReader& reader, int treeType)
 
 bool BSPExternal::collide(const LineSegment& segment, glm::vec3& impact) const
 {
-    if(_solid)
+    if(solid_)
     {
         impact = segment.begin;
         return true;
@@ -115,41 +115,41 @@ bool BSPExternal::collide(const LineSegment& segment, glm::vec3& impact) const
 
 const Sphere& BSPExternal::bounds() const
 {
-    return _bounds;
+    return bounds_;
 }
 
 BSPPortal::BSPPortal(BinReader& reader, int treeType)
 {
-    _partition.normal.x = reader.read<float>();
-    _partition.normal.y = reader.read<float>();
-    _partition.normal.z = reader.read<float>();
-    _partition.dist = reader.read<float>();
+    partition_.normal.x = reader.read<float>();
+    partition_.normal.y = reader.read<float>();
+    partition_.normal.z = reader.read<float>();
+    partition_.dist = reader.read<float>();
 
-    _frontChild = readBSP(reader, treeType);
-    _backChild = readBSP(reader, treeType);
+    frontChild_ = readBSP(reader, treeType);
+    backChild_ = readBSP(reader, treeType);
 
     if(treeType != 0)
     {
         return;
     }
 
-    _bounds.center.x = reader.read<float>();
-    _bounds.center.y = reader.read<float>();
-    _bounds.center.z = reader.read<float>();
-    _bounds.radius = reader.read<float>();
+    bounds_.center.x = reader.read<float>();
+    bounds_.center.y = reader.read<float>();
+    bounds_.center.z = reader.read<float>();
+    bounds_.radius = reader.read<float>();
 
     auto triCount = reader.read<uint32_t>();
-    _triangleIndices.resize(triCount);
+    triangleIndices_.resize(triCount);
 
     auto polyCount = reader.read<uint32_t>();
-    _portalPolys.resize(polyCount);
+    portalPolys_.resize(polyCount);
 
-    for(auto& index : _triangleIndices)
+    for(auto& index : triangleIndices_)
     {
         index = reader.read<uint16_t>();
     }
 
-    for(auto& poly : _portalPolys)
+    for(auto& poly : portalPolys_)
     {
         poly.index = reader.read<uint16_t>();
         poly.what = reader.read<uint16_t>();
@@ -167,7 +167,7 @@ bool BSPPortal::collide(const LineSegment& segment, glm::vec3& impact) const
 
 const Sphere& BSPPortal::bounds() const
 {
-    return _bounds;
+    return bounds_;
 }
 
 unique_ptr<BSPNode> readBSP(BinReader& reader, int treeType)

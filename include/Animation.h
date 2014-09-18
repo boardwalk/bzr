@@ -29,7 +29,7 @@ public:
     const vector<AnimationFrame>& frames() const;
 
 private:
-    vector<AnimationFrame> _frames;
+    vector<AnimationFrame> frames_;
 };
 
 #endif

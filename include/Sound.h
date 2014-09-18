@@ -31,10 +31,10 @@ public:
     const vector<uint8_t>& samples() const;
 
 private:
-    uint32_t _samplesPerSecond;
-    uint32_t _numChannels;
-    uint32_t _bitsPerSample;
-    vector<uint8_t> _samples;
+    uint32_t samplesPerSecond_;
+    uint32_t numChannels_;
+    uint32_t bitsPerSample_;
+    vector<uint8_t> samples_;
 };
 
 #endif

@@ -45,9 +45,9 @@ public:
     const vector<AnimInfo>& animInfos() const;
 
 private:
-    uint16_t _id;
-    uint16_t _stanceId;
-    vector<AnimInfo> _animInfos;
+    uint16_t id_;
+    uint16_t stanceId_;
+    vector<AnimInfo> animInfos_;
 };
 
 #endif

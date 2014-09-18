@@ -58,21 +58,21 @@ private:
     void handleEvents();
     void step(fp_t dt);
 
-    bool _done;
-    unique_ptr<Config> _config;
-    unique_ptr<DatFile> _portalDat;
-    unique_ptr<DatFile> _cellDat;
-    unique_ptr<DatFile> _highresDat;
-    unique_ptr<ResourceCache> _resourceCache;
-    unique_ptr<LandcellManager> _landcellManager;
-    unique_ptr<ObjectManager> _objectManager;
-    unique_ptr<Camera> _camera;
+    bool done_;
+    unique_ptr<Config> config_;
+    unique_ptr<DatFile> portalDat_;
+    unique_ptr<DatFile> cellDat_;
+    unique_ptr<DatFile> highresDat_;
+    unique_ptr<ResourceCache> resourceCache_;
+    unique_ptr<LandcellManager> landcellManager_;
+    unique_ptr<ObjectManager> objectManager_;
+    unique_ptr<Camera> camera_;
 #ifndef HEADLESS
-    unique_ptr<Renderer> _renderer;
+    unique_ptr<Renderer> renderer_;
 #endif
-    ObjectId _playerId;
+    ObjectId playerId_;
     // TEMPORARY
-    uint32_t _modelId;
+    uint32_t modelId_;
 };
 
 #endif

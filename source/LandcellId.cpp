@@ -18,19 +18,19 @@
 #include "LandcellId.h"
 
 LandcellId::LandcellId() :
-    _value(0)
+    value_(0)
 {}
 
 LandcellId::LandcellId(uint32_t value) :
-    _value(value)
+    value_(value)
 {}
 
 LandcellId::LandcellId(uint8_t x, uint8_t y) :
-    _value((uint32_t(x) << 24) | (uint32_t(y) << 16) | 0xFFFF)
+    value_((uint32_t(x) << 24) | (uint32_t(y) << 16) | 0xFFFF)
 {}
 
 LandcellId::LandcellId(uint8_t x, uint8_t y, uint16_t n) :
-    _value((uint32_t(x) << 24) | (uint32_t(y) << 16) | n)
+    value_((uint32_t(x) << 24) | (uint32_t(y) << 16) | n)
 {}
 
 int LandcellId::calcSquareDistance(LandcellId other) const
@@ -42,22 +42,22 @@ int LandcellId::calcSquareDistance(LandcellId other) const
 
 uint8_t LandcellId::x() const
 {
-    return uint8_t(_value >> 24);
+    return uint8_t(value_ >> 24);
 }
 
 uint8_t LandcellId::y() const
 {
-    return uint8_t(_value >> 16);
+    return uint8_t(value_ >> 16);
 }
 
 uint16_t LandcellId::n() const
 {
-    return uint16_t(_value);
+    return uint16_t(value_);
 }
 
 uint32_t LandcellId::value() const
 {
-    return _value;
+    return value_;
 }
 
 bool LandcellId::isStructure() const
@@ -67,10 +67,10 @@ bool LandcellId::isStructure() const
 
 bool LandcellId::operator==(LandcellId other) const
 {
-    return _value == other._value;
+    return value_ == other.value_;
 }
 
 bool LandcellId::operator!=(LandcellId other) const
 {
-    return _value != other._value;
+    return value_ != other.value_;
 }

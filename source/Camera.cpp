@@ -21,25 +21,25 @@
 
 Camera::Camera()
 {
-    _speed = fp_t(0.0);
-    _position = glm::vec3(88.5, 22.5, 125);
-    _yaw = fp_t(0.0);
-    _pitch = fp_t(0.26666);
-    _roll = fp_t(0.0);
+    speed_ = fp_t(0.0);
+    position_ = glm::vec3(88.5, 22.5, 125);
+    yaw_ = fp_t(0.0);
+    pitch_ = fp_t(0.26666);
+    roll_ = fp_t(0.0);
     updateRotationQuat();
 }
 
 void Camera::move(fp_t dx, fp_t dy)
 {
-    glm::vec3 dp(dx * _speed, 0.0, -dy * _speed);
-    _position = _position + glm::conjugate(_rotationQuat) * dp;
+    glm::vec3 dp(dx * speed_, 0.0, -dy * speed_);
+    position_ = position_ + glm::conjugate(rotationQuat_) * dp;
     updateViewMatrix();
 }
 
 void Camera::look(fp_t dx, fp_t dy)
 {
-    _pitch = glm::mod(_pitch - fp_t(2.0) * dy, fp_t(2.0) * pi());
-    _yaw = glm::mod(_yaw + fp_t(2.0) * dx, fp_t(2.0) * pi());
+    pitch_ = glm::mod(pitch_ - fp_t(2.0) * dy, fp_t(2.0) * pi());
+    yaw_ = glm::mod(yaw_ + fp_t(2.0) * dx, fp_t(2.0) * pi());
     updateRotationQuat();
 }
 
@@ -50,54 +50,54 @@ void Camera::step(fp_t dt)
 
 void Camera::setSpeed(fp_t newSpeed)
 {
-    _speed = newSpeed;
+    speed_ = newSpeed;
 }
 
 void Camera::setPosition(const glm::vec3& newPosition)
 {
-    _position = newPosition;
+    position_ = newPosition;
     updateViewMatrix();
 }
 
 void Camera::setHeadPosition(const glm::vec3& newHeadPosition)
 {
-    _headPosition = newHeadPosition;
+    headPosition_ = newHeadPosition;
     updateViewMatrix();
 }
 
 void Camera::setHeadOrientation(const glm::quat& newHeadOrientation)
 {
-    _headOrientation = newHeadOrientation;
+    headOrientation_ = newHeadOrientation;
     updateRotationQuat();
 }
 
 const glm::vec3& Camera::position() const
 {
-    return _position;
+    return position_;
 }
 
 const glm::quat& Camera::rotationQuat() const
 {
-    return _rotationQuat;
+    return rotationQuat_;
 }
 
 const glm::mat4& Camera::viewMatrix() const
 {
-    return _viewMatrix;
+    return viewMatrix_;
 }
 
 void Camera::updateRotationQuat()
 {
     auto initialPitchQuat = glm::angleAxis(-pi() / fp_t(2.0), glm::vec3(1.0, 0.0, 0.0));
-    auto yawQuat = glm::angleAxis(_yaw, glm::vec3(0.0, 1.0, 0.0));
-    auto pitchQuat = glm::angleAxis(_pitch, glm::vec3(1.0, 0.0, 0.0));
+    auto yawQuat = glm::angleAxis(yaw_, glm::vec3(0.0, 1.0, 0.0));
+    auto pitchQuat = glm::angleAxis(pitch_, glm::vec3(1.0, 0.0, 0.0));
 
-    _rotationQuat = _headOrientation * pitchQuat * yawQuat * initialPitchQuat;
+    rotationQuat_ = headOrientation_ * pitchQuat * yawQuat * initialPitchQuat;
 
     updateViewMatrix();
 }
 
 void Camera::updateViewMatrix()
 {
-    _viewMatrix = glm::mat4_cast(_rotationQuat) * glm::translate(glm::mat4(), -(_position + _headPosition));
+    viewMatrix_ = glm::mat4_cast(rotationQuat_) * glm::translate(glm::mat4(), -(position_ + headPosition_));
 }

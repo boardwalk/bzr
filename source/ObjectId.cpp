@@ -17,23 +17,23 @@
  */
 #include "ObjectId.h"
 
-ObjectId::ObjectId() : _value(0)
+ObjectId::ObjectId() : value_(0)
 {}
 
-ObjectId::ObjectId(uint32_t val) : _value(val)
+ObjectId::ObjectId(uint32_t val) : value_(val)
 {}
 
 uint32_t ObjectId::value() const
 {
-    return _value;
+    return value_;
 }
 
 bool ObjectId::operator==(ObjectId other) const
 {
-    return _value == other._value;
+    return value_ == other.value_;
 }
 
 bool ObjectId::operator!=(ObjectId other) const
 {
-    return _value != other._value;
+    return value_ != other.value_;
 }

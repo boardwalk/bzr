@@ -33,9 +33,9 @@ public:
     unique_ptr<Destructable>& renderData();
 
 private:
-    Image _image;
-    ResourcePtr _palette;
-    unique_ptr<Destructable> _renderData;
+    Image image_;
+    ResourcePtr palette_;
+    unique_ptr<Destructable> renderData_;
 };
 
 #endif

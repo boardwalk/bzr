@@ -40,24 +40,24 @@ static fp_t bicubic(fp_t p[4][4], fp_t x, fp_t y)
     return cubic(arr, x);
 }
 
-Land::Land(const void* data, size_t size) : _numStructures(0)
+Land::Land(const void* data, size_t size) : numStructures_(0)
 {
     if(size != sizeof(Data))
     {
         throw runtime_error("Bad land data length");
     }
 
-    memcpy(&_data, data, sizeof(_data));
+    memcpy(&data_, data, sizeof(data_));
 }
 
 void Land::init()
 {
-    if(!_offsetMap.empty())
+    if(!offsetMap_.empty())
     {
         return;
     }
 
-    if(_data.flags)
+    if(data_.flags)
     {
         initDoodads();
     }
@@ -119,13 +119,13 @@ void Land::init()
         }
     }
 
-    _offsetMap.resize(OFFSET_MAP_SIZE * OFFSET_MAP_SIZE);
-    _offsetMapBase = minOffset;
-    _offsetMapScale = maxOffset - minOffset;
+    offsetMap_.resize(OFFSET_MAP_SIZE * OFFSET_MAP_SIZE);
+    offsetMapBase_ = minOffset;
+    offsetMapScale_ = maxOffset - minOffset;
 
-    if(_offsetMapScale < 0.0001)
+    if(offsetMapScale_ < 0.0001)
     {
-        memset(_offsetMap.data(), 0, _offsetMap.size() * sizeof(uint16_t));
+        memset(offsetMap_.data(), 0, offsetMap_.size() * sizeof(uint16_t));
     }
     else
     {
@@ -134,12 +134,12 @@ void Land::init()
             for(auto ox = 0; ox < OFFSET_MAP_SIZE; ox++)
             {
                 fp_t offset = resample[ox + oy * OFFSET_MAP_SIZE];
-                _offsetMap[ox + oy * OFFSET_MAP_SIZE] = (uint16_t)((offset - _offsetMapBase) / _offsetMapScale * fp_t(0xFFFF));
+                offsetMap_[ox + oy * OFFSET_MAP_SIZE] = (uint16_t)((offset - offsetMapBase_) / offsetMapScale_ * fp_t(0xFFFF));
             }
         }
     }
 
-    _normalMap.resize(OFFSET_MAP_SIZE * OFFSET_MAP_SIZE * 3);
+    normalMap_.resize(OFFSET_MAP_SIZE * OFFSET_MAP_SIZE * 3);
 
     for(auto oy = 0; oy < OFFSET_MAP_SIZE; oy++)
     {
@@ -164,9 +164,9 @@ void Land::init()
             glm::vec3 b(0.0, ly2 - ly1, h3 - h1);
 
             auto n = glm::normalize(glm::cross(a, b)) * fp_t(0.5) + glm::vec3(0.5, 0.5, 0.5);
-            _normalMap[(ox + oy * OFFSET_MAP_SIZE) * 3] = (uint8_t)(n.x * fp_t(0xFF));
-            _normalMap[(ox + oy * OFFSET_MAP_SIZE) * 3 + 1] = (uint8_t)(n.y * fp_t(0xFF));
-            _normalMap[(ox + oy * OFFSET_MAP_SIZE) * 3 + 2] = (uint8_t)(n.z * fp_t(0xFF));
+            normalMap_[(ox + oy * OFFSET_MAP_SIZE) * 3] = (uint8_t)(n.x * fp_t(0xFF));
+            normalMap_[(ox + oy * OFFSET_MAP_SIZE) * 3 + 1] = (uint8_t)(n.y * fp_t(0xFF));
+            normalMap_[(ox + oy * OFFSET_MAP_SIZE) * 3 + 2] = (uint8_t)(n.z * fp_t(0xFF));
         }
     }
 }
@@ -184,10 +184,10 @@ fp_t Land::calcHeight(fp_t x, fp_t y) const
     auto fy = modf(y / CELL_SIZE, &diy);
     auto iy = (int)diy;
 
-    auto h1 = _data.heights[ix][iy] * fp_t(2.0);
-    auto h2 = _data.heights[min(ix + 1, GRID_SIZE - 1)][iy] * fp_t(2.0);
-    auto h3 = _data.heights[ix][min(iy + 1, GRID_SIZE - 1)] * fp_t(2.0);
-    auto h4 = _data.heights[min(ix + 1, GRID_SIZE - 1)][min(iy + 1, GRID_SIZE - 1)] * fp_t(2.0);
+    auto h1 = data_.heights[ix][iy] * fp_t(2.0);
+    auto h2 = data_.heights[min(ix + 1, GRID_SIZE - 1)][iy] * fp_t(2.0);
+    auto h3 = data_.heights[ix][min(iy + 1, GRID_SIZE - 1)] * fp_t(2.0);
+    auto h4 = data_.heights[min(ix + 1, GRID_SIZE - 1)][min(iy + 1, GRID_SIZE - 1)] * fp_t(2.0);
 
     if(isSplitNESW(ix, iy))
     {
@@ -273,22 +273,22 @@ fp_t Land::calcHeightUnbounded(fp_t x, fp_t y) const
 
 LandcellId Land::id() const
 {
-    return LandcellId(_data.fileId);
+    return LandcellId(data_.fileId);
 }
 
 const Land::Data& Land::data() const
 {
-    return _data;
+    return data_;
 }
 
 uint32_t Land::numStructures() const
 {
-    return _numStructures;
+    return numStructures_;
 }
 
 const uint8_t* Land::normalMap() const
 {
-    return _normalMap.data();
+    return normalMap_.data();
 }
 
 bool Land::isSplitNESW(int x, int y) const
@@ -302,28 +302,28 @@ bool Land::isSplitNESW(int x, int y) const
 
 void Land::initDoodads()
 {
-    auto blob = Core::get().cellDat().read(_data.fileId - 1);
+    auto blob = Core::get().cellDat().read(data_.fileId - 1);
 
     BinReader reader(blob.data(), blob.size());
 
     auto fid = reader.read<uint32_t>();
-    assert(fid == _data.fileId - 1);
+    assert(fid == data_.fileId - 1);
     
-    _numStructures = reader.read<uint32_t>();
+    numStructures_ = reader.read<uint32_t>();
 
     auto numDoodads = reader.read<uint16_t>();
-    _doodads.resize(numDoodads);
+    doodads_.resize(numDoodads);
 
     auto unk1 = reader.read<uint16_t>();
     assert(unk1 == 0);
 
     for(auto di = 0u; di < numDoodads; di++)
     {
-        _doodads[di].read(reader);
+        doodads_[di].read(reader);
     }
 
     auto numDoodadsEx = reader.read<uint16_t>();
-    _doodads.resize(numDoodads + numDoodadsEx);
+    doodads_.resize(numDoodads + numDoodadsEx);
 
     // I don't know what this is, but it means there's more data
     auto unk2 = reader.read<uint16_t>();    
@@ -331,7 +331,7 @@ void Land::initDoodads()
 
     for(auto di = 0u; di < numDoodadsEx; di++)
     {
-        _doodads[numDoodads + di].read(reader);
+        doodads_[numDoodads + di].read(reader);
 
         reader.read<uint32_t>();
         auto numPortals = reader.read<uint32_t>();

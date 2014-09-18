@@ -62,18 +62,18 @@ MeshRenderData::MeshRenderData(const Structure& structure)
 
 MeshRenderData::~MeshRenderData()
 {
-    glDeleteVertexArrays(1, &_vertexArray);
-    glDeleteBuffers(1, &_vertexBuffer);
-    glDeleteBuffers(1, &_indexBuffer);
+    glDeleteVertexArrays(1, &vertexArray_);
+    glDeleteBuffers(1, &vertexBuffer_);
+    glDeleteBuffers(1, &indexBuffer_);
 }
 
 void MeshRenderData::render()
 {
-    glBindVertexArray(_vertexArray);
+    glBindVertexArray(vertexArray_);
 
     auto indexBase = 0;
 
-    for(auto& batch : _batches)
+    for(auto& batch : batches_)
     {
         auto& texture = const_cast<Texture&>(batch.texture->cast<TextureLookup8>().textureLookup5().texture());
 
@@ -124,23 +124,23 @@ void MeshRenderData::init(
             continue;
         }
 
-        if(_batches.empty() || textures[triangleFan->texIndex].get() != _batches.back().texture.get())
+        if(batches_.empty() || textures[triangleFan->texIndex].get() != batches_.back().texture.get())
         {
             // Start a new batch
             Batch batch = { textures[triangleFan->texIndex], 0 };
-            _batches.push_back(batch);
+            batches_.push_back(batch);
         }
-        else if(_batches.back().indexCount != 0)
+        else if(batches_.back().indexCount != 0)
         {
             // Starting a new triangle fan in existing batch
             indexData.push_back(0xFFFF);
-            _batches.back().indexCount++;
+            batches_.back().indexCount++;
         }
 
         for(auto& index : triangleFan->indices)
         {
             indexData.push_back(uint16_t(vertexData.size() / COMPONENTS_PER_VERTEX));
-            _batches.back().indexCount++;
+            batches_.back().indexCount++;
 
             auto& vertex = vertices[index.vertexIndex];
 
@@ -178,20 +178,20 @@ void MeshRenderData::init(
         }
 
         Batch batch = { textureLookup8, 0 };
-        _batches.push_back(batch);
+        batches_.push_back(batch);
 
         for(auto& triangleFan : hitTriangleFans)
         {
-            if(_batches.back().indexCount != 0)
+            if(batches_.back().indexCount != 0)
             {
                 indexData.push_back(0xFFFF);
-                _batches.back().indexCount++;
+                batches_.back().indexCount++;
             }
 
             for(auto& index : triangleFan.indices)
             {
                 indexData.push_back(uint16_t(vertexData.size() / COMPONENTS_PER_VERTEX));
-                _batches.back().indexCount++;
+                batches_.back().indexCount++;
 
                 auto& vertex = vertices[index.vertexIndex];
 
@@ -209,15 +209,15 @@ void MeshRenderData::init(
         }
     }
 
-    glGenVertexArrays(1, &_vertexArray);
-    glBindVertexArray(_vertexArray);
+    glGenVertexArrays(1, &vertexArray_);
+    glBindVertexArray(vertexArray_);
 
-    glGenBuffers(1, &_vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+    glGenBuffers(1, &vertexBuffer_);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer_);
     glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(float), vertexData.data(), GL_STATIC_DRAW);
 
-    glGenBuffers(1, &_indexBuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indexBuffer);
+    glGenBuffers(1, &indexBuffer_);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer_);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexData.size() * sizeof(uint16_t), indexData.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * COMPONENTS_PER_VERTEX, nullptr);

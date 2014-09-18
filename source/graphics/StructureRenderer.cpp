@@ -32,30 +32,30 @@
 
 StructureRenderer::StructureRenderer()
 {
-    _program.create();
-    _program.attach(GL_VERTEX_SHADER, ModelVertexShader);
-    _program.attach(GL_FRAGMENT_SHADER, ModelFragmentShader);
-    _program.link();
+    program_.create();
+    program_.attach(GL_VERTEX_SHADER, ModelVertexShader);
+    program_.attach(GL_FRAGMENT_SHADER, ModelFragmentShader);
+    program_.link();
 
-    _program.use();
+    program_.use();
 
-    auto texLocation = _program.getUniform("tex");
+    auto texLocation = program_.getUniform("tex");
     glUniform1i(texLocation, 0);
 }
 
 StructureRenderer::~StructureRenderer()
 {
-    _program.destroy();
+    program_.destroy();
 }
 
 void StructureRenderer::render(const glm::mat4& projectionMat, const glm::mat4& viewMat)
 {
-    _program.use();
+    program_.use();
 
     auto& landcellManager = Core::get().landcellManager();
 
     auto cameraPosition = Core::get().camera().position();
-    glUniform4f(_program.getUniform("cameraPosition"), GLfloat(cameraPosition.x), GLfloat(cameraPosition.y), GLfloat(cameraPosition.z), 1.0f);
+    glUniform4f(program_.getUniform("cameraPosition"), GLfloat(cameraPosition.x), GLfloat(cameraPosition.y), GLfloat(cameraPosition.z), 1.0f);
 
     for(auto& pair : landcellManager)
     {
@@ -84,9 +84,9 @@ void StructureRenderer::renderStructure(
 {
     auto worldMat = glm::translate(glm::mat4(), position) * glm::mat4_cast(rotation);
 
-    loadMat4ToUniform(worldMat, _program.getUniform("worldMatrix"));
-    loadMat4ToUniform(viewMat, _program.getUniform("viewMatrix"));
-    loadMat4ToUniform(projectionMat, _program.getUniform("projectionMatrix"));
+    loadMat4ToUniform(worldMat, program_.getUniform("worldMatrix"));
+    loadMat4ToUniform(viewMat, program_.getUniform("viewMatrix"));
+    loadMat4ToUniform(projectionMat, program_.getUniform("projectionMatrix"));
 
     if(!structure.renderData())
     {

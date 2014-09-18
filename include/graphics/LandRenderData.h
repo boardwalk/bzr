@@ -35,11 +35,11 @@ private:
     void initGeometry(const Land& land);
     void initNormalTexture(const Land& land);
 
-    GLuint _vertexArray;
-    GLuint _vertexBuffer;
-    GLsizei _vertexCount;
+    GLuint vertexArray_;
+    GLuint vertexBuffer_;
+    GLsizei vertexCount_;
 
-    GLuint _normalTexture;
+    GLuint normalTexture_;
 };
 
 #endif

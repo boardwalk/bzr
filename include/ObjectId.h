@@ -30,7 +30,7 @@ public:
     bool operator!=(ObjectId other) const;
 
 private:
-    uint32_t _value;
+    uint32_t value_;
 };
 
 namespace std

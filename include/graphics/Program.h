@@ -32,7 +32,7 @@ public:
     void destroy();
 
 private:
-    GLuint _handle;
+    GLuint handle_;
 };
 
 #endif

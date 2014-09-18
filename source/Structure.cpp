@@ -26,7 +26,7 @@ Structure::Structure(const void* data, size_t size)
     BinReader reader(data, size);
 
     auto resourceId = reader.read<uint32_t>();
-    _id = LandcellId(resourceId);
+    id_ = LandcellId(resourceId);
 
     // 0x1 above ground
     // 0x2 has objects
@@ -39,30 +39,30 @@ Structure::Structure(const void* data, size_t size)
     assert(resourceId2 == resourceId);
 
     auto numTextures = reader.read<uint8_t>();
-    _textures.resize(numTextures);
+    textures_.resize(numTextures);
 
     auto numConnected = reader.read<uint8_t>();
     auto numVisible = reader.read<uint16_t>();
 
-    for(auto& texture : _textures)
+    for(auto& texture : textures_)
     {
         auto textureId = reader.read<uint16_t>();
         texture = Core::get().resourceCache().get(ResourceType::TextureLookup8 | textureId);
     }
 
     auto geometryId = reader.read<uint16_t>();
-    _geometry = Core::get().resourceCache().get(ResourceType::StructureGeom | geometryId);
+    geometry_ = Core::get().resourceCache().get(ResourceType::StructureGeom | geometryId);
 
-    _partNum = reader.read<uint16_t>();
+    partNum_ = reader.read<uint16_t>();
 
-    _position.x = reader.read<float>();
-    _position.y = reader.read<float>();
-    _position.z = reader.read<float>();
+    position_.x = reader.read<float>();
+    position_.y = reader.read<float>();
+    position_.z = reader.read<float>();
 
-    _rotation.w = reader.read<float>();
-    _rotation.x = reader.read<float>();
-    _rotation.y = reader.read<float>();
-    _rotation.z = reader.read<float>();
+    rotation_.w = reader.read<float>();
+    rotation_.x = reader.read<float>();
+    rotation_.y = reader.read<float>();
+    rotation_.z = reader.read<float>();
 
     for(auto ci = 0u; ci < numConnected; ci++)
     {
@@ -80,9 +80,9 @@ Structure::Structure(const void* data, size_t size)
     if(flags & 2)
     {
         auto numDoodads = reader.read<uint32_t>();
-        _doodads.resize(numDoodads);
+        doodads_.resize(numDoodads);
 
-        for(auto& doodad : _doodads)
+        for(auto& doodad : doodads_)
         {
             doodad.read(reader);
         }
@@ -99,30 +99,30 @@ Structure::Structure(const void* data, size_t size)
 
 LandcellId Structure::id() const
 {
-    return _id;
+    return id_;
 }
 
 const glm::vec3& Structure::position() const
 {
-    return _position;
+    return position_;
 }
 
 const glm::quat& Structure::rotation() const
 {
-    return _rotation;
+    return rotation_;
 }
 
 const vector<ResourcePtr>& Structure::textures() const
 {
-    return _textures;
+    return textures_;
 }
 
 const StructureGeom& Structure::geometry() const
 {
-    return _geometry->cast<StructureGeom>();
+    return geometry_->cast<StructureGeom>();
 }
 
 uint16_t Structure::partNum() const
 {
-    return _partNum;
+    return partNum_;
 }

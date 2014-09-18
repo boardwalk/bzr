@@ -28,7 +28,7 @@ Animation::Animation(uint32_t id, const void* data, size_t size) : ResourceImpl(
     auto type = reader.read<uint32_t>();
     auto numModels = reader.read<uint32_t>();
     auto numFrames = reader.read<uint32_t>();
-    _frames.resize(numFrames);
+    frames_.resize(numFrames);
 
     if(type == 1 || type == 3)
     {
@@ -38,7 +38,7 @@ Animation::Animation(uint32_t id, const void* data, size_t size) : ResourceImpl(
         }
     }
 
-    for(auto& frame : _frames)
+    for(auto& frame : frames_)
     {
         frame.read(reader, numModels);
     }
@@ -48,5 +48,5 @@ Animation::Animation(uint32_t id, const void* data, size_t size) : ResourceImpl(
 
 const vector<AnimationFrame>& Animation::frames() const
 {
-    return _frames;
+    return frames_;
 }

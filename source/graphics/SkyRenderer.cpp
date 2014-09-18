@@ -37,38 +37,38 @@ SkyRenderer::SkyRenderer()
 
 SkyRenderer::~SkyRenderer()
 {
-    _program.destroy();
-    glDeleteVertexArrays(1, &_vertexArray);
-    glDeleteBuffers(1, &_vertexBuffer);
-    glDeleteTextures(1, &_texture);
+    program_.destroy();
+    glDeleteVertexArrays(1, &vertexArray_);
+    glDeleteBuffers(1, &vertexBuffer_);
+    glDeleteTextures(1, &texture_);
 }
 
 void SkyRenderer::render()
 {
-    _program.use();
+    program_.use();
 
     auto rotationMat = glm::mat4_cast(glm::conjugate(Core::get().camera().rotationQuat()));
 
-    loadMat4ToUniform(rotationMat, _program.getUniform("rotationMat"));
+    loadMat4ToUniform(rotationMat, program_.getUniform("rotationMat"));
 
-    glBindVertexArray(_vertexArray);
+    glBindVertexArray(vertexArray_);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, _texture);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
 
     glDisable(GL_DEPTH_TEST);
 
-    glDrawArrays(GL_TRIANGLES, 0, _vertexCount);
+    glDrawArrays(GL_TRIANGLES, 0, vertexCount_);
 
     glEnable(GL_DEPTH_TEST);
 }
 
 void SkyRenderer::initProgram()
 {
-    _program.create();
-    _program.attach(GL_VERTEX_SHADER, SkyVertexShader);
-    _program.attach(GL_FRAGMENT_SHADER, SkyFragmentShader);
-    _program.link();
+    program_.create();
+    program_.attach(GL_VERTEX_SHADER, SkyVertexShader);
+    program_.attach(GL_FRAGMENT_SHADER, SkyFragmentShader);
+    program_.link();
 }
 
 void SkyRenderer::initGeometry()
@@ -85,13 +85,13 @@ void SkyRenderer::initGeometry()
 
     static const int COMPONENTS_PER_VERTEX = 2;
 
-    _vertexCount = sizeof(VERTEX_DATA) / sizeof(VERTEX_DATA[0]) / COMPONENTS_PER_VERTEX;
+    vertexCount_ = sizeof(VERTEX_DATA) / sizeof(VERTEX_DATA[0]) / COMPONENTS_PER_VERTEX;
 
-    glGenVertexArrays(1, &_vertexArray);
-    glBindVertexArray(_vertexArray);
+    glGenVertexArrays(1, &vertexArray_);
+    glBindVertexArray(vertexArray_);
 
-    glGenBuffers(1, &_vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+    glGenBuffers(1, &vertexBuffer_);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer_);
     glBufferData(GL_ARRAY_BUFFER, sizeof(VERTEX_DATA), VERTEX_DATA, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * COMPONENTS_PER_VERTEX, nullptr);
@@ -113,8 +113,8 @@ void SkyRenderer::initTexture()
 
     static const int NUM_FACES = sizeof(FACES) / sizeof(FACES[0]);
 
-    glGenTextures(1, &_texture);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, _texture);
+    glGenTextures(1, &texture_);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -184,13 +184,13 @@ void SkyRenderer::initTexture()
         glTexImage2D(FACES[face], 0, GL_RGB8, CUBE_SIZE, CUBE_SIZE, 0, GL_RGB, GL_UNSIGNED_BYTE, data.data());
     }
 
-    _sunVector.x = sin(model.thetaSun()) * sin(model.phiSun());
-    _sunVector.y = -sin(model.thetaSun()) * cos(model.phiSun());
-    _sunVector.z = cos(model.thetaSun());
+    sunVector_.x = sin(model.thetaSun()) * sin(model.phiSun());
+    sunVector_.y = -sin(model.thetaSun()) * cos(model.phiSun());
+    sunVector_.z = cos(model.thetaSun());
 }
 
 const glm::vec3& SkyRenderer::sunVector() const
 {
-    return _sunVector;
+    return sunVector_;
 }
 

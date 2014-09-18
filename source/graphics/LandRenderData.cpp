@@ -27,19 +27,19 @@ LandRenderData::LandRenderData(const Land& land)
 
 LandRenderData::~LandRenderData()
 {
-    glDeleteVertexArrays(1, &_vertexArray);
-    glDeleteBuffers(1, &_vertexBuffer);
-    glDeleteTextures(1, &_normalTexture);
+    glDeleteVertexArrays(1, &vertexArray_);
+    glDeleteBuffers(1, &vertexBuffer_);
+    glDeleteTextures(1, &normalTexture_);
 }
 
 void LandRenderData::render()
 {
-    glBindVertexArray(_vertexArray);
+    glBindVertexArray(vertexArray_);
 
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, _normalTexture);
+    glBindTexture(GL_TEXTURE_2D, normalTexture_);
 
-    glDrawArrays(GL_TRIANGLES, 0, _vertexCount);
+    glDrawArrays(GL_TRIANGLES, 0, vertexCount_);
 }
 
 static void pushRotatedCoord(vector<uint8_t>& vertexData, fp_t s, fp_t t, int rotations, uint8_t scale)
@@ -253,13 +253,13 @@ void LandRenderData::initGeometry(const Land& land)
 
     static const int COMPONENTS_PER_VERTEX = 25;
 
-    _vertexCount = GLsizei(vertexData.size()) / COMPONENTS_PER_VERTEX;
+    vertexCount_ = GLsizei(vertexData.size()) / COMPONENTS_PER_VERTEX;
 
-    glGenVertexArrays(1, &_vertexArray);
-    glBindVertexArray(_vertexArray);
+    glGenVertexArrays(1, &vertexArray_);
+    glBindVertexArray(vertexArray_);
 
-    glGenBuffers(1, &_vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
+    glGenBuffers(1, &vertexBuffer_);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer_);
     glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(uint8_t), vertexData.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), nullptr);
@@ -281,8 +281,8 @@ void LandRenderData::initGeometry(const Land& land)
 
 void LandRenderData::initNormalTexture(const Land& land)
 {
-    glGenTextures(1, &_normalTexture);
-    glBindTexture(GL_TEXTURE_2D, _normalTexture);
+    glGenTextures(1, &normalTexture_);
+    glBindTexture(GL_TEXTURE_2D, normalTexture_);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, Land::OFFSET_MAP_SIZE, Land::OFFSET_MAP_SIZE, 0, GL_RGB, GL_UNSIGNED_BYTE, land.normalMap());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // default is GL_NEAREST_MIPMAP_LINEAR
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

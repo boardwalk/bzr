@@ -24,57 +24,57 @@
 
 LandcellManager::LandcellManager()
 {
-    _radius = Core::get().config().getInt("LandcellManager.radius", 5);
+    radius_ = Core::get().config().getInt("LandcellManager.radius", 5);
 }
 
 void LandcellManager::setCenter(LandcellId c)
 {
-    if(c != _center)
+    if(c != center_)
     {
         printf("new center: %02x %02x\n", c.x(), c.y());
-        _center = c;
+        center_ = c;
         load();
     }
 }
 
 LandcellId LandcellManager::center() const
 {
-    return _center;
+    return center_;
 }
 
 LandcellManager::iterator LandcellManager::find(LandcellId id)
 {
-    return _data.find(id);
+    return data_.find(id);
 }
 
 LandcellManager::iterator LandcellManager::begin()
 {
-    return _data.begin();
+    return data_.begin();
 }
 
 LandcellManager::iterator LandcellManager::end()
 {
-    return _data.end();
+    return data_.end();
 }
 
 void LandcellManager::load()
 {
     // we grab more landblocks than we need so the ones that actually
     // get initialized have all their neighbors
-    uint8_t sloppyRadius = uint8_t(_radius) + 2;
+    uint8_t sloppyRadius = uint8_t(radius_) + 2;
 
-    for(uint8_t x = _center.x() - sloppyRadius; x <= _center.x() + sloppyRadius; x++)
+    for(uint8_t x = center_.x() - sloppyRadius; x <= center_.x() + sloppyRadius; x++)
     {
-        for(uint8_t y = _center.y() - sloppyRadius; y <= _center.y() + sloppyRadius; y++)
+        for(uint8_t y = center_.y() - sloppyRadius; y <= center_.y() + sloppyRadius; y++)
         {
             LandcellId landId(x, y);
 
-            if(_center.calcSquareDistance(landId) > sloppyRadius * sloppyRadius)
+            if(center_.calcSquareDistance(landId) > sloppyRadius * sloppyRadius)
             {
                 continue;
             }
 
-            if(_data.find(landId) != _data.end())
+            if(data_.find(landId) != data_.end())
             {
                 continue;
             }
@@ -86,13 +86,13 @@ void LandcellManager::load()
                  continue;
             }
 
-            _data[landId].reset(new Land(data.data(), data.size()));
+            data_[landId].reset(new Land(data.data(), data.size()));
         }
     }
 
-    for(auto it = _data.begin(); it != _data.end(); ++it)
+    for(auto it = data_.begin(); it != data_.end(); ++it)
     {
-        if(_center.calcSquareDistance(it->first) <= _radius * _radius)
+        if(center_.calcSquareDistance(it->first) <= radius_ * radius_)
         {
             if(it->first.isStructure())
             {
@@ -107,7 +107,7 @@ void LandcellManager::load()
             {
                 auto structId = LandcellId(land.id().x(), land.id().y(), (uint16_t)(0x0100 + i));
 
-                if(_data.find(structId) != _data.end())
+                if(data_.find(structId) != data_.end())
                 {
                     continue;
                 }
@@ -119,16 +119,16 @@ void LandcellManager::load()
                     throw runtime_error("Structure not found");
                 }
 
-                _data[structId].reset(new Structure(data.data(), data.size()));
+                data_[structId].reset(new Structure(data.data(), data.size()));
             }
         }
     }
 
-    for(auto it = _data.begin(); it != _data.end(); /**/)
+    for(auto it = data_.begin(); it != data_.end(); /**/)
     {
-        if(_center.calcSquareDistance(it->first) > _radius * _radius)
+        if(center_.calcSquareDistance(it->first) > radius_ * radius_)
         {
-            it = _data.erase(it);
+            it = data_.erase(it);
         }
         else
         {

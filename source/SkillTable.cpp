@@ -37,7 +37,7 @@ SkillTable::SkillTable()
     for(auto si = 0u; si < numSkills; si++)
     {
         auto id = reader.read<uint32_t>();
-        auto& skill = _skills[id];
+        auto& skill = skills_[id];
 
         skill.description = reader.readString();
         skill.name = reader.readString();

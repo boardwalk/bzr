@@ -35,7 +35,7 @@ public:
     iterator end();
 
 private:
-    container_type _data;
+    container_type data_;
 };
 
 #endif

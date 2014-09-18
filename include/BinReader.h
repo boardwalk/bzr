@@ -21,7 +21,7 @@
 class BinReader
 {
 public:
-    BinReader(const void* data, size_t size) : _data(data), _size(size), _position(0)
+    BinReader(const void* data, size_t size) : data_(data), size_(size), position_(0)
     {}
 
     template<class T>
@@ -29,9 +29,9 @@ public:
     {
         assertRemaining(sizeof(T));
 
-        auto result = *(const T*)((const uint8_t*)_data + _position);
+        auto result = *(const T*)((const uint8_t*)data_ + position_);
 
-        _position += sizeof(T);
+        position_ += sizeof(T);
 
         return result;
     }
@@ -41,9 +41,9 @@ public:
     {
         assertRemaining(sizeof(T) * count);
 
-        auto result = (const T*)((const uint8_t*)_data + _position);
+        auto result = (const T*)((const uint8_t*)data_ + position_);
 
-        _position += sizeof(T) * count;
+        position_ += sizeof(T) * count;
 
         return result;
     }
@@ -78,15 +78,15 @@ public:
 
     void align()
     {
-        while(_position & 3)
+        while(position_ & 3)
         {
-            _position++;
+            position_++;
         }
     }
 
     void assertEnd() const
     {
-        if(_position < _size)
+        if(position_ < size_)
         {
            throw runtime_error("Expected end of blob");
         }
@@ -95,15 +95,15 @@ public:
 private:
     void assertRemaining(size_t numBytes) const
     {
-        if(_position + numBytes > _size)
+        if(position_ + numBytes > size_)
         {
             throw runtime_error("Read overrun in blob");
         }
     }
 
-    const void* _data;
-    size_t _size;
-    size_t _position;
+    const void* data_;
+    size_t size_;
+    size_t position_;
 };
 
 #endif

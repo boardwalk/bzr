@@ -35,12 +35,12 @@ public:
     uint16_t partNum() const;
 
 private:
-    LandcellId _id;
-    glm::vec3 _position;
-    glm::quat _rotation;
-    vector<ResourcePtr> _textures;
-    ResourcePtr _geometry;
-    uint16_t _partNum;
+    LandcellId id_;
+    glm::vec3 position_;
+    glm::quat rotation_;
+    vector<ResourcePtr> textures_;
+    ResourcePtr geometry_;
+    uint16_t partNum_;
 };
 
 #endif

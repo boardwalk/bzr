@@ -35,25 +35,25 @@ AnimationSet::AnimationSet(uint32_t id, const void* data, size_t size) : Resourc
     }
 
     auto numStrips1 = reader.read<uint32_t>();
-    _strips1.resize(numStrips1);
+    strips1_.resize(numStrips1);
 
-    for(auto& strip : _strips1)
+    for(auto& strip : strips1_)
     {
         strip.read(reader);
     }
 
     auto numStrips2 = reader.read<uint32_t>();
-    _strips2.resize(numStrips2);
+    strips2_.resize(numStrips2);
 
-    for(auto& strip : _strips2)
+    for(auto& strip : strips2_)
     {
         strip.read(reader);
     }
 
     auto numComboStrips = reader.read<uint32_t>();
-    _comboStrips.resize(numComboStrips);
+    comboStrips_.resize(numComboStrips);
 
-    for(auto& comboStrip : _comboStrips)
+    for(auto& comboStrip : comboStrips_)
     {
         reader.read<uint32_t>();
 

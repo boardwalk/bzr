@@ -69,7 +69,7 @@ public:
     container::const_iterator find(uint32_t id) const;
 
 private:
-    container _skills;
+    container skills_;
 };
 
 #endif

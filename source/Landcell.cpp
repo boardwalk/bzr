@@ -22,10 +22,10 @@ Landcell::~Landcell()
 
 const vector<Doodad>& Landcell::doodads() const
 {
-    return _doodads;
+    return doodads_;
 }
 
 unique_ptr<Destructable>& Landcell::renderData() const
 {
-    return _renderData;
+    return renderData_;
 }

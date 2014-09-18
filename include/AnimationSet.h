@@ -27,9 +27,9 @@ public:
     AnimationSet(uint32_t id, const void* data, size_t size);
 
 private:
-    vector<AnimationStrip> _strips1;
-    vector<AnimationStrip> _strips2;
-    vector<vector<AnimationStrip>> _comboStrips;
+    vector<AnimationStrip> strips1_;
+    vector<AnimationStrip> strips2_;
+    vector<vector<AnimationStrip>> comboStrips_;
 };
 
 #endif
