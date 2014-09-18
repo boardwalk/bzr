@@ -25,7 +25,6 @@ class DatFile : Noncopyable
 {
 public:
     DatFile(const string& path);
-    ~DatFile();
 
     vector<uint8_t> read(uint32_t id) const;
     vector<uint32_t> list() const;

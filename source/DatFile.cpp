@@ -57,7 +57,7 @@ DatFile::DatFile(const string& path) :
     DatHeader header;
 
     fs_.seekg(HEADER_OFFSET);
-    fs_.read((char*)&header, sizeof(header));
+    fs_.read(reinterpret_cast<char*>(&header), sizeof(header));
 
     if(!fs_.good())
     {
@@ -73,24 +73,21 @@ DatFile::DatFile(const string& path) :
     rootPosition_ = header.rootPosition;
 }
 
-DatFile::~DatFile()
-{}
-
 vector<uint8_t> DatFile::read(uint32_t id) const
 {
-    auto position = rootPosition_;
+    uint32_t position = rootPosition_;
 
     for(;;)
     {
-        auto nodeData = readBlocks(position, sizeof(DatNode));
-        auto node = (DatNode*)nodeData.data();
+        vector<uint8_t> nodeData = readBlocks(position, sizeof(DatNode));
+        DatNode* node = reinterpret_cast<DatNode*>(nodeData.data());
 
         if(node->nodeCount > MAX_NODE_COUNT)
         {
             throw runtime_error("Node has bad node count");
         }
 
-        auto i = 0u;
+        uint32_t i = 0;
 
         for(; i < node->nodeCount; i++)
         {
@@ -137,8 +134,8 @@ vector<uint8_t> DatFile::readBlocks(uint32_t position, size_t size) const
         size_t readSize = min<size_t>(size - offset, blockSize_);
 
         fs_.seekg(position);
-        fs_.read((char*)&position, sizeof(position));
-        fs_.read((char*)result.data() + offset, readSize);
+        fs_.read(reinterpret_cast<char*>(&position), sizeof(position));
+        fs_.read(reinterpret_cast<char*>(result.data() + offset), readSize);
 
         if(!fs_.good())
         {
@@ -153,15 +150,15 @@ vector<uint8_t> DatFile::readBlocks(uint32_t position, size_t size) const
 
 void DatFile::listDir(uint32_t position, vector<uint32_t>& result) const
 {
-    auto nodeData = readBlocks(position, sizeof(DatNode));
-    auto node = (DatNode*)nodeData.data();
+    vector<uint8_t> nodeData = readBlocks(position, sizeof(DatNode));
+    DatNode* node = reinterpret_cast<DatNode*>(nodeData.data());
 
     if(node->nodeCount > MAX_NODE_COUNT)
     {
         throw runtime_error("Node has bad node count");
     }
 
-    for(auto i = 0u; i < node->nodeCount; i++)
+    for(uint32_t i = 0; i < node->nodeCount; i++)
     {
         result.push_back(node->leafNodes[i].id);
 

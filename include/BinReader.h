@@ -21,7 +21,7 @@
 class BinReader
 {
 public:
-    BinReader(const void* data, size_t size) : data_(data), size_(size), position_(0)
+    BinReader(const void* data, size_t size) : data_(reinterpret_cast<const uint8_t*>(data)), size_(size), position_(0)
     {}
 
     template<class T>
@@ -29,7 +29,7 @@ public:
     {
         assertRemaining(sizeof(T));
 
-        auto result = *(const T*)((const uint8_t*)data_ + position_);
+        const T& result = *reinterpret_cast<const T*>(data_ + position_);
 
         position_ += sizeof(T);
 
@@ -41,7 +41,7 @@ public:
     {
         assertRemaining(sizeof(T) * count);
 
-        auto result = (const T*)((const uint8_t*)data_ + position_);
+        const T* result = reinterpret_cast<const T*>(data_ + position_);
 
         position_ += sizeof(T) * count;
 
@@ -69,7 +69,7 @@ public:
             count = read<uint32_t>();
         }
 
-        auto data = readPointer<char>(count);
+        const char* data = readPointer<char>(count);
 
         align();
 
@@ -101,7 +101,7 @@ private:
         }
     }
 
-    const void* data_;
+    const uint8_t* data_;
     size_t size_;
     size_t position_;
 };
