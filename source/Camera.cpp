@@ -88,9 +88,9 @@ const glm::mat4& Camera::viewMatrix() const
 
 void Camera::updateRotationQuat()
 {
-    auto initialPitchQuat = glm::angleAxis(-pi() / fp_t(2.0), glm::vec3(1.0, 0.0, 0.0));
-    auto yawQuat = glm::angleAxis(yaw_, glm::vec3(0.0, 1.0, 0.0));
-    auto pitchQuat = glm::angleAxis(pitch_, glm::vec3(1.0, 0.0, 0.0));
+    glm::quat initialPitchQuat = glm::angleAxis(-pi() / fp_t(2.0), glm::vec3(1.0, 0.0, 0.0));
+    glm::quat yawQuat = glm::angleAxis(yaw_, glm::vec3(0.0, 1.0, 0.0));
+    glm::quat pitchQuat = glm::angleAxis(pitch_, glm::vec3(1.0, 0.0, 0.0));
 
     rotationQuat_ = headOrientation_ * pitchQuat * yawQuat * initialPitchQuat;
 

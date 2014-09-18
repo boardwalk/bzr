@@ -115,12 +115,12 @@ void LandRenderer::render(const glm::mat4& projectionMat, const glm::mat4& viewM
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D_ARRAY, blendTexture_);
 
-    auto& landcellManager = Core::get().landcellManager();
+    LandcellManager& landcellManager = Core::get().landcellManager();
 
-    auto cameraPosition = Core::get().camera().position();
+    glm::vec3 cameraPosition = Core::get().camera().position();
     glUniform4f(program_.getUniform("cameraPosition"), GLfloat(cameraPosition.x), GLfloat(cameraPosition.y), GLfloat(cameraPosition.z), 1.0f);
 
-    auto viewLightPosition = viewMat * glm::vec4(lightPosition_.x, lightPosition_.y, lightPosition_.z, 1.0);
+    glm::vec4 viewLightPosition = viewMat * glm::vec4(lightPosition_.x, lightPosition_.y, lightPosition_.z, 1.0);
     glUniform3f(program_.getUniform("lightPosition"), GLfloat(viewLightPosition.x), GLfloat(viewLightPosition.y), GLfloat(viewLightPosition.z));
 
     for(auto& pair : landcellManager)
@@ -130,12 +130,12 @@ void LandRenderer::render(const glm::mat4& projectionMat, const glm::mat4& viewM
             continue;
         }
 
-        auto dx = pair.first.x() - landcellManager.center().x();
-        auto dy = pair.first.y() - landcellManager.center().y();
+        int dx = pair.first.x() - landcellManager.center().x();
+        int dy = pair.first.y() - landcellManager.center().y();
 
-        auto blockPosition = glm::vec3(dx * 192.0, dy * 192.0, 0.0);
+        glm::vec3 blockPosition(dx * 192.0, dy * 192.0, 0.0);
 
-        auto& land = static_cast<const Land&>(*pair.second);
+        const Land& land = static_cast<const Land&>(*pair.second);
 
         renderLand(land, projectionMat, viewMat, blockPosition);
     }
@@ -152,7 +152,7 @@ void LandRenderer::renderLand(
     const glm::mat4& viewMat,
     const glm::vec3& position)
 {
-    auto worldMat = glm::translate(glm::mat4(), position);
+    glm::mat4 worldMat = glm::translate(glm::mat4(), position);
 
     loadMat3ToUniform(glm::inverseTranspose(glm::mat3(viewMat * worldMat)), program_.getUniform("normalMatrix"));
     loadMat4ToUniform(worldMat, program_.getUniform("worldMatrix"));
@@ -164,7 +164,7 @@ void LandRenderer::renderLand(
         land.renderData().reset(new LandRenderData(land));
     }
 
-    auto& landRenderData = (LandRenderData&)*land.renderData();
+    LandRenderData& landRenderData = (LandRenderData&)*land.renderData();
 
     landRenderData.render();
 }
@@ -179,13 +179,13 @@ void LandRenderer::initProgram()
     program_.use();
 
     // samplers
-    auto terrainTexLocation = program_.getUniform("terrainTex");
+    GLuint terrainTexLocation = program_.getUniform("terrainTex");
     glUniform1i(terrainTexLocation, 0); // corresponds to GL_TEXTURE0
 
-    auto blendTexLocation = program_.getUniform("blendTex");
+    GLuint blendTexLocation = program_.getUniform("blendTex");
     glUniform1i(blendTexLocation, 1);
 
-    auto normalTexLocation = program_.getUniform("normalTex");
+    GLuint normalTexLocation = program_.getUniform("normalTex");
     glUniform1i(normalTexLocation, 2);
 
     // lighting parameters
@@ -207,8 +207,8 @@ void LandRenderer::initTerrainTexture()
     glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_ANISOTROPY_EXT, Core::get().renderer().textureMaxAnisotropy());
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB8, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_DEPTH, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 
-    // populate terrain texture 
-    for(auto i = 0; i < TERRAIN_ARRAY_DEPTH; i++)
+    // populate terrain texture
+    for(int i = 0; i < TERRAIN_ARRAY_DEPTH; i++)
     {
         Image image;
 
@@ -219,7 +219,7 @@ void LandRenderer::initTerrainTexture()
         }
         else
         {
-            auto texture = Core::get().resourceCache().get(LANDSCAPE_TEXTURES[i]);
+            ResourcePtr texture = Core::get().resourceCache().get(LANDSCAPE_TEXTURES[i]);
             image = texture->cast<Texture>().image();
             image.scale(TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_SIZE);
         }
@@ -260,8 +260,8 @@ void LandRenderer::initBlendTexture()
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_R8, BLEND_ARRAY_SIZE, BLEND_ARRAY_SIZE, BLEND_ARRAY_DEPTH, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
 
-    // populate terrain texture 
-    for(auto i = 0; i < BLEND_ARRAY_DEPTH; i++)
+    // populate terrain texture
+    for(int i = 0; i < BLEND_ARRAY_DEPTH; i++)
     {
         Image image;
 
@@ -276,7 +276,7 @@ void LandRenderer::initBlendTexture()
         }
         else
         {
-            auto texture = Core::get().resourceCache().get(BLEND_TEXTURES[i]);
+            ResourcePtr texture = Core::get().resourceCache().get(BLEND_TEXTURES[i]);
             image = texture->cast<Texture>().image();
         }
 

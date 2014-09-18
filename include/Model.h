@@ -30,7 +30,7 @@ class Model : public ResourceImpl<ResourceType::Model>
 public:
     Model(uint32_t id, const void* data, size_t size);
     ~Model();
-    
+
     const vector<ResourcePtr>& textures() const;
     const vector<Vertex>& vertices() const;
     const vector<TriangleFan>& triangleFans() const;

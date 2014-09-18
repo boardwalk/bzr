@@ -30,7 +30,7 @@ public:
         glm::vec3 position;
         glm::quat rotation;
     };
-    
+
     AnimationFrame();
     AnimationFrame(AnimationFrame&&);
     AnimationFrame& operator=(AnimationFrame&&);

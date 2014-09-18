@@ -57,7 +57,7 @@ ModelRenderer::ModelRenderer()
 
     program_.use();
 
-    auto texLocation = program_.getUniform("tex");
+    GLuint texLocation = program_.getUniform("tex");
     glUniform1i(texLocation, 0);
 }
 
@@ -70,10 +70,10 @@ void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& view
 {
     program_.use();
 
-    auto& landcellManager = Core::get().landcellManager();
-    auto& objectManager = Core::get().objectManager();
+    LandcellManager& landcellManager = Core::get().landcellManager();
+    ObjectManager& objectManager = Core::get().objectManager();
 
-    auto cameraPosition = Core::get().camera().position();
+    glm::vec3 cameraPosition = Core::get().camera().position();
     glUniform4f(program_.getUniform("cameraPosition"), GLfloat(cameraPosition.x), GLfloat(cameraPosition.y), GLfloat(cameraPosition.z), 1.0f);
 
     // first pass, render solid objects and collect objects that need depth sorting
@@ -81,33 +81,33 @@ void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& view
 
     for(auto& pair : objectManager)
     {
-        auto& object = *pair.second;
+        Object& object = *pair.second;
 
         if(!object.model())
         {
             continue;
         }
 
-        auto dx = object.location().landcell.x() - landcellManager.center().x();
-        auto dy = object.location().landcell.y() - landcellManager.center().y();
+        int dx = object.location().landcell.x() - landcellManager.center().x();
+        int dy = object.location().landcell.y() - landcellManager.center().y();
 
-        auto blockPosition = glm::vec3(dx * Land::BLOCK_SIZE, dy * Land::BLOCK_SIZE, 0.0);
+        glm::vec3 blockPosition(dx * Land::BLOCK_SIZE, dy * Land::BLOCK_SIZE, 0.0);
 
-        auto worldMat = glm::translate(glm::mat4(), blockPosition + object.location().offset) * glm::mat4_cast(object.location().rotation);
+        glm::mat4 worldMat = glm::translate(glm::mat4(), blockPosition + object.location().offset) * glm::mat4_cast(object.location().rotation);
 
         renderOne(object.model(), projectionMat, viewMat, worldMat);
     }
 
     for(auto& pair : landcellManager)
     {
-        auto dx = pair.first.x() - landcellManager.center().x();
-        auto dy = pair.first.y() - landcellManager.center().y();
+        int dx = pair.first.x() - landcellManager.center().x();
+        int dy = pair.first.y() - landcellManager.center().y();
 
-        auto blockPosition = glm::vec3(dx * Land::BLOCK_SIZE, dy * Land::BLOCK_SIZE, 0.0);
+        glm::vec3 blockPosition(dx * Land::BLOCK_SIZE, dy * Land::BLOCK_SIZE, 0.0);
 
-        for(auto& doodad : pair.second->doodads())
+        for(const Doodad& doodad : pair.second->doodads())
         {
-            auto worldMat = glm::translate(glm::mat4(), blockPosition + doodad.position) * glm::mat4_cast(doodad.rotation);
+            glm::mat4 worldMat = glm::translate(glm::mat4(), blockPosition + doodad.position) * glm::mat4_cast(doodad.rotation);
 
             renderOne(doodad.resource, projectionMat, viewMat, worldMat);
         }
@@ -116,7 +116,7 @@ void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& view
     // second pass, sort and render objects that need depth sorting
     sort(depthSortList_.begin(), depthSortList_.end(), CompareByDepth());
 
-    for(auto& depthSortedModel : depthSortList_)
+    for(const DepthSortedModel& depthSortedModel : depthSortList_)
     {
         renderModel(*depthSortedModel.model,
             projectionMat,
@@ -128,7 +128,7 @@ void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& view
 
 void ModelRenderer::renderOne(const ResourcePtr& resource,
     const glm::mat4& projectionMat,
-    const glm::mat4& viewMat, 
+    const glm::mat4& viewMat,
     const glm::mat4& worldMat)
 {
     if(resource->resourceType() == ResourceType::ModelGroup)
@@ -153,11 +153,11 @@ void ModelRenderer::renderModelGroup(const ModelGroup& modelGroup,
     const glm::mat4& viewMat,
     const glm::mat4& worldMat)
 {
-    for(auto child = 0u; child < modelGroup.modelInfos().size(); child++)
+    for(size_t child = 0; child < modelGroup.modelInfos().size(); child++)
     {
-        auto& modelInfo = modelGroup.modelInfos()[child];
+        const ModelGroup::ModelInfo& modelInfo = modelGroup.modelInfos()[child];
 
-        auto subWorldMat = glm::translate(glm::mat4(), modelInfo.position) * glm::mat4_cast(modelInfo.rotation) * glm::scale(glm::mat4(), modelInfo.scale);
+        glm::mat4 subWorldMat = glm::translate(glm::mat4(), modelInfo.position) * glm::mat4_cast(modelInfo.rotation) * glm::scale(glm::mat4(), modelInfo.scale);
 
         renderOne(modelInfo.resource,
             projectionMat,
@@ -174,7 +174,7 @@ void ModelRenderer::renderModel(const Model& model,
 {
     if(firstPass && model.needsDepthSort())
     {
-        auto worldPos = worldMat * glm::vec4(0.0, 0.0, 0.0, 1.0);
+        glm::vec4 worldPos = worldMat * glm::vec4(0.0, 0.0, 0.0, 1.0);
         DepthSortedModel depthSortedModel = { &model, worldMat, glm::vec3(worldPos.x, worldPos.y, worldPos.z) };
         depthSortList_.push_back(depthSortedModel);
         return;
@@ -189,7 +189,7 @@ void ModelRenderer::renderModel(const Model& model,
         model.renderData().reset(new MeshRenderData(model));
     }
 
-    auto& renderData = (MeshRenderData&)*model.renderData();
+    MeshRenderData& renderData = (MeshRenderData&)*model.renderData();
 
     renderData.render();
 }

@@ -36,7 +36,7 @@ void AnimationFrame::read(BinReader& reader, uint32_t numModels)
 {
     orientations_.resize(numModels);
 
-    for(auto& orientation : orientations_)
+    for(Orientation& orientation : orientations_)
     {
         orientation.position.x = reader.read<float>();
         orientation.position.y = reader.read<float>();
@@ -48,12 +48,12 @@ void AnimationFrame::read(BinReader& reader, uint32_t numModels)
         orientation.rotation.z = reader.read<float>();
     }
 
-    auto numExtra = reader.read<uint32_t>();
+    uint32_t numExtra = reader.read<uint32_t>();
 
-    for(auto ei = 0u; ei < numExtra; ei++)
+    for(uint32_t ei = 0; ei < numExtra; ei++)
     {
-        auto extraType = reader.read<uint32_t>();
-        auto extraSize = 0u;
+        uint32_t extraType = reader.read<uint32_t>();
+        uint32_t extraSize = 0;
 
         switch(extraType)
         {

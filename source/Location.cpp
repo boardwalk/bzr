@@ -19,6 +19,6 @@
 
 glm::vec3 Location::normalize() const
 {
-	// FIXME
-	return offset;
+		// FIXME
+		return offset;
 }

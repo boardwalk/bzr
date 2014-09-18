@@ -22,7 +22,7 @@
 
 void Doodad::read(BinReader& reader)
 {
-    auto modelId = reader.read<uint32_t>();
+    uint32_t modelId = reader.read<uint32_t>();
     resource = Core::get().resourceCache().get(modelId);
 
     position.x = reader.read<float>();

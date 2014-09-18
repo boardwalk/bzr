@@ -52,9 +52,9 @@ void StructureRenderer::render(const glm::mat4& projectionMat, const glm::mat4& 
 {
     program_.use();
 
-    auto& landcellManager = Core::get().landcellManager();
+    LandcellManager& landcellManager = Core::get().landcellManager();
 
-    auto cameraPosition = Core::get().camera().position();
+    glm::vec3 cameraPosition = Core::get().camera().position();
     glUniform4f(program_.getUniform("cameraPosition"), GLfloat(cameraPosition.x), GLfloat(cameraPosition.y), GLfloat(cameraPosition.z), 1.0f);
 
     for(auto& pair : landcellManager)
@@ -64,12 +64,12 @@ void StructureRenderer::render(const glm::mat4& projectionMat, const glm::mat4& 
             continue;
         }
 
-        auto dx = pair.first.x() - landcellManager.center().x();
-        auto dy = pair.first.y() - landcellManager.center().y();
+        int dx = pair.first.x() - landcellManager.center().x();
+        int dy = pair.first.y() - landcellManager.center().y();
 
-        auto blockPosition = glm::vec3(dx * 192.0, dy * 192.0, 0.0);
+        glm::vec3 blockPosition(dx * 192.0, dy * 192.0, 0.0);
 
-        auto& structure = static_cast<const Structure&>(*pair.second);
+        const Structure& structure = static_cast<const Structure&>(*pair.second);
 
         renderStructure(structure, projectionMat, viewMat, blockPosition + structure.position(), structure.rotation());
     }
@@ -82,7 +82,7 @@ void StructureRenderer::renderStructure(
     const glm::vec3& position,
     const glm::quat& rotation)
 {
-    auto worldMat = glm::translate(glm::mat4(), position) * glm::mat4_cast(rotation);
+    glm::mat4 worldMat = glm::translate(glm::mat4(), position) * glm::mat4_cast(rotation);
 
     loadMat4ToUniform(worldMat, program_.getUniform("worldMatrix"));
     loadMat4ToUniform(viewMat, program_.getUniform("viewMatrix"));
@@ -93,7 +93,7 @@ void StructureRenderer::renderStructure(
         structure.renderData().reset(new MeshRenderData(structure));
     }
 
-    auto& renderData = (MeshRenderData&)*structure.renderData();
+    MeshRenderData& renderData = (MeshRenderData&)*structure.renderData();
 
     renderData.render();
 }

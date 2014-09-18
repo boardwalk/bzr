@@ -28,7 +28,7 @@
 #include "ResourceCache.h"
 #include "util.h"
 
-static const auto STEP_RATE = fp_t(60.0);
+static const fp_t STEP_RATE = 60.0;
 
 static unique_ptr<Core> g_singleton;
 
@@ -266,7 +266,7 @@ void Core::handleEvents()
     {
         printf("Loading model %08x\n", modelId_);
 
-        auto& object = (*objectManager_)[ObjectId(1)];
+        Object& object = (*objectManager_)[ObjectId(1)];
 
         object.setModel(resourceCache_->get(modelId_));
 
@@ -282,7 +282,7 @@ void Core::step(fp_t dt)
 {
     const Uint8* state = SDL_GetKeyboardState(nullptr);
 
-    auto speed = fp_t(0.0);
+    fp_t speed = 0.0;
 
     if(state[SDL_SCANCODE_LSHIFT])
     {
@@ -295,8 +295,8 @@ void Core::step(fp_t dt)
 
     camera_->setSpeed(speed);
 
-    auto lx = fp_t(0.0);
-    auto ly = fp_t(0.0);
+    fp_t lx = 0.0;
+    fp_t ly = 0.0;
 
     if(state[SDL_SCANCODE_LEFT])
     {
@@ -323,8 +323,8 @@ void Core::step(fp_t dt)
         camera_->look(lx, ly);
     }
 
-    auto mx = fp_t(0.0);
-    auto my = fp_t(0.0);
+    fp_t mx = 0.0;
+    fp_t my = 0.0;
 
     if(state[SDL_SCANCODE_A])
     {
@@ -351,8 +351,8 @@ void Core::step(fp_t dt)
         camera_->move(mx, my);
     }
 
-    auto& position = camera_->position();    
-    auto id = landcellManager_->center();
+    const glm::vec3& position = camera_->position();
+    LandcellId id = landcellManager_->center();
 
     if(position.x < 0.0)
     {

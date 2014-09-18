@@ -47,7 +47,7 @@ void SkyRenderer::render()
 {
     program_.use();
 
-    auto rotationMat = glm::mat4_cast(glm::conjugate(Core::get().camera().rotationQuat()));
+    glm::mat4 rotationMat = glm::mat4_cast(glm::conjugate(Core::get().camera().rotationQuat()));
 
     loadMat4ToUniform(rotationMat, program_.getUniform("rotationMat"));
 
@@ -133,15 +133,15 @@ void SkyRenderer::initTexture()
 
     vector<uint8_t> data(CUBE_SIZE * CUBE_SIZE * 3);
 
-    for(auto face = 0; face < NUM_FACES; face++)
+    for(int face = 0; face < NUM_FACES; face++)
     {
-        for(auto j = 0; j < CUBE_SIZE; j++)
+        for(int j = 0; j < CUBE_SIZE; j++)
         {
-            for(auto i = 0; i < CUBE_SIZE; i++)
+            for(int i = 0; i < CUBE_SIZE; i++)
             {
                 // scale to cube face
-                auto fi = fp_t(i) / fp_t(CUBE_SIZE - 1) * 2.0 - 1.0;
-                auto fj = fp_t(j) / fp_t(CUBE_SIZE - 1) * 2.0 - 1.0;
+                fp_t fi = fp_t(i) / fp_t(CUBE_SIZE - 1) * fp_t(2.0) - fp_t(1.0);
+                fp_t fj = fp_t(j) / fp_t(CUBE_SIZE - 1) * fp_t(2.0) - fp_t(1.0);
 
                 // find point on the cube we're mapping
                 glm::vec3 cp;
@@ -167,14 +167,14 @@ void SkyRenderer::initTexture()
                 // convert cartesian to spherical
                 // http://en.wikipedia.org/wiki/Spherical_coordinate_system#Cartesian_coordinates
                 // phi is ccw from -y, not ccw from +x
-                auto theta = acos(sp.z / sqrt(sp.x * sp.x + sp.y * sp.y + sp.z * sp.z));
-                auto phi = atan2(sp.x, -sp.y);
+                fp_t theta = acos(sp.z / sqrt(sp.x * sp.x + sp.y * sp.y + sp.z * sp.z));
+                fp_t phi = atan2(sp.x, -sp.y);
 
                 // pull sky edge below land edge
                 theta *= fp_t(0.9);
 
                 // compute and store color
-                auto color = model.getColor(theta, phi);
+                glm::vec3 color = model.getColor(theta, phi);
                 data[(i + j * CUBE_SIZE) * 3] = (uint8_t)(color.x * 0xFF);
                 data[(i + j * CUBE_SIZE) * 3 + 1] = (uint8_t)(color.y * 0xFF);
                 data[(i + j * CUBE_SIZE) * 3 + 2] = (uint8_t)(color.z * 0xFF);
@@ -193,4 +193,3 @@ const glm::vec3& SkyRenderer::sunVector() const
 {
     return sunVector_;
 }
-

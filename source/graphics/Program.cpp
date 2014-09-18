@@ -35,7 +35,7 @@ void Program::attach(GLenum type, const GLchar* source)
 {
     GLint length = GLint(strlen(source));
 
-    auto shader = glCreateShader(type);
+    GLuint shader = glCreateShader(type);
     glShaderSource(shader, 1, &source, &length);
     glCompileShader(shader);
 
@@ -90,7 +90,7 @@ GLint Program::getUniform(const GLchar* name)
 {
     assert(handle_ != 0);
 
-    auto loc = glGetUniformLocation(handle_, name);
+    GLuint loc = glGetUniformLocation(handle_, name);
 
     if(loc < 0)
     {

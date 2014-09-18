@@ -79,7 +79,7 @@ void LandcellManager::load()
                 continue;
             }
 
-            auto data = Core::get().cellDat().read(landId.value());
+            vector<uint8_t> data = Core::get().cellDat().read(landId.value());
 
             if(data.empty())
             {
@@ -103,16 +103,16 @@ void LandcellManager::load()
 
             land.init();
 
-            for(auto i = 0u; i < land.numStructures(); i++)
+            for(uint32_t i = 0; i < land.numStructures(); i++)
             {
-                auto structId = LandcellId(land.id().x(), land.id().y(), (uint16_t)(0x0100 + i));
+                LandcellId structId(land.id().x(), land.id().y(), (uint16_t)(0x0100 + i));
 
                 if(data_.find(structId) != data_.end())
                 {
                     continue;
                 }
 
-                auto data = Core::get().cellDat().read(structId.value());
+                vector<uint8_t> data = Core::get().cellDat().read(structId.value());
 
                 if(data.empty())
                 {

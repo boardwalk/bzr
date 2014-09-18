@@ -38,18 +38,18 @@ static fp_t tonemap(fp_t luminance)
 void SkyModel::prepare(const Params& p)
 {
     // calculate solar time
-    auto t_s = p.tm * fp_t(24.0); // standard time in decimal hours
-    auto J = p.dt; // Julian day
-    auto SM = int(p.lng / fp_t(15.0)) * fp_t(15.0); // standard meridian for time zone
-    auto L = p.lng; // longitude in radians
+    fp_t t_s = p.tm * fp_t(24.0); // standard time in decimal hours
+    fp_t J = p.dt; // Julian day
+    fp_t SM = int(p.lng / fp_t(15.0)) * fp_t(15.0); // standard meridian for time zone
+    fp_t L = p.lng; // longitude in radians
 
-    auto t = t_s + fp_t(0.170) * glm::sin(fp_t(4.0) * pi() * (J - fp_t(80.0)) / fp_t(373.0)) - fp_t(0.129) * glm::sin(fp_t(2.0) * pi() * (J - fp_t(8.0)) / fp_t(355.0)) + fp_t(12.0) * (SM - L) / pi();
+    fp_t t = t_s + fp_t(0.170) * glm::sin(fp_t(4.0) * pi() * (J - fp_t(80.0)) / fp_t(373.0)) - fp_t(0.129) * glm::sin(fp_t(2.0) * pi() * (J - fp_t(8.0)) / fp_t(355.0)) + fp_t(12.0) * (SM - L) / pi();
 
     // calculate solar declination
-    auto delta = fp_t(0.4093) * glm::sin(fp_t(2.0) * pi() * (J - fp_t(81.0)) / fp_t(368.0));
+    fp_t delta = fp_t(0.4093) * glm::sin(fp_t(2.0) * pi() * (J - fp_t(81.0)) / fp_t(368.0));
 
     // calculate solar position
-    auto l = p.lat; // latitude in radians
+    fp_t l = p.lat; // latitude in radians
 
     theta_s_ = pi() / fp_t(2.0) - glm::asin(sin(l) * sin(delta) - cos(l) * cos(delta) * cos(pi() * t / fp_t(12.0)));
     phi_s_ = (fp_t)atan2(-glm::cos(delta) * glm::sin(pi() * t / fp_t(12.0)), (glm::cos(l) * glm::sin(delta) - glm::sin(l) * glm::cos(delta) * glm::cos(pi() * t / fp_t(12.0))));
@@ -74,19 +74,19 @@ void SkyModel::prepare(const Params& p)
     coeffs_y_[4] = fp_t(-0.0109) * p.tu + fp_t(0.0529);
 
     // calculate Y sub z
-    auto chi = (fp_t(4.0 / 9.0) - p.tu / fp_t(120.0)) * (pi() - fp_t(2.0) * theta_s_);
+    fp_t chi = (fp_t(4.0 / 9.0) - p.tu / fp_t(120.0)) * (pi() - fp_t(2.0) * theta_s_);
     Y_z_ = (fp_t(4.0453) * p.tu - fp_t(4.9710)) * tan(chi) - fp_t(0.2155) * p.tu + fp_t(2.4192);
     Y_z_ *= fp_t(1000.0); // convert kcd/m^2 to cd/m^2
 
-    auto tu_sq = p.tu * p.tu;
-    auto theta_s_sq = theta_s_ * theta_s_;
-    auto theta_s_cu = theta_s_sq * theta_s_;
+    fp_t tu_sq = p.tu * p.tu;
+    fp_t theta_s_sq = theta_s_ * theta_s_;
+    fp_t theta_s_cu = theta_s_sq * theta_s_;
 
     // calculate x sub z
-    auto c1 = tu_sq * fp_t(0.00166) + p.tu * fp_t(-0.02903) + fp_t(0.11693);
-    auto c2 = tu_sq * fp_t(-0.00375) + p.tu * fp_t(0.06377) + fp_t(-0.21196);
-    auto c3 = tu_sq * fp_t(0.00209) + p.tu * fp_t(-0.03202) + fp_t(0.06052);
-    auto c4 = p.tu * fp_t(0.00394) + fp_t(0.25886);
+    fp_t c1 = tu_sq * fp_t(0.00166) + p.tu * fp_t(-0.02903) + fp_t(0.11693);
+    fp_t c2 = tu_sq * fp_t(-0.00375) + p.tu * fp_t(0.06377) + fp_t(-0.21196);
+    fp_t c3 = tu_sq * fp_t(0.00209) + p.tu * fp_t(-0.03202) + fp_t(0.06052);
+    fp_t c4 = p.tu * fp_t(0.00394) + fp_t(0.25886);
 
     x_z_ = c1 * theta_s_cu + c2 * theta_s_sq + c3 * theta_s_ + c4;
 
@@ -110,11 +110,11 @@ glm::vec3 toCartesian(fp_t theta, fp_t phi)
 glm::vec3 SkyModel::getColor(fp_t theta, fp_t phi)
 {
     // this is the angle between theta_s, phi_s and theta, phi
-    auto gamma = glm::acos(glm::dot(toCartesian(theta, phi), toCartesian(theta_s_, phi_s_)));
+    fp_t gamma = glm::acos(glm::dot(toCartesian(theta, phi), toCartesian(theta_s_, phi_s_)));
 
-    auto Y = F(coeffs_Y_, theta, gamma) / F(coeffs_Y_, 0.0, theta_s_) * Y_z_;
-    auto x = F(coeffs_x_, theta, gamma) / F(coeffs_x_, 0.0, theta_s_) * x_z_;
-    auto y = F(coeffs_y_, theta, gamma) / F(coeffs_y_, 0.0, theta_s_) * y_z_;
+    fp_t Y = F(coeffs_Y_, theta, gamma) / F(coeffs_Y_, 0.0, theta_s_) * Y_z_;
+    fp_t x = F(coeffs_x_, theta, gamma) / F(coeffs_x_, 0.0, theta_s_) * x_z_;
+    fp_t y = F(coeffs_y_, theta, gamma) / F(coeffs_y_, 0.0, theta_s_) * y_z_;
 
     // Y is luminance in candela/m^2 (aka nit)
     Y = min(tonemap(abs(Y)), fp_t(1.0));
@@ -130,7 +130,7 @@ glm::vec3 SkyModel::getColor(fp_t theta, fp_t phi)
         XYZ.z = (fp_t(1.0) - x - y) * Y / y;
     }
 
-    auto RGB = glm::vec3(
+    glm::vec3 RGB(
         XYZ.x * fp_t(3.2406)  + XYZ.y * fp_t(-1.5372) + XYZ.z * fp_t(-0.4986),
         XYZ.x * fp_t(-0.9689) + XYZ.y * fp_t( 1.8758) + XYZ.z * fp_t( 0.0415),
         XYZ.x * fp_t(0.0557)  + XYZ.y * fp_t(-0.2040) + XYZ.z * fp_t( 1.0570));

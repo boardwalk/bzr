@@ -27,7 +27,7 @@ static vector<string> splitName(const string& name)
 
     for(;;)
     {
-        auto tokenEnd = name.find('.', tokenBegin);
+        size_t tokenEnd = name.find('.', tokenBegin);
 
         if(tokenEnd == string::npos)
         {
@@ -46,11 +46,11 @@ static vector<string> splitName(const string& name)
 
 Config::Config()
 {
-    auto prefPath = SDL_GetPrefPath("boardwalk", "Bael'Zharon's Revenge");
+    char* prefPath = SDL_GetPrefPath("boardwalk", "Bael'Zharon's Revenge");
     path_ = string(prefPath) + "config.json";
     SDL_free(prefPath);
 
-    auto fp = fopen(path_.c_str(), "r");
+    FILE* fp = fopen(path_.c_str(), "r");
 
     if(fp != nullptr)
     {
@@ -105,7 +105,7 @@ void Config::setString(const char* name, const string& value)
 
 bool Config::getBool(const char* name, bool defaultValue)
 {
-    auto value = get(name);
+    json_t* value = get(name);
 
     if(json_is_boolean(value))
     {
@@ -120,7 +120,7 @@ bool Config::getBool(const char* name, bool defaultValue)
 
 int Config::getInt(const char* name, int defaultValue)
 {
-    auto value = get(name);
+    json_t* value = get(name);
 
     if(json_is_integer(value))
     {
@@ -135,7 +135,7 @@ int Config::getInt(const char* name, int defaultValue)
 
 fp_t Config::getFloat(const char* name, fp_t defaultValue)
 {
-    auto value = get(name);
+    json_t* value = get(name);
 
     if(json_is_real(value))
     {
@@ -150,7 +150,7 @@ fp_t Config::getFloat(const char* name, fp_t defaultValue)
 
 string Config::getString(const char* name, const string& defaultValue)
 {
-    auto value = get(name);
+    json_t* value = get(name);
 
     if(json_is_string(value))
     {
@@ -165,16 +165,16 @@ string Config::getString(const char* name, const string& defaultValue)
 
 void Config::set(const char* name, json_t* value)
 {
-    auto nameParts = splitName(name);
+    vector<string> nameParts = splitName(name);
 
-    auto lastPart = nameParts.back();
+    string lastPart = nameParts.back();
     nameParts.pop_back();
 
-    auto node = root_;
+    json_t* node = root_;
 
-    for(auto& part : nameParts)
+    for(string& part : nameParts)
     {
-        auto childNode = json_object_get(node, part.c_str());
+        json_t* childNode = json_object_get(node, part.c_str());
 
         if(!json_is_object(childNode))
         {
@@ -190,11 +190,11 @@ void Config::set(const char* name, json_t* value)
 
 json_t* Config::get(const char* name) const
 {
-    auto nameParts = splitName(name);
+    vector<string> nameParts = splitName(name);
 
-    auto node = root_;
+    json_t* node = root_;
 
-    for(auto& part : nameParts)
+    for(string& part : nameParts)
     {
         if(!json_is_object(node))
         {

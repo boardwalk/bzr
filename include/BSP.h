@@ -40,7 +40,7 @@ class BSPInternal : public BSPNode
 {
 public:
     BSPInternal(BinReader& reader, int treeType, uint32_t nodeType);
-    
+
     bool collide(const LineSegment& segment, glm::vec3& impact) const override;
 
     const Sphere& bounds() const override;

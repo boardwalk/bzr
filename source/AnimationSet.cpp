@@ -22,45 +22,45 @@ AnimationSet::AnimationSet(uint32_t id, const void* data, size_t size) : Resourc
 {
     BinReader reader(data, size);
 
-    auto resourceId = reader.read<uint32_t>();
+    uint32_t resourceId = reader.read<uint32_t>();
     assert(resourceId == id);
 
     reader.read<uint32_t>();
-    auto numUnknown = reader.read<uint32_t>();
-    
-    for(auto ui = 0u; ui < numUnknown; ui++)
+    uint32_t numUnknown = reader.read<uint32_t>();
+
+    for(uint32_t ui = 0; ui < numUnknown; ui++)
     {
         reader.read<uint32_t>();
         reader.read<uint32_t>();
     }
 
-    auto numStrips1 = reader.read<uint32_t>();
+    uint32_t numStrips1 = reader.read<uint32_t>();
     strips1_.resize(numStrips1);
 
-    for(auto& strip : strips1_)
+    for(AnimationStrip& strip : strips1_)
     {
         strip.read(reader);
     }
 
-    auto numStrips2 = reader.read<uint32_t>();
+    uint32_t numStrips2 = reader.read<uint32_t>();
     strips2_.resize(numStrips2);
 
-    for(auto& strip : strips2_)
+    for(AnimationStrip& strip : strips2_)
     {
         strip.read(reader);
     }
 
-    auto numComboStrips = reader.read<uint32_t>();
+    uint32_t numComboStrips = reader.read<uint32_t>();
     comboStrips_.resize(numComboStrips);
 
-    for(auto& comboStrip : comboStrips_)
+    for(vector<AnimationStrip>& comboStrip : comboStrips_)
     {
         reader.read<uint32_t>();
 
-        auto numStrips3 = reader.read<uint32_t>();
+        uint32_t numStrips3 = reader.read<uint32_t>();
         comboStrip.resize(numStrips3);
 
-        for(auto& strip : comboStrip)
+        for(AnimationStrip& strip : comboStrip)
         {
             strip.read(reader);
         }

@@ -47,7 +47,7 @@ private:
         const vector<Vertex>& vertices,
         const vector<TriangleFan>& triangleFans,
         const vector<TriangleFan>& hitTriangleFans);
-    
+
     GLuint vertexArray_;
     GLuint vertexBuffer_;
     GLuint indexBuffer_;

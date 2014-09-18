@@ -35,8 +35,8 @@ LandcellId::LandcellId(uint8_t x, uint8_t y, uint16_t n) :
 
 int LandcellId::calcSquareDistance(LandcellId other) const
 {
-    auto dx = other.x() - x();
-    auto dy = other.y() - y();
+    int dx = other.x() - x();
+    int dy = other.y() - y();
     return dx * dx + dy * dy;
 }
 

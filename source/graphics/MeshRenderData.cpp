@@ -52,7 +52,7 @@ MeshRenderData::MeshRenderData(const Model& model)
 MeshRenderData::MeshRenderData(const Structure& structure)
 {
     assert(structure.partNum() < structure.geometry().size());
-    auto& part = structure.geometry()[structure.partNum()];
+    const StructureGeomPart& part = structure.geometry()[structure.partNum()];
 
     init(structure.textures(),
         part.vertices(),
@@ -71,9 +71,9 @@ void MeshRenderData::render()
 {
     glBindVertexArray(vertexArray_);
 
-    auto indexBase = 0;
+    int indexBase = 0;
 
-    for(auto& batch : batches_)
+    for(Batch& batch : batches_)
     {
         auto& texture = const_cast<Texture&>(batch.texture->cast<TextureLookup8>().textureLookup5().texture());
 
@@ -82,7 +82,7 @@ void MeshRenderData::render()
             texture.renderData().reset(new TextureRenderData(texture));
         }
 
-        auto& renderData = (TextureRenderData&)*texture.renderData();
+        TextureRenderData& renderData = (TextureRenderData&)*texture.renderData();
 
         glActiveTexture(GL_TEXTURE0);
         renderData.bind();
@@ -105,7 +105,7 @@ void MeshRenderData::init(
     // Sort triangle fans by texture
     vector<const TriangleFan*> sortedTriangleFans;
 
-    for(auto& triangleFan : triangleFans)
+    for(const TriangleFan& triangleFan : triangleFans)
     {
         sortedTriangleFans.push_back(&triangleFan);
     }
@@ -116,7 +116,7 @@ void MeshRenderData::init(
     vector<float> vertexData;
     vector<uint16_t> indexData;
 
-    for(auto triangleFan : sortedTriangleFans)
+    for(const TriangleFan* triangleFan : sortedTriangleFans)
     {
         // Skip portal/lighting polygons
         if(triangleFan->flags == 0x04)
@@ -137,12 +137,12 @@ void MeshRenderData::init(
             batches_.back().indexCount++;
         }
 
-        for(auto& index : triangleFan->indices)
+        for(const TriangleFan::Index& index : triangleFan->indices)
         {
             indexData.push_back(uint16_t(vertexData.size() / COMPONENTS_PER_VERTEX));
             batches_.back().indexCount++;
 
-            auto& vertex = vertices[index.vertexIndex];
+            const Vertex& vertex = vertices[index.vertexIndex];
 
             vertexData.push_back(float(vertex.position.x));
             vertexData.push_back(float(vertex.position.y));
@@ -167,7 +167,7 @@ void MeshRenderData::init(
 
     if(Core::get().renderer().renderHitGeometry())
     {
-        auto textureLookup8 = hitTexture.lock();
+        ResourcePtr textureLookup8 = hitTexture.lock();
 
         if(!textureLookup8)
         {
@@ -180,7 +180,7 @@ void MeshRenderData::init(
         Batch batch = { textureLookup8, 0 };
         batches_.push_back(batch);
 
-        for(auto& triangleFan : hitTriangleFans)
+        for(const TriangleFan& triangleFan : hitTriangleFans)
         {
             if(batches_.back().indexCount != 0)
             {
@@ -188,12 +188,12 @@ void MeshRenderData::init(
                 batches_.back().indexCount++;
             }
 
-            for(auto& index : triangleFan.indices)
+            for(const TriangleFan::Index& index : triangleFan.indices)
             {
                 indexData.push_back(uint16_t(vertexData.size() / COMPONENTS_PER_VERTEX));
                 batches_.back().indexCount++;
 
-                auto& vertex = vertices[index.vertexIndex];
+                const Vertex& vertex = vertices[index.vertexIndex];
 
                 vertexData.push_back(float(vertex.position.x));
                 vertexData.push_back(float(vertex.position.y));

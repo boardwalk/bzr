@@ -44,19 +44,19 @@ void LandRenderData::render()
 
 static void pushRotatedCoord(vector<uint8_t>& vertexData, fp_t s, fp_t t, int rotations, uint8_t scale)
 {
-    auto cosine = glm::cos(pi() / fp_t(180.0) * fp_t(90.0) * rotations);
-    auto sine = glm::sin(pi() / fp_t(180.0) * fp_t(90.0) * rotations);
+    fp_t cosine = glm::cos(pi() / fp_t(180.0) * fp_t(90.0) * rotations);
+    fp_t sine = glm::sin(pi() / fp_t(180.0) * fp_t(90.0) * rotations);
 
-    auto ns = (s - fp_t(0.5)) * cosine - (t - fp_t(0.5)) * sine + fp_t(0.5);
-    auto nt = (s - fp_t(0.5)) * sine + (t - fp_t(0.5)) * cosine + fp_t(0.5);
+    fp_t ns = (s - fp_t(0.5)) * cosine - (t - fp_t(0.5)) * sine + fp_t(0.5);
+    fp_t nt = (s - fp_t(0.5)) * sine + (t - fp_t(0.5)) * cosine + fp_t(0.5);
 
-    vertexData.push_back(uint8_t(ns + fp_t(0.5)) * scale);
-    vertexData.push_back(uint8_t(nt + fp_t(0.5)) * scale);
+    vertexData.push_back(static_cast<uint8_t>(ns + fp_t(0.5)) * scale);
+    vertexData.push_back(static_cast<uint8_t>(nt + fp_t(0.5)) * scale);
 }
 
 void LandRenderData::initGeometry(const Land& land)
 {
-    auto& data = land.data();
+    const Land::Data& data = land.data();
 
     vector<uint8_t> vertexData;
 
@@ -88,7 +88,7 @@ void LandRenderData::initGeometry(const Land& land)
             vector<uint8_t> blendTextures;
             vector<uint8_t> rotations;
 
-            for(auto i = 0; i < 4; i++)
+            for(int i = 0; i < 4; i++)
             {
                 if(terrainDone & (1 << terrain[i]))
                 {
@@ -99,7 +99,7 @@ void LandRenderData::initGeometry(const Land& land)
 
                 uint8_t bitfield = 0;
 
-                for(auto j = 0; j < 4; j++)
+                for(int j = 0; j < 4; j++)
                 {
                     if(terrain[j] == terrain[i])
                     {
@@ -158,7 +158,7 @@ void LandRenderData::initGeometry(const Land& land)
             {
                 uint8_t bitfield = 0;
 
-                for(auto j = 0; j < 4; j++)
+                for(int j = 0; j < 4; j++)
                 {
                     if(road[j])
                     {
@@ -288,4 +288,3 @@ void LandRenderData::initNormalTexture(const Land& land)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
-

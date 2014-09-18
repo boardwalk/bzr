@@ -96,15 +96,15 @@ void Image::applyPalette(const Palette& palette)
 {
     vector<uint8_t> newData(width_ * height_ * 4);
 
-    auto input = (const T*)data_.data();
-    auto inputEnd = (const T*)data_.data() + width_ * height_;
+    const T* input = (const T*)data_.data();
+    const T* inputEnd = (const T*)data_.data() + width_ * height_;
 
-    auto output = (uint8_t*)newData.data();
+    uint8_t* output = (uint8_t*)newData.data();
 
     while(input < inputEnd)
     {
-        auto paletteIndex = *input & (palette.colors().size() - 1);
-        auto color = palette.colors()[paletteIndex];
+        T paletteIndex = *input & (palette.colors().size() - 1);
+        Palette::Color color = palette.colors()[paletteIndex];
 
         *output++ = color.blue;
         *output++ = color.green;
@@ -148,30 +148,30 @@ void Image::scale(int newWidth, int newHeight)
         throw runtime_error("Cannot scale compressed image");
     }
 
-    auto nchannels = ImageFormat::bitsPerPixel(format_) / 8;
+    int nchannels = ImageFormat::bitsPerPixel(format_) / 8;
 
     vector<uint8_t> newData(newWidth * newHeight * nchannels);
 
-    for(auto dstY = 0; dstY < newHeight; dstY++)
+    for(int dstY = 0; dstY < newHeight; dstY++)
     {
-        for(auto dstX = 0; dstX < newWidth; dstX++)
+        for(int dstX = 0; dstX < newWidth; dstX++)
         {
-            auto srcFX = fp_t(dstX) / fp_t(newWidth) * fp_t(width_);
-            auto srcFY = fp_t(dstY) / fp_t(newHeight) * fp_t(height_);
+            fp_t srcFX = fp_t(dstX) / fp_t(newWidth) * fp_t(width_);
+            fp_t srcFY = fp_t(dstY) / fp_t(newHeight) * fp_t(height_);
 
-            auto srcX = (int)srcFX;
-            auto srcY = (int)srcFY;
+            int srcX = (int)srcFX;
+            int srcY = (int)srcFY;
 
-            auto xDiff = srcFX - srcX;
-            auto yDiff = srcFY - srcY;
+            fp_t xDiff = srcFX - srcX;
+            fp_t yDiff = srcFY - srcY;
 
-            auto xOpposite = 1.0 - xDiff;
-            auto yOpposite = 1.0 - yDiff;
+            fp_t xOpposite = fp_t(1.0) - xDiff;
+            fp_t yOpposite = fp_t(1.0) - yDiff;
 
 #define SRCPX(x, y, cn) (fp_t)data_[(min(x, width_ - 1) + min(y, height_ - 1) * width_) * nchannels + cn]
 #define DSTPX(x, y, cn) newData[((x) + (y) * newWidth) * nchannels + cn]
 
-            for(auto c = 0; c < nchannels; c++)
+            for(int c = 0; c < nchannels; c++)
             {
                 DSTPX(dstX, dstY, c) = uint8_t(
                     (SRCPX(srcX, srcY, c) * xOpposite + SRCPX(srcX + 1, srcY, c) * xDiff) * yOpposite +
@@ -195,11 +195,11 @@ void Image::flipVertical()
         throw runtime_error("Cannot flip compressed image");
     }
 
-    auto stride = width_ * ImageFormat::bitsPerPixel(format_) / 8;
+    int stride = width_ * ImageFormat::bitsPerPixel(format_) / 8;
 
     vector<uint8_t> rowBuf(stride);
 
-    for(auto y = 0; y < height_ / 2; y++)
+    for(int y = 0; y < height_ / 2; y++)
     {
         memcpy(rowBuf.data(), data_.data() + y * stride, stride);
         memcpy(data_.data() + stride * y, data_.data() + (height_ - y - 1) * stride, stride);
@@ -247,8 +247,8 @@ void Image::updateHasAlpha()
 {
     hasAlpha_ = false;
 
-    auto input = data_.data();
-    auto inputEnd = data_.data() + data_.size();
+    uint8_t* input = data_.data();
+    uint8_t* inputEnd = data_.data() + data_.size();
 
     if(format_ == ImageFormat::BGRA32)
     {
@@ -267,9 +267,9 @@ void Image::updateHasAlpha()
     {
         while(input < inputEnd)
         {
-            auto c0 = *(const uint16_t*)input;
-            auto c1 = *(const uint16_t*)(input + 2);
-            auto ctab = *(const uint32_t*)(input + 4);
+            uint16_t c0 = *(const uint16_t*)input;
+            uint16_t c1 = *(const uint16_t*)(input + 2);
+            uint32_t ctab = *(const uint32_t*)(input + 4);
 
             if(c0 <= c1)
             {

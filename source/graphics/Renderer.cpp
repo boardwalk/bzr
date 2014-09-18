@@ -49,7 +49,7 @@ Renderer::Renderer() : videoInit_(false), window_(nullptr), context_(nullptr)
     // 32 crashes mysteriously on my laptop
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
-    auto& config = Core::get().config();
+    Config& config = Core::get().config();
 
     auto multisamples = config.getInt("Renderer.multisamples", 16);
 
@@ -464,6 +464,6 @@ void Renderer::renderOVR(fp_t interp)
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    ovrHmd_EndFrame(hmd_, eyePose, (ovrTexture*)eyeTexture_);    
+    ovrHmd_EndFrame(hmd_, eyePose, (ovrTexture*)eyeTexture_);
 }
 #endif

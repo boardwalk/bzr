@@ -53,10 +53,10 @@ BSPInternal::BSPInternal(BinReader& reader, int treeType, uint32_t nodeType)
         return;
     }
 
-    auto triCount = reader.read<uint32_t>();
+    uint32_t triCount = reader.read<uint32_t>();
     triangleIndices_.resize(triCount);
 
-    for(auto& index : triangleIndices_)
+    for(uint16_t& index : triangleIndices_)
     {
         index = reader.read<uint16_t>();
     }
@@ -93,10 +93,10 @@ BSPExternal::BSPExternal(BinReader& reader, int treeType)
     bounds_.center.z = reader.read<float>();
     bounds_.radius = reader.read<float>();
 
-    auto triCount = reader.read<uint32_t>();
+    uint32_t triCount = reader.read<uint32_t>();
     triangleIndices_.resize(triCount);
 
-    for(auto& index : triangleIndices_)
+    for(uint16_t& index : triangleIndices_)
     {
         index = reader.read<uint16_t>();
     }
@@ -138,18 +138,18 @@ BSPPortal::BSPPortal(BinReader& reader, int treeType)
     bounds_.center.z = reader.read<float>();
     bounds_.radius = reader.read<float>();
 
-    auto triCount = reader.read<uint32_t>();
+    uint32_t triCount = reader.read<uint32_t>();
     triangleIndices_.resize(triCount);
 
-    auto polyCount = reader.read<uint32_t>();
+    uint32_t polyCount = reader.read<uint32_t>();
     portalPolys_.resize(polyCount);
 
-    for(auto& index : triangleIndices_)
+    for(uint16_t& index : triangleIndices_)
     {
         index = reader.read<uint16_t>();
     }
 
-    for(auto& poly : portalPolys_)
+    for(PortalPoly& poly : portalPolys_)
     {
         poly.index = reader.read<uint16_t>();
         poly.what = reader.read<uint16_t>();
@@ -161,7 +161,7 @@ bool BSPPortal::collide(const LineSegment& segment, glm::vec3& impact) const
     // TODO
     (void)segment;
     (void)impact;
-    
+
     return false;
 }
 
@@ -172,7 +172,7 @@ const Sphere& BSPPortal::bounds() const
 
 unique_ptr<BSPNode> readBSP(BinReader& reader, int treeType)
 {
-    auto nodeType = reader.read<uint32_t>();
+    uint32_t nodeType = reader.read<uint32_t>();
 
     if(nodeType == 0x4c454146) // LEAF
     {

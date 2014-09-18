@@ -44,21 +44,21 @@ void AnimationStrip::read(BinReader& reader)
     id_ = reader.read<uint16_t>();
     stanceId_ = reader.read<uint16_t>();
 
-    auto numAnims = reader.read<uint8_t>();
+    uint8_t numAnims = reader.read<uint8_t>();
     animInfos_.resize(numAnims);
 
-    auto unk1 = reader.read<uint8_t>();
+    uint8_t unk1 = reader.read<uint8_t>();
     assert(unk1 == 0 || unk1 == 1 || unk1 == 2);
 
-    auto unk2 = reader.read<uint8_t>();
+    uint8_t unk2 = reader.read<uint8_t>();
     assert(unk2 == 0 || unk2 == 1 || unk2 == 2);
 
-    auto unk3 = reader.read<uint8_t>();
+    uint8_t unk3 = reader.read<uint8_t>();
     assert(unk3 == 0);
 
-    for(auto& animInfo : animInfos_)
+    for(AnimInfo& animInfo : animInfos_)
     {
-        auto animId = reader.read<uint32_t>();
+        uint32_t animId = reader.read<uint32_t>();
         animInfo.resource = Core::get().resourceCache().get(animId);
         animInfo.firstFrame = reader.read<uint32_t>();
         animInfo.lastFrame = reader.read<uint32_t>();
