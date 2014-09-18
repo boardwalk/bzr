@@ -160,7 +160,7 @@ void DatFile::listDir(uint32_t position, vector<uint32_t>& result) const
 
         if(node->internalNodes[0] != 0)
         {
-            listDir(node->internalNodes[i], result);
+            listDir(node->internalNodes[i + 1], result);
         }
     }
 }
