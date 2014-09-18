@@ -90,7 +90,7 @@ GLint Program::getUniform(const GLchar* name)
 {
     assert(handle_ != 0);
 
-    GLuint loc = glGetUniformLocation(handle_, name);
+    GLint loc = glGetUniformLocation(handle_, name);
 
     if(loc < 0)
     {
