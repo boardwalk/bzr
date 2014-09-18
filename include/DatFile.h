@@ -28,9 +28,11 @@ public:
     ~DatFile();
 
     vector<uint8_t> read(uint32_t id) const;
+    vector<uint32_t> list() const;
 
 private:
     vector<uint8_t> readBlocks(uint32_t position) const;
+    void listDir(uint32_t position, vector<uint32_t>& result) const;
 
     mutable fstream fs_;
     uint32_t blockSize_;

@@ -78,11 +78,11 @@ DatFile::~DatFile()
 
 vector<uint8_t> DatFile::read(uint32_t id) const
 {
-    auto nodePosition = rootPosition_;
+    auto position = rootPosition_;
 
     for(;;)
     {
-        auto nodeData = readBlocks(nodePosition);
+        auto nodeData = readBlocks(position);
         auto node = (DatNode*)nodeData.data();
 
         if(node->nodeCount > MAX_NODE_COUNT)
@@ -112,8 +112,15 @@ vector<uint8_t> DatFile::read(uint32_t id) const
             return vector<uint8_t>();
         }
 
-        nodePosition = node->internalNodes[i];
+        position = node->internalNodes[i];
     }
+}
+
+vector<uint32_t> DatFile::list() const
+{
+    vector<uint32_t> result;
+    listDir(rootPosition_, result);
+    return result;
 }
 
 vector<uint8_t> DatFile::readBlocks(uint32_t position) const
@@ -137,3 +144,23 @@ vector<uint8_t> DatFile::readBlocks(uint32_t position) const
     return result;
 }
 
+void DatFile::listDir(uint32_t position, vector<uint32_t>& result) const
+{
+    auto nodeData = readBlocks(position);
+    auto node = (DatNode*)nodeData.data();
+
+    if(node->nodeCount > MAX_NODE_COUNT)
+    {
+        throw runtime_error("Node has bad node count");
+    }
+
+    for(auto i = 0u; i < node->nodeCount; i++)
+    {
+        result.push_back(node->leafNodes[i].id);
+
+        if(node->internalNodes[0] != 0)
+        {
+            listDir(node->internalNodes[i], result);
+        }
+    }
+}

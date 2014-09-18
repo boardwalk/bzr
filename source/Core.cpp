@@ -127,6 +127,25 @@ void Core::init()
 #endif
     landcellManager_->setCenter(LandcellId(0x31, 0xD6));
 
+#if 0
+    for(auto resourceId : portalDat_->list())
+    {
+        if((resourceId & 0xFF000000) <= 0x0D000000)
+        {
+            printf("%08x\n", resourceId);
+
+            try
+            {
+                resourceCache_->get(resourceId);
+            }
+            catch(runtime_error& e)
+            {
+                printf("Failed to load resource %08x: %s\n", resourceId, e.what());
+            }
+        }
+    }
+#endif
+
     setPlayerId(ObjectId(1));
 }
 
