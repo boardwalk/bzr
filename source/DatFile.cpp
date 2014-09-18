@@ -82,7 +82,7 @@ vector<uint8_t> DatFile::read(uint32_t id) const
 
     for(;;)
     {
-        auto nodeData = readBlocks(position);
+        auto nodeData = readBlocks(position, sizeof(DatNode));
         auto node = (DatNode*)nodeData.data();
 
         if(node->nodeCount > MAX_NODE_COUNT)
@@ -102,9 +102,7 @@ vector<uint8_t> DatFile::read(uint32_t id) const
 
         if(i < node->nodeCount && id == node->leafNodes[i].id)
         {
-            auto result = readBlocks(node->leafNodes[i].position);
-            result.resize(node->leafNodes[i].size);
-            return result;
+            return readBlocks(node->leafNodes[i].position, node->leafNodes[i].size);
         }
 
         if(node->internalNodes[0] == 0)
@@ -123,22 +121,31 @@ vector<uint32_t> DatFile::list() const
     return result;
 }
 
-vector<uint8_t> DatFile::readBlocks(uint32_t position) const
+vector<uint8_t> DatFile::readBlocks(uint32_t position, size_t size) const
 {
-    vector<uint8_t> result;
+    vector<uint8_t> result(size);
 
-    while(position != 0)
+    size_t offset = 0;
+
+    while(offset < size)
     {
-        result.resize(result.size() + blockSize_);
+        if(position == 0)
+        {
+            throw runtime_error("Not enough blocks for resource");
+        }
+
+        size_t readSize = min<size_t>(size - offset, blockSize_);
 
         fs_.seekg(position);
         fs_.read((char*)&position, sizeof(position));
-        fs_.read((char*)result.data() + result.size() - blockSize_, blockSize_);
+        fs_.read((char*)result.data() + offset, readSize);
 
         if(!fs_.good())
         {
             throw runtime_error("Failed to read block");
         }
+
+        offset += readSize;
     }
 
     return result;
@@ -146,7 +153,7 @@ vector<uint8_t> DatFile::readBlocks(uint32_t position) const
 
 void DatFile::listDir(uint32_t position, vector<uint32_t>& result) const
 {
-    auto nodeData = readBlocks(position);
+    auto nodeData = readBlocks(position, sizeof(DatNode));
     auto node = (DatNode*)nodeData.data();
 
     if(node->nodeCount > MAX_NODE_COUNT)

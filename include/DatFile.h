@@ -31,7 +31,7 @@ public:
     vector<uint32_t> list() const;
 
 private:
-    vector<uint8_t> readBlocks(uint32_t position) const;
+    vector<uint8_t> readBlocks(uint32_t position, size_t size) const;
     void listDir(uint32_t position, vector<uint32_t>& result) const;
 
     mutable fstream fs_;
