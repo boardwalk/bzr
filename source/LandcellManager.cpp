@@ -61,7 +61,7 @@ void LandcellManager::load()
 {
     // we grab more landblocks than we need so the ones that actually
     // get initialized have all their neighbors
-    uint8_t sloppyRadius = uint8_t(radius_) + 2;
+    uint8_t sloppyRadius = static_cast<uint8_t>(radius_) + 2;
 
     for(uint8_t x = center_.x() - sloppyRadius; x <= center_.x() + sloppyRadius; x++)
     {

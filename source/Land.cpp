@@ -73,8 +73,8 @@ void Land::init()
     {
         for(int sx = 0; sx < totalSampleSize; sx++)
         {
-            fp_t lx = fp_t(sx - edgeSize) / fp_t(sampleSize - 1) * BLOCK_SIZE;
-            fp_t ly = fp_t(sy - edgeSize) / fp_t(sampleSize - 1) * BLOCK_SIZE;
+            fp_t lx = static_cast<fp_t>(sx - edgeSize) / static_cast<fp_t>(sampleSize - 1) * BLOCK_SIZE;
+            fp_t ly = static_cast<fp_t>(sy - edgeSize) / static_cast<fp_t>(sampleSize - 1) * BLOCK_SIZE;
             sample[sx + sy * totalSampleSize] = calcHeightUnbounded(lx, ly);
         }
     }
@@ -88,11 +88,11 @@ void Land::init()
     {
         for(int ox = 0; ox < OFFSET_MAP_SIZE; ox++)
         {
-            fp_t sx = fp_t(ox) / fp_t(OFFSET_MAP_SIZE - 1) * fp_t(sampleSize - 1);
-            fp_t sy = fp_t(oy) / fp_t(OFFSET_MAP_SIZE - 1) * fp_t(sampleSize - 1);
+            fp_t sx = static_cast<fp_t>(ox) / static_cast<fp_t>(OFFSET_MAP_SIZE - 1) * static_cast<fp_t>(sampleSize - 1);
+            fp_t sy = static_cast<fp_t>(oy) / static_cast<fp_t>(OFFSET_MAP_SIZE - 1) * static_cast<fp_t>(sampleSize - 1);
 
-            int ix = (int)sx;
-            int iy = (int)sy;
+            int ix = static_cast<int>(sx);
+            int iy = static_cast<int>(sy);
 
             fp_t fx = sx - ix;
             fp_t fy = sy - iy;
@@ -107,8 +107,8 @@ void Land::init()
                 }
             }
 
-            fp_t lx = fp_t(ox) / fp_t(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
-            fp_t ly = fp_t(oy) / fp_t(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
+            fp_t lx = static_cast<fp_t>(ox) / static_cast<fp_t>(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
+            fp_t ly = static_cast<fp_t>(oy) / static_cast<fp_t>(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
 
             fp_t offset = bicubic(p, fx, fy) - calcHeight(lx, ly);
 
@@ -134,7 +134,7 @@ void Land::init()
             for(int ox = 0; ox < OFFSET_MAP_SIZE; ox++)
             {
                 fp_t offset = resample[ox + oy * OFFSET_MAP_SIZE];
-                offsetMap_[ox + oy * OFFSET_MAP_SIZE] = (uint16_t)((offset - offsetMapBase_) / offsetMapScale_ * fp_t(0xFFFF));
+                offsetMap_[ox + oy * OFFSET_MAP_SIZE] = static_cast<uint16_t>((offset - offsetMapBase_) / offsetMapScale_ * fp_t(0xFFFF));
             }
         }
     }
@@ -151,10 +151,10 @@ void Land::init()
             int ox2 = min(ox + 1, OFFSET_MAP_SIZE - 1);
             int oy2 = min(oy + 1, OFFSET_MAP_SIZE - 1);
 
-            fp_t lx1 = fp_t(ox1) / fp_t(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
-            fp_t lx2 = fp_t(ox2) / fp_t(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
-            fp_t ly1 = fp_t(oy1) / fp_t(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
-            fp_t ly2 = fp_t(oy2) / fp_t(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
+            fp_t lx1 = static_cast<fp_t>(ox1) / static_cast<fp_t>(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
+            fp_t lx2 = static_cast<fp_t>(ox2) / static_cast<fp_t>(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
+            fp_t ly1 = static_cast<fp_t>(oy1) / static_cast<fp_t>(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
+            fp_t ly2 = static_cast<fp_t>(oy2) / static_cast<fp_t>(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
 
             fp_t h1 = resample[ox1 + oy1 * OFFSET_MAP_SIZE] + calcHeight(lx1, ly1);
             fp_t h2 = resample[ox2 + oy1 * OFFSET_MAP_SIZE] + calcHeight(lx2, ly1);
@@ -164,9 +164,9 @@ void Land::init()
             glm::vec3 b(0.0, ly2 - ly1, h3 - h1);
 
             glm::vec3 n = glm::normalize(glm::cross(a, b)) * fp_t(0.5) + glm::vec3(0.5, 0.5, 0.5);
-            normalMap_[(ox + oy * OFFSET_MAP_SIZE) * 3] = (uint8_t)(n.x * fp_t(0xFF));
-            normalMap_[(ox + oy * OFFSET_MAP_SIZE) * 3 + 1] = (uint8_t)(n.y * fp_t(0xFF));
-            normalMap_[(ox + oy * OFFSET_MAP_SIZE) * 3 + 2] = (uint8_t)(n.z * fp_t(0xFF));
+            normalMap_[(ox + oy * OFFSET_MAP_SIZE) * 3] = static_cast<uint8_t>(n.x * fp_t(0xFF));
+            normalMap_[(ox + oy * OFFSET_MAP_SIZE) * 3 + 1] = static_cast<uint8_t>(n.y * fp_t(0xFF));
+            normalMap_[(ox + oy * OFFSET_MAP_SIZE) * 3 + 2] = static_cast<uint8_t>(n.z * fp_t(0xFF));
         }
     }
 }
@@ -178,11 +178,11 @@ fp_t Land::calcHeight(fp_t x, fp_t y) const
 
     fp_t dix;
     fp_t fx = modf(x / CELL_SIZE, &dix);
-    int ix = (int)dix;
+    int ix = static_cast<int>(dix);
 
     fp_t diy;
     fp_t fy = modf(y / CELL_SIZE, &diy);
-    int iy = (int)diy;
+    int iy = static_cast<int>(diy);
 
     fp_t h1 = data_.heights[ix][iy] * fp_t(2.0);
     fp_t h2 = data_.heights[min(ix + 1, GRID_SIZE - 1)][iy] * fp_t(2.0);

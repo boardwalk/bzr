@@ -144,13 +144,13 @@ void MeshRenderData::init(
 
             const Vertex& vertex = vertices[index.vertexIndex];
 
-            vertexData.push_back(float(vertex.position.x));
-            vertexData.push_back(float(vertex.position.y));
-            vertexData.push_back(float(vertex.position.z));
+            vertexData.push_back(static_cast<float>(vertex.position.x));
+            vertexData.push_back(static_cast<float>(vertex.position.y));
+            vertexData.push_back(static_cast<float>(vertex.position.z));
 
-            vertexData.push_back(float(vertex.normal.x));
-            vertexData.push_back(float(vertex.normal.y));
-            vertexData.push_back(float(vertex.normal.z));
+            vertexData.push_back(static_cast<float>(vertex.normal.x));
+            vertexData.push_back(static_cast<float>(vertex.normal.y));
+            vertexData.push_back(static_cast<float>(vertex.normal.z));
 
             if(vertex.texCoords.empty())
             {
@@ -159,8 +159,8 @@ void MeshRenderData::init(
             }
             else
             {
-                vertexData.push_back(float(vertex.texCoords[index.texCoordIndex].x));
-                vertexData.push_back(float(vertex.texCoords[index.texCoordIndex].y));
+                vertexData.push_back(static_cast<float>(vertex.texCoords[index.texCoordIndex].x));
+                vertexData.push_back(static_cast<float>(vertex.texCoords[index.texCoordIndex].y));
             }
         }
     }
@@ -195,13 +195,13 @@ void MeshRenderData::init(
 
                 const Vertex& vertex = vertices[index.vertexIndex];
 
-                vertexData.push_back(float(vertex.position.x));
-                vertexData.push_back(float(vertex.position.y));
-                vertexData.push_back(float(vertex.position.z));
+                vertexData.push_back(static_cast<float>(vertex.position.x));
+                vertexData.push_back(static_cast<float>(vertex.position.y));
+                vertexData.push_back(static_cast<float>(vertex.position.z));
 
-                vertexData.push_back(float(vertex.normal.x));
-                vertexData.push_back(float(vertex.normal.y));
-                vertexData.push_back(float(vertex.normal.z));
+                vertexData.push_back(static_cast<float>(vertex.normal.x));
+                vertexData.push_back(static_cast<float>(vertex.normal.y));
+                vertexData.push_back(static_cast<float>(vertex.normal.z));
 
                 vertexData.push_back(0.0f);
                 vertexData.push_back(0.0f);

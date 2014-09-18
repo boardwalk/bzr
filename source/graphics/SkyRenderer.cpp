@@ -175,9 +175,9 @@ void SkyRenderer::initTexture()
 
                 // compute and store color
                 glm::vec3 color = model.getColor(theta, phi);
-                data[(i + j * CUBE_SIZE) * 3] = (uint8_t)(color.x * 0xFF);
-                data[(i + j * CUBE_SIZE) * 3 + 1] = (uint8_t)(color.y * 0xFF);
-                data[(i + j * CUBE_SIZE) * 3 + 2] = (uint8_t)(color.z * 0xFF);
+                data[(i + j * CUBE_SIZE) * 3] = static_cast<uint8_t>(color.x * 0xFF);
+                data[(i + j * CUBE_SIZE) * 3 + 1] = static_cast<uint8_t>(color.y * 0xFF);
+                data[(i + j * CUBE_SIZE) * 3 + 2] = static_cast<uint8_t>(color.z * 0xFF);
             }
         }
 

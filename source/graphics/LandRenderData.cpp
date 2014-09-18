@@ -253,7 +253,7 @@ void LandRenderData::initGeometry(const Land& land)
 
     static const int COMPONENTS_PER_VERTEX = 25;
 
-    vertexCount_ = GLsizei(vertexData.size()) / COMPONENTS_PER_VERTEX;
+    vertexCount_ = static_cast<GLsizei>(vertexData.size()) / COMPONENTS_PER_VERTEX;
 
     glGenVertexArrays(1, &vertexArray_);
     glBindVertexArray(vertexArray_);
@@ -263,12 +263,12 @@ void LandRenderData::initGeometry(const Land& land)
     glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(uint8_t), vertexData.data(), GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), nullptr);
-    glVertexAttribPointer(1, 2, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), (GLvoid*)(sizeof(uint8_t) * 3));
-    glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), (GLvoid*)(sizeof(uint8_t) * 5));
-    glVertexAttribPointer(3, 4, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), (GLvoid*)(sizeof(uint8_t) * 9));
-    glVertexAttribPointer(4, 4, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), (GLvoid*)(sizeof(uint8_t) * 13));
-    glVertexAttribPointer(5, 4, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), (GLvoid*)(sizeof(uint8_t) * 17));
-    glVertexAttribPointer(6, 4, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), (GLvoid*)(sizeof(uint8_t) * 21));
+    glVertexAttribPointer(1, 2, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 3));
+    glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 5));
+    glVertexAttribPointer(3, 4, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 9));
+    glVertexAttribPointer(4, 4, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 13));
+    glVertexAttribPointer(5, 4, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 17));
+    glVertexAttribPointer(6, 4, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 21));
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);

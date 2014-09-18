@@ -96,10 +96,10 @@ void Image::applyPalette(const Palette& palette)
 {
     vector<uint8_t> newData(width_ * height_ * 4);
 
-    const T* input = (const T*)data_.data();
-    const T* inputEnd = (const T*)data_.data() + width_ * height_;
+    const T* input = reinterpret_cast<const T*>(data_.data());
+    const T* inputEnd = input + width_ * height_;
 
-    uint8_t* output = (uint8_t*)newData.data();
+    uint8_t* output = newData.data();
 
     while(input < inputEnd)
     {
@@ -156,11 +156,11 @@ void Image::scale(int newWidth, int newHeight)
     {
         for(int dstX = 0; dstX < newWidth; dstX++)
         {
-            fp_t srcFX = fp_t(dstX) / fp_t(newWidth) * fp_t(width_);
-            fp_t srcFY = fp_t(dstY) / fp_t(newHeight) * fp_t(height_);
+            fp_t srcFX = static_cast<fp_t>(dstX) / static_cast<fp_t>(newWidth) * static_cast<fp_t>(width_);
+            fp_t srcFY = static_cast<fp_t>(dstY) / static_cast<fp_t>(newHeight) * static_cast<fp_t>(height_);
 
-            int srcX = (int)srcFX;
-            int srcY = (int)srcFY;
+            int srcX = static_cast<int>(srcFX);
+            int srcY = static_cast<int>(srcFY);
 
             fp_t xDiff = srcFX - srcX;
             fp_t yDiff = srcFY - srcY;
@@ -168,12 +168,12 @@ void Image::scale(int newWidth, int newHeight)
             fp_t xOpposite = fp_t(1.0) - xDiff;
             fp_t yOpposite = fp_t(1.0) - yDiff;
 
-#define SRCPX(x, y, cn) (fp_t)data_[(min(x, width_ - 1) + min(y, height_ - 1) * width_) * nchannels + cn]
+#define SRCPX(x, y, cn) static_cast<fp_t>(data_[(min(x, width_ - 1) + min(y, height_ - 1) * width_) * nchannels + cn])
 #define DSTPX(x, y, cn) newData[((x) + (y) * newWidth) * nchannels + cn]
 
             for(int c = 0; c < nchannels; c++)
             {
-                DSTPX(dstX, dstY, c) = uint8_t(
+                DSTPX(dstX, dstY, c) = static_cast<uint8_t>(
                     (SRCPX(srcX, srcY, c) * xOpposite + SRCPX(srcX + 1, srcY, c) * xDiff) * yOpposite +
                     (SRCPX(srcX, srcY + 1, c) * xOpposite + SRCPX(srcX + 1, srcY + 1, c) * xDiff) * yDiff);
             }
@@ -267,9 +267,9 @@ void Image::updateHasAlpha()
     {
         while(input < inputEnd)
         {
-            uint16_t c0 = *(const uint16_t*)input;
-            uint16_t c1 = *(const uint16_t*)(input + 2);
-            uint32_t ctab = *(const uint32_t*)(input + 4);
+            uint16_t c0 = *reinterpret_cast<const uint16_t*>(input);
+            uint16_t c1 = *reinterpret_cast<const uint16_t*>(input + 2);
+            uint32_t ctab = *reinterpret_cast<const uint32_t*>(input + 4);
 
             if(c0 <= c1)
             {

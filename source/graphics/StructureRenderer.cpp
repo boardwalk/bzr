@@ -93,7 +93,7 @@ void StructureRenderer::renderStructure(
         structure.renderData().reset(new MeshRenderData(structure));
     }
 
-    MeshRenderData& renderData = (MeshRenderData&)*structure.renderData();
+    MeshRenderData& renderData = static_cast<MeshRenderData&>(*structure.renderData());
 
     renderData.render();
 }

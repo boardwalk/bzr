@@ -171,7 +171,7 @@ void Core::cleanup()
 void Core::run()
 {
     uint64_t frequency = SDL_GetPerformanceFrequency();
-    uint64_t fixedStep = frequency / uint64_t(STEP_RATE);
+    uint64_t fixedStep = frequency / static_cast<uint64_t>(STEP_RATE);
     uint64_t maxTotalDelta = fixedStep * 6;
     uint64_t stepTime = SDL_GetPerformanceCounter();
 
@@ -192,7 +192,7 @@ void Core::run()
         }
 
 #ifndef HEADLESS
-        fp_t interp = fp_t(loopTime - stepTime) / fp_t(frequency);
+        fp_t interp = static_cast<fp_t>(loopTime - stepTime) / static_cast<fp_t>(frequency);
         renderer_->render(interp);
 #else
         // simulate ~83 without game logic

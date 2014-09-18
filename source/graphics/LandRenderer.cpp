@@ -164,7 +164,7 @@ void LandRenderer::renderLand(
         land.renderData().reset(new LandRenderData(land));
     }
 
-    LandRenderData& landRenderData = (LandRenderData&)*land.renderData();
+    LandRenderData& landRenderData = static_cast<LandRenderData&>(*land.renderData());
 
     landRenderData.render();
 }

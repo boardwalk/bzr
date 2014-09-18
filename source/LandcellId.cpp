@@ -42,17 +42,17 @@ int LandcellId::calcSquareDistance(LandcellId other) const
 
 uint8_t LandcellId::x() const
 {
-    return uint8_t(value_ >> 24);
+    return static_cast<uint8_t>(value_ >> 24);
 }
 
 uint8_t LandcellId::y() const
 {
-    return uint8_t(value_ >> 16);
+    return static_cast<uint8_t>(value_ >> 16);
 }
 
 uint16_t LandcellId::n() const
 {
-    return uint16_t(value_);
+    return static_cast<uint16_t>(value_);
 }
 
 uint32_t LandcellId::value() const

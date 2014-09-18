@@ -124,7 +124,7 @@ int Config::getInt(const char* name, int defaultValue)
 
     if(json_is_integer(value))
     {
-        return (int)json_integer_value(value);
+        return static_cast<int>(json_integer_value(value));
     }
     else
     {
@@ -139,7 +139,7 @@ fp_t Config::getFloat(const char* name, fp_t defaultValue)
 
     if(json_is_real(value))
     {
-        return fp_t(json_real_value(value));
+        return static_cast<fp_t>(json_real_value(value));
     }
     else
     {

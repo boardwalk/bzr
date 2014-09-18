@@ -40,7 +40,7 @@ void SkyModel::prepare(const Params& p)
     // calculate solar time
     fp_t t_s = p.tm * fp_t(24.0); // standard time in decimal hours
     fp_t J = p.dt; // Julian day
-    fp_t SM = int(p.lng / fp_t(15.0)) * fp_t(15.0); // standard meridian for time zone
+    fp_t SM = static_cast<int>(p.lng / fp_t(15.0)) * fp_t(15.0); // standard meridian for time zone
     fp_t L = p.lng; // longitude in radians
 
     fp_t t = t_s + fp_t(0.170) * glm::sin(fp_t(4.0) * pi() * (J - fp_t(80.0)) / fp_t(373.0)) - fp_t(0.129) * glm::sin(fp_t(2.0) * pi() * (J - fp_t(8.0)) / fp_t(355.0)) + fp_t(12.0) * (SM - L) / pi();
