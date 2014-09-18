@@ -25,10 +25,14 @@ Sound::Sound(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
     auto resourceId = reader.read<uint32_t>();
     assert(resourceId == id);
 
+    auto type = reader.read<uint32_t>();
+
     // There's one file that has type != 18
     // I'm going to ignore it till it comes up
-    auto type = reader.read<uint32_t>();
-    assert(type == 18);
+    if(type != 18)
+    {
+        throw runtime_error("Type 18 sounds not supported");
+    }
 
     auto samplesLen = reader.read<uint32_t>();
 
@@ -41,7 +45,7 @@ Sound::Sound(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
     samplesPerSecond_ = reader.read<uint32_t>();
     auto totalSamplesPerSecond = reader.read<uint32_t>();
 
-    numChannels_ = reader.read<uint32_t>();
+    numChannels_ = reader.read<uint16_t>();
     assert(numChannels_ == 1 || numChannels_ == 2 || numChannels_ == 4);
     assert(samplesPerSecond_ * numChannels_ == totalSamplesPerSecond);
 
