@@ -32,19 +32,24 @@ Texture::Texture(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
     assert(unk1 <= 0xA);
 
     auto width = reader.read<uint32_t>();
-    assert(width <= 2048);
+    assert(width <= 4096);
 
     auto height = reader.read<uint32_t>();
-    assert(height <= 2048);
+    assert(height <= 4096);
 
     auto format = (ImageFormat::Value)reader.read<uint32_t>();
+
+    if(format == ImageFormat::JPEG)
+    {
+        throw runtime_error("JPEG textures not supported");
+    }
 
     auto pixelsSize = reader.read<uint32_t>();
     assert(pixelsSize * 8 == width * height * ImageFormat::bitsPerPixel(format));
 
     auto pixels = reader.readPointer<uint8_t>(pixelsSize);
 
-    if(format == ImageFormat::Paletted16)
+    if(ImageFormat::isPaletted(format))
     {
         auto paletteId = reader.read<uint32_t>();
         palette_ = Core::get().resourceCache().get(paletteId);

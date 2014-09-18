@@ -27,15 +27,21 @@ struct ImageFormat
         Invalid = 0x00,
         BGR24 = 0x14,
         BGRA32 = 0x15,
+        A16 = 0x17,
+        A16_2 = 0x1A,
+        A8_2 = 0x1C,
+        Paletted8 = 0x29,
+        Paletted16 = 0x65,
         RGB24 = 0xF3,
         A8 = 0xF4,
+        JPEG = 0x1F4,
         DXT1 = 0x31545844,
         DXT3 = 0x33545844,
-        DXT5 = 0x35545844,
-        Paletted16 = 0x65
+        DXT5 = 0x35545844
     };
 
     static int bitsPerPixel(Value f);
+    static bool isPaletted(Value f);
     static bool isCompressed(Value f);
     static bool hasAlpha(Value f);
 };
@@ -60,6 +66,9 @@ public:
     bool hasAlpha() const;
 
 private:
+    template<class T>
+    void applyPalette(const Palette& palette);
+
     void updateHasAlpha();
 
     ImageFormat::Value format_;

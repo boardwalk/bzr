@@ -130,18 +130,20 @@ void Core::init()
 #if 0
     for(auto resourceId : portalDat_->list())
     {
-        if((resourceId & 0xFF000000) <= 0x0D000000)
+        if((resourceId & 0xFF000000) > 0x0D000000)
         {
-            printf("%08x\n", resourceId);
+            continue;
+        }
 
-            try
-            {
-                resourceCache_->get(resourceId);
-            }
-            catch(runtime_error& e)
-            {
-                printf("Failed to load resource %08x: %s\n", resourceId, e.what());
-            }
+        try
+        {
+            resourceCache_->get(resourceId);
+
+            printf("%08x OK\n", resourceId);
+        }
+        catch(runtime_error& e)
+        {
+            printf("%08x FAIL %s\n", resourceId, e.what());
         }
     }
 #endif

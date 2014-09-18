@@ -27,6 +27,16 @@ int ImageFormat::bitsPerPixel(Value f)
             return 24;
         case BGRA32:
             return 32;
+        case A16:
+            return 16;
+        case A16_2:
+            return 16;
+        case A8_2:
+            return 8;
+        case Paletted8:
+            return 8;
+        case Paletted16:
+            return 16;
         case RGB24:
             return 24;
         case A8:
@@ -37,13 +47,16 @@ int ImageFormat::bitsPerPixel(Value f)
             return 8;
         case DXT5:
             return 8;
-        case Paletted16:
-            return 16;
         default:
             break;
     }
 
     throw runtime_error("Invalid format");
+}
+
+bool ImageFormat::isPaletted(Value f)
+{
+    return f == Paletted8 || f == Paletted16;
 }
 
 bool ImageFormat::isCompressed(Value f)
@@ -53,7 +66,7 @@ bool ImageFormat::isCompressed(Value f)
 
 bool ImageFormat::hasAlpha(Value f)
 {
-    return f == BGRA32 || f == A8 || f == DXT3 || f == DXT5 || f == Paletted16;
+    return f == BGRA32 || f == Paletted8 || f == Paletted16 || f == A8 || f == DXT3 || f == DXT5;
 }
 
 Image::Image() : format_(ImageFormat::Invalid), width_(0), height_(0), hasAlpha_(false)
@@ -78,24 +91,19 @@ void Image::init(ImageFormat::Value newFormat, int newWidth, int newHeight, cons
     updateHasAlpha();
 }
 
+template<class T>
 void Image::applyPalette(const Palette& palette)
 {
-    if(format_ != ImageFormat::Paletted16)
-    {
-        return;
-    }
-
     vector<uint8_t> newData(width_ * height_ * 4);
 
-    auto input = (const uint16_t*)data_.data();
-    auto inputEnd = (const uint16_t*)data_.data() + width_ * height_;
+    auto input = (const T*)data_.data();
+    auto inputEnd = (const T*)data_.data() + width_ * height_;
 
     auto output = (uint8_t*)newData.data();
 
     while(input < inputEnd)
     {
-        // TODO I have no idea if this is the proper thing to do
-        auto paletteIndex = *input & 0x7FF;
+        auto paletteIndex = *input & (palette.colors().size() - 1);
         auto color = palette.colors()[paletteIndex];
 
         *output++ = color.blue;
@@ -109,6 +117,23 @@ void Image::applyPalette(const Palette& palette)
     data_ = move(newData);
     format_ = ImageFormat::BGRA32;
     updateHasAlpha();
+}
+
+void Image::applyPalette(const Palette& palette)
+{
+    if(format_ == ImageFormat::Paletted8)
+    {
+        applyPalette<uint8_t>(palette);
+
+    }
+    else if(format_ == ImageFormat::Paletted16)
+    {
+        applyPalette<uint16_t>(palette);
+    }
+    else
+    {
+        throw runtime_error("Cannot apply palette to this format");
+    }
 }
 
 void Image::scale(int newWidth, int newHeight)
