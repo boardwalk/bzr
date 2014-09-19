@@ -3,6 +3,15 @@ import argparse
 import json
 import xml.etree.ElementTree
 
+PRIMITIVE_MAPPING = {
+    'BYTE': 'uint8_t',
+    'WORD': 'uint16_t',
+    'DWORD': 'uint32_t',
+    'float': 'float',
+    'double': 'double',
+    'String': 'string'
+}
+
 parser = argparse.ArgumentParser()
 parser.add_argument('infile')
 parser.add_argument('outfile')
@@ -15,6 +24,9 @@ def checkattribs(elem, values):
         if attrib not in values:
             raise RuntimeError('unknown attribute: ' + attrib)
 
+def converttype(typ):
+    return PRIMITIVE_MAPPING.get(typ, typ)
+
 def get(elem, key):
     value = elem.get(key)
     if value is None:
@@ -26,7 +38,7 @@ def parse_field(elem):
     return {
         'what': 'field',
         'name': get(elem, 'name'),
-        'type': get(elem, 'type')
+        'type': converttype(get(elem, 'type'))
     }
 
 def parse_maskmap(elem):
@@ -75,9 +87,9 @@ def parse_switch(elem):
 
 def parse_align(elem):
     checkattribs(elem, ('type'))
+    assert elem.get('type') == 'DWORD'
     return {
-        'what': 'align',
-        'type': get(elem, 'type')
+        'what': 'align'
     }
 
 def parse_elem(elem):
@@ -108,4 +120,4 @@ for elem in tree.findall('./messages/message'):
     messages[elem.get('type')] = parse_struct(elem)
 
 with open(args.outfile, 'w') as outf:
-    json.dump({'types': types, 'messages': messages}, outf)
+    json.dump({'types': types, 'messages': messages}, outf, indent=2)
