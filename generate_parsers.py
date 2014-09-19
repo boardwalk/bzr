@@ -23,11 +23,27 @@ import json
 import os
 import re
 
-PRIMITIVES = ['uint8_t', 'uint16_t', 'uint32_t', 'float', 'double']
+with open('c++keywords.txt') as f:
+    KEYWORDS = set([k.strip() for k in f.readlines()])
+
+PRIMITIVES = {
+    'BYTE': ('uint8_t', 'readByte'),
+    'WORD': ('uint16_t', 'readShort'),
+    'DWORD': ('uint32_t', 'readInt'),
+    'QWORD': ('uint64_t', 'readLong'),
+    'float': ('float', 'readFloat'),
+    'double': ('double', 'readDouble'),
+    'PackedWORD': ('uint16_t', 'readPackedShort'),
+    'PackedDWORD': ('uint32_t', 'readPackedInt'),
+    'String': ('string', 'readString'),
+    'WString': ('string', 'readWideString')
+}
 
 HEADER_TEMPLATE = """\
 #ifndef BZR_PARSERS_{ucname}_H
 #define BZR_PARSERS_{ucname}_H
+
+{includes}
 
 class BinReader;
 
@@ -43,6 +59,16 @@ SOURCE_TEMPLATE = """\
 {impl}
 """
 
+def fix_var_name(ent):
+    try:
+        name = ent['name']
+    except KeyError:
+        return
+    name = re.sub('[^a-zA-Z0-9_]', '_', name)
+    if name in KEYWORDS:
+        name = name + '_'
+    ent['name'] = name
+
 class Struct(object):
     def __init__(self, name, parent, schema):
         self.name = name
@@ -50,27 +76,8 @@ class Struct(object):
         self.children = []
         self.fields = []
         self.source = []
-
-        for ent in schema:
-            if ent['what'] == 'field':
-                self.fields.append('{type} {name};'.format(**ent))
-                if ent['type'] in PRIMITIVES:
-                    self.source.append('{name} = reader.read<{type}>();'.format(**ent))
-                else:
-                    self.source.append('{name} = {type}(reader);'.format(**ent))
-            elif ent['what'] == 'vector':
-                self.fields.append('vector<{name}Element> {name};'.format(**ent))
-                self.source.append('')
-                self.source.append('{name}.reserve({length});'.format(**ent))
-                self.source.append('for(size_t i = 0; i < {length}; i++)'.format(**ent))
-                self.source.append('{')
-                self.source.append('    {name}.emplace_back(reader);'.format(**ent))
-                self.source.append('}')
-                self.source.append('')
-
-                self.children.append(Struct(ent['name'] + 'Element', self, ent['fields']))
-            else:
-                self.source.append('// TODO {what}'.format(**ent))
+        self.indent = 0
+        self.generate_all(schema)
 
     @property
     def fullname(self):
@@ -85,7 +92,7 @@ class Struct(object):
 struct {name}
 {{
 {children}
-    {name}(BinReader& reader);
+    read(BinReader& reader);
     {fields}
 }};"""
 
@@ -101,7 +108,7 @@ struct {name}
         s = """\
 {children}
 
-{fullname}::{name}(BinReader& reader)
+{fullname}::read(BinReader& reader)
 {{
     {source}
 }}"""
@@ -109,33 +116,86 @@ struct {name}
         s = s.format(
             children = ''.join([c.impl for c in self.children]),
             fullname = self.fullname,
-            name = self.name,
             source = '\n    '.join(self.source))
 
         return s
+
+    def generate_all(self, schema):
+        for ent in schema:
+            self.generate(ent)
+
+    def generate(self, ent):
+        fix_var_name(ent)
+        if ent['what'] == 'field':
+            self.generate_field(ent)
+        elif ent['what'] == 'vector':
+            self.generate_vector(ent)
+        elif ent['what'] == 'maskmap':
+            self.generate_maskmap(ent)
+        elif ent['what'] == 'switch':
+            self.generate_switch(ent)
+        elif ent['what'] == 'align':
+            self.append_source('reader.align();')
+        else:
+            raise RuntimeError('unknown entity type')
+
+    def generate_field(self, ent):
+        pair = PRIMITIVES.get(ent['type'])
+        if pair:
+            self.fields.append('{type} {name};'.format(type=pair[0], name=ent['name']))
+            self.append_source('{name} = reader.{method}();'.format(name=ent['name'], method=pair[1]))
+        else:
+            includes.add(ent['type'])
+            self.fields.append('{type} {name};'.format(**ent))
+            self.append_source('{name}.read(reader);'.format(**ent))
+
+    def generate_vector(self, ent):
+        typename = ent['name'][0].upper() + ent['name'][1:] + 'Element'
+        self.children.append(Struct(typename, self, ent['fields']))
+        self.fields.append('vector<{typename}> {name};'.format(typename=typename, name=ent['name']))
+        self.append_source('{name}.resize({length});'.format(**ent))
+        self.append_source('for(size_t i = 0; i < {length}; i++)'.format(**ent))
+        self.append_source('{{')
+        self.append_source('    {name}[i].read(reader);'.format(**ent))
+        self.append_source('}}')
+
+    def generate_maskmap(self, ent):
+        for case in ent['alt']:
+            self.append_source('if({name} & {value})'.format(name=ent['name'], value=case['value']))
+            self.append_source('{{')
+            self.indent += 1
+            self.generate_all(case['fields'])
+            self.indent -= 1
+            self.append_source('}}')
+
+    def generate_switch(self, ent):
+        firstCase = True
+        for case in ent['alt']:
+            if firstCase:
+                keyword = 'if'
+                firstCase = False
+            else:
+                keyword = 'else if'
+            self.append_source('{keyword}({name} == {value})'.format(keyword=keyword, name=ent['name'], value=case['value']))
+            self.append_source('{{')
+            self.indent += 1
+            self.generate_all(case['fields'])
+            self.indent -= 1
+            self.append_source('}}')
+
+    def append_source(self, fmt, *args, **kwargs):
+        self.source.append('    ' * self.indent + fmt.format(*args, **kwargs))
 
 def write_type(name, schema, outdir):
     structs = []
     fields = []
     source = []
 
-
     st = Struct(name, None, schema)
 
-    #for ent in typ:
-        #if ent['what'] == 'field':
-            #fields.append('{type} {name};'.format(**ent))
-            #if ent['type'] in PRIMITIVES:
-                #source.append('{name} = reader.read<{type}>();'.format(**ent))
-            #else:
-                #source.append('{name} = {type}(reader);'.format(**ent))
-        #elif ent['what'] == 'vector':
-            #build_temp_type(ent['name'] + 'Element', ent['fields'], structs)
-            #fields.append('vector<{type}> {name};'.format(type=ent['name'] + 'Element', name=ent['name']))
-        #else:
-            #source.append('// TODO {}'.format(ent['what']))
+    includes_str = '\n'.join(['#include "parsers/{}.h"'.format(inc) for inc in includes])
 
-    headerstr = HEADER_TEMPLATE.format(ucname=name.upper(), decl=st.decl)
+    headerstr = HEADER_TEMPLATE.format(ucname=name.upper(), decl=st.decl, includes=includes_str)
     sourcestr = SOURCE_TEMPLATE.format(name=name, impl=st.impl)
 
     with open(os.path.join(outdir, name + '.h'), 'w') as f:
@@ -144,6 +204,8 @@ def write_type(name, schema, outdir):
         f.write(sourcestr)
 
 def main():
+    global includes
+
     parser = argparse.ArgumentParser()
     parser.add_argument('infile')
     parser.add_argument('outdir')
@@ -152,10 +214,13 @@ def main():
     with open(args.infile) as f:
         schema = json.load(f)
 
-    #for name, typ in schema['types']:
-    #    write_type(name, typ)
-    write_type('Position0', schema['types']['Position0'], args.outdir)
-    write_type('CharacterOptionData', schema['types']['CharacterOptionData'], args.outdir)
+    for name, typ in schema['types'].iteritems():
+        includes = set()
+        write_type(name, typ, args.outdir)
+
+    for name, msg in schema['messages'].iteritems():
+        includes = set()
+        write_type('Message' + name, msg, args.outdir)
 
 if __name__ == '__main__':
     main()
