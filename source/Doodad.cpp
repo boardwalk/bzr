@@ -20,7 +20,7 @@
 #include "Core.h"
 #include "ResourceCache.h"
 
-void Doodad::read(BinReader& reader)
+Doodad::Doodad(BinReader& reader)
 {
     uint32_t modelId = reader.read<uint32_t>();
     resource = Core::get().resourceCache().get(modelId);

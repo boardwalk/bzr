@@ -80,11 +80,11 @@ Structure::Structure(const void* data, size_t size)
     if(flags & 2)
     {
         uint32_t numDoodads = reader.read<uint32_t>();
-        doodads_.resize(numDoodads);
+        doodads_.reserve(numDoodads);
 
-        for(Doodad& doodad : doodads_)
+        for(uint32_t di = 0; di < numDoodads; di++)
         {
-            doodad.read(reader);
+            doodads_.emplace_back(reader);
         }
     }
 

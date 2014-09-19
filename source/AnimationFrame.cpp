@@ -18,21 +18,7 @@
 #include "AnimationFrame.h"
 #include "BinReader.h"
 
-AnimationFrame::AnimationFrame()
-{}
-
-AnimationFrame::AnimationFrame(AnimationFrame&& other)
-{
-    orientations = move(other.orientations);
-}
-
-AnimationFrame& AnimationFrame::operator=(AnimationFrame&& other)
-{
-    orientations = move(other.orientations);
-    return *this;
-}
-
-void AnimationFrame::read(BinReader& reader, uint32_t numModels)
+AnimationFrame::AnimationFrame(BinReader& reader, uint32_t numModels)
 {
     orientations.resize(numModels);
 
@@ -76,4 +62,15 @@ void AnimationFrame::read(BinReader& reader, uint32_t numModels)
 
         reader.readPointer<uint32_t>(extraSize);
     }
+}
+
+AnimationFrame::AnimationFrame(AnimationFrame&& other)
+{
+    orientations = move(other.orientations);
+}
+
+AnimationFrame& AnimationFrame::operator=(AnimationFrame&& other)
+{
+    orientations = move(other.orientations);
+    return *this;
 }

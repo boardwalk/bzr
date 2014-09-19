@@ -24,7 +24,7 @@ class BinReader;
 
 struct Doodad
 {
-    void read(BinReader& reader);
+    Doodad(BinReader& reader);
 
     ResourcePtr resource;
     glm::vec3 position;

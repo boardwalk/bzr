@@ -312,26 +312,28 @@ void Land::initDoodads()
     numStructures_ = reader.read<uint32_t>();
 
     uint16_t numDoodads = reader.read<uint16_t>();
-    doodads_.resize(numDoodads);
 
     uint16_t unk1 = reader.read<uint16_t>();
     assert(unk1 == 0);
 
+    doodads_.reserve(numDoodads);
+
     for(uint16_t di = 0; di < numDoodads; di++)
     {
-        doodads_[di].read(reader);
+        doodads_.emplace_back(reader);
     }
 
     uint16_t numDoodadsEx = reader.read<uint16_t>();
-    doodads_.resize(numDoodads + numDoodadsEx);
 
     // I don't know what this is, but it means there's more data
     uint16_t unk2 = reader.read<uint16_t>();
     assert(unk2 == 0 || unk2 == 1);
 
+    doodads_.reserve(numDoodads + numDoodadsEx);
+
     for(uint16_t di = 0; di < numDoodadsEx; di++)
     {
-        doodads_[numDoodads + di].read(reader);
+        doodads_.emplace_back(reader);
 
         reader.read<uint32_t>();
         uint32_t numPortals = reader.read<uint32_t>();

@@ -31,11 +31,9 @@ public:
         glm::quat rotation;
     };
 
-    AnimationFrame();
+    AnimationFrame(BinReader& reader, uint32_t numModels);
     AnimationFrame(AnimationFrame&&);
     AnimationFrame& operator=(AnimationFrame&&);
-
-    void read(BinReader& reader, uint32_t numModels);
 
     vector<Orientation> orientations;
 };

@@ -21,25 +21,7 @@
 #include "Core.h"
 #include "ResourceCache.h"
 
-AnimationStrip::AnimationStrip() : id(0), stanceId(0)
-{}
-
-AnimationStrip::AnimationStrip(AnimationStrip&& other)
-{
-    id = other.id;
-    stanceId = other.stanceId;
-    animInfos = move(other.animInfos);
-}
-
-AnimationStrip& AnimationStrip::operator=(AnimationStrip&& other)
-{
-    id = other.id;
-    stanceId = other.stanceId;
-    animInfos = move(other.animInfos);
-    return *this;
-}
-
-void AnimationStrip::read(BinReader& reader)
+AnimationStrip::AnimationStrip(BinReader& reader)
 {
     id = reader.read<uint16_t>();
     stanceId = reader.read<uint16_t>();
@@ -81,4 +63,19 @@ void AnimationStrip::read(BinReader& reader)
         reader.read<float>();
         reader.read<float>();
     }
+}
+
+AnimationStrip::AnimationStrip(AnimationStrip&& other)
+{
+    id = other.id;
+    stanceId = other.stanceId;
+    animInfos = move(other.animInfos);
+}
+
+AnimationStrip& AnimationStrip::operator=(AnimationStrip&& other)
+{
+    id = other.id;
+    stanceId = other.stanceId;
+    animInfos = move(other.animInfos);
+    return *this;
 }

@@ -34,11 +34,9 @@ public:
         float framesPerSecond;
     };
     
-    AnimationStrip();
+    AnimationStrip(BinReader& reader);
     AnimationStrip(AnimationStrip&&);
     AnimationStrip& operator=(AnimationStrip&&);
-
-    void read(BinReader& reader);
 
     uint16_t id;
     uint16_t stanceId;
