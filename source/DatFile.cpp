@@ -18,9 +18,9 @@
 #include "DatFile.h"
 #include <algorithm>
  
-static const size_t HEADER_OFFSET = 0x140;
-static const uint32_t HEADER_MAGIC_NUMBER = 0x5442; // 'BT\0\0'
-static const int MAX_NODE_COUNT = 62;
+static const size_t kHeaderOffset = 0x140;
+static const uint32_t kHeaderMagicNumber = 0x5442; // 'BT\0\0'
+static const int kMaxNodeCount = 62;
 
 PACK(struct DatHeader
 {
@@ -47,9 +47,9 @@ PACK(struct DatLeaf
 
 PACK(struct DatNode
 {
-    uint32_t internalNodes[MAX_NODE_COUNT];
+    uint32_t internalNodes[kMaxNodeCount];
     uint32_t nodeCount;
-    DatLeaf leafNodes[MAX_NODE_COUNT];
+    DatLeaf leafNodes[kMaxNodeCount];
 });
 
 DatFile::DatFile(const string& path) :
@@ -57,7 +57,7 @@ DatFile::DatFile(const string& path) :
 {
     DatHeader header;
 
-    fs_.seekg(HEADER_OFFSET);
+    fs_.seekg(kHeaderOffset);
     fs_.read(reinterpret_cast<char*>(&header), sizeof(header));
 
     if(!fs_.good())
@@ -65,7 +65,7 @@ DatFile::DatFile(const string& path) :
         throw runtime_error("Could not read dat file header");
     }
 
-    if(header.magicNumber != HEADER_MAGIC_NUMBER)
+    if(header.magicNumber != kHeaderMagicNumber)
     {
         throw runtime_error("Dat file header has bad magic number");
     }
@@ -83,7 +83,7 @@ vector<uint8_t> DatFile::read(uint32_t id) const
         vector<uint8_t> nodeData = readBlocks(position, sizeof(DatNode));
         DatNode* node = reinterpret_cast<DatNode*>(nodeData.data());
 
-        if(node->nodeCount > MAX_NODE_COUNT)
+        if(node->nodeCount > kMaxNodeCount)
         {
             throw runtime_error("Node has bad node count");
         }
@@ -154,7 +154,7 @@ void DatFile::listDir(uint32_t position, vector<uint32_t>& result) const
     vector<uint8_t> nodeData = readBlocks(position, sizeof(DatNode));
     DatNode* node = reinterpret_cast<DatNode*>(nodeData.data());
 
-    if(node->nodeCount > MAX_NODE_COUNT)
+    if(node->nodeCount > kMaxNodeCount)
     {
         throw runtime_error("Node has bad node count");
     }

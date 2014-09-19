@@ -28,7 +28,7 @@
 #include "ResourceCache.h"
 #include "util.h"
 
-static const fp_t STEP_RATE = 60.0;
+static const fp_t kStepRate = 60.0;
 
 static unique_ptr<Core> g_singleton;
 
@@ -171,7 +171,7 @@ void Core::cleanup()
 void Core::run()
 {
     uint64_t frequency = SDL_GetPerformanceFrequency();
-    uint64_t fixedStep = frequency / static_cast<uint64_t>(STEP_RATE);
+    uint64_t fixedStep = frequency / static_cast<uint64_t>(kStepRate);
     uint64_t maxTotalDelta = fixedStep * 6;
     uint64_t stepTime = SDL_GetPerformanceCounter();
 
@@ -187,7 +187,7 @@ void Core::run()
         while(loopTime >= stepTime + fixedStep)
         {
             handleEvents();
-            step(fp_t(1.0) / STEP_RATE);
+            step(fp_t(1.0) / kStepRate);
             stepTime += fixedStep;
         }
 
