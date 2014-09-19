@@ -44,23 +44,23 @@ StructureGeomPart& StructureGeomPart::operator=(StructureGeomPart&& other)
 
 void StructureGeomPart::read(BinReader& reader)
 {
-    uint32_t numTriangleFans = reader.read<uint32_t>();
+    uint32_t numTriangleFans = reader.readInt();
     triangleFans.resize(numTriangleFans);
 
-    uint32_t numHitTriangleFans = reader.read<uint32_t>();
+    uint32_t numHitTriangleFans = reader.readInt();
     hitTriangleFans.resize(numHitTriangleFans);
 
-    uint32_t numShorts = reader.read<uint32_t>();
+    uint32_t numShorts = reader.readInt();
 
-    uint32_t unk5 = reader.read<uint32_t>();
+    uint32_t unk5 = reader.readInt();
     assert(unk5 == 1);
 
-    uint32_t numVertices = reader.read<uint32_t>();
+    uint32_t numVertices = reader.readInt();
     vertices.resize(numVertices);
 
     for(uint32_t vi = 0; vi < numVertices; vi++)
     {
-        uint16_t vertexNum = reader.read<uint16_t>();
+        uint16_t vertexNum = reader.readShort();
         assert(vertexNum == vi);
 
         vertices[vi].read(reader);
@@ -68,7 +68,7 @@ void StructureGeomPart::read(BinReader& reader)
 
     for(uint32_t tfi = 0; tfi < numTriangleFans; tfi++)
     {
-        uint16_t triangleFanNum = reader.read<uint16_t>();
+        uint16_t triangleFanNum = reader.readShort();
         assert(triangleFanNum == tfi);
 
         triangleFans[tfi].read(reader);
@@ -76,7 +76,7 @@ void StructureGeomPart::read(BinReader& reader)
 
     for(uint32_t si = 0; si < numShorts; si++)
     {
-        reader.read<uint16_t>();
+        reader.readShort();
     }
     reader.align();
 
@@ -84,7 +84,7 @@ void StructureGeomPart::read(BinReader& reader)
 
     for(uint32_t htfi = 0; htfi < numHitTriangleFans; htfi++)
     {
-        uint16_t triangleFanNum = reader.read<uint16_t>();
+        uint16_t triangleFanNum = reader.readShort();
         assert(triangleFanNum == htfi);
 
         hitTriangleFans[htfi].read(reader);
@@ -92,7 +92,7 @@ void StructureGeomPart::read(BinReader& reader)
 
     readBSP(reader, 1);
 
-    uint32_t unk7 = reader.read<uint32_t>();
+    uint32_t unk7 = reader.readInt();
     assert(unk7 == 0 || unk7 == 1);
 
     if(unk7)

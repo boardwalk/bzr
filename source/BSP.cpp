@@ -21,10 +21,10 @@
 
 BSPInternal::BSPInternal(BinReader& reader, int treeType, uint32_t nodeType)
 {
-    partition_.normal.x = reader.read<float>();
-    partition_.normal.y = reader.read<float>();
-    partition_.normal.z = reader.read<float>();
-    partition_.dist = reader.read<float>();
+    partition_.normal.x = reader.readFloat();
+    partition_.normal.y = reader.readFloat();
+    partition_.normal.z = reader.readFloat();
+    partition_.dist = reader.readFloat();
 
     if(nodeType == 0x42506e6e || nodeType == 0x4250496e) // BPnn, BPIn
     {
@@ -42,10 +42,10 @@ BSPInternal::BSPInternal(BinReader& reader, int treeType, uint32_t nodeType)
 
     if(treeType == 0 || treeType == 1)
     {
-        bounds_.center.x = reader.read<float>();
-        bounds_.center.y = reader.read<float>();
-        bounds_.center.z = reader.read<float>();
-        bounds_.radius = reader.read<float>();
+        bounds_.center.x = reader.readFloat();
+        bounds_.center.y = reader.readFloat();
+        bounds_.center.z = reader.readFloat();
+        bounds_.radius = reader.readFloat();
     }
 
     if(treeType != 0)
@@ -53,12 +53,12 @@ BSPInternal::BSPInternal(BinReader& reader, int treeType, uint32_t nodeType)
         return;
     }
 
-    uint32_t triCount = reader.read<uint32_t>();
+    uint32_t triCount = reader.readInt();
     triangleIndices_.resize(triCount);
 
     for(uint16_t& index : triangleIndices_)
     {
-        index = reader.read<uint16_t>();
+        index = reader.readShort();
     }
 }
 
@@ -78,7 +78,7 @@ const Sphere& BSPInternal::bounds() const
 
 BSPExternal::BSPExternal(BinReader& reader, int treeType)
 {
-    index_ = reader.read<uint32_t>();
+    index_ = reader.readInt();
 
     if(treeType != 1)
     {
@@ -86,19 +86,19 @@ BSPExternal::BSPExternal(BinReader& reader, int treeType)
     }
 
     // if 1, sphere parameters are valid and there are indices
-    solid_ = reader.read<uint32_t>();
+    solid_ = reader.readInt();
 
-    bounds_.center.x = reader.read<float>();
-    bounds_.center.y = reader.read<float>();
-    bounds_.center.z = reader.read<float>();
-    bounds_.radius = reader.read<float>();
+    bounds_.center.x = reader.readFloat();
+    bounds_.center.y = reader.readFloat();
+    bounds_.center.z = reader.readFloat();
+    bounds_.radius = reader.readFloat();
 
-    uint32_t triCount = reader.read<uint32_t>();
+    uint32_t triCount = reader.readInt();
     triangleIndices_.resize(triCount);
 
     for(uint16_t& index : triangleIndices_)
     {
-        index = reader.read<uint16_t>();
+        index = reader.readShort();
     }
 }
 
@@ -120,10 +120,10 @@ const Sphere& BSPExternal::bounds() const
 
 BSPPortal::BSPPortal(BinReader& reader, int treeType)
 {
-    partition_.normal.x = reader.read<float>();
-    partition_.normal.y = reader.read<float>();
-    partition_.normal.z = reader.read<float>();
-    partition_.dist = reader.read<float>();
+    partition_.normal.x = reader.readFloat();
+    partition_.normal.y = reader.readFloat();
+    partition_.normal.z = reader.readFloat();
+    partition_.dist = reader.readFloat();
 
     frontChild_ = readBSP(reader, treeType);
     backChild_ = readBSP(reader, treeType);
@@ -133,26 +133,26 @@ BSPPortal::BSPPortal(BinReader& reader, int treeType)
         return;
     }
 
-    bounds_.center.x = reader.read<float>();
-    bounds_.center.y = reader.read<float>();
-    bounds_.center.z = reader.read<float>();
-    bounds_.radius = reader.read<float>();
+    bounds_.center.x = reader.readFloat();
+    bounds_.center.y = reader.readFloat();
+    bounds_.center.z = reader.readFloat();
+    bounds_.radius = reader.readFloat();
 
-    uint32_t triCount = reader.read<uint32_t>();
+    uint32_t triCount = reader.readInt();
     triangleIndices_.resize(triCount);
 
-    uint32_t polyCount = reader.read<uint32_t>();
+    uint32_t polyCount = reader.readInt();
     portalPolys_.resize(polyCount);
 
     for(uint16_t& index : triangleIndices_)
     {
-        index = reader.read<uint16_t>();
+        index = reader.readShort();
     }
 
     for(PortalPoly& poly : portalPolys_)
     {
-        poly.index = reader.read<uint16_t>();
-        poly.what = reader.read<uint16_t>();
+        poly.index = reader.readShort();
+        poly.what = reader.readShort();
     }
 }
 
@@ -172,7 +172,7 @@ const Sphere& BSPPortal::bounds() const
 
 unique_ptr<BSPNode> readBSP(BinReader& reader, int treeType)
 {
-    uint32_t nodeType = reader.read<uint32_t>();
+    uint32_t nodeType = reader.readInt();
 
     if(nodeType == 0x4c454146) // LEAF
     {

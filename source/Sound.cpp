@@ -22,10 +22,10 @@ Sound::Sound(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
     BinReader reader(data, size);
 
-    uint32_t resourceId = reader.read<uint32_t>();
+    uint32_t resourceId = reader.readInt();
     assert(resourceId == id);
 
-    uint32_t type = reader.read<uint32_t>();
+    uint32_t type = reader.readInt();
 
     // There's one file that has type != 18
     // I'm going to ignore it till it comes up
@@ -34,25 +34,25 @@ Sound::Sound(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
         throw runtime_error("Type 18 sounds not supported");
     }
 
-    uint32_t samplesLen = reader.read<uint32_t>();
+    uint32_t samplesLen = reader.readInt();
 
-    uint16_t unk1 = reader.read<uint16_t>();
+    uint16_t unk1 = reader.readShort();
     assert(unk1 == 1);
 
-    uint16_t unk2 = reader.read<uint16_t>();
+    uint16_t unk2 = reader.readShort();
     assert(unk2 == 1 || unk2 == 2);
 
-    samplesPerSecond = reader.read<uint32_t>();
-    uint32_t totalSamplesPerSecond = reader.read<uint32_t>();
+    samplesPerSecond = reader.readInt();
+    uint32_t totalSamplesPerSecond = reader.readInt();
 
-    numChannels = reader.read<uint16_t>();
+    numChannels = reader.readShort();
     assert(numChannels == 1 || numChannels == 2 || numChannels == 4);
     assert(samplesPerSecond * numChannels == totalSamplesPerSecond);
 
-    bitsPerSample = reader.read<uint32_t>();
+    bitsPerSample = reader.readInt();
     assert(bitsPerSample == 8 || bitsPerSample == 16);
 
-    const uint8_t* samplesPtr = reader.readPointer<uint8_t>(samplesLen);
+    const uint8_t* samplesPtr = reader.readRaw(samplesLen);
 
     reader.assertEnd();
 

@@ -309,14 +309,14 @@ void Land::initDoodads()
 
     BinReader reader(blob.data(), blob.size());
 
-    uint32_t fid = reader.read<uint32_t>();
+    uint32_t fid = reader.readInt();
     assert(fid == data_.fileId - 1);
 
-    numStructures_ = reader.read<uint32_t>();
+    numStructures_ = reader.readInt();
 
-    uint16_t numDoodads = reader.read<uint16_t>();
+    uint16_t numDoodads = reader.readShort();
 
-    uint16_t unk1 = reader.read<uint16_t>();
+    uint16_t unk1 = reader.readShort();
     assert(unk1 == 0);
 
     doodads_.reserve(numDoodads);
@@ -326,10 +326,10 @@ void Land::initDoodads()
         doodads_.emplace_back(reader);
     }
 
-    uint16_t numDoodadsEx = reader.read<uint16_t>();
+    uint16_t numDoodadsEx = reader.readShort();
 
     // I don't know what this is, but it means there's more data
-    uint16_t unk2 = reader.read<uint16_t>();
+    uint16_t unk2 = reader.readShort();
     assert(unk2 == 0 || unk2 == 1);
 
     doodads_.reserve(numDoodads + numDoodadsEx);
@@ -338,19 +338,19 @@ void Land::initDoodads()
     {
         doodads_.emplace_back(reader);
 
-        reader.read<uint32_t>();
-        uint32_t numPortals = reader.read<uint32_t>();
+        reader.readInt();
+        uint32_t numPortals = reader.readInt();
 
         // credits to Akilla
         for(uint32_t pi = 0; pi < numPortals; pi++)
         {
-            reader.read<uint32_t>();
-            reader.read<uint16_t>();
-            uint16_t numVisible = reader.read<uint16_t>();
+            reader.readInt();
+            reader.readShort();
+            uint16_t numVisible = reader.readShort();
 
             for(uint16_t vi = 0; vi < numVisible; vi++)
             {
-                reader.read<uint16_t>(); // structure index
+                reader.readShort(); // structure index
             }
 
             reader.align();

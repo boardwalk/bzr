@@ -25,33 +25,33 @@ Texture::Texture(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
     BinReader reader(data, size);
 
-    uint32_t resourceId = reader.read<uint32_t>();
+    uint32_t resourceId = reader.readInt();
     assert(resourceId == id);
 
-    uint32_t unk1 = reader.read<uint32_t>();
+    uint32_t unk1 = reader.readInt();
     assert(unk1 <= 0xA);
 
-    uint32_t width = reader.read<uint32_t>();
+    uint32_t width = reader.readInt();
     assert(width <= 4096);
 
-    uint32_t height = reader.read<uint32_t>();
+    uint32_t height = reader.readInt();
     assert(height <= 4096);
 
-    ImageFormat::Value format = static_cast<ImageFormat::Value>(reader.read<uint32_t>());
+    ImageFormat::Value format = static_cast<ImageFormat::Value>(reader.readInt());
 
     if(format == ImageFormat::kJPEG)
     {
         throw runtime_error("JPEG textures not supported");
     }
 
-    uint32_t pixelsSize = reader.read<uint32_t>();
+    uint32_t pixelsSize = reader.readInt();
     assert(pixelsSize * 8 == width * height * ImageFormat::bitsPerPixel(format));
 
-    const uint8_t* pixels = reader.readPointer<uint8_t>(pixelsSize);
+    const uint8_t* pixels = reader.readRaw(pixelsSize);
 
     if(ImageFormat::isPaletted(format))
     {
-        uint32_t paletteId = reader.read<uint32_t>();
+        uint32_t paletteId = reader.readInt();
         palette = Core::get().resourceCache().get(paletteId);
     }
 

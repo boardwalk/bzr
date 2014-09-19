@@ -17,31 +17,83 @@
  */
 #include "BinReader.h"
 
-BinReader::BinReader(const void* data, size_t size) : data_{reinterpret_cast<const uint8_t*>(data)}, size_{size}, position_{0}
+template<class T>
+T readPrimitive(BinReader& reader)
+{
+    return *reinterpret_cast<const T*>(reader.readRaw(sizeof(T)));
+}
+
+BinReader::BinReader(const void* data, size_t size) : data_{data}, size_{size}, position_{0}
 {}
+
+const uint8_t* BinReader::readRaw(size_t size)
+{
+    if(position_ + size > size_)
+    {
+        throw runtime_error("read overrun");
+    }
+
+    const uint8_t* ptr = reinterpret_cast<const uint8_t*>(data_) + position_;
+
+    position_ += size;
+
+    return ptr;
+}
+
+uint8_t BinReader::readByte()
+{
+    return readPrimitive<uint8_t>(*this);
+}
+
+uint16_t BinReader::readShort()
+{
+    return readPrimitive<uint16_t>(*this);
+}
+
+uint32_t BinReader::readInt()
+{
+    return readPrimitive<uint32_t>(*this);
+}
+
+uint64_t BinReader::readLong()
+{
+    return readPrimitive<uint64_t>(*this);
+}
+
+float BinReader::readFloat()
+{
+    return readPrimitive<float>(*this);
+}
+
+double BinReader::readDouble()
+{
+    return readPrimitive<double>(*this);
+}
 
 uint16_t BinReader::readPackedShort()
 {
-    uint16_t val = read<uint8_t>();
+    uint16_t val = readByte();
 
     if(val & 0x80)
     {
-        val = (val & 0x7F) << 8 | read<uint8_t>();
+        val = (val & 0x7F) << 8 | readByte();
     }
 
     return val;
 }
 
+// TODO readPackedInt
+
 string BinReader::readString()
 {
-    uint32_t count = read<uint16_t>();
+    uint32_t count = readShort();
 
     if(count == 0xFFFF)
     {
-        count = read<uint32_t>();
+        count = readInt();
     }
 
-    const char* data = readPointer<char>(count);
+    const uint8_t* data = readRaw(count);
 
     align();
 
@@ -58,13 +110,5 @@ void BinReader::assertEnd() const
     if(position_ < size_)
     {
        throw runtime_error("Expected end of blob");
-    }
-}
-
-void BinReader::assertRemaining(size_t numBytes) const
-{
-    if(position_ + numBytes > size_)
-    {
-        throw runtime_error("Read overrun in blob");
     }
 }

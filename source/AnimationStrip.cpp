@@ -23,28 +23,28 @@
 
 AnimationStrip::AnimationStrip(BinReader& reader)
 {
-    id = reader.read<uint16_t>();
-    stanceId = reader.read<uint16_t>();
+    id = reader.readShort();
+    stanceId = reader.readShort();
 
-    uint8_t numAnims = reader.read<uint8_t>();
+    uint8_t numAnims = reader.readByte();
     animInfos.resize(numAnims);
 
-    uint8_t unk1 = reader.read<uint8_t>();
+    uint8_t unk1 = reader.readByte();
     assert(unk1 == 0 || unk1 == 1 || unk1 == 2);
 
-    uint8_t unk2 = reader.read<uint8_t>();
+    uint8_t unk2 = reader.readByte();
     assert(unk2 == 0 || unk2 == 1 || unk2 == 2);
 
-    uint8_t unk3 = reader.read<uint8_t>();
+    uint8_t unk3 = reader.readByte();
     assert(unk3 == 0);
 
     for(AnimInfo& animInfo : animInfos)
     {
-        uint32_t animId = reader.read<uint32_t>();
+        uint32_t animId = reader.readInt();
         animInfo.resource = Core::get().resourceCache().get(animId);
-        animInfo.firstFrame = reader.read<uint32_t>();
-        animInfo.lastFrame = reader.read<uint32_t>();
-        animInfo.framesPerSecond = reader.read<float>();
+        animInfo.firstFrame = reader.readInt();
+        animInfo.lastFrame = reader.readInt();
+        animInfo.framesPerSecond = reader.readFloat();
 
         if(animInfo.lastFrame == 0xffffffff)
         {
@@ -59,9 +59,9 @@ AnimationStrip::AnimationStrip(BinReader& reader)
 
     if(unk2 == 1 || unk2 == 2)
     {
-        reader.read<float>();
-        reader.read<float>();
-        reader.read<float>();
+        reader.readFloat();
+        reader.readFloat();
+        reader.readFloat();
     }
 }
 

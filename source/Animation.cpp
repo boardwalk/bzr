@@ -22,18 +22,18 @@ Animation::Animation(uint32_t id, const void* data, size_t size) : ResourceImpl{
 {
     BinReader reader(data, size);
 
-    uint32_t resourceId = reader.read<uint32_t>();
+    uint32_t resourceId = reader.readInt();
     assert(resourceId == id);
 
-    uint32_t type = reader.read<uint32_t>();
-    uint32_t numModels = reader.read<uint32_t>();
-    uint32_t numFrames = reader.read<uint32_t>();
+    uint32_t type = reader.readInt();
+    uint32_t numModels = reader.readInt();
+    uint32_t numFrames = reader.readInt();
 
     if(type == 1 || type == 3)
     {
         for(uint32_t fi = 0; fi < numFrames; fi++)
         {
-            reader.readPointer<uint32_t>(7);
+            reader.readRaw(7 * sizeof(uint32_t));
         }
     }
 

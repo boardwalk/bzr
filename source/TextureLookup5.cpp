@@ -25,28 +25,28 @@ TextureLookup5::TextureLookup5(uint32_t id,  const void* data, size_t size) : Re
 {
     BinReader reader(data, size);
 
-    uint32_t resourceId = reader.read<uint32_t>();
+    uint32_t resourceId = reader.readInt();
     assert(resourceId == id);
 
-    uint32_t zero = reader.read<uint32_t>();
+    uint32_t zero = reader.readInt();
     assert(zero == 0);
 
-    uint8_t two = reader.read<uint8_t>();
+    uint8_t two = reader.readByte();
     assert(two == 2);
 
-    uint32_t numTextures = reader.read<uint32_t>();
+    uint32_t numTextures = reader.readInt();
     assert(numTextures > 0);
 
     // This seems to be a list of textures by decreasing quality, as the first ones in the list are in highres.dat
     // We're just going to pick the first and roll with it
 
-    uint32_t textureId = reader.read<uint32_t>();
+    uint32_t textureId = reader.readInt();
     texture = Core::get().resourceCache().get(textureId);
     assert(texture->resourceType() == ResourceType::kTexture);
 
     for(uint32_t i = 1; i < numTextures; i++)
     {
-        reader.read<uint32_t>();
+        reader.readInt();
     }
 
     reader.assertEnd();

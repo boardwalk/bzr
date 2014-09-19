@@ -23,14 +23,15 @@ class BinReader
 public:
     BinReader(const void* data, size_t size);
 
-    template<class T>
-    const T& read();
-
-    template<class T>
-    const T* readPointer(size_t count = 1);
-
+    const uint8_t* readRaw(size_t size);
+    uint8_t readByte();
+    uint16_t readShort();
+    uint32_t readInt();
+    uint64_t readLong();
+    float readFloat();
+    double readDouble();
     uint16_t readPackedShort();
-
+    uint32_t readPackedInt();
     string readString();
 
     void align();
@@ -38,35 +39,9 @@ public:
     void assertEnd() const;
 
 private:
-    void assertRemaining(size_t numBytes) const;
-
-    const uint8_t* data_;
-    size_t size_;
+    const void* data_;
+    const size_t size_;
     size_t position_;
 };
-
-template<class T>
-const T& BinReader::read()
-{
-    assertRemaining(sizeof(T));
-
-    const T* result = reinterpret_cast<const T*>(data_ + position_);
-
-    position_ += sizeof(T);
-
-    return *result;
-}
-
-template<class T>
-const T* BinReader::readPointer(size_t count)
-{
-    assertRemaining(sizeof(T) * count);
-
-    const T* result = reinterpret_cast<const T*>(data_ + position_);
-
-    position_ += sizeof(T) * count;
-
-    return result;
-}
 
 #endif

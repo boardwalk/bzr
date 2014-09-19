@@ -64,14 +64,14 @@ void LandRenderData::initGeometry(const Land& land)
     {
         for(uint8_t x = 0; x < Land::kGridSize - 1; x++)
         {
-#define T(dx, dy) (data.styles[x + (dx)][y + (dy)] >> 2) & 0x1F
+#define T(dx, dy) static_cast<uint8_t>((data.styles[x + (dx)][y + (dy)] >> 2) & 0x1F)
             uint8_t terrain[]
             {
                 T(0, 0), T(1, 0), T(1, 1), T(0, 1)
             };
 #undef T
 
-#define R(dx, dy) data.styles[x + (dx)][y + (dy)] & 0x3
+#define R(dx, dy) static_cast<uint8_t>(data.styles[x + (dx)][y + (dy)] & 0x3)
             uint8_t road[]
             {
                 R(0, 0), R(1, 0), R(1, 1), R(0, 1)

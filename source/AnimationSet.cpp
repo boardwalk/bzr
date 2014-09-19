@@ -22,19 +22,19 @@ AnimationSet::AnimationSet(uint32_t id, const void* data, size_t size) : Resourc
 {
     BinReader reader(data, size);
 
-    uint32_t resourceId = reader.read<uint32_t>();
+    uint32_t resourceId = reader.readInt();
     assert(resourceId == id);
 
-    reader.read<uint32_t>();
-    uint32_t numUnknown = reader.read<uint32_t>();
+    reader.readInt();
+    uint32_t numUnknown = reader.readInt();
 
     for(uint32_t ui = 0; ui < numUnknown; ui++)
     {
-        reader.read<uint32_t>();
-        reader.read<uint32_t>();
+        reader.readInt();
+        reader.readInt();
     }
 
-    uint32_t numStrips1 = reader.read<uint32_t>();
+    uint32_t numStrips1 = reader.readInt();
     strips1.reserve(numStrips1);
 
     for(uint32_t si = 0; si < numStrips1; si++)
@@ -42,7 +42,7 @@ AnimationSet::AnimationSet(uint32_t id, const void* data, size_t size) : Resourc
         strips1.emplace_back(reader);
     }
 
-    uint32_t numStrips2 = reader.read<uint32_t>();
+    uint32_t numStrips2 = reader.readInt();
     strips2.reserve(numStrips2);
 
     for(uint32_t si = 0; si < numStrips2; si++)
@@ -50,14 +50,14 @@ AnimationSet::AnimationSet(uint32_t id, const void* data, size_t size) : Resourc
         strips2.emplace_back(reader);
     }
 
-    uint32_t numComboStrips = reader.read<uint32_t>();
+    uint32_t numComboStrips = reader.readInt();
     comboStrips.resize(numComboStrips);
 
     for(vector<AnimationStrip>& comboStrip : comboStrips)
     {
-        reader.read<uint32_t>();
+        reader.readInt();
 
-        uint32_t numStrips3 = reader.read<uint32_t>();
+        uint32_t numStrips3 = reader.readInt();
         comboStrip.reserve(numStrips3);
 
         for(uint32_t si = 0; si < numStrips3; si++)

@@ -20,29 +20,29 @@
 
 void TriangleFan::read(BinReader& reader)
 {
-    uint8_t numIndices = reader.read<uint8_t>();
+    uint8_t numIndices = reader.readByte();
     indices.resize(numIndices);
 
-    flags = reader.read<uint8_t>();
+    flags = reader.readByte();
     assert(flags == 0x0 || flags == 0x1 || flags == 0x4);
 
-    uint32_t flags2 = reader.read<uint32_t>();
+    uint32_t flags2 = reader.readInt();
     assert(flags2 == 0x0 || flags2 == 0x1 || flags2 == 0x2);
 
-    texIndex = reader.read<uint16_t>();
+    texIndex = reader.readShort();
 
-    reader.read<uint16_t>();
+    reader.readShort();
 
     for(Index& index : indices)
     {
-        index.vertexIndex = reader.read<uint16_t>();
+        index.vertexIndex = reader.readShort();
     }
 
     if(flags != 0x04)
     {
         for(Index& index : indices)
         {
-            index.texCoordIndex = reader.read<uint8_t>();
+            index.texCoordIndex = reader.readByte();
         }
     }
 
@@ -50,7 +50,7 @@ void TriangleFan::read(BinReader& reader)
     {
         for(uint8_t pvi = 0; pvi < numIndices; pvi++)
         {
-            reader.read<uint8_t>();
+            reader.readByte();
         }
     }
 }

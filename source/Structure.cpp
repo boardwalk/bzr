@@ -25,61 +25,61 @@ Structure::Structure(const void* data, size_t size)
 {
     BinReader reader(data, size);
 
-    uint32_t resourceId = reader.read<uint32_t>();
+    uint32_t resourceId = reader.readInt();
     id_ = LandcellId(resourceId);
 
     // 0x1 above ground
     // 0x2 has objects
     // 0x4 unknown
     // 0x8 unknown, extra 4 bytes
-    uint32_t flags = reader.read<uint32_t>();
+    uint32_t flags = reader.readInt();
     assert(flags <= 0xF);
 
-    uint32_t resourceId2 = reader.read<uint32_t>();
+    uint32_t resourceId2 = reader.readInt();
     assert(resourceId2 == resourceId);
 
-    uint8_t numTextures = reader.read<uint8_t>();
+    uint8_t numTextures = reader.readByte();
     textures_.resize(numTextures);
 
-    uint8_t numConnected = reader.read<uint8_t>();
-    uint16_t numVisible = reader.read<uint16_t>();
+    uint8_t numConnected = reader.readByte();
+    uint16_t numVisible = reader.readShort();
 
     for(ResourcePtr& texture : textures_)
     {
-        uint16_t textureId = reader.read<uint16_t>();
+        uint16_t textureId = reader.readShort();
         texture = Core::get().resourceCache().get(ResourceType::kTextureLookup8 | textureId);
     }
 
-    uint16_t geometryId = reader.read<uint16_t>();
+    uint16_t geometryId = reader.readShort();
     geometry_ = Core::get().resourceCache().get(ResourceType::kStructureGeom | geometryId);
 
-    partNum_ = reader.read<uint16_t>();
+    partNum_ = reader.readShort();
 
-    position_.x = reader.read<float>();
-    position_.y = reader.read<float>();
-    position_.z = reader.read<float>();
+    position_.x = reader.readFloat();
+    position_.y = reader.readFloat();
+    position_.z = reader.readFloat();
 
-    rotation_.w = reader.read<float>();
-    rotation_.x = reader.read<float>();
-    rotation_.y = reader.read<float>();
-    rotation_.z = reader.read<float>();
+    rotation_.w = reader.readFloat();
+    rotation_.x = reader.readFloat();
+    rotation_.y = reader.readFloat();
+    rotation_.z = reader.readFloat();
 
     for(uint8_t ci = 0; ci < numConnected; ci++)
     {
-        reader.read<uint16_t>();
-        reader.read<uint16_t>();
-        reader.read<uint16_t>(); // structure index
-        reader.read<uint16_t>();
+        reader.readShort();
+        reader.readShort();
+        reader.readShort(); // structure index
+        reader.readShort();
     }
 
     for(uint16_t vi = 0; vi < numVisible; vi++)
     {
-        reader.read<uint16_t>(); // structure index
+        reader.readShort(); // structure index
     }
 
     if(flags & 2)
     {
-        uint32_t numDoodads = reader.read<uint32_t>();
+        uint32_t numDoodads = reader.readInt();
         doodads_.reserve(numDoodads);
 
         for(uint32_t di = 0; di < numDoodads; di++)
@@ -91,7 +91,7 @@ Structure::Structure(const void* data, size_t size)
     if(flags & 8)
     {
         // I'm not sure this is where this is supposed to be
-        reader.read<uint32_t>();
+        reader.readInt();
     }
 
     reader.assertEnd();

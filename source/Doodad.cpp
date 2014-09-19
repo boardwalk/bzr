@@ -22,15 +22,15 @@
 
 Doodad::Doodad(BinReader& reader)
 {
-    uint32_t modelId = reader.read<uint32_t>();
+    uint32_t modelId = reader.readInt();
     resource = Core::get().resourceCache().get(modelId);
 
-    position.x = reader.read<float>();
-    position.y = reader.read<float>();
-    position.z = reader.read<float>();
+    position.x = reader.readFloat();
+    position.y = reader.readFloat();
+    position.z = reader.readFloat();
 
-    rotation.w = reader.read<float>();
-    rotation.x = reader.read<float>();
-    rotation.y = reader.read<float>();
-    rotation.z = reader.read<float>();
+    rotation.w = reader.readFloat();
+    rotation.x = reader.readFloat();
+    rotation.y = reader.readFloat();
+    rotation.z = reader.readFloat();
 }

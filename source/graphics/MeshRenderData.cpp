@@ -31,7 +31,7 @@
 
 // FIXME Not the neatest thing in the world
 // Ought to find an existing 0x08 file with a nice transparent texture
-static weak_ptr<Resource> g_hitTexture;
+static weak_ptr<const Resource> g_hitTexture;
 
 struct SortByTexIndex
 {

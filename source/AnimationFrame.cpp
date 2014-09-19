@@ -24,21 +24,21 @@ AnimationFrame::AnimationFrame(BinReader& reader, uint32_t numModels)
 
     for(Orientation& orientation : orientations)
     {
-        orientation.position.x = reader.read<float>();
-        orientation.position.y = reader.read<float>();
-        orientation.position.z = reader.read<float>();
+        orientation.position.x = reader.readFloat();
+        orientation.position.y = reader.readFloat();
+        orientation.position.z = reader.readFloat();
 
-        orientation.rotation.w = reader.read<float>();
-        orientation.rotation.x = reader.read<float>();
-        orientation.rotation.y = reader.read<float>();
-        orientation.rotation.z = reader.read<float>();
+        orientation.rotation.w = reader.readFloat();
+        orientation.rotation.x = reader.readFloat();
+        orientation.rotation.y = reader.readFloat();
+        orientation.rotation.z = reader.readFloat();
     }
 
-    uint32_t numExtra = reader.read<uint32_t>();
+    uint32_t numExtra = reader.readInt();
 
     for(uint32_t ei = 0; ei < numExtra; ei++)
     {
-        uint32_t extraType = reader.read<uint32_t>();
+        uint32_t extraType = reader.readInt();
         uint32_t extraSize = 0;
 
         switch(extraType)
@@ -60,7 +60,7 @@ AnimationFrame::AnimationFrame(BinReader& reader, uint32_t numModels)
                 throw runtime_error("Unknown extraType in animation frame");
         }
 
-        reader.readPointer<uint32_t>(extraSize);
+        reader.readRaw(extraSize * sizeof(uint32_t));
     }
 }
 
