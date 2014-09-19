@@ -31,7 +31,7 @@
 
 // FIXME Not the neatest thing in the world
 // Ought to find an existing 0x08 file with a nice transparent texture
-static weak_ptr<Resource> hitTexture;
+static weak_ptr<Resource> g_hitTexture;
 
 struct SortByTexIndex
 {
@@ -82,7 +82,7 @@ void MeshRenderData::render()
 
         if(!texture.renderData)
         {
-            texture.renderData.reset(new TextureRenderData(texture));
+            texture.renderData.reset(new TextureRenderData{texture});
         }
 
         TextureRenderData& renderData = static_cast<TextureRenderData&>(*texture.renderData);
@@ -103,7 +103,7 @@ void MeshRenderData::init(
     const vector<TriangleFan>& hitTriangleFans)
 {
     // vx, vy, vz, nx, ny, nz, s, t
-    static const int COMPONENTS_PER_VERTEX = 8;
+    static const int kComponentsPerVertex = 8;
 
     // Sort triangle fans by texture
     vector<const TriangleFan*> sortedTriangleFans;
@@ -130,8 +130,7 @@ void MeshRenderData::init(
         if(batches_.empty() || textures[triangleFan->texIndex].get() != batches_.back().texture.get())
         {
             // Start a new batch
-            Batch batch = { textures[triangleFan->texIndex], 0 };
-            batches_.push_back(batch);
+            batches_.push_back({textures[triangleFan->texIndex], 0});
         }
         else if(batches_.back().indexCount != 0)
         {
@@ -142,7 +141,7 @@ void MeshRenderData::init(
 
         for(const TriangleFan::Index& index : triangleFan->indices)
         {
-            indexData.push_back(uint16_t(vertexData.size() / COMPONENTS_PER_VERTEX));
+            indexData.push_back(static_cast<uint16_t>(vertexData.size() / kComponentsPerVertex));
             batches_.back().indexCount++;
 
             const Vertex& vertex = vertices[index.vertexIndex];
@@ -170,18 +169,17 @@ void MeshRenderData::init(
 
     if(Core::get().renderer().renderHitGeometry())
     {
-        ResourcePtr textureLookup8 = hitTexture.lock();
+        ResourcePtr textureLookup8 = g_hitTexture.lock();
 
         if(!textureLookup8)
         {
-            ResourcePtr texture(new Texture(0x800000FF));
-            ResourcePtr textureLookup5(new TextureLookup5(texture));
-            textureLookup8.reset(new TextureLookup8(textureLookup5));
-            hitTexture = textureLookup8;
+            ResourcePtr texture{new Texture{0x800000FF}};
+            ResourcePtr textureLookup5{new TextureLookup5{texture}};
+            textureLookup8.reset(new TextureLookup8{textureLookup5});
+            g_hitTexture = textureLookup8;
         }
 
-        Batch batch = { textureLookup8, 0 };
-        batches_.push_back(batch);
+        batches_.push_back({textureLookup8, 0});
 
         for(const TriangleFan& triangleFan : hitTriangleFans)
         {
@@ -193,7 +191,7 @@ void MeshRenderData::init(
 
             for(const TriangleFan::Index& index : triangleFan.indices)
             {
-                indexData.push_back(uint16_t(vertexData.size() / COMPONENTS_PER_VERTEX));
+                indexData.push_back(static_cast<uint16_t>(vertexData.size() / kComponentsPerVertex));
                 batches_.back().indexCount++;
 
                 const Vertex& vertex = vertices[index.vertexIndex];
@@ -223,9 +221,9 @@ void MeshRenderData::init(
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer_);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexData.size() * sizeof(uint16_t), indexData.data(), GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * COMPONENTS_PER_VERTEX, nullptr);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * COMPONENTS_PER_VERTEX, (GLvoid*)(sizeof(float) * 3));
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * COMPONENTS_PER_VERTEX, (GLvoid*)(sizeof(float) * 6));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * kComponentsPerVertex, nullptr);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * kComponentsPerVertex, reinterpret_cast<GLvoid*>(sizeof(float) * 3));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * kComponentsPerVertex, reinterpret_cast<GLvoid*>(sizeof(float) * 6));
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);

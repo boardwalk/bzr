@@ -22,7 +22,7 @@
 Camera::Camera()
 {
     speed_ = fp_t(0.0);
-    position_ = glm::vec3(88.5, 22.5, 125);
+    position_ = glm::vec3{88.5, 22.5, 125};
     yaw_ = fp_t(0.0);
     pitch_ = fp_t(0.26666);
     roll_ = fp_t(0.0);
@@ -88,9 +88,9 @@ const glm::mat4& Camera::viewMatrix() const
 
 void Camera::updateRotationQuat()
 {
-    glm::quat initialPitchQuat = glm::angleAxis(-pi() / fp_t(2.0), glm::vec3(1.0, 0.0, 0.0));
-    glm::quat yawQuat = glm::angleAxis(yaw_, glm::vec3(0.0, 1.0, 0.0));
-    glm::quat pitchQuat = glm::angleAxis(pitch_, glm::vec3(1.0, 0.0, 0.0));
+    glm::quat initialPitchQuat = glm::angleAxis(-pi() / fp_t(2.0), glm::vec3{1.0, 0.0, 0.0});
+    glm::quat yawQuat = glm::angleAxis(yaw_, glm::vec3{0.0, 1.0, 0.0});
+    glm::quat pitchQuat = glm::angleAxis(pitch_, glm::vec3{1.0, 0.0, 0.0});
 
     rotationQuat_ = headOrientation_ * pitchQuat * yawQuat * initialPitchQuat;
 
@@ -99,5 +99,5 @@ void Camera::updateRotationQuat()
 
 void Camera::updateViewMatrix()
 {
-    viewMatrix_ = glm::mat4_cast(rotationQuat_) * glm::translate(glm::mat4(), -(position_ + headPosition_));
+    viewMatrix_ = glm::mat4_cast(rotationQuat_) * glm::translate(glm::mat4{}, -(position_ + headPosition_));
 }

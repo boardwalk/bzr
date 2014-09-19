@@ -20,7 +20,7 @@
 ObjectId::ObjectId() : value_(0)
 {}
 
-ObjectId::ObjectId(uint32_t val) : value_(val)
+ObjectId::ObjectId(uint32_t val) : value_{val}
 {}
 
 uint32_t ObjectId::value() const

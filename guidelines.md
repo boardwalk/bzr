@@ -31,8 +31,7 @@ The [Google C++ Style Guide](http://google-styleguide.googlecode.com/svn/trunk/c
 ## Instance construction
 
 * Use equal sign initialization (e.g. `int bar = 3`) for fundamental types.
-* Use paren init syntax (e.g. `MyObject obj(1, 2, 3)`) for class types.
-* Do not use brace init syntax (e.g. `MyObject obj {1, 2, 3}`). VS2012 does not support it.
+* Use brace init syntax (e.g. `MyObject obj { 1, 2, 3 }`) for class types.
 
 ## Type inference
 

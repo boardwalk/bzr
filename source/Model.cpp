@@ -41,7 +41,7 @@ static vector<TriangleFan> readTriangleFans(BinReader& reader)
     return triangleFans;
 }
 
-Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl(id), needsDepthSort(false)
+Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl{id}, needsDepthSort{false}
 {
     BinReader reader(data, size);
 

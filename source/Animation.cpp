@@ -18,7 +18,7 @@
 #include "Animation.h"
 #include "BinReader.h"
 
-Animation::Animation(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
+Animation::Animation(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
     BinReader reader(data, size);
 

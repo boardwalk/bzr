@@ -64,22 +64,18 @@ void LandRenderData::initGeometry(const Land& land)
     {
         for(uint8_t x = 0; x < Land::kGridSize - 1; x++)
         {
-            uint8_t terrain[4];
-
 #define T(dx, dy) (data.styles[x + (dx)][y + (dy)] >> 2) & 0x1F
-            terrain[0] = T(0, 0);
-            terrain[1] = T(1, 0);
-            terrain[2] = T(1, 1);
-            terrain[3] = T(0, 1);
+            uint8_t terrain[]
+            {
+                T(0, 0), T(1, 0), T(1, 1), T(0, 1)
+            };
 #undef T
 
-            uint8_t road[4];
-
 #define R(dx, dy) data.styles[x + (dx)][y + (dy)] & 0x3
-            road[0] = R(0, 0);
-            road[1] = R(1, 0);
-            road[2] = R(1, 1);
-            road[3] = R(0, 1);
+            uint8_t road[]
+            {
+                R(0, 0), R(1, 0), R(1, 1), R(0, 1)
+            };
 #undef R
 
             uint32_t terrainDone = 0;
@@ -251,9 +247,9 @@ void LandRenderData::initGeometry(const Land& land)
         }
     }
 
-    static const int COMPONENTS_PER_VERTEX = 25;
+    static const int kComponentsPerVertex = 25;
 
-    vertexCount_ = static_cast<GLsizei>(vertexData.size()) / COMPONENTS_PER_VERTEX;
+    vertexCount_ = static_cast<GLsizei>(vertexData.size()) / kComponentsPerVertex;
 
     glGenVertexArrays(1, &vertexArray_);
     glBindVertexArray(vertexArray_);
@@ -262,13 +258,13 @@ void LandRenderData::initGeometry(const Land& land)
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer_);
     glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(uint8_t), vertexData.data(), GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), nullptr);
-    glVertexAttribPointer(1, 2, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 3));
-    glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 5));
-    glVertexAttribPointer(3, 4, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 9));
-    glVertexAttribPointer(4, 4, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 13));
-    glVertexAttribPointer(5, 4, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 17));
-    glVertexAttribPointer(6, 4, GL_UNSIGNED_BYTE, GL_FALSE, COMPONENTS_PER_VERTEX * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 21));
+    glVertexAttribPointer(0, 3, GL_UNSIGNED_BYTE, GL_FALSE, kComponentsPerVertex * sizeof(uint8_t), nullptr);
+    glVertexAttribPointer(1, 2, GL_UNSIGNED_BYTE, GL_FALSE, kComponentsPerVertex * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 3));
+    glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_FALSE, kComponentsPerVertex * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 5));
+    glVertexAttribPointer(3, 4, GL_UNSIGNED_BYTE, GL_FALSE, kComponentsPerVertex * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 9));
+    glVertexAttribPointer(4, 4, GL_UNSIGNED_BYTE, GL_FALSE, kComponentsPerVertex * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 13));
+    glVertexAttribPointer(5, 4, GL_UNSIGNED_BYTE, GL_FALSE, kComponentsPerVertex * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 17));
+    glVertexAttribPointer(6, 4, GL_UNSIGNED_BYTE, GL_FALSE, kComponentsPerVertex * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 21));
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);

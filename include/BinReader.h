@@ -21,7 +21,7 @@
 class BinReader
 {
 public:
-    BinReader(const void* data, size_t size) : data_(reinterpret_cast<const uint8_t*>(data)), size_(size), position_(0)
+    BinReader(const void* data, size_t size) : data_{reinterpret_cast<const uint8_t*>(data)}, size_{size}, position_{0}
     {}
 
     template<class T>

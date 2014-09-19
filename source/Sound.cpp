@@ -18,7 +18,7 @@
 #include "Sound.h"
 #include "BinReader.h"
 
-Sound::Sound(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
+Sound::Sound(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
     BinReader reader(data, size);
 

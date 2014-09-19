@@ -11,7 +11,7 @@
 
 ### Build dependencies
 
-* A recent GCC or MSVC supporting C++11
+* A recent GCC or VC2013 or newer
 * Python 2.7 or 3.0+
 * [Ninja](http://martine.github.io/ninja/)
 * [Jansson](http://www.digip.org/jansson/), developed with v2.6

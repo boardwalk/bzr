@@ -21,7 +21,7 @@
 #include "Palette.h"
 #include "ResourceCache.h"
 
-Texture::Texture(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
+Texture::Texture(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
     BinReader reader(data, size);
 

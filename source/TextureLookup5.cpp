@@ -21,7 +21,7 @@
 #include "ResourceCache.h"
 #include "Texture.h"
 
-TextureLookup5::TextureLookup5(uint32_t id,  const void* data, size_t size) : ResourceImpl(id)
+TextureLookup5::TextureLookup5(uint32_t id,  const void* data, size_t size) : ResourceImpl{id}
 {
     BinReader reader(data, size);
 
@@ -52,7 +52,7 @@ TextureLookup5::TextureLookup5(uint32_t id,  const void* data, size_t size) : Re
     reader.assertEnd();
 }
 
-TextureLookup5::TextureLookup5(ResourcePtr texture) : ResourceImpl(ResourceType::kTextureLookup5 | 0xFFFF), texture(texture)
+TextureLookup5::TextureLookup5(ResourcePtr texture) : ResourceImpl{ResourceType::kTextureLookup5 | 0xFFFF}, texture{texture}
 {
     assert(texture->resourceType() == ResourceType::kTexture);
 }

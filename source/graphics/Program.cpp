@@ -33,7 +33,7 @@ void Program::create()
 
 void Program::attach(GLenum type, const GLchar* source)
 {
-    GLint length = GLint(strlen(source));
+    GLint length = static_cast<GLint>(strlen(source));
 
     GLuint shader = glCreateShader(type);
     glShaderSource(shader, 1, &source, &length);

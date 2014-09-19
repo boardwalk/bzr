@@ -73,7 +73,7 @@ void SkyRenderer::initProgram()
 
 void SkyRenderer::initGeometry()
 {
-    static float VERTEX_DATA[] =
+    static float VERTEX_DATA[]
     {
         -1.0, -1.0,
          1.0, -1.0,
@@ -83,9 +83,9 @@ void SkyRenderer::initGeometry()
          1.0, -1.0
     };
 
-    static const int COMPONENTS_PER_VERTEX = 2;
+    static const int kComponentsPerVertex = 2;
 
-    vertexCount_ = sizeof(VERTEX_DATA) / sizeof(VERTEX_DATA[0]) / COMPONENTS_PER_VERTEX;
+    vertexCount_ = sizeof(VERTEX_DATA) / sizeof(VERTEX_DATA[0]) / kComponentsPerVertex;
 
     glGenVertexArrays(1, &vertexArray_);
     glBindVertexArray(vertexArray_);
@@ -94,14 +94,14 @@ void SkyRenderer::initGeometry()
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer_);
     glBufferData(GL_ARRAY_BUFFER, sizeof(VERTEX_DATA), VERTEX_DATA, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * COMPONENTS_PER_VERTEX, nullptr);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * kComponentsPerVertex, nullptr);
 
     glEnableVertexAttribArray(0);
 }
 
 void SkyRenderer::initTexture()
 {
-    static const GLenum FACES[] =
+    static const GLenum kFaces[]
     {
         GL_TEXTURE_CUBE_MAP_POSITIVE_X,
         GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
@@ -111,7 +111,7 @@ void SkyRenderer::initTexture()
         GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
     };
 
-    static const int NUM_FACES = sizeof(FACES) / sizeof(FACES[0]);
+    static const int kNumkFaces = sizeof(kFaces) / sizeof(kFaces[0]);
 
     glGenTextures(1, &texture_);
     glBindTexture(GL_TEXTURE_CUBE_MAP, texture_);
@@ -133,7 +133,7 @@ void SkyRenderer::initTexture()
 
     vector<uint8_t> data(kCubeSize * kCubeSize * 3);
 
-    for(int face = 0; face < NUM_FACES; face++)
+    for(int face = 0; face < kNumkFaces; face++)
     {
         for(int j = 0; j < kCubeSize; j++)
         {
@@ -148,12 +148,12 @@ void SkyRenderer::initTexture()
 
                 switch(face)
                 {
-                    case 0: cp = glm::vec3( 1.0,  -fj,  -fi); break; // +X
-                    case 1: cp = glm::vec3(-1.0,  -fj,   fi); break; // -X
-                    case 2: cp = glm::vec3(  fi,  1.0,   fj); break; // +Y
-                    case 3: cp = glm::vec3(  fi, -1.0,  -fj); break; // -Y
-                    case 4: cp = glm::vec3(  fi,  -fj,  1.0); break; // +Z
-                    case 5: cp = glm::vec3( -fi,  -fj, -1.0); break; // -Z
+                    case 0: cp = glm::vec3{ 1.0,  -fj,  -fi}; break; // +X
+                    case 1: cp = glm::vec3{-1.0,  -fj,   fi}; break; // -X
+                    case 2: cp = glm::vec3{  fi,  1.0,   fj}; break; // +Y
+                    case 3: cp = glm::vec3{  fi, -1.0,  -fj}; break; // -Y
+                    case 4: cp = glm::vec3{  fi,  -fj,  1.0}; break; // +Z
+                    case 5: cp = glm::vec3{ -fi,  -fj, -1.0}; break; // -Z
                 }
 
                 // map cube to sphere
@@ -181,7 +181,7 @@ void SkyRenderer::initTexture()
             }
         }
 
-        glTexImage2D(FACES[face], 0, GL_RGB8, kCubeSize, kCubeSize, 0, GL_RGB, GL_UNSIGNED_BYTE, data.data());
+        glTexImage2D(kFaces[face], 0, GL_RGB8, kCubeSize, kCubeSize, 0, GL_RGB, GL_UNSIGNED_BYTE, data.data());
     }
 
     sunVector_.x = sin(model.thetaSun()) * sin(model.phiSun());

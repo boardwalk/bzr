@@ -74,7 +74,10 @@ void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& view
     ObjectManager& objectManager = Core::get().objectManager();
 
     glm::vec3 cameraPosition = Core::get().camera().position();
-    glUniform4f(program_.getUniform("cameraPosition"), GLfloat(cameraPosition.x), GLfloat(cameraPosition.y), GLfloat(cameraPosition.z), 1.0f);
+    glUniform4f(program_.getUniform("cameraPosition"),
+        static_cast<GLfloat>(cameraPosition.x),
+        static_cast<GLfloat>(cameraPosition.y),
+        static_cast<GLfloat>(cameraPosition.z), 1.0f);
 
     // first pass, render solid objects and collect objects that need depth sorting
     depthSortList_.clear();
@@ -91,9 +94,9 @@ void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& view
         int dx = object.location().landcell.x() - landcellManager.center().x();
         int dy = object.location().landcell.y() - landcellManager.center().y();
 
-        glm::vec3 blockPosition(dx * Land::kBlockSize, dy * Land::kBlockSize, 0.0);
+        glm::vec3 blockPosition{dx * Land::kBlockSize, dy * Land::kBlockSize, 0.0};
 
-        glm::mat4 worldMat = glm::translate(glm::mat4(), blockPosition + object.location().offset) * glm::mat4_cast(object.location().rotation);
+        glm::mat4 worldMat = glm::translate(glm::mat4{}, blockPosition + object.location().offset) * glm::mat4_cast(object.location().rotation);
 
         renderOne(object.model(), projectionMat, viewMat, worldMat);
     }
@@ -103,18 +106,18 @@ void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& view
         int dx = pair.first.x() - landcellManager.center().x();
         int dy = pair.first.y() - landcellManager.center().y();
 
-        glm::vec3 blockPosition(dx * Land::kBlockSize, dy * Land::kBlockSize, 0.0);
+        glm::vec3 blockPosition{dx * Land::kBlockSize, dy * Land::kBlockSize, 0.0};
 
         for(const Doodad& doodad : pair.second->doodads())
         {
-            glm::mat4 worldMat = glm::translate(glm::mat4(), blockPosition + doodad.position) * glm::mat4_cast(doodad.rotation);
+            glm::mat4 worldMat = glm::translate(glm::mat4{}, blockPosition + doodad.position) * glm::mat4_cast(doodad.rotation);
 
             renderOne(doodad.resource, projectionMat, viewMat, worldMat);
         }
     }
 
     // second pass, sort and render objects that need depth sorting
-    sort(depthSortList_.begin(), depthSortList_.end(), CompareByDepth());
+    sort(depthSortList_.begin(), depthSortList_.end(), CompareByDepth{});
 
     for(const DepthSortedModel& depthSortedModel : depthSortList_)
     {
@@ -155,7 +158,7 @@ void ModelRenderer::renderModelGroup(const ModelGroup& modelGroup,
 {
     for(const ModelGroup::ModelInfo& modelInfo : modelGroup.modelInfos)
     {
-        glm::mat4 subWorldMat = glm::translate(glm::mat4(), modelInfo.position) * glm::mat4_cast(modelInfo.rotation) * glm::scale(glm::mat4(), modelInfo.scale);
+        glm::mat4 subWorldMat = glm::translate(glm::mat4{}, modelInfo.position) * glm::mat4_cast(modelInfo.rotation) * glm::scale(glm::mat4(), modelInfo.scale);
 
         renderOne(modelInfo.resource,
             projectionMat,
@@ -172,9 +175,8 @@ void ModelRenderer::renderModel(const Model& model,
 {
     if(firstPass && model.needsDepthSort)
     {
-        glm::vec4 worldPos = worldMat * glm::vec4(0.0, 0.0, 0.0, 1.0);
-        DepthSortedModel depthSortedModel = { &model, worldMat, glm::vec3(worldPos.x, worldPos.y, worldPos.z) };
-        depthSortList_.push_back(depthSortedModel);
+        glm::vec4 worldPos = worldMat * glm::vec4{0.0, 0.0, 0.0, 1.0};
+        depthSortList_.push_back({&model, worldMat, {worldPos.x, worldPos.y, worldPos.z}});
         return;
     }
 

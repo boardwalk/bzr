@@ -18,7 +18,9 @@
 #ifndef BZR_GRAPHICS_PROGRAM_H
 #define BZR_GRAPHICS_PROGRAM_H
 
-class Program
+#include "Noncopyable.h"
+
+class Program : Noncopyable
 {
 public:
     Program();

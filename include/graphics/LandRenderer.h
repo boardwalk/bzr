@@ -39,6 +39,7 @@ private:
         const glm::mat4& projectionMat,
         const glm::mat4& viewMat,
         const glm::vec3& position);
+    
     void initProgram();
     void initTerrainTexture();
     void initBlendTexture();

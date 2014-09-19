@@ -176,14 +176,14 @@ unique_ptr<BSPNode> readBSP(BinReader& reader, int treeType)
 
     if(nodeType == 0x4c454146) // LEAF
     {
-        return unique_ptr<BSPNode>(new BSPExternal(reader, treeType));
+        return unique_ptr<BSPNode>(new BSPExternal{reader, treeType});
     }
     else if(nodeType == 0x504f5254) // PORT
     {
-        return unique_ptr<BSPNode>(new BSPPortal(reader, treeType));
+        return unique_ptr<BSPNode>(new BSPPortal{reader, treeType});
     }
     else
     {
-        return unique_ptr<BSPNode>(new BSPInternal(reader, treeType, nodeType));
+        return unique_ptr<BSPNode>(new BSPInternal{reader, treeType, nodeType});
     }
 }

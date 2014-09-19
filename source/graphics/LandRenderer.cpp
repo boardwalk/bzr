@@ -118,10 +118,16 @@ void LandRenderer::render(const glm::mat4& projectionMat, const glm::mat4& viewM
     LandcellManager& landcellManager = Core::get().landcellManager();
 
     glm::vec3 cameraPosition = Core::get().camera().position();
-    glUniform4f(program_.getUniform("cameraPosition"), GLfloat(cameraPosition.x), GLfloat(cameraPosition.y), GLfloat(cameraPosition.z), 1.0f);
+    glUniform4f(program_.getUniform("cameraPosition"),
+        static_cast<GLfloat>(cameraPosition.x),
+        static_cast<GLfloat>(cameraPosition.y),
+        static_cast<GLfloat>(cameraPosition.z), 1.0f);
 
-    glm::vec4 viewLightPosition = viewMat * glm::vec4(lightPosition_.x, lightPosition_.y, lightPosition_.z, 1.0);
-    glUniform3f(program_.getUniform("lightPosition"), GLfloat(viewLightPosition.x), GLfloat(viewLightPosition.y), GLfloat(viewLightPosition.z));
+    glm::vec4 viewLightPosition = viewMat * glm::vec4{lightPosition_.x, lightPosition_.y, lightPosition_.z, 1.0};
+    glUniform3f(program_.getUniform("lightPosition"),
+        static_cast<GLfloat>(viewLightPosition.x),
+        static_cast<GLfloat>(viewLightPosition.y),
+        static_cast<GLfloat>(viewLightPosition.z));
 
     for(auto& pair : landcellManager)
     {
@@ -133,7 +139,7 @@ void LandRenderer::render(const glm::mat4& projectionMat, const glm::mat4& viewM
         int dx = pair.first.x() - landcellManager.center().x();
         int dy = pair.first.y() - landcellManager.center().y();
 
-        glm::vec3 blockPosition(dx * 192.0, dy * 192.0, 0.0);
+        glm::vec3 blockPosition{dx * 192.0, dy * 192.0, 0.0};
 
         const Land& land = static_cast<const Land&>(*pair.second);
 
@@ -152,7 +158,7 @@ void LandRenderer::renderLand(
     const glm::mat4& viewMat,
     const glm::vec3& position)
 {
-    glm::mat4 worldMat = glm::translate(glm::mat4(), position);
+    glm::mat4 worldMat = glm::translate(glm::mat4{}, position);
 
     loadMat3ToUniform(glm::inverseTranspose(glm::mat3(viewMat * worldMat)), program_.getUniform("normalMatrix"));
     loadMat4ToUniform(worldMat, program_.getUniform("worldMatrix"));

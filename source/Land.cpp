@@ -32,11 +32,14 @@ static fp_t cubic(fp_t p[4], fp_t x)
 
 static fp_t bicubic(fp_t p[4][4], fp_t x, fp_t y)
 {
-    fp_t arr[4];
-    arr[0] = cubic(p[0], y);
-    arr[1] = cubic(p[1], y);
-    arr[2] = cubic(p[2], y);
-    arr[3] = cubic(p[3], y);
+    fp_t arr[]
+    {
+        cubic(p[0], y),
+        cubic(p[1], y),
+        cubic(p[2], y),
+        cubic(p[3], y)
+    };
+
     return cubic(arr, x);
 }
 
@@ -160,10 +163,10 @@ void Land::init()
             fp_t h2 = resample[ox2 + oy1 * kOffsetMapSize] + calcHeight(lx2, ly1);
             fp_t h3 = resample[ox1 + oy2 * kOffsetMapSize] + calcHeight(lx1, ly2);
 
-            glm::vec3 a(lx2 - lx1, 0.0, h2 - h1);
-            glm::vec3 b(0.0, ly2 - ly1, h3 - h1);
+            glm::vec3 a{lx2 - lx1, 0.0, h2 - h1};
+            glm::vec3 b{0.0, ly2 - ly1, h3 - h1};
 
-            glm::vec3 n = glm::normalize(glm::cross(a, b)) * fp_t(0.5) + glm::vec3(0.5, 0.5, 0.5);
+            glm::vec3 n = glm::normalize(glm::cross(a, b)) * fp_t(0.5) + glm::vec3{0.5, 0.5, 0.5};
             normalMap_[(ox + oy * kOffsetMapSize) * 3] = static_cast<uint8_t>(n.x * fp_t(0xFF));
             normalMap_[(ox + oy * kOffsetMapSize) * 3 + 1] = static_cast<uint8_t>(n.y * fp_t(0xFF));
             normalMap_[(ox + oy * kOffsetMapSize) * 3 + 2] = static_cast<uint8_t>(n.z * fp_t(0xFF));

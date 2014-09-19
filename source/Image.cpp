@@ -19,9 +19,9 @@
 #include "Palette.h"
 #include <algorithm>
 
-int ImageFormat::bitsPerPixel(Value f)
+int ImageFormat::bitsPerPixel(Value format)
 {
-    switch(f)
+    switch(format)
     {
         case kBGR24:
             return 24;
@@ -54,19 +54,19 @@ int ImageFormat::bitsPerPixel(Value f)
     throw runtime_error("Invalid format");
 }
 
-bool ImageFormat::isPaletted(Value f)
+bool ImageFormat::isPaletted(Value format)
 {
-    return f == kPaletted8 || f == kPaletted16;
+    return format == kPaletted8 || format == kPaletted16;
 }
 
-bool ImageFormat::isCompressed(Value f)
+bool ImageFormat::isCompressed(Value format)
 {
-    return f == kDXT1 || f == kDXT3 || f == kDXT5;
+    return format == kDXT1 || format == kDXT3 || format == kDXT5;
 }
 
-bool ImageFormat::hasAlpha(Value f)
+bool ImageFormat::hasAlpha(Value format)
 {
-    return f == kBGRA32 || f == kPaletted8 || f == kPaletted16 || f == kA8 || f == kDXT3 || f == kDXT5;
+    return format == kBGRA32 || format == kPaletted8 || format == kPaletted16 || format == kA8 || format == kDXT3 || format == kDXT5;
 }
 
 Image::Image() : format_(ImageFormat::kInvalid), width_(0), height_(0), hasAlpha_(false)

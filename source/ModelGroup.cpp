@@ -21,7 +21,7 @@
 #include "ResourceCache.h"
 #include <glm/gtx/norm.hpp>
 
-ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
+ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
     BinReader reader(data, size);
 

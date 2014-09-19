@@ -130,10 +130,12 @@ glm::vec3 SkyModel::getColor(fp_t theta, fp_t phi)
         XYZ.z = (fp_t(1.0) - x - y) * Y / y;
     }
 
-    glm::vec3 RGB(
+    glm::vec3 RGB
+    {
         XYZ.x * fp_t(3.2406)  + XYZ.y * fp_t(-1.5372) + XYZ.z * fp_t(-0.4986),
         XYZ.x * fp_t(-0.9689) + XYZ.y * fp_t( 1.8758) + XYZ.z * fp_t( 0.0415),
-        XYZ.x * fp_t(0.0557)  + XYZ.y * fp_t(-0.2040) + XYZ.z * fp_t( 1.0570));
+        XYZ.x * fp_t(0.0557)  + XYZ.y * fp_t(-0.2040) + XYZ.z * fp_t( 1.0570)
+    };
 
     RGB.x = min(RGB.x, fp_t(1.0));
     RGB.y = min(RGB.y, fp_t(1.0));

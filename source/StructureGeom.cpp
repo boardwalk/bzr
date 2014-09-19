@@ -18,7 +18,7 @@
 #include "StructureGeom.h"
 #include "BinReader.h"
 
-StructureGeom::StructureGeom(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
+StructureGeom::StructureGeom(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
     BinReader reader(data, size);
 

@@ -18,7 +18,7 @@
 #include "Palette.h"
 #include "BinReader.h"
 
-Palette::Palette(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
+Palette::Palette(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
     BinReader reader(data, size);
 

@@ -40,10 +40,10 @@ struct ImageFormat
         kDXT5 = 0x35545844
     };
 
-    static int bitsPerPixel(Value f);
-    static bool isPaletted(Value f);
-    static bool isCompressed(Value f);
-    static bool hasAlpha(Value f);
+    static int bitsPerPixel(Value format);
+    static bool isPaletted(Value format);
+    static bool isCompressed(Value format);
+    static bool hasAlpha(Value format);
 };
 
 class Image

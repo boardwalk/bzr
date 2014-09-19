@@ -67,7 +67,7 @@ void StructureRenderer::render(const glm::mat4& projectionMat, const glm::mat4& 
         int dx = pair.first.x() - landcellManager.center().x();
         int dy = pair.first.y() - landcellManager.center().y();
 
-        glm::vec3 blockPosition(dx * 192.0, dy * 192.0, 0.0);
+        glm::vec3 blockPosition{dx * 192.0, dy * 192.0, 0.0};
 
         const Structure& structure = static_cast<const Structure&>(*pair.second);
 
@@ -82,7 +82,7 @@ void StructureRenderer::renderStructure(
     const glm::vec3& position,
     const glm::quat& rotation)
 {
-    glm::mat4 worldMat = glm::translate(glm::mat4(), position) * glm::mat4_cast(rotation);
+    glm::mat4 worldMat = glm::translate(glm::mat4{}, position) * glm::mat4_cast(rotation);
 
     loadMat4ToUniform(worldMat, program_.getUniform("worldMatrix"));
     loadMat4ToUniform(viewMat, program_.getUniform("viewMatrix"));

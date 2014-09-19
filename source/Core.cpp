@@ -35,7 +35,7 @@ static unique_ptr<Core> g_singleton;
 void Core::go()
 {
     assert(!g_singleton);
-    g_singleton.reset(new Core());
+    g_singleton.reset(new Core{});
     g_singleton->init();
     g_singleton->run();
     g_singleton->cleanup();
@@ -113,16 +113,16 @@ void Core::init()
         throwSDLError();
     }
 
-    config_.reset(new Config());
-    portalDat_.reset(new DatFile("data/client_portal.dat"));
-    cellDat_.reset(new DatFile("data/client_cell_1.dat"));
-    highresDat_.reset(new DatFile("data/client_highres.dat"));
-    resourceCache_.reset(new ResourceCache());
-    landcellManager_.reset(new LandcellManager());
-    objectManager_.reset(new ObjectManager());
-    camera_.reset(new Camera());
+    config_.reset(new Config{});
+    portalDat_.reset(new DatFile{"data/client_portal.dat"});
+    cellDat_.reset(new DatFile{"data/client_cell_1.dat"});
+    highresDat_.reset(new DatFile{"data/client_highres.dat"});
+    resourceCache_.reset(new ResourceCache{});
+    landcellManager_.reset(new LandcellManager{});
+    objectManager_.reset(new ObjectManager{});
+    camera_.reset(new Camera{});
 #ifndef HEADLESS
-    renderer_.reset(new Renderer());
+    renderer_.reset(new Renderer{});
     renderer_->init();
 #endif
     landcellManager_->setCenter(LandcellId(0x31, 0xD6));
@@ -148,7 +148,7 @@ void Core::init()
     }
 #endif
 
-    setPlayerId(ObjectId(1));
+    setPlayerId(ObjectId{1});
 }
 
 void Core::cleanup()
@@ -266,13 +266,13 @@ void Core::handleEvents()
     {
         printf("Loading model %08x\n", modelId_);
 
-        Object& object = (*objectManager_)[ObjectId(1)];
+        Object& object = (*objectManager_)[ObjectId{1}];
 
         object.setModel(resourceCache_->get(modelId_));
 
         Location loc;
         loc.landcell = landcellManager_->center();
-        loc.offset = glm::vec3(92.0, 92.0, 0.0);
+        loc.offset = glm::vec3{92.0, 92.0, 0.0};
         object.setLocation(loc);
     }
 #endif

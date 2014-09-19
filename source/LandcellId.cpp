@@ -26,11 +26,11 @@ LandcellId::LandcellId(uint32_t value) :
 {}
 
 LandcellId::LandcellId(uint8_t x, uint8_t y) :
-    value_((uint32_t(x) << 24) | (uint32_t(y) << 16) | 0xFFFF)
+    value_((uint32_t{x} << 24) | (uint32_t{y} << 16) | 0xFFFF)
 {}
 
 LandcellId::LandcellId(uint8_t x, uint8_t y, uint16_t n) :
-    value_((uint32_t(x) << 24) | (uint32_t(y) << 16) | n)
+    value_((uint32_t{x} << 24) | (uint32_t{y} << 16) | n)
 {}
 
 int LandcellId::calcSquareDistance(LandcellId other) const

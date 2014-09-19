@@ -22,7 +22,7 @@
 #include "Texture.h"
 #include "TextureLookup5.h"
 
-TextureLookup8::TextureLookup8(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
+TextureLookup8::TextureLookup8(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
     BinReader reader(data, size);
 

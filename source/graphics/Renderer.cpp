@@ -97,7 +97,7 @@ Renderer::Renderer() : videoInit_(false), window_(nullptr), context_(nullptr)
         throw runtime_error("Bad value for Renderer.textureFiltering");
     }
 
-    textureMaxAnisotropy_ = (GLfloat)config.getFloat("Renderer.anisotropyLevel", 0.0);
+    textureMaxAnisotropy_ = static_cast<GLfloat>(config.getFloat("Renderer.anisotropyLevel", 0.0));
 
     if(textureMaxAnisotropy_ != 0.0f)
     {
@@ -186,7 +186,7 @@ void Renderer::render(fp_t interp)
     SDL_GetWindowSize(window_, &windowWidth, &windowHeight);
 
     // projection * view * model * vertex
-    glm::mat4 projectionMat = glm::perspective(fieldOfView_ / fp_t(180.0) * pi(), fp_t(windowWidth) / fp_t(windowHeight), fp_t(0.1), fp_t(1000.0));
+    glm::mat4 projectionMat = glm::perspective(fieldOfView_ / fp_t(180.0) * pi(), static_cast<fp_t>(windowWidth) / static_cast<fp_t>(windowHeight), fp_t(0.1), fp_t(1000.0));
 
     const glm::mat4& viewMat = Core::get().camera().viewMatrix();
 
@@ -269,18 +269,16 @@ void Renderer::createWindow()
 }
 
 #ifdef OCULUSVR
-#define UNITS_PER_METER fp_t(1.0)
-
 static glm::quat convertOvrQuatf(const ovrQuatf& quat)
 {
-    return glm::quat(quat.w, quat.x, quat.y, quat.z);
+    return glm::quat{quat.w, quat.x, quat.y, quat.z};
 }
 
 static glm::vec3 convertOvrVector3f(const ovrVector3f& vec)
 {
     // ovr has +x right, +y up, and +z back
     // we have +x right, +y forward, +z up,
-    return glm::vec3(vec.x, -vec.z, vec.y) * UNITS_PER_METER;
+    return glm::vec3{vec.x, -vec.z, vec.y};
 }
 
 static glm::mat4 convertOvrMatrix4f(const ovrMatrix4f& mat)
@@ -453,7 +451,7 @@ void Renderer::renderOVR(fp_t interp)
         Core::get().camera().setHeadOrientation(glm::conjugate(convertOvrQuatf(eyePose[eye].Orientation)));
         Core::get().camera().setHeadPosition(convertOvrVector3f(eyePose[eye].Position));
 
-        glm::mat4 viewMat = glm::translate(glm::mat4(), convertOvrVector3f(eyeRenderDesc_[eye].ViewAdjust));
+        glm::mat4 viewMat = glm::translate(glm::mat4{}, convertOvrVector3f(eyeRenderDesc_[eye].ViewAdjust));
         viewMat = viewMat * Core::get().camera().viewMatrix();
 
         skyRenderer_->render();
