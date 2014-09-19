@@ -28,7 +28,7 @@ public:
     ResourcePtr get(uint32_t resourceId);
 
 private:
-    unordered_map<uint32_t, weak_ptr<Resource>> data_;
+    unordered_map<uint32_t, weak_ptr<const Resource>> data_;
 };
 
 #endif

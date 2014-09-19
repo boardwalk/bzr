@@ -86,6 +86,6 @@ public:
     static const ResourceType::Value RESOURCE_TYPE = RT;
 };
 
-typedef shared_ptr<Resource> ResourcePtr;
+typedef shared_ptr<const Resource> ResourcePtr;
 
 #endif

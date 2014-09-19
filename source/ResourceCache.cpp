@@ -29,7 +29,7 @@
 #include "TextureLookup5.h"
 #include "TextureLookup8.h"
 
-static Resource* loadResource(uint32_t resourceId)
+static const Resource* loadResource(uint32_t resourceId)
 {
     vector<uint8_t> data = Core::get().portalDat().read(resourceId);
 
@@ -72,7 +72,7 @@ static Resource* loadResource(uint32_t resourceId)
 
 ResourcePtr ResourceCache::get(uint32_t resourceId)
 {
-    weak_ptr<Resource>& weakPtr = data_[resourceId];
+    weak_ptr<const Resource>& weakPtr = data_[resourceId];
 
     ResourcePtr sharedPtr = weakPtr.lock();
 
