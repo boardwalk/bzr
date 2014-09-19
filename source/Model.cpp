@@ -26,7 +26,7 @@
 
 static vector<TriangleFan> readTriangleFans(BinReader& reader)
 {
-    uint16_t numTriangleFans = reader.readVarInt();
+    uint16_t numTriangleFans = reader.readPackedShort();
 
     vector<TriangleFan> triangleFans(numTriangleFans);
 
