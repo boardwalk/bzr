@@ -47,11 +47,11 @@ Structure::Structure(const void* data, size_t size)
     for(ResourcePtr& texture : textures_)
     {
         uint16_t textureId = reader.read<uint16_t>();
-        texture = Core::get().resourceCache().get(ResourceType::TextureLookup8 | textureId);
+        texture = Core::get().resourceCache().get(ResourceType::kTextureLookup8 | textureId);
     }
 
     uint16_t geometryId = reader.read<uint16_t>();
-    geometry_ = Core::get().resourceCache().get(ResourceType::StructureGeom | geometryId);
+    geometry_ = Core::get().resourceCache().get(ResourceType::kStructureGeom | geometryId);
 
     partNum_ = reader.read<uint16_t>();
 

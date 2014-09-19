@@ -20,7 +20,7 @@
 
 #include "Resource.h"
 
-class Palette : public ResourceImpl<ResourceType::Palette>
+class Palette : public ResourceImpl<ResourceType::kPalette>
 {
 public:
     struct Color

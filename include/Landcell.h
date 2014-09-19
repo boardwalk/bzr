@@ -27,8 +27,8 @@ struct LandcellType
 {
     enum Value
     {
-        Land,
-        Structure
+        kLand,
+        kStructure
     };
 };
 

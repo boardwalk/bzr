@@ -22,7 +22,7 @@
 #include "Image.h"
 #include "Resource.h"
 
-class Texture : public ResourceImpl<ResourceType::Texture>
+class Texture : public ResourceImpl<ResourceType::kTexture>
 {
 public:
     Texture(uint32_t id, const void* data, size_t size);

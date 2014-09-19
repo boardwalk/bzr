@@ -60,9 +60,9 @@ void LandRenderData::initGeometry(const Land& land)
 
     vector<uint8_t> vertexData;
 
-    for(uint8_t y = 0; y < Land::GRID_SIZE - 1; y++)
+    for(uint8_t y = 0; y < Land::kGridSize - 1; y++)
     {
-        for(uint8_t x = 0; x < Land::GRID_SIZE - 1; x++)
+        for(uint8_t x = 0; x < Land::kGridSize - 1; x++)
         {
             uint8_t terrain[4];
 
@@ -283,7 +283,7 @@ void LandRenderData::initNormalTexture(const Land& land)
 {
     glGenTextures(1, &normalTexture_);
     glBindTexture(GL_TEXTURE_2D, normalTexture_);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, Land::OFFSET_MAP_SIZE, Land::OFFSET_MAP_SIZE, 0, GL_RGB, GL_UNSIGNED_BYTE, land.normalMap());
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, Land::kOffsetMapSize, Land::kOffsetMapSize, 0, GL_RGB, GL_UNSIGNED_BYTE, land.normalMap());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // default is GL_NEAREST_MIPMAP_LINEAR
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);

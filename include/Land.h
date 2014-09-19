@@ -23,17 +23,17 @@
 class Land : public Landcell
 {
 public:
-    static const int GRID_SIZE = 9;
-    static const fp_t CELL_SIZE;
-    static const fp_t BLOCK_SIZE;
-    static const int OFFSET_MAP_SIZE = 64;
+    static const int kGridSize = 9;
+    static const fp_t kCellSize;
+    static const fp_t kBlockSize;
+    static const int kOffsetMapSize = 64;
 
     PACK(struct Data
     {
         uint32_t fileId;
         uint32_t flags;
-        uint16_t styles[GRID_SIZE][GRID_SIZE];
-        uint8_t heights[GRID_SIZE][GRID_SIZE];
+        uint16_t styles[kGridSize][kGridSize];
+        uint8_t heights[kGridSize][kGridSize];
         uint8_t pad;
     });
 

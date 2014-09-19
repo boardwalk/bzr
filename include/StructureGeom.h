@@ -21,7 +21,7 @@
 #include "Resource.h"
 #include "StructureGeomPart.h"
 
-class StructureGeom : public ResourceImpl<ResourceType::StructureGeom>
+class StructureGeom : public ResourceImpl<ResourceType::kStructureGeom>
 {
 public:
     StructureGeom(uint32_t id, const void* data, size_t size);

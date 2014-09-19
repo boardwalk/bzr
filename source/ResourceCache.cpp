@@ -45,25 +45,25 @@ static Resource* loadResource(uint32_t resourceId)
 
     switch(resourceId & 0xFF000000)
     {
-        case ResourceType::Model:
+        case ResourceType::kModel:
             return new Model(resourceId, data.data(), data.size());
-        case ResourceType::ModelGroup:
+        case ResourceType::kModelGroup:
             return new ModelGroup(resourceId, data.data(), data.size());
-        case ResourceType::Animation:
+        case ResourceType::kAnimation:
             return new Animation(resourceId, data.data(), data.size());
-        case ResourceType::Palette:
+        case ResourceType::kPalette:
             return new Palette(resourceId, data.data(), data.size());
-        case ResourceType::TextureLookup5:
+        case ResourceType::kTextureLookup5:
             return new TextureLookup5(resourceId, data.data(), data.size());
-        case ResourceType::Texture:
+        case ResourceType::kTexture:
             return new Texture(resourceId, data.data(), data.size());
-        case ResourceType::TextureLookup8:
+        case ResourceType::kTextureLookup8:
             return new TextureLookup8(resourceId, data.data(), data.size());
-        case ResourceType::AnimationSet:
+        case ResourceType::kAnimationSet:
             return new AnimationSet(resourceId, data.data(), data.size());
-        case ResourceType::Sound:
+        case ResourceType::kSound:
             return new Sound(resourceId, data.data(), data.size());
-        case ResourceType::StructureGeom:
+        case ResourceType::kStructureGeom:
             return new StructureGeom(resourceId, data.data(), data.size());
         default:
             throw runtime_error("Resource type not supported");

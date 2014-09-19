@@ -20,7 +20,7 @@
 
 #include "Resource.h"
 
-class Sound : public ResourceImpl<ResourceType::Sound>
+class Sound : public ResourceImpl<ResourceType::kSound>
 {
 public:
     Sound(uint32_t id, const void* data, size_t size);

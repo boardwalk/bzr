@@ -356,25 +356,25 @@ void Core::step(fp_t dt)
 
     if(position.x < 0.0)
     {
-        camera_->setPosition(glm::vec3(position.x + Land::BLOCK_SIZE, position.y, position.z));
+        camera_->setPosition(glm::vec3(position.x + Land::kBlockSize, position.y, position.z));
         landcellManager_->setCenter(LandcellId(id.x() - 1, id.y()));
     }
 
-    if(position.x >= Land::BLOCK_SIZE)
+    if(position.x >= Land::kBlockSize)
     {
-        camera_->setPosition(glm::vec3(position.x - Land::BLOCK_SIZE, position.y, position.z));
+        camera_->setPosition(glm::vec3(position.x - Land::kBlockSize, position.y, position.z));
         landcellManager_->setCenter(LandcellId(id.x() + 1, id.y()));
     }
 
     if(position.y < 0.0)
     {
-        camera_->setPosition(glm::vec3(position.x, position.y + Land::BLOCK_SIZE, position.z));
+        camera_->setPosition(glm::vec3(position.x, position.y + Land::kBlockSize, position.z));
         landcellManager_->setCenter(LandcellId(id.x(), id.y() - 1));
     }
 
-    if(position.y >= Land::BLOCK_SIZE)
+    if(position.y >= Land::kBlockSize)
     {
-        camera_->setPosition(glm::vec3(position.x, position.y - Land::BLOCK_SIZE, position.z));
+        camera_->setPosition(glm::vec3(position.x, position.y - Land::kBlockSize, position.z));
         landcellManager_->setCenter(LandcellId(id.x(), id.y() + 1));
     }
 

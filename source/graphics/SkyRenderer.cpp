@@ -24,7 +24,7 @@
 #include "graphics/shaders/SkyVertexShader.h"
 #include "graphics/shaders/SkyFragmentShader.h"
 
-static const int CUBE_SIZE = 256;
+static const int kCubeSize = 256;
 
 SkyRenderer::SkyRenderer()
 {
@@ -131,17 +131,17 @@ void SkyRenderer::initTexture()
     params.tu = fp_t(5.0);
     model.prepare(params);
 
-    vector<uint8_t> data(CUBE_SIZE * CUBE_SIZE * 3);
+    vector<uint8_t> data(kCubeSize * kCubeSize * 3);
 
     for(int face = 0; face < NUM_FACES; face++)
     {
-        for(int j = 0; j < CUBE_SIZE; j++)
+        for(int j = 0; j < kCubeSize; j++)
         {
-            for(int i = 0; i < CUBE_SIZE; i++)
+            for(int i = 0; i < kCubeSize; i++)
             {
                 // scale to cube face
-                fp_t fi = fp_t(i) / fp_t(CUBE_SIZE - 1) * fp_t(2.0) - fp_t(1.0);
-                fp_t fj = fp_t(j) / fp_t(CUBE_SIZE - 1) * fp_t(2.0) - fp_t(1.0);
+                fp_t fi = fp_t(i) / fp_t(kCubeSize - 1) * fp_t(2.0) - fp_t(1.0);
+                fp_t fj = fp_t(j) / fp_t(kCubeSize - 1) * fp_t(2.0) - fp_t(1.0);
 
                 // find point on the cube we're mapping
                 glm::vec3 cp;
@@ -175,13 +175,13 @@ void SkyRenderer::initTexture()
 
                 // compute and store color
                 glm::vec3 color = model.getColor(theta, phi);
-                data[(i + j * CUBE_SIZE) * 3] = static_cast<uint8_t>(color.x * 0xFF);
-                data[(i + j * CUBE_SIZE) * 3 + 1] = static_cast<uint8_t>(color.y * 0xFF);
-                data[(i + j * CUBE_SIZE) * 3 + 2] = static_cast<uint8_t>(color.z * 0xFF);
+                data[(i + j * kCubeSize) * 3] = static_cast<uint8_t>(color.x * 0xFF);
+                data[(i + j * kCubeSize) * 3 + 1] = static_cast<uint8_t>(color.y * 0xFF);
+                data[(i + j * kCubeSize) * 3 + 2] = static_cast<uint8_t>(color.z * 0xFF);
             }
         }
 
-        glTexImage2D(FACES[face], 0, GL_RGB8, CUBE_SIZE, CUBE_SIZE, 0, GL_RGB, GL_UNSIGNED_BYTE, data.data());
+        glTexImage2D(FACES[face], 0, GL_RGB8, kCubeSize, kCubeSize, 0, GL_RGB, GL_UNSIGNED_BYTE, data.data());
     }
 
     sunVector_.x = sin(model.thetaSun()) * sin(model.phiSun());

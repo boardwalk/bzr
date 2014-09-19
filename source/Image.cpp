@@ -23,29 +23,29 @@ int ImageFormat::bitsPerPixel(Value f)
 {
     switch(f)
     {
-        case BGR24:
+        case kBGR24:
             return 24;
-        case BGRA32:
+        case kBGRA32:
             return 32;
-        case A16:
+        case kA16:
             return 16;
-        case A16_2:
+        case kA16_2:
             return 16;
-        case A8_2:
+        case kA8_2:
             return 8;
-        case Paletted8:
+        case kPaletted8:
             return 8;
-        case Paletted16:
+        case kPaletted16:
             return 16;
-        case RGB24:
+        case kRGB24:
             return 24;
-        case A8:
+        case kA8:
             return 8;
-        case DXT1:
+        case kDXT1:
             return 4;
-        case DXT3:
+        case kDXT3:
             return 8;
-        case DXT5:
+        case kDXT5:
             return 8;
         default:
             break;
@@ -56,20 +56,20 @@ int ImageFormat::bitsPerPixel(Value f)
 
 bool ImageFormat::isPaletted(Value f)
 {
-    return f == Paletted8 || f == Paletted16;
+    return f == kPaletted8 || f == kPaletted16;
 }
 
 bool ImageFormat::isCompressed(Value f)
 {
-    return f == DXT1 || f == DXT3 || f == DXT5;
+    return f == kDXT1 || f == kDXT3 || f == kDXT5;
 }
 
 bool ImageFormat::hasAlpha(Value f)
 {
-    return f == BGRA32 || f == Paletted8 || f == Paletted16 || f == A8 || f == DXT3 || f == DXT5;
+    return f == kBGRA32 || f == kPaletted8 || f == kPaletted16 || f == kA8 || f == kDXT3 || f == kDXT5;
 }
 
-Image::Image() : format_(ImageFormat::Invalid), width_(0), height_(0), hasAlpha_(false)
+Image::Image() : format_(ImageFormat::kInvalid), width_(0), height_(0), hasAlpha_(false)
 {}
 
 void Image::init(ImageFormat::Value newFormat, int newWidth, int newHeight, const void* newData)
@@ -115,18 +115,18 @@ void Image::applyPalette(const Palette& palette)
     }
 
     data_ = move(newData);
-    format_ = ImageFormat::BGRA32;
+    format_ = ImageFormat::kBGRA32;
     updateHasAlpha();
 }
 
 void Image::applyPalette(const Palette& palette)
 {
-    if(format_ == ImageFormat::Paletted8)
+    if(format_ == ImageFormat::kPaletted8)
     {
         applyPalette<uint8_t>(palette);
 
     }
-    else if(format_ == ImageFormat::Paletted16)
+    else if(format_ == ImageFormat::kPaletted16)
     {
         applyPalette<uint16_t>(palette);
     }
@@ -250,7 +250,7 @@ void Image::updateHasAlpha()
     uint8_t* input = data_.data();
     uint8_t* inputEnd = data_.data() + data_.size();
 
-    if(format_ == ImageFormat::BGRA32)
+    if(format_ == ImageFormat::kBGRA32)
     {
         while(input < inputEnd)
         {
@@ -263,7 +263,7 @@ void Image::updateHasAlpha()
             input += 4;
         }
     }
-    else if(format_ == ImageFormat::DXT1)
+    else if(format_ == ImageFormat::kDXT1)
     {
         while(input < inputEnd)
         {
@@ -288,7 +288,7 @@ void Image::updateHasAlpha()
             input += 8;
         }
     }
-    else if(format_ == ImageFormat::A8 || format_ == ImageFormat::DXT3 || format_ == ImageFormat::DXT5)
+    else if(format_ == ImageFormat::kA8 || format_ == ImageFormat::kDXT3 || format_ == ImageFormat::kDXT5)
     {
         // There's no reason to use these formats unless you have alpha
         // So let's just assume it's they do

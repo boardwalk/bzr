@@ -9,8 +9,7 @@ The [Google C++ Style Guide](http://google-styleguide.googlecode.com/svn/trunk/c
 * Leave a blank line before and after blocks and between functions with bodies.
 * Other blank lines are discretionary.
 * The rare global variable `g_looksLikeThis`.
-* Constants and enumeration values `LOOK_LIKE_THIS`.
-* Template variables look like `T`, `E`
+* Template variables look like `T`, `E`.
 * Local variable s`lookLikeThis` (`not_like_this`).
 
 ## Accessors

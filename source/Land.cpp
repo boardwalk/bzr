@@ -22,8 +22,8 @@
 #include "LandcellManager.h"
 #include <algorithm>
 
-const fp_t Land::CELL_SIZE = fp_t(24.0);
-const fp_t Land::BLOCK_SIZE = fp_t(192.0);
+const fp_t Land::kCellSize = fp_t(24.0);
+const fp_t Land::kBlockSize = fp_t(192.0);
 
 static fp_t cubic(fp_t p[4], fp_t x)
 {
@@ -63,7 +63,7 @@ void Land::init()
     }
 
     // sample another two times at the edges so we don't have to clamp our bicubic resample
-    static const int sampleSize = GRID_SIZE;
+    static const int sampleSize = kGridSize;
     static const int edgeSize = 2;
     static const int totalSampleSize = sampleSize + edgeSize * 2;
 
@@ -73,23 +73,23 @@ void Land::init()
     {
         for(int sx = 0; sx < totalSampleSize; sx++)
         {
-            fp_t lx = static_cast<fp_t>(sx - edgeSize) / static_cast<fp_t>(sampleSize - 1) * BLOCK_SIZE;
-            fp_t ly = static_cast<fp_t>(sy - edgeSize) / static_cast<fp_t>(sampleSize - 1) * BLOCK_SIZE;
+            fp_t lx = static_cast<fp_t>(sx - edgeSize) / static_cast<fp_t>(sampleSize - 1) * kBlockSize;
+            fp_t ly = static_cast<fp_t>(sy - edgeSize) / static_cast<fp_t>(sampleSize - 1) * kBlockSize;
             sample[sx + sy * totalSampleSize] = calcHeightUnbounded(lx, ly);
         }
     }
 
-    vector<fp_t> resample(OFFSET_MAP_SIZE * OFFSET_MAP_SIZE);
+    vector<fp_t> resample(kOffsetMapSize * kOffsetMapSize);
 
     fp_t minOffset = numeric_limits<fp_t>::max();
     fp_t maxOffset = numeric_limits<fp_t>::min();
 
-    for(int oy = 0; oy < OFFSET_MAP_SIZE; oy++)
+    for(int oy = 0; oy < kOffsetMapSize; oy++)
     {
-        for(int ox = 0; ox < OFFSET_MAP_SIZE; ox++)
+        for(int ox = 0; ox < kOffsetMapSize; ox++)
         {
-            fp_t sx = static_cast<fp_t>(ox) / static_cast<fp_t>(OFFSET_MAP_SIZE - 1) * static_cast<fp_t>(sampleSize - 1);
-            fp_t sy = static_cast<fp_t>(oy) / static_cast<fp_t>(OFFSET_MAP_SIZE - 1) * static_cast<fp_t>(sampleSize - 1);
+            fp_t sx = static_cast<fp_t>(ox) / static_cast<fp_t>(kOffsetMapSize - 1) * static_cast<fp_t>(sampleSize - 1);
+            fp_t sy = static_cast<fp_t>(oy) / static_cast<fp_t>(kOffsetMapSize - 1) * static_cast<fp_t>(sampleSize - 1);
 
             int ix = static_cast<int>(sx);
             int iy = static_cast<int>(sy);
@@ -107,19 +107,19 @@ void Land::init()
                 }
             }
 
-            fp_t lx = static_cast<fp_t>(ox) / static_cast<fp_t>(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
-            fp_t ly = static_cast<fp_t>(oy) / static_cast<fp_t>(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
+            fp_t lx = static_cast<fp_t>(ox) / static_cast<fp_t>(kOffsetMapSize - 1) * kBlockSize;
+            fp_t ly = static_cast<fp_t>(oy) / static_cast<fp_t>(kOffsetMapSize - 1) * kBlockSize;
 
             fp_t offset = bicubic(p, fx, fy) - calcHeight(lx, ly);
 
             minOffset = min(minOffset, offset);
             maxOffset = max(maxOffset, offset);
 
-            resample[ox + oy * OFFSET_MAP_SIZE] = offset;
+            resample[ox + oy * kOffsetMapSize] = offset;
         }
     }
 
-    offsetMap_.resize(OFFSET_MAP_SIZE * OFFSET_MAP_SIZE);
+    offsetMap_.resize(kOffsetMapSize * kOffsetMapSize);
     offsetMapBase_ = minOffset;
     offsetMapScale_ = maxOffset - minOffset;
 
@@ -129,65 +129,65 @@ void Land::init()
     }
     else
     {
-        for(int oy = 0; oy < OFFSET_MAP_SIZE; oy++)
+        for(int oy = 0; oy < kOffsetMapSize; oy++)
         {
-            for(int ox = 0; ox < OFFSET_MAP_SIZE; ox++)
+            for(int ox = 0; ox < kOffsetMapSize; ox++)
             {
-                fp_t offset = resample[ox + oy * OFFSET_MAP_SIZE];
-                offsetMap_[ox + oy * OFFSET_MAP_SIZE] = static_cast<uint16_t>((offset - offsetMapBase_) / offsetMapScale_ * fp_t(0xFFFF));
+                fp_t offset = resample[ox + oy * kOffsetMapSize];
+                offsetMap_[ox + oy * kOffsetMapSize] = static_cast<uint16_t>((offset - offsetMapBase_) / offsetMapScale_ * fp_t(0xFFFF));
             }
         }
     }
 
-    normalMap_.resize(OFFSET_MAP_SIZE * OFFSET_MAP_SIZE * 3);
+    normalMap_.resize(kOffsetMapSize * kOffsetMapSize * 3);
 
-    for(int oy = 0; oy < OFFSET_MAP_SIZE; oy++)
+    for(int oy = 0; oy < kOffsetMapSize; oy++)
     {
-        for(int ox = 0; ox < OFFSET_MAP_SIZE; ox++)
+        for(int ox = 0; ox < kOffsetMapSize; ox++)
         {
             int ox1 = max(ox - 1, 0);
             int oy1 = max(oy - 1, 0);
 
-            int ox2 = min(ox + 1, OFFSET_MAP_SIZE - 1);
-            int oy2 = min(oy + 1, OFFSET_MAP_SIZE - 1);
+            int ox2 = min(ox + 1, kOffsetMapSize - 1);
+            int oy2 = min(oy + 1, kOffsetMapSize - 1);
 
-            fp_t lx1 = static_cast<fp_t>(ox1) / static_cast<fp_t>(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
-            fp_t lx2 = static_cast<fp_t>(ox2) / static_cast<fp_t>(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
-            fp_t ly1 = static_cast<fp_t>(oy1) / static_cast<fp_t>(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
-            fp_t ly2 = static_cast<fp_t>(oy2) / static_cast<fp_t>(OFFSET_MAP_SIZE - 1) * BLOCK_SIZE;
+            fp_t lx1 = static_cast<fp_t>(ox1) / static_cast<fp_t>(kOffsetMapSize - 1) * kBlockSize;
+            fp_t lx2 = static_cast<fp_t>(ox2) / static_cast<fp_t>(kOffsetMapSize - 1) * kBlockSize;
+            fp_t ly1 = static_cast<fp_t>(oy1) / static_cast<fp_t>(kOffsetMapSize - 1) * kBlockSize;
+            fp_t ly2 = static_cast<fp_t>(oy2) / static_cast<fp_t>(kOffsetMapSize - 1) * kBlockSize;
 
-            fp_t h1 = resample[ox1 + oy1 * OFFSET_MAP_SIZE] + calcHeight(lx1, ly1);
-            fp_t h2 = resample[ox2 + oy1 * OFFSET_MAP_SIZE] + calcHeight(lx2, ly1);
-            fp_t h3 = resample[ox1 + oy2 * OFFSET_MAP_SIZE] + calcHeight(lx1, ly2);
+            fp_t h1 = resample[ox1 + oy1 * kOffsetMapSize] + calcHeight(lx1, ly1);
+            fp_t h2 = resample[ox2 + oy1 * kOffsetMapSize] + calcHeight(lx2, ly1);
+            fp_t h3 = resample[ox1 + oy2 * kOffsetMapSize] + calcHeight(lx1, ly2);
 
             glm::vec3 a(lx2 - lx1, 0.0, h2 - h1);
             glm::vec3 b(0.0, ly2 - ly1, h3 - h1);
 
             glm::vec3 n = glm::normalize(glm::cross(a, b)) * fp_t(0.5) + glm::vec3(0.5, 0.5, 0.5);
-            normalMap_[(ox + oy * OFFSET_MAP_SIZE) * 3] = static_cast<uint8_t>(n.x * fp_t(0xFF));
-            normalMap_[(ox + oy * OFFSET_MAP_SIZE) * 3 + 1] = static_cast<uint8_t>(n.y * fp_t(0xFF));
-            normalMap_[(ox + oy * OFFSET_MAP_SIZE) * 3 + 2] = static_cast<uint8_t>(n.z * fp_t(0xFF));
+            normalMap_[(ox + oy * kOffsetMapSize) * 3] = static_cast<uint8_t>(n.x * fp_t(0xFF));
+            normalMap_[(ox + oy * kOffsetMapSize) * 3 + 1] = static_cast<uint8_t>(n.y * fp_t(0xFF));
+            normalMap_[(ox + oy * kOffsetMapSize) * 3 + 2] = static_cast<uint8_t>(n.z * fp_t(0xFF));
         }
     }
 }
 
 fp_t Land::calcHeight(fp_t x, fp_t y) const
 {
-    assert(x >= 0.0 && x <= BLOCK_SIZE);
-    assert(y >= 0.0 && y <= BLOCK_SIZE);
+    assert(x >= 0.0 && x <= kBlockSize);
+    assert(y >= 0.0 && y <= kBlockSize);
 
     fp_t dix;
-    fp_t fx = modf(x / CELL_SIZE, &dix);
+    fp_t fx = modf(x / kCellSize, &dix);
     int ix = static_cast<int>(dix);
 
     fp_t diy;
-    fp_t fy = modf(y / CELL_SIZE, &diy);
+    fp_t fy = modf(y / kCellSize, &diy);
     int iy = static_cast<int>(diy);
 
     fp_t h1 = data_.heights[ix][iy] * fp_t(2.0);
-    fp_t h2 = data_.heights[min(ix + 1, GRID_SIZE - 1)][iy] * fp_t(2.0);
-    fp_t h3 = data_.heights[ix][min(iy + 1, GRID_SIZE - 1)] * fp_t(2.0);
-    fp_t h4 = data_.heights[min(ix + 1, GRID_SIZE - 1)][min(iy + 1, GRID_SIZE - 1)] * fp_t(2.0);
+    fp_t h2 = data_.heights[min(ix + 1, kGridSize - 1)][iy] * fp_t(2.0);
+    fp_t h3 = data_.heights[ix][min(iy + 1, kGridSize - 1)] * fp_t(2.0);
+    fp_t h4 = data_.heights[min(ix + 1, kGridSize - 1)][min(iy + 1, kGridSize - 1)] * fp_t(2.0);
 
     if(isSplitNESW(ix, iy))
     {
@@ -238,25 +238,25 @@ fp_t Land::calcHeightUnbounded(fp_t x, fp_t y) const
     while(x < 0.0)
     {
         thisId = LandcellId(thisId.x() - 1, thisId.y());
-        x += BLOCK_SIZE;
+        x += kBlockSize;
     }
 
-    while(x >= BLOCK_SIZE)
+    while(x >= kBlockSize)
     {
         thisId = LandcellId(thisId.x() + 1, thisId.y());
-        x -= BLOCK_SIZE;
+        x -= kBlockSize;
     }
 
     while(y < 0.0)
     {
         thisId = LandcellId(thisId.x(), thisId.y() - 1);
-        y += BLOCK_SIZE;
+        y += kBlockSize;
     }
 
-    while(y >= BLOCK_SIZE)
+    while(y >= kBlockSize)
     {
         thisId = LandcellId(thisId.x(), thisId.y() + 1);
-        y -= BLOCK_SIZE;
+        y -= kBlockSize;
     }
 
     auto it = Core::get().landcellManager().find(thisId);

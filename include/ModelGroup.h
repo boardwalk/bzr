@@ -20,7 +20,7 @@
 
 #include "Resource.h"
 
-class ModelGroup : public ResourceImpl<ResourceType::ModelGroup>
+class ModelGroup : public ResourceImpl<ResourceType::kModelGroup>
 {
 public:
     struct ModelInfo

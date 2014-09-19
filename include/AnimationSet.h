@@ -21,7 +21,7 @@
 #include "AnimationStrip.h"
 #include "Resource.h"
 
-class AnimationSet : public ResourceImpl<ResourceType::AnimationSet>
+class AnimationSet : public ResourceImpl<ResourceType::kAnimationSet>
 {
 public:
     AnimationSet(uint32_t id, const void* data, size_t size);

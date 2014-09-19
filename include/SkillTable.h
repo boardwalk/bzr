@@ -24,9 +24,9 @@ struct SkillType
 {
     enum Value
     {
-        Physical = 1,
-        Utility = 2,
-        Magic = 3
+        kPhysical = 1,
+        kUtility = 2,
+        kMagic = 3
     };
 };
 
@@ -34,12 +34,12 @@ struct AttributeType
 {
     enum Value
     {
-        Strength = 1,
-        Endurance = 2,
-        Quickness = 3,
-        Coordination = 4,
-        Focus = 5,
-        Self = 6
+        kStrength = 1,
+        kEndurance = 2,
+        kQuickness = 3,
+        kCoordination = 4,
+        kFocus = 5,
+        kSelf = 6
     };
 };
 

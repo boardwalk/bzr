@@ -39,7 +39,7 @@ Texture::Texture(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 
     ImageFormat::Value format = static_cast<ImageFormat::Value>(reader.read<uint32_t>());
 
-    if(format == ImageFormat::JPEG)
+    if(format == ImageFormat::kJPEG)
     {
         throw runtime_error("JPEG textures not supported");
     }
@@ -65,9 +65,9 @@ Texture::Texture(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
     }
 }
 
-Texture::Texture(uint32_t bgra) : ResourceImpl(ResourceType::Texture | 0xFFFF)
+Texture::Texture(uint32_t bgra) : ResourceImpl(ResourceType::kTexture | 0xFFFF)
 {
-    image_.init(ImageFormat::BGRA32, 1, 1, &bgra);
+    image_.init(ImageFormat::kBGRA32, 1, 1, &bgra);
 }
 
 const Image& Texture::image() const

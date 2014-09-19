@@ -21,7 +21,7 @@
 #include "AnimationFrame.h"
 #include "Resource.h"
 
-class Animation : public ResourceImpl<ResourceType::Animation>
+class Animation : public ResourceImpl<ResourceType::kAnimation>
 {
 public:
     Animation(uint32_t id, const void* data, size_t size);

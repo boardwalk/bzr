@@ -24,16 +24,16 @@ struct ResourceType
 {
     enum Value
     {
-        Model = 0x01000000,
-        ModelGroup = 0x02000000,
-        Animation = 0x03000000,
-        Palette = 0x04000000,
-        TextureLookup5 = 0x05000000,
-        Texture = 0x06000000,
-        TextureLookup8 = 0x08000000,
-        AnimationSet = 0x09000000,
-        Sound = 0x0A000000,
-        StructureGeom = 0x0D000000
+        kModel = 0x01000000,
+        kModelGroup = 0x02000000,
+        kAnimation = 0x03000000,
+        kPalette = 0x04000000,
+        kTextureLookup5 = 0x05000000,
+        kTexture = 0x06000000,
+        kTextureLookup8 = 0x08000000,
+        kAnimationSet = 0x09000000,
+        kSound = 0x0A000000,
+        kStructureGeom = 0x0D000000
     };
 };
 

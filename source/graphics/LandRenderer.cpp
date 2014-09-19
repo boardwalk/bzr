@@ -32,7 +32,7 @@
 #include "graphics/shaders/LandVertexShader.h"
 #include "graphics/shaders/LandFragmentShader.h"
 
-static const uint32_t LANDSCAPE_TEXTURES[] =
+static const uint32_t kLandscapeTextures[] =
 {
     0x06006d6f, // 0x00 BarrenRock
     0x06006d49, // 0x01 Grassland
@@ -70,10 +70,10 @@ static const uint32_t LANDSCAPE_TEXTURES[] =
     0x06006d3f  // 0x20
 };
 
-static const int TERRAIN_ARRAY_SIZE = 512;
-static const int TERRAIN_ARRAY_DEPTH = sizeof(LANDSCAPE_TEXTURES) / sizeof(LANDSCAPE_TEXTURES[0]);
+static const int kTerrainArraySize = 512;
+static const int kTerrainArrayDepth = sizeof(kLandscapeTextures) / sizeof(kLandscapeTextures[0]);
 
-static const uint32_t BLEND_TEXTURES[] =
+static const uint32_t kBlendTextures[] =
 {
     0xFFFFFFFF, // 0 special case, all white
     0x00000000, // 1 special case, all black
@@ -88,8 +88,8 @@ static const uint32_t BLEND_TEXTURES[] =
     0x06006d36  // A wavy diagonal
 };
 
-static const int BLEND_ARRAY_SIZE = 512;
-static const int BLEND_ARRAY_DEPTH = sizeof(BLEND_TEXTURES) / sizeof(BLEND_TEXTURES[0]);
+static const int kBlendArraySize = 512;
+static const int kBlendArrayDepth = sizeof(kBlendTextures) / sizeof(kBlendTextures[0]);
 
 LandRenderer::LandRenderer()
 {
@@ -205,36 +205,36 @@ void LandRenderer::initTerrainTexture()
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, Core::get().renderer().textureMinFilter());
     glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_ANISOTROPY_EXT, Core::get().renderer().textureMaxAnisotropy());
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB8, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_DEPTH, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB8, kTerrainArraySize, kTerrainArraySize, kTerrainArrayDepth, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 
     // populate terrain texture
-    for(int i = 0; i < TERRAIN_ARRAY_DEPTH; i++)
+    for(int i = 0; i < kTerrainArrayDepth; i++)
     {
         Image image;
 
-        if(LANDSCAPE_TEXTURES[i] == 0x00000000)
+        if(kLandscapeTextures[i] == 0x00000000)
         {
-            image.init(ImageFormat::RGB24, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_SIZE, nullptr);
+            image.init(ImageFormat::kRGB24, kTerrainArraySize, kTerrainArraySize, nullptr);
             image.fill(0xFF);
         }
         else
         {
-            ResourcePtr texture = Core::get().resourceCache().get(LANDSCAPE_TEXTURES[i]);
+            ResourcePtr texture = Core::get().resourceCache().get(kLandscapeTextures[i]);
             image = texture->cast<Texture>().image();
-            image.scale(TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_SIZE);
+            image.scale(kTerrainArraySize, kTerrainArraySize);
         }
 
         GLenum format;
 
-        if(image.format() == ImageFormat::RGB24)
+        if(image.format() == ImageFormat::kRGB24)
         {
             format = GL_RGB;
         }
-        else if(image.format() == ImageFormat::BGR24)
+        else if(image.format() == ImageFormat::kBGR24)
         {
             format = GL_BGR;
         }
-        else if(image.format() == ImageFormat::BGRA32)
+        else if(image.format() == ImageFormat::kBGRA32)
         {
             format = GL_BGRA;
         }
@@ -243,7 +243,7 @@ void LandRenderer::initTerrainTexture()
             throw runtime_error("Bad terrain image format");
         }
 
-        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, TERRAIN_ARRAY_SIZE, TERRAIN_ARRAY_SIZE, 1, format, GL_UNSIGNED_BYTE, image.data());
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, kTerrainArraySize, kTerrainArraySize, 1, format, GL_UNSIGNED_BYTE, image.data());
     }
 
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
@@ -258,38 +258,38 @@ void LandRenderer::initBlendTexture()
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_R8, BLEND_ARRAY_SIZE, BLEND_ARRAY_SIZE, BLEND_ARRAY_DEPTH, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_R8, kBlendArraySize, kBlendArraySize, kBlendArrayDepth, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
 
     // populate terrain texture
-    for(int i = 0; i < BLEND_ARRAY_DEPTH; i++)
+    for(int i = 0; i < kBlendArrayDepth; i++)
     {
         Image image;
 
-        if(BLEND_TEXTURES[i] == 0x00000000)
+        if(kBlendTextures[i] == 0x00000000)
         {
-            image.init(ImageFormat::A8, BLEND_ARRAY_SIZE, BLEND_ARRAY_SIZE, nullptr);
+            image.init(ImageFormat::kA8, kBlendArraySize, kBlendArraySize, nullptr);
         }
-        else if(BLEND_TEXTURES[i] == 0xFFFFFFFF)
+        else if(kBlendTextures[i] == 0xFFFFFFFF)
         {
-            image.init(ImageFormat::A8, BLEND_ARRAY_SIZE, BLEND_ARRAY_SIZE, nullptr);
+            image.init(ImageFormat::kA8, kBlendArraySize, kBlendArraySize, nullptr);
             image.fill(0xFF);
         }
         else
         {
-            ResourcePtr texture = Core::get().resourceCache().get(BLEND_TEXTURES[i]);
+            ResourcePtr texture = Core::get().resourceCache().get(kBlendTextures[i]);
             image = texture->cast<Texture>().image();
         }
 
-        if(image.width() != BLEND_ARRAY_SIZE || image.height() != BLEND_ARRAY_SIZE)
+        if(image.width() != kBlendArraySize || image.height() != kBlendArraySize)
         {
             throw runtime_error("Bad terrain image size");
         }
 
-        if(image.format() != ImageFormat::A8)
+        if(image.format() != ImageFormat::kA8)
         {
             throw runtime_error("Bad terrain image format");
         }
 
-        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, BLEND_ARRAY_SIZE, BLEND_ARRAY_SIZE, 1, GL_RED, GL_UNSIGNED_BYTE, image.data());
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, kBlendArraySize, kBlendArraySize, 1, GL_RED, GL_UNSIGNED_BYTE, image.data());
     }
 }

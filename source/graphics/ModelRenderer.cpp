@@ -91,7 +91,7 @@ void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& view
         int dx = object.location().landcell.x() - landcellManager.center().x();
         int dy = object.location().landcell.y() - landcellManager.center().y();
 
-        glm::vec3 blockPosition(dx * Land::BLOCK_SIZE, dy * Land::BLOCK_SIZE, 0.0);
+        glm::vec3 blockPosition(dx * Land::kBlockSize, dy * Land::kBlockSize, 0.0);
 
         glm::mat4 worldMat = glm::translate(glm::mat4(), blockPosition + object.location().offset) * glm::mat4_cast(object.location().rotation);
 
@@ -103,7 +103,7 @@ void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& view
         int dx = pair.first.x() - landcellManager.center().x();
         int dy = pair.first.y() - landcellManager.center().y();
 
-        glm::vec3 blockPosition(dx * Land::BLOCK_SIZE, dy * Land::BLOCK_SIZE, 0.0);
+        glm::vec3 blockPosition(dx * Land::kBlockSize, dy * Land::kBlockSize, 0.0);
 
         for(const Doodad& doodad : pair.second->doodads())
         {
@@ -131,14 +131,14 @@ void ModelRenderer::renderOne(const ResourcePtr& resource,
     const glm::mat4& viewMat,
     const glm::mat4& worldMat)
 {
-    if(resource->resourceType() == ResourceType::ModelGroup)
+    if(resource->resourceType() == ResourceType::kModelGroup)
     {
         renderModelGroup(resource->cast<ModelGroup>(),
             projectionMat,
             viewMat,
             worldMat);
     }
-    else if(resource->resourceType() == ResourceType::Model)
+    else if(resource->resourceType() == ResourceType::kModel)
     {
         renderModel(resource->cast<Model>(),
             projectionMat,
