@@ -22,7 +22,7 @@
 
 TextureRenderData::TextureRenderData(const Texture& texture)
 {
-    const Image& image = texture.image();
+    const Image& image = texture.image;
 
     glGenTextures(1, &handle_);
     glBindTexture(GL_TEXTURE_2D, handle_);

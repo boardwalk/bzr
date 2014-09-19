@@ -26,11 +26,7 @@ class StructureGeom : public ResourceImpl<ResourceType::kStructureGeom>
 public:
     StructureGeom(uint32_t id, const void* data, size_t size);
 
-    const StructureGeomPart& operator[](size_t i) const;
-    size_t size() const;
-
-private:
-    vector<StructureGeomPart> parts_;
+    vector<StructureGeomPart> parts;
 };
 
 #endif

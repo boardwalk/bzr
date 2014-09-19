@@ -220,7 +220,7 @@ void LandRenderer::initTerrainTexture()
         else
         {
             ResourcePtr texture = Core::get().resourceCache().get(kLandscapeTextures[i]);
-            image = texture->cast<Texture>().image();
+            image = texture->cast<Texture>().image;
             image.scale(kTerrainArraySize, kTerrainArraySize);
         }
 
@@ -277,7 +277,7 @@ void LandRenderer::initBlendTexture()
         else
         {
             ResourcePtr texture = Core::get().resourceCache().get(kBlendTextures[i]);
-            image = texture->cast<Texture>().image();
+            image = texture->cast<Texture>().image;
         }
 
         if(image.width() != kBlendArraySize || image.height() != kBlendArraySize)

@@ -33,10 +33,7 @@ public:
 
     Palette(uint32_t id, const void* data, size_t size);
 
-    const vector<Color>& colors() const;
-
-private:
-    vector<Color> colors_;
+    vector<Color> colors;
 };
 
 #endif

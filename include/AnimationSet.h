@@ -26,10 +26,9 @@ class AnimationSet : public ResourceImpl<ResourceType::kAnimationSet>
 public:
     AnimationSet(uint32_t id, const void* data, size_t size);
 
-private:
-    vector<AnimationStrip> strips1_;
-    vector<AnimationStrip> strips2_;
-    vector<vector<AnimationStrip>> comboStrips_;
+    vector<AnimationStrip> strips1;
+    vector<AnimationStrip> strips2;
+    vector<vector<AnimationStrip>> comboStrips;
 };
 
 #endif

@@ -37,10 +37,7 @@ public:
 
     void read(BinReader& reader, uint32_t numModels);
 
-    const vector<Orientation>& orientations() const;
-
-private:
-    vector<Orientation> orientations_;
+    vector<Orientation> orientations;
 };
 
 #endif

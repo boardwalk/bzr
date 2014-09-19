@@ -35,16 +35,10 @@ public:
 
     void read(BinReader& reader);
 
-    const vector<Vertex>& vertices() const;
-    const vector<TriangleFan>& triangleFans() const;
-    const vector<TriangleFan>& hitTriangleFans() const;
-    const BSPNode* hitTree() const;
-
-private:
-    vector<Vertex> vertices_;
-    vector<TriangleFan> triangleFans_;
-    vector<TriangleFan> hitTriangleFans_;
-    unique_ptr<BSPNode> hitTree_;
+    vector<Vertex> vertices;
+    vector<TriangleFan> triangleFans;
+    vector<TriangleFan> hitTriangleFans;
+    unique_ptr<BSPNode> hitTree;
 };
 
 #endif

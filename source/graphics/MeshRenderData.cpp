@@ -43,21 +43,21 @@ struct SortByTexIndex
 
 MeshRenderData::MeshRenderData(const Model& model)
 {
-    init(model.textures(),
-        model.vertices(),
-        model.triangleFans(),
-        model.hitTriangleFans());
+    init(model.textures,
+        model.vertices,
+        model.triangleFans,
+        model.hitTriangleFans);
 }
 
 MeshRenderData::MeshRenderData(const Structure& structure)
 {
-    assert(structure.partNum() < structure.geometry().size());
-    const StructureGeomPart& part = structure.geometry()[structure.partNum()];
+    assert(structure.partNum() < structure.geometry().parts.size());
+    const StructureGeomPart& part = structure.geometry().parts[structure.partNum()];
 
     init(structure.textures(),
-        part.vertices(),
-        part.triangleFans(),
-        part.hitTriangleFans());
+        part.vertices,
+        part.triangleFans,
+        part.hitTriangleFans);
 }
 
 MeshRenderData::~MeshRenderData()
@@ -75,19 +75,22 @@ void MeshRenderData::render()
 
     for(Batch& batch : batches_)
     {
-        const Texture& texture = batch.texture->cast<TextureLookup8>().textureLookup5().texture();
+        const Texture& texture = batch
+            .texture->cast<TextureLookup8>()
+            .textureLookup5->cast<TextureLookup5>()
+            .texture->cast<Texture>();
 
-        if(!texture.renderData())
+        if(!texture.renderData)
         {
-            texture.renderData().reset(new TextureRenderData(texture));
+            texture.renderData.reset(new TextureRenderData(texture));
         }
 
-        TextureRenderData& renderData = (TextureRenderData&)*texture.renderData();
+        TextureRenderData& renderData = static_cast<TextureRenderData&>(*texture.renderData);
 
         glActiveTexture(GL_TEXTURE0);
         renderData.bind();
 
-        glDrawElements(GL_TRIANGLE_FAN, batch.indexCount, GL_UNSIGNED_SHORT, (void*)(indexBase * sizeof(uint16_t)));
+        glDrawElements(GL_TRIANGLE_FAN, batch.indexCount, GL_UNSIGNED_SHORT, reinterpret_cast<GLvoid*>(indexBase * sizeof(uint16_t)));
 
         indexBase += batch.indexCount;
     }

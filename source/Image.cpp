@@ -103,8 +103,8 @@ void Image::applyPalette(const Palette& palette)
 
     while(input < inputEnd)
     {
-        T paletteIndex = *input & (palette.colors().size() - 1);
-        Palette::Color color = palette.colors()[paletteIndex];
+        T paletteIndex = *input & (palette.colors.size() - 1);
+        Palette::Color color = palette.colors[paletteIndex];
 
         *output++ = color.blue;
         *output++ = color.green;

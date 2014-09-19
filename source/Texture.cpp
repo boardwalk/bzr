@@ -52,35 +52,20 @@ Texture::Texture(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
     if(ImageFormat::isPaletted(format))
     {
         uint32_t paletteId = reader.read<uint32_t>();
-        palette_ = Core::get().resourceCache().get(paletteId);
+        palette = Core::get().resourceCache().get(paletteId);
     }
 
     reader.assertEnd();
 
-    image_.init(format, width, height, pixels);
+    image.init(format, width, height, pixels);
 
-    if(palette_)
+    if(palette)
     {
-        image_.applyPalette(palette_->cast<Palette>());
+        image.applyPalette(palette->cast<Palette>());
     }
 }
 
 Texture::Texture(uint32_t bgra) : ResourceImpl(ResourceType::kTexture | 0xFFFF)
 {
-    image_.init(ImageFormat::kBGRA32, 1, 1, &bgra);
-}
-
-const Image& Texture::image() const
-{
-    return image_;
-}
-
-const ResourcePtr& Texture::palette() const
-{
-    return palette_;
-}
-
-unique_ptr<Destructable>& Texture::renderData() const
-{
-    return renderData_;
+    image.init(ImageFormat::kBGRA32, 1, 1, &bgra);
 }

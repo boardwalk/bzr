@@ -34,11 +34,11 @@ struct TriangleFan
     TriangleFan() : texIndex(0)
     {}
 
+    void read(BinReader& reader);
+
     int flags;
     int texIndex;
     vector<Index> indices;
-
-    void read(BinReader& reader);
 };
 
 #endif

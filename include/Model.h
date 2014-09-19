@@ -31,26 +31,14 @@ public:
     Model(uint32_t id, const void* data, size_t size);
     ~Model();
 
-    const vector<ResourcePtr>& textures() const;
-    const vector<Vertex>& vertices() const;
-    const vector<TriangleFan>& triangleFans() const;
-    const vector<TriangleFan>& hitTriangleFans() const;
-    const BSPNode* hitTree() const;
+    vector<ResourcePtr> textures;
+    vector<Vertex> vertices;
+    vector<TriangleFan> triangleFans;
+    vector<TriangleFan> hitTriangleFans;
+    unique_ptr<BSPNode> hitTree;
+    bool needsDepthSort;
 
-    // If true, the model has transparent or translucent elements and must be depth sorted before rendering
-    bool needsDepthSort() const;
-
-    unique_ptr<Destructable>& renderData() const;
-
-private:
-    vector<ResourcePtr> textures_;
-    vector<Vertex> vertices_;
-    vector<TriangleFan> triangleFans_;
-    vector<TriangleFan> hitTriangleFans_;
-    unique_ptr<BSPNode> hitTree_;
-    bool needsDepthSort_;
-
-    mutable unique_ptr<Destructable> renderData_;
+    mutable unique_ptr<Destructable> renderData;
 };
 
 #endif

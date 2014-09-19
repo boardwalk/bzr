@@ -28,16 +28,10 @@ public:
     Texture(uint32_t id, const void* data, size_t size);
     explicit Texture(uint32_t bgra);
 
-    const Image& image() const;
-    const ResourcePtr& palette() const;
+    Image image;
+    ResourcePtr palette;
 
-    unique_ptr<Destructable>& renderData() const;
-
-private:
-    Image image_;
-    ResourcePtr palette_;
-
-    mutable unique_ptr<Destructable> renderData_;
+    mutable unique_ptr<Destructable> renderData;
 };
 
 #endif

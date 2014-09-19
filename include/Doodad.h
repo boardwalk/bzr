@@ -24,11 +24,11 @@ class BinReader;
 
 struct Doodad
 {
+    void read(BinReader& reader);
+
     ResourcePtr resource;
     glm::vec3 position;
     glm::quat rotation;
-
-    void read(BinReader& reader);
 };
 
 #endif

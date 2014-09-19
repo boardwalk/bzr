@@ -28,10 +28,7 @@ public:
     TextureLookup8(uint32_t id, const void* data, size_t size);
     explicit TextureLookup8(ResourcePtr textureLookup5);
 
-    const TextureLookup5& textureLookup5() const;
-
-private:
-    ResourcePtr textureLookup5_;
+    ResourcePtr textureLookup5;
 };
 
 #endif

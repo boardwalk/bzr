@@ -42,39 +42,19 @@ Sound::Sound(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
     uint16_t unk2 = reader.read<uint16_t>();
     assert(unk2 == 1 || unk2 == 2);
 
-    samplesPerSecond_ = reader.read<uint32_t>();
+    samplesPerSecond = reader.read<uint32_t>();
     uint32_t totalSamplesPerSecond = reader.read<uint32_t>();
 
-    numChannels_ = reader.read<uint16_t>();
-    assert(numChannels_ == 1 || numChannels_ == 2 || numChannels_ == 4);
-    assert(samplesPerSecond_ * numChannels_ == totalSamplesPerSecond);
+    numChannels = reader.read<uint16_t>();
+    assert(numChannels == 1 || numChannels == 2 || numChannels == 4);
+    assert(samplesPerSecond * numChannels == totalSamplesPerSecond);
 
-    bitsPerSample_ = reader.read<uint32_t>();
-    assert(bitsPerSample_ == 8 || bitsPerSample_ == 16);
+    bitsPerSample = reader.read<uint32_t>();
+    assert(bitsPerSample == 8 || bitsPerSample == 16);
 
-    const uint8_t* samples = reader.readPointer<uint8_t>(samplesLen);
+    const uint8_t* samplesPtr = reader.readPointer<uint8_t>(samplesLen);
 
     reader.assertEnd();
 
-    samples_.assign(samples, samples + samplesLen);
-}
-
-uint32_t Sound::samplesPerSecond() const
-{
-    return samplesPerSecond_;
-}
-
-uint32_t Sound::numChannels() const
-{
-    return numChannels_;
-}
-
-uint32_t Sound::bitsPerSample() const
-{
-    return bitsPerSample_;
-}
-
-const vector<uint8_t>& Sound::samples() const
-{
-    return samples_;
+    samples.assign(samplesPtr, samplesPtr + samplesLen);
 }

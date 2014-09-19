@@ -32,9 +32,9 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
     assert(flags <= 0xF);
 
     uint32_t numModels = reader.read<uint32_t>();
-    modelInfos_.resize(numModels);
+    modelInfos.resize(numModels);
 
-    for(ModelInfo& modelInfo : modelInfos_)
+    for(ModelInfo& modelInfo : modelInfos)
     {
         uint32_t modelId = reader.read<uint32_t>();
         modelInfo.resource = Core::get().resourceCache().get(modelId);
@@ -42,7 +42,7 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
 
     if(flags & 1)
     {
-        for(ModelInfo& modelInfo : modelInfos_)
+        for(ModelInfo& modelInfo : modelInfos)
         {
             modelInfo.parent = reader.read<uint32_t>();
         }
@@ -50,7 +50,7 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
 
     if(flags & 2)
     {
-        for(ModelInfo& modelInfo : modelInfos_)
+        for(ModelInfo& modelInfo : modelInfos)
         {
             modelInfo.scale.x = reader.read<float>();
             modelInfo.scale.y = reader.read<float>();
@@ -84,7 +84,7 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
     reader.read<uint32_t>();
     reader.read<uint32_t>();
 
-    for(ModelInfo& modelInfo : modelInfos_)
+    for(ModelInfo& modelInfo : modelInfos)
     {
         modelInfo.position.x = reader.read<float>();
         modelInfo.position.y = reader.read<float>();
@@ -97,9 +97,4 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
 
         assert(glm::length2(modelInfo.rotation) >= 0.99 && glm::length2(modelInfo.rotation) <= 1.01);
     }
-}
-
-const vector<ModelGroup::ModelInfo>& ModelGroup::modelInfos() const
-{
-    return modelInfos_;
 }

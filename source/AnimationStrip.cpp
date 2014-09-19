@@ -21,31 +21,31 @@
 #include "Core.h"
 #include "ResourceCache.h"
 
-AnimationStrip::AnimationStrip() : id_(0), stanceId_(0)
+AnimationStrip::AnimationStrip() : id(0), stanceId(0)
 {}
 
 AnimationStrip::AnimationStrip(AnimationStrip&& other)
 {
-    id_ = other.id_;
-    stanceId_ = other.stanceId_;
-    animInfos_ = move(other.animInfos_);
+    id = other.id;
+    stanceId = other.stanceId;
+    animInfos = move(other.animInfos);
 }
 
 AnimationStrip& AnimationStrip::operator=(AnimationStrip&& other)
 {
-    id_ = other.id_;
-    stanceId_ = other.stanceId_;
-    animInfos_ = move(other.animInfos_);
+    id = other.id;
+    stanceId = other.stanceId;
+    animInfos = move(other.animInfos);
     return *this;
 }
 
 void AnimationStrip::read(BinReader& reader)
 {
-    id_ = reader.read<uint16_t>();
-    stanceId_ = reader.read<uint16_t>();
+    id = reader.read<uint16_t>();
+    stanceId = reader.read<uint16_t>();
 
     uint8_t numAnims = reader.read<uint8_t>();
-    animInfos_.resize(numAnims);
+    animInfos.resize(numAnims);
 
     uint8_t unk1 = reader.read<uint8_t>();
     assert(unk1 == 0 || unk1 == 1 || unk1 == 2);
@@ -56,7 +56,7 @@ void AnimationStrip::read(BinReader& reader)
     uint8_t unk3 = reader.read<uint8_t>();
     assert(unk3 == 0);
 
-    for(AnimInfo& animInfo : animInfos_)
+    for(AnimInfo& animInfo : animInfos)
     {
         uint32_t animId = reader.read<uint32_t>();
         animInfo.resource = Core::get().resourceCache().get(animId);
@@ -66,7 +66,7 @@ void AnimationStrip::read(BinReader& reader)
 
         if(animInfo.lastFrame == 0xffffffff)
         {
-            animInfo.lastFrame = static_cast<uint32_t>(animInfo.resource->cast<Animation>().frames().size() - 1);
+            animInfo.lastFrame = static_cast<uint32_t>(animInfo.resource->cast<Animation>().frames.size() - 1);
         }
 
         if(animInfo.framesPerSecond < 0.0f && animInfo.firstFrame < animInfo.lastFrame)
@@ -81,19 +81,4 @@ void AnimationStrip::read(BinReader& reader)
         reader.read<float>();
         reader.read<float>();
     }
-}
-
-uint16_t AnimationStrip::id() const
-{
-    return id_;
-}
-
-uint16_t AnimationStrip::stanceId() const
-{
-    return stanceId_;
-}
-
-const vector<AnimationStrip::AnimInfo>& AnimationStrip::animInfos() const
-{
-    return animInfos_;
 }

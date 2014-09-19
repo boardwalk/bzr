@@ -22,11 +22,11 @@ class BinReader;
 
 struct Vertex
 {
+    void read(BinReader& reader);
+
     glm::vec3 position;
     glm::vec3 normal;
     vector<glm::vec2> texCoords;
-
-    void read(BinReader& reader);
 };
 
 #endif

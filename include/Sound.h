@@ -25,16 +25,10 @@ class Sound : public ResourceImpl<ResourceType::kSound>
 public:
     Sound(uint32_t id, const void* data, size_t size);
 
-    uint32_t samplesPerSecond() const;
-    uint32_t numChannels() const;
-    uint32_t bitsPerSample() const;
-    const vector<uint8_t>& samples() const;
-
-private:
-    uint32_t samplesPerSecond_;
-    uint32_t numChannels_;
-    uint32_t bitsPerSample_;
-    vector<uint8_t> samples_;
+    uint32_t samplesPerSecond;
+    uint32_t numChannels;
+    uint32_t bitsPerSample;
+    vector<uint8_t> samples;
 };
 
 #endif

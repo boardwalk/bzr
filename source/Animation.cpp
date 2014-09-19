@@ -28,7 +28,7 @@ Animation::Animation(uint32_t id, const void* data, size_t size) : ResourceImpl(
     uint32_t type = reader.read<uint32_t>();
     uint32_t numModels = reader.read<uint32_t>();
     uint32_t numFrames = reader.read<uint32_t>();
-    frames_.resize(numFrames);
+    frames.resize(numFrames);
 
     if(type == 1 || type == 3)
     {
@@ -38,15 +38,10 @@ Animation::Animation(uint32_t id, const void* data, size_t size) : ResourceImpl(
         }
     }
 
-    for(AnimationFrame& frame : frames_)
+    for(AnimationFrame& frame : frames)
     {
         frame.read(reader, numModels);
     }
 
     reader.assertEnd();
-}
-
-const vector<AnimationFrame>& Animation::frames() const
-{
-    return frames_;
 }

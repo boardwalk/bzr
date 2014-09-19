@@ -37,10 +37,7 @@ public:
 
     ModelGroup(uint32_t id, const void* data, size_t size);
 
-    const vector<ModelInfo>& modelInfos() const;
-
-private:
-    vector<ModelInfo> modelInfos_;
+    vector<ModelInfo> modelInfos;
 };
 
 #endif

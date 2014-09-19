@@ -40,14 +40,9 @@ public:
 
     void read(BinReader& reader);
 
-    uint16_t id() const;
-    uint16_t stanceId() const;
-    const vector<AnimInfo>& animInfos() const;
-
-private:
-    uint16_t id_;
-    uint16_t stanceId_;
-    vector<AnimInfo> animInfos_;
+    uint16_t id;
+    uint16_t stanceId;
+    vector<AnimInfo> animInfos;
 };
 
 #endif

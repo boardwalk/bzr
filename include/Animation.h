@@ -26,10 +26,7 @@ class Animation : public ResourceImpl<ResourceType::kAnimation>
 public:
     Animation(uint32_t id, const void* data, size_t size);
 
-    const vector<AnimationFrame>& frames() const;
-
-private:
-    vector<AnimationFrame> frames_;
+    vector<AnimationFrame> frames;
 };
 
 #endif

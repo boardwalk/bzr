@@ -153,10 +153,8 @@ void ModelRenderer::renderModelGroup(const ModelGroup& modelGroup,
     const glm::mat4& viewMat,
     const glm::mat4& worldMat)
 {
-    for(size_t child = 0; child < modelGroup.modelInfos().size(); child++)
+    for(const ModelGroup::ModelInfo& modelInfo : modelGroup.modelInfos)
     {
-        const ModelGroup::ModelInfo& modelInfo = modelGroup.modelInfos()[child];
-
         glm::mat4 subWorldMat = glm::translate(glm::mat4(), modelInfo.position) * glm::mat4_cast(modelInfo.rotation) * glm::scale(glm::mat4(), modelInfo.scale);
 
         renderOne(modelInfo.resource,
@@ -172,7 +170,7 @@ void ModelRenderer::renderModel(const Model& model,
     const glm::mat4& worldMat,
     bool firstPass)
 {
-    if(firstPass && model.needsDepthSort())
+    if(firstPass && model.needsDepthSort)
     {
         glm::vec4 worldPos = worldMat * glm::vec4(0.0, 0.0, 0.0, 1.0);
         DepthSortedModel depthSortedModel = { &model, worldMat, glm::vec3(worldPos.x, worldPos.y, worldPos.z) };
@@ -184,12 +182,12 @@ void ModelRenderer::renderModel(const Model& model,
     loadMat4ToUniform(viewMat, program_.getUniform("viewMatrix"));
     loadMat4ToUniform(projectionMat, program_.getUniform("projectionMatrix"));
 
-    if(!model.renderData())
+    if(!model.renderData)
     {
-        model.renderData().reset(new MeshRenderData(model));
+        model.renderData.reset(new MeshRenderData(model));
     }
 
-    MeshRenderData& renderData = (MeshRenderData&)*model.renderData();
+    MeshRenderData& renderData = static_cast<MeshRenderData&>(*model.renderData);
 
     renderData.render();
 }
