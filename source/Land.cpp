@@ -266,7 +266,7 @@ fp_t Land::calcHeightUnbounded(fp_t x, fp_t y) const
 
     if(it == Core::get().landcellManager().end())
     {
-        throw logic_error("landcell not found");
+        throw logic_error("Landcell not found");
     }
 
     Land& land = static_cast<Land&>(*it->second);
