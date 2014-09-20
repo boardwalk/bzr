@@ -71,6 +71,7 @@ def main():
 
     with open('build.ninja', 'w') as buildfile:
         n = ninja_syntax.Writer(buildfile)
+        n.variable('builddir', 'build')
 
         if sys.platform == 'win32':
             cppflags = '/nologo /EHsc /Iinclude /Ibuild /D_CRT_SECURE_NO_WARNINGS'
