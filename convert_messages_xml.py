@@ -1,14 +1,8 @@
 #!/usr/bin/env python
 import argparse
 import json
+import os
 import xml.etree.ElementTree
-
-parser = argparse.ArgumentParser()
-parser.add_argument('infile')
-parser.add_argument('outfile')
-args = parser.parse_args()
-
-tree = xml.etree.ElementTree.parse(args.infile)
 
 def checkattribs(elem, values):
     for attrib in elem.keys():
@@ -97,15 +91,27 @@ def parse_elem(elem):
 def parse_struct(elem):
     return [parse_elem(child) for child in elem]
 
-types = {}
-for elem in tree.findall('./datatypes/type'):
-    if elem.get('primitive'):
-        continue
-    types[elem.get('name')] = parse_struct(elem)
+def dump_binf(name, schema, outdir):
+    path = os.path.join(outdir, name + '.binf')
+    print('Writing {}'.format(path))
+    with open(path, 'w') as outf:
+        json.dump(schema, outf, indent=2)
 
-messages = {}
-for elem in tree.findall('./messages/message'):
-    messages[elem.get('type')] = parse_struct(elem)
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('infile')
+    parser.add_argument('outdir')
+    args = parser.parse_args()
 
-with open(args.outfile, 'w') as outf:
-    json.dump({'types': types, 'messages': messages}, outf, indent=2)
+    tree = xml.etree.ElementTree.parse(args.infile)
+
+    for elem in tree.findall('./datatypes/type'):
+        if elem.get('primitive'):
+            continue
+        dump_binf(get(elem, 'name'), parse_struct(elem), args.outdir)
+
+    for elem in tree.findall('./messages/message'):
+        dump_binf('Message' + get(elem, 'type'), parse_struct(elem), args.outdir)
+
+if __name__ == '__main__':
+    main()

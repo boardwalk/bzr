@@ -59,6 +59,8 @@ SOURCE_TEMPLATE = """\
 {impl}
 """
 
+includes = set()
+
 def fix_var_name(ent):
     try:
         name = ent['name']
@@ -152,8 +154,8 @@ struct {name}
     def generate_vector(self, ent):
         typename = ent['name'][0].upper() + ent['name'][1:] + 'Element'
         self.children.append(Struct(typename, self, ent['fields']))
-        self.fields.append('vector<{typename}> {name};'.format(typename=typename, name=ent['name']))
-        self.append_source('{name}.resize({length});'.format(**ent))
+        self.fields.append('unique_ptr<{typename}[]> {name};'.format(typename=typename, name=ent['name']))
+        self.append_source('{name}.reset(new {typename}[{length}]);'.format(typename=typename, name=ent['name'], length=ent['length']))
         self.append_source('for(size_t i = 0; i < {length}; i++)'.format(**ent))
         self.append_source('{{')
         self.append_source('    {name}[i].read(reader);'.format(**ent))
@@ -204,8 +206,6 @@ def write_type(name, schema, outdir):
         f.write(sourcestr)
 
 def main():
-    global includes
-
     parser = argparse.ArgumentParser()
     parser.add_argument('infile')
     parser.add_argument('outdir')
@@ -214,13 +214,10 @@ def main():
     with open(args.infile) as f:
         schema = json.load(f)
 
-    for name, typ in schema['types'].iteritems():
-        includes = set()
-        write_type(name, typ, args.outdir)
+    tail = os.path.basename(args.infile)
+    root, ext = os.path.splitext(tail)
 
-    for name, msg in schema['messages'].iteritems():
-        includes = set()
-        write_type('Message' + name, msg, args.outdir)
+    write_type(root, schema, args.outdir)
 
 if __name__ == '__main__':
     main()
