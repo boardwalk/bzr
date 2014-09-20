@@ -22,9 +22,8 @@
 
 class BinReader;
 
-class AnimationFrame : Noncopyable
+struct AnimationFrame : Noncopyable
 {
-public:
     struct Orientation
     {
         glm::vec3 position;

@@ -20,7 +20,7 @@
 
 #include "Landcell.h"
 
-class StructureGeom;
+struct StructureGeom;
 
 class Structure : public Landcell
 {

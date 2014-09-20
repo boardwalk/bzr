@@ -21,7 +21,7 @@
 #include "Destructable.h"
 #include "Noncopyable.h"
 
-class Texture;
+struct Texture;
 
 class TextureRenderData : public Destructable, Noncopyable
 {

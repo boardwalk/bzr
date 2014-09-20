@@ -23,9 +23,8 @@
 
 class BinReader;
 
-class AnimationStrip : Noncopyable
+struct AnimationStrip : Noncopyable
 {
-public:
     struct AnimInfo
     {
         ResourcePtr resource;

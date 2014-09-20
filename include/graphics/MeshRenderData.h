@@ -22,7 +22,7 @@
 #include "Noncopyable.h"
 #include "Resource.h"
 
-class Model;
+struct Model;
 class Structure;
 struct Vertex;
 struct TriangleFan;

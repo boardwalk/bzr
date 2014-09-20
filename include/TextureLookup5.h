@@ -21,11 +21,8 @@
 #include "Destructable.h"
 #include "Resource.h"
 
-class Texture;
-
-class TextureLookup5 : public ResourceImpl<ResourceType::kTextureLookup5>
+struct TextureLookup5 : public ResourceImpl<ResourceType::kTextureLookup5>
 {
-public:
     TextureLookup5(uint32_t id, const void* data, size_t size);
     explicit TextureLookup5(ResourcePtr texture);
 

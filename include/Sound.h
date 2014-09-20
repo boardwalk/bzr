@@ -20,9 +20,8 @@
 
 #include "Resource.h"
 
-class Sound : public ResourceImpl<ResourceType::kSound>
+struct Sound : public ResourceImpl<ResourceType::kSound>
 {
-public:
     Sound(uint32_t id, const void* data, size_t size);
 
     uint32_t samplesPerSecond;

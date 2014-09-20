@@ -20,9 +20,8 @@
 
 #include "Resource.h"
 
-class ModelGroup : public ResourceImpl<ResourceType::kModelGroup>
+struct ModelGroup : public ResourceImpl<ResourceType::kModelGroup>
 {
-public:
     struct ModelInfo
     {
         ModelInfo() : parent(0xFFFFFFFF), scale(1.0, 1.0, 1.0)

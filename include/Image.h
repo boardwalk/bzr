@@ -18,7 +18,7 @@
 #ifndef BZR_GRAPHICS_IMAGE_H
 #define BZR_GRAPHICS_IMAGE_H
 
-class Palette;
+struct Palette;
 
 struct ImageFormat
 {

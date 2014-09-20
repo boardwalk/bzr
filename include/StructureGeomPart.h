@@ -25,9 +25,8 @@
 class BinReader;
 class BSPNode;
 
-class StructureGeomPart : Noncopyable
+struct StructureGeomPart : Noncopyable
 {
-public:
     StructureGeomPart();
     StructureGeomPart(StructureGeomPart&&);
     ~StructureGeomPart();

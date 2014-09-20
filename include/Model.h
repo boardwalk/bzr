@@ -25,9 +25,8 @@
 
 class BSPNode;
 
-class Model : public ResourceImpl<ResourceType::kModel>
+struct Model : public ResourceImpl<ResourceType::kModel>
 {
-public:
     Model(uint32_t id, const void* data, size_t size);
     ~Model();
 

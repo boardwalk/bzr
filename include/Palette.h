@@ -20,9 +20,8 @@
 
 #include "Resource.h"
 
-class Palette : public ResourceImpl<ResourceType::kPalette>
+struct Palette : public ResourceImpl<ResourceType::kPalette>
 {
-public:
     struct Color
     {
         uint8_t blue;

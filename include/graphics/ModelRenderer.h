@@ -22,8 +22,8 @@
 #include "Noncopyable.h"
 #include "Resource.h"
 
-class ModelGroup;
-class Model;
+struct ModelGroup;
+struct Model;
 
 class ModelRenderer : Noncopyable
 {
