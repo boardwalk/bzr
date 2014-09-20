@@ -102,7 +102,7 @@ string BinReader::readString()
 
 void BinReader::align()
 {
-    position_ += 3 - ((position_ - 1) & 3);
+    position_ = (position_ + 3) & ~3;
 }
 
 void BinReader::assertEnd() const
