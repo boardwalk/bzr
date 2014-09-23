@@ -18,6 +18,37 @@
 #include "AnimationFrame.h"
 #include "BinReader.h"
 
+enum AnimHooks
+{
+    kNoOp = 0x0000,
+    kSound = 0x0001,
+    kSoundTable = 0x0002,
+    kAttack = 0x0003,
+    kAnimDone = 0x0004,
+    kReplaceObject = 0x0005,
+    kEthereal = 0x0006,
+    kTransparentPart = 0x0007,
+    kLuminous = 0x0008,
+    kLuminousPart = 0x0009,
+    kDiffuse = 0x000a,
+    kDiffusePart = 0x000b,
+    kScale = 0x000c,
+    kCreateParticle = 0x000d,
+    kDestroyParticle = 0x000e,
+    kStopParticle = 0x000f,
+    kNoDraw = 0x0010,
+    kDefaultScript = 0x0011,
+    kDefaultScriptPart = 0x0012,
+    kCallPes = 0x0013,
+    kTransparent = 0x0014,
+    kSoundTweaked = 0x0015,
+    kSetOmega = 0x0016,
+    kTextureVelocity = 0x0017,
+    kTextureVelocityPart = 0x0018,
+    kSetLight = 0x0019,
+    kCreateBlockingParticle = 0x001a
+};
+
 AnimationFrame::AnimationFrame(BinReader& reader, uint32_t numModels)
 {
     orientations.resize(numModels);
@@ -34,33 +65,33 @@ AnimationFrame::AnimationFrame(BinReader& reader, uint32_t numModels)
         orientation.rotation.z = reader.readFloat();
     }
 
-    uint32_t numExtra = reader.readInt();
+    uint32_t numHooks = reader.readInt();
 
-    for(uint32_t ei = 0; ei < numExtra; ei++)
+    for(uint32_t hi = 0; hi < numHooks; hi++)
     {
-        uint32_t extraType = reader.readInt();
-        uint32_t extraSize = 0;
+        uint32_t hookType = reader.readInt();
+        uint32_t hookSize = 0;
 
-        switch(extraType)
+        switch(hookType)
         {
-            case 0x01: extraSize = 2;  break; // 0x00,soundref
-            case 0x02: extraSize = 2;  break; // 0x00,0x0C
-            case 0x03: extraSize = 8;  break; // 0x00,0x14,6floats
-            case 0x05: extraSize = 2;  break; // 0x00,0xBB401
-            case 0x06: extraSize = 2;  break; // 0x01,0x01
-            case 0x07: extraSize = 5;  break; // 0x00,0x0A,1.0,1.0,0x00
-            case 0x0D: extraSize = 11; break; // lotsa stuff (3 floats in there somewhere)
-            case 0x0F: extraSize = 2;  break; // 0x00,0x01
-            case 0x11: extraSize = 1;  break; // 0x00
-            case 0x13: extraSize = 3;  break; // 0x00,someREF,0x00
-            case 0x14: extraSize = 4;  break; // 0x00,0x00,0x00,0x00
-            case 0x15: extraSize = 5;  break; // 0x00,soundref,3floats
-            case 0x16: extraSize = 4;  break; // 0x00,0x00,2floats
+            case kSound: hookSize = 2;  break; // 0x00,soundref
+            case kSoundTable: hookSize = 2;  break; // 0x00,0x0C
+            case kAttack: hookSize = 8;  break; // 0x00,0x14,6floats
+            case kReplaceObject: hookSize = 2;  break; // 0x00,0xBB401
+            case kEthereal: hookSize = 2;  break; // 0x01,0x01
+            case kTransparentPart: hookSize = 5;  break; // 0x00,0x0A,1.0,1.0,0x00
+            case kCreateParticle: hookSize = 11; break; // lotsa stuff (3 floats in there somewhere)
+            case kStopParticle: hookSize = 2;  break; // 0x00,0x01
+            case kDefaultScript: hookSize = 1;  break; // 0x00
+            case kCallPes: hookSize = 3;  break; // 0x00,someREF,0x00
+            case kTransparent: hookSize = 4;  break; // 0x00,0x00,0x00,0x00
+            case kSoundTweaked: hookSize = 5;  break; // 0x00,soundref,3floats
+            case kSetOmega: hookSize = 4;  break; // 0x00,0x00,2floats
             default:
-                throw runtime_error("Unknown extraType in animation frame");
+                throw runtime_error("Unknown hookType in animation frame");
         }
 
-        reader.readRaw(extraSize * sizeof(uint32_t));
+        reader.readRaw(hookSize * sizeof(uint32_t));
     }
 }
 
