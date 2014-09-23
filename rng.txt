@@ -1,0 +1,104 @@
+
+SubTableEntry4__Constructor(dword[6] this)
+    this->xortbl = new dword[256];
+    this->unktbl = new dword[256];
+
+SubTableEntry3__XOR_LOOP1(DWORD* xor1, DWORD* xor2,  DWORD* xor3, DWORD* xor4, DWORD* xor5, DWORD* xor6, DWORD* xor7)
+{
+    // ugly stuff
+}
+
+SubTableEntry3__Fill_Out_Tables_Part2(dword[7] this, SubTableEntry4* ptr, bool use_given_keys)
+    dword xorvals[8];
+
+    for(int i = 0; i < 8; i++)
+        xorvals[i] = 9E3779B9h;
+
+    if(!use_given_keys)
+    {
+        this->key0 = 0
+        this->key1 = 0
+        this->key2 = 0
+    }
+
+    for(int i = 0; i < 4; i++)
+    {
+        SubTableEntry3__XOR_LOOP1(xorvals);
+    }
+
+    if(!use_given_keys)
+    {
+        // todo don't use keys route
+        SubTableEntry3__XOR_LOOP1(xorvals);
+
+        int i = 0;
+        for(int j = 0; j < 7; j++)
+        {
+            unktbl[i + j] = xorvals[7 - j];
+        }
+
+        goto last_part;
+    }
+
+    for(int i = 0; i < 256; i += 8)
+    {
+        for(int j = 0; j < 8; j++)
+        {
+            xorvals[7 - j] += xortbl[i + j];
+        }
+
+        SubTableEntry3__XOR_LOOP1(xorvals);
+
+        for(int j = 0; j < 8; j++)
+        {
+            unktbl[i + j] = xorvals[7 - j];
+        }
+    }
+
+    for(int i = 0; i < 256; i += 8)
+    {
+        for(int j = 0; j < 8; j++)
+        {
+            xorvals[7 - j] += unktbl[i + j];
+        }
+
+        SubTableEntry3__XOR_LOOP1(xorvals);
+
+        for(int j = 0; j < 8; j++)
+        {
+            unktbl[i + j] += xorvals[7 - j];
+        }
+    }
+
+last_part:
+    counter = 256
+    SubTableEntry3__Final_INIT_Stage()
+
+SubTableEntry3__Fill_Out_Tables(dword[7] this, dword key0, dword key1, dword key2, dword* initvals)
+
+    for(int i = 0; i < 256; i++)
+    {
+        if(initvals) {
+          this->xortbl[i] = initvals[i]
+        }
+        else {
+          this->xortbl[i] = 0;
+        }
+    }
+
+    this->key0 = key0
+    this->key1 = key1
+    this->key2 = key2
+    SubTableEntry3__Fill_Out_Tables_Part2(this, true);
+
+SubTableEntry3__Constructor(dword[7] this, dword key0, dword key1, dword key2)
+    SubTableEntry4__Constructor(this + 1)
+    this->vtbl = vtbl;
+    SubTableEntry3__Fill_Out_Tables(this, key0, key1, key2, 0);
+
+SubTableEntry2__Constructor(dword[3] this, dword key)
+  this->seqnum = 1
+  this->encryption_key = key
+  this->subtableentry3 = new byte[28];
+  SubTableEntry3__Constructor(this->subtableentry3, key, key, key);
+
