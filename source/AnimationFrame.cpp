@@ -39,7 +39,7 @@ enum AnimHooks
     kNoDraw = 0x0010,
     kDefaultScript = 0x0011,
     kDefaultScriptPart = 0x0012,
-    kCallPes = 0x0013,
+    kCallPES = 0x0013,
     kTransparent = 0x0014,
     kSoundTweaked = 0x0015,
     kSetOmega = 0x0016,
@@ -72,21 +72,114 @@ AnimationFrame::AnimationFrame(BinReader& reader, uint32_t numModels)
         uint32_t hookType = reader.readInt();
         uint32_t hookSize = 0;
 
+        // only apply this hook when playing this frame
+        // 1 = forward, -1 = backward, 0 = both, 
+        uint32_t hookDir = reader.readInt();
+        assert(hookDir == 0 || hookDir == 1 || hookDir == 0xFFFFFFFF);
+
         switch(hookType)
         {
-            case kSound: hookSize = 2;  break; // 0x00,soundref
-            case kSoundTable: hookSize = 2;  break; // 0x00,0x0C
-            case kAttack: hookSize = 8;  break; // 0x00,0x14,6floats
-            case kReplaceObject: hookSize = 2;  break; // 0x00,0xBB401
-            case kEthereal: hookSize = 2;  break; // 0x01,0x01
-            case kTransparentPart: hookSize = 5;  break; // 0x00,0x0A,1.0,1.0,0x00
-            case kCreateParticle: hookSize = 11; break; // lotsa stuff (3 floats in there somewhere)
-            case kStopParticle: hookSize = 2;  break; // 0x00,0x01
-            case kDefaultScript: hookSize = 1;  break; // 0x00
-            case kCallPes: hookSize = 3;  break; // 0x00,someREF,0x00
-            case kTransparent: hookSize = 4;  break; // 0x00,0x00,0x00,0x00
-            case kSoundTweaked: hookSize = 5;  break; // 0x00,soundref,3floats
-            case kSetOmega: hookSize = 4;  break; // 0x00,0x00,2floats
+            case kSound:
+                /* struct SoundHook
+                   uint32_t sound_gid; */
+                hookSize = 1;
+                break;
+
+            case kSoundTable:
+                /* struct SoundTableHook
+                   uint32_t sound_type; */
+                hookSize = 1;
+                break;
+
+            case kAttack:
+                /* struct AttackHook
+                   struct AttackCone
+                   uint32_t part_index;
+                   float left_x;
+                   float left_y;
+                   float right_x;
+                   float right_y;
+                   float radius;
+                   float height; */
+                hookSize = 7;
+                break;
+
+            case kReplaceObject:
+                /* struct ReplaceObjectHook
+                   struct AnimPartChange
+                   uint16_t part_index;
+                   uint16_t part_gid; */
+                hookSize = 1;
+                break;
+
+            case kEthereal:
+                /* struct EtherealHook
+                   uint32_t ethereal; */
+                hookSize = 1;
+                break;
+
+            case kTransparentPart:
+                /* struct TransparentPartHook
+                   uint32_t part_index;
+                   float start;
+                   float end;
+                   float time; */
+                hookSize = 4;
+                break;
+
+            case kCreateParticle:
+                /* struct CreateParticleHook
+                   uint32_t emitter_info_gid;
+                   uint32_t part_index;
+                   struct Frame offset
+                   float px, py, pz;
+                   float rw, rx, ry, rz;
+                   uint32_t emitter_id; */
+                hookSize = 10;
+                break;
+
+            case kStopParticle:
+                /* struct StopParticleHook
+                   uint32_t emitter_id; */
+                hookSize = 1;
+                break;
+
+            case kDefaultScript:
+                /* struct DefaultScriptHook */
+                hookSize = 0;
+                break;
+
+            case kCallPES:
+                /* struct CallPESHook
+                   uint32_t pes_gid;
+                   float pause; */
+                hookSize = 2;
+                break;
+
+            case kTransparent:
+                /* struct TransparentHook
+                   float start;
+                   float end;
+                   float time; */
+                hookSize = 3;
+                break;
+
+            case kSoundTweaked:
+                /* struct SoundTweakedHook
+                   uint32_t sound_gid;
+                   float priority;
+                   float probability;
+                   float volume; */
+                hookSize = 4;
+                break;
+
+            case kSetOmega:
+                /* struct SetOmegaHook
+                   struct Vector3 axis
+                   float x, y, z; */
+                hookSize = 3;
+                break;
+
             default:
                 throw runtime_error("Unknown hookType in animation frame");
         }
