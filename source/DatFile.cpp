@@ -83,7 +83,7 @@ vector<uint8_t> DatFile::read(uint32_t id) const
         vector<uint8_t> nodeData = readBlocks(position, sizeof(DatNode));
         DatNode* node = reinterpret_cast<DatNode*>(nodeData.data());
 
-        if(node->nodeCount > kMaxNodeCount)
+        if(node->nodeCount >= kMaxNodeCount)
         {
             throw runtime_error("Node has bad node count");
         }
@@ -154,18 +154,24 @@ void DatFile::listDir(uint32_t position, vector<uint32_t>& result) const
     vector<uint8_t> nodeData = readBlocks(position, sizeof(DatNode));
     DatNode* node = reinterpret_cast<DatNode*>(nodeData.data());
 
-    if(node->nodeCount > kMaxNodeCount)
+    if(node->nodeCount >= kMaxNodeCount)
     {
         throw runtime_error("Node has bad node count");
     }
 
     for(uint32_t i = 0; i < node->nodeCount; i++)
     {
-        result.push_back(node->leafNodes[i].id);
-
         if(node->internalNodes[0] != 0)
         {
-            listDir(node->internalNodes[i + 1], result);
+            listDir(node->internalNodes[i], result);
         }
+
+        result.push_back(node->leafNodes[i].id);
+    }
+
+    if(node->internalNodes[0] != 0 && node->nodeCount < kMaxNodeCount)
+    {
+        listDir(node->internalNodes[node->nodeCount], result);
     }
 }
+
