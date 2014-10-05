@@ -28,6 +28,7 @@ public:
     static const fp_t kBlockSize;
     static const int kOffsetMapSize = 64;
 
+    // struct CLandBlock
     PACK(struct Data
     {
         uint32_t fileId;

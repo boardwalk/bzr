@@ -18,7 +18,9 @@
 #ifndef BZR_BINREADER_H
 #define BZR_BINREADER_H
 
-class BinReader
+#include "Noncopyable.h"
+
+class BinReader : Noncopyable
 {
 public:
     BinReader(const void* data, size_t size);

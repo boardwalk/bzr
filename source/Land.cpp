@@ -305,6 +305,7 @@ bool Land::isSplitNESW(int x, int y) const
 
 void Land::initDoodads()
 {
+    // struct CLandBlockInfo
     vector<uint8_t> blob = Core::get().cellDat().read(data_.fileId - 1);
 
     BinReader reader(blob.data(), blob.size());
@@ -336,14 +337,15 @@ void Land::initDoodads()
 
     for(uint16_t di = 0; di < numDoodadsEx; di++)
     {
+        // struct BuildInfo
         doodads_.emplace_back(reader);
 
-        reader.readInt();
+        /*uint32_t numLeaves = */reader.readInt();
         uint32_t numPortals = reader.readInt();
 
-        // credits to Akilla
         for(uint32_t pi = 0; pi < numPortals; pi++)
         {
+            // struct CBldPortal
             reader.readInt();
             reader.readShort();
             uint16_t numVisible = reader.readShort();

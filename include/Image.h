@@ -20,6 +20,7 @@
 
 struct Palette;
 
+// enum PixelFormatID
 struct ImageFormat
 {
     enum Value
