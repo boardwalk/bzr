@@ -463,9 +463,12 @@ void Land::initScene(int x, int y, const Scene& scene)
         blockPos.z += calcHeight(blockPos.x, blockPos.y);
 
         // calculate scale
-        double scale = objectDesc.minScale * pow(objectDesc.maxScale / objectDesc.minScale, prng(cellX, cellY, RND_SCENE_SCALE1 + i));
+        fp_t scale = static_cast<fp_t>(objectDesc.minScale * pow(objectDesc.maxScale / objectDesc.minScale, prng(cellX, cellY, RND_SCENE_SCALE1 + i)));
 
-        // TODO random (object) rotation
+        // calculate rotation
+        fp_t randRot = static_cast<fp_t>(prng(cellX, cellY, RND_SCENE_OBJROT + i)) * glm::radians(objectDesc.maxRotation);
+        glm::quat rotation = glm::angleAxis(randRot, glm::vec3(0.0, 0.0, 1.0)) * objectDesc.rotation;
+
         // TODO road avoidance
         // TODO slope check
 
@@ -473,8 +476,8 @@ void Land::initScene(int x, int y, const Scene& scene)
         Doodad doodad;
         doodad.resource = Core::get().resourceCache().get(objectDesc.resourceId);
         doodad.position = blockPos;
-        doodad.rotation = objectDesc.rotation;
-        doodad.scale = static_cast<fp_t>(scale);
+        doodad.rotation = rotation;
+        doodad.scale = scale;
         doodads_.push_back(doodad);
     }
 }
