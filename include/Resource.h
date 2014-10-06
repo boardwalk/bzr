@@ -75,7 +75,9 @@ struct ResourceType
         kTextureLookup8 = 0x08000000,
         kAnimationSet = 0x09000000,
         kSound = 0x0A000000,
-        kStructureGeom = 0x0D000000
+        kStructureGeom = 0x0D000000,
+        kScene = 0x12000000,
+        kRegion = 0x13000000
     };
 };
 

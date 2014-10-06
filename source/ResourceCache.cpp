@@ -23,6 +23,8 @@
 #include "Palette.h"
 #include "Model.h"
 #include "ModelGroup.h"
+#include "Region.h"
+#include "Scene.h"
 #include "Sound.h"
 #include "StructureGeom.h"
 #include "Texture.h"
@@ -65,6 +67,10 @@ static const Resource* loadResource(uint32_t resourceId)
             return new Sound{resourceId, data.data(), data.size()};
         case ResourceType::kStructureGeom:
             return new StructureGeom{resourceId, data.data(), data.size()};
+        case ResourceType::kScene:
+            return new Scene{resourceId, data.data(), data.size()};
+        case ResourceType::kRegion:
+            return new Region{resourceId, data.data(), data.size()};
         default:
             throw runtime_error("Resource type not supported");
     }
