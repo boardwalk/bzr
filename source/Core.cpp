@@ -25,6 +25,7 @@
 #include "Land.h"
 #include "LandcellManager.h"
 #include "ObjectManager.h"
+#include "Region.h"
 #include "ResourceCache.h"
 #include "util.h"
 
@@ -81,6 +82,11 @@ ObjectManager& Core::objectManager()
     return *objectManager_;
 }
 
+const Region& Core::region() const
+{
+    return region_->cast<Region>();
+}
+
 Camera& Core::camera()
 {
     return *camera_;
@@ -120,6 +126,7 @@ void Core::init()
     resourceCache_.reset(new ResourceCache{});
     landcellManager_.reset(new LandcellManager{});
     objectManager_.reset(new ObjectManager{});
+    region_ = resourceCache_->get(0x13000000);
     camera_.reset(new Camera{});
 #ifndef HEADLESS
     renderer_.reset(new Renderer{});

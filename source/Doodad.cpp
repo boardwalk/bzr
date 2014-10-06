@@ -20,6 +20,9 @@
 #include "Core.h"
 #include "ResourceCache.h"
 
+Doodad::Doodad()
+{}
+
 Doodad::Doodad(BinReader& reader)
 {
     uint32_t modelId = reader.readInt();

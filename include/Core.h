@@ -19,12 +19,14 @@
 #define BZR_CORE_H
 
 #include "ObjectId.h"
+#include "Resource.h"
 
 class Camera;
 class Config;
 class DatFile;
 class LandcellManager;
 class ObjectManager;
+struct Region;
 class Renderer;
 class ResourceCache;
 
@@ -41,6 +43,7 @@ public:
     ResourceCache& resourceCache();
     LandcellManager& landcellManager();
     ObjectManager& objectManager();
+    const Region& region() const;
     Camera& camera();
 #ifndef HEADLESS
     Renderer& renderer();
@@ -66,6 +69,7 @@ private:
     unique_ptr<ResourceCache> resourceCache_;
     unique_ptr<LandcellManager> landcellManager_;
     unique_ptr<ObjectManager> objectManager_;
+    ResourcePtr region_;
     unique_ptr<Camera> camera_;
 #ifndef HEADLESS
     unique_ptr<Renderer> renderer_;

@@ -20,6 +20,8 @@
 
 #include "Landcell.h"
 
+struct Scene;
+
 class Land : public Landcell
 {
 public:
@@ -54,6 +56,8 @@ public:
 
 private:
     void initDoodads();
+    void initScenes();
+    void initScene(int x, int y, const Scene& scene);
 
     Data data_;
     uint32_t numStructures_;

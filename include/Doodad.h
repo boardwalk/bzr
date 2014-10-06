@@ -24,6 +24,7 @@ class BinReader;
 
 struct Doodad
 {
+    Doodad();
     Doodad(BinReader& reader);
 
     ResourcePtr resource;

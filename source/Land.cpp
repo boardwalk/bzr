@@ -21,6 +21,9 @@
 #include "DatFile.h"
 #include "LandcellManager.h"
 #include "PRNG.h"
+#include "Region.h"
+#include "ResourceCache.h"
+#include "Scene.h"
 #include <algorithm>
 
 const fp_t Land::kCellSize = fp_t(24.0);
@@ -65,6 +68,8 @@ void Land::init()
     {
         initDoodads();
     }
+
+    initScenes();
 
     // sample another two times at the edges so we don't have to clamp our bicubic resample
     static const int sampleSize = kGridSize;
@@ -357,5 +362,116 @@ void Land::initDoodads()
 
             reader.align();
         }
+    }
+}
+
+void Land::initScenes()
+{
+    const Region& region = Core::get().region();
+
+    for(int x = 0; x < kGridSize; x++)
+    {
+        for(int y = 0; y < kGridSize; y++)
+        {
+            uint32_t terrainTypeNum = (data_.styles[x][y] >> 2) & 0x1F;
+            uint32_t terrainSceneTypeNum = data_.styles[x][y] >> 11;
+
+            assert(terrainTypeNum < region.terrainTypes.size());
+            const vector<uint32_t>& terrainSceneTypes = region.terrainTypes[terrainTypeNum].sceneTypes;
+
+            assert(terrainSceneTypeNum < terrainSceneTypes.size());
+            uint32_t sceneTypeNum = terrainSceneTypes[terrainSceneTypeNum];
+
+            const Region::SceneType& sceneType = region.sceneTypes[sceneTypeNum];
+
+            uint32_t cellX = id().x() * 8 + x;
+            uint32_t cellY = id().y() * 8 + y;
+            uint32_t sceneNum = static_cast<uint32_t>(prng(cellX, cellY, RND_SCENE_PICK) * static_cast<double>(sceneType.scenes.size()));
+
+            if(sceneNum >= sceneType.scenes.size())
+            {
+                sceneNum = 0;
+            }
+
+            const Scene& scene = sceneType.scenes[sceneNum]->cast<Scene>();
+
+            initScene(x, y, scene);
+        }
+    }
+}
+
+void Land::initScene(int x, int y, const Scene& scene)
+{
+    uint32_t cellX = id().x() * 8 + x;
+    uint32_t cellY = id().y() * 8 + y;
+
+    double sceneRot = prng(cellX, cellY, RND_SCENE_ROT);
+
+    for(uint32_t i = 0; i < scene.objects.size(); i++)
+    {
+        const Scene::ObjectDesc& objectDesc = scene.objects[i];
+
+        if(objectDesc.isWeenieObj)
+        {
+            // not sure what these are for
+            // they don't have a valid resourceId
+            continue;
+        }
+
+        if(prng(cellX, cellY, RND_SCENE_FREQ + i) >= objectDesc.frequency)
+        {
+            // object hidden
+            continue;
+        }
+
+        // calculate position within block
+        glm::vec3 cellPos = objectDesc.position;
+        
+        cellPos.x += static_cast<float>(prng(cellX, cellY, RND_SCENE_DISP_X + i) * objectDesc.displace.x);
+        cellPos.y += static_cast<float>(prng(cellX, cellY, RND_SCENE_DISP_Y + i) * objectDesc.displace.y);
+
+        glm::vec3 tempPos = cellPos;
+
+        if(sceneRot >= 0.75)
+        {
+            cellPos.x = tempPos.y;
+            cellPos.y = -tempPos.x;
+        }
+        else if(sceneRot >= 0.5)
+        {
+            cellPos.x = -tempPos.x;
+            cellPos.y = -tempPos.y;
+        }
+        else if(sceneRot >= 0.25)
+        {
+            cellPos.x = -tempPos.y;
+            cellPos.y = tempPos.x;
+        }
+        else
+        {
+            cellPos.x = tempPos.y;
+            cellPos.y = tempPos.x;
+        }
+
+        glm::vec3 blockPos = cellPos + glm::vec3(x * kCellSize, y * kCellSize, 0.0);
+
+        if(blockPos.x < 0.0 || blockPos.x >= kBlockSize || blockPos.y < 0.0 || blockPos.y >= kBlockSize)
+        {
+            continue;
+        }
+
+        blockPos.z += calcHeight(blockPos.x, blockPos.y);
+
+        // TODO random (object) rotation
+        // TODO random scale
+        // TODO road avoidance
+        // TODO slope check
+
+        // add doodad
+        Doodad doodad;
+        doodad.resource = Core::get().resourceCache().get(objectDesc.resourceId);
+        doodad.position = blockPos;
+        doodad.rotation = objectDesc.rotation;
+        doodads_.push_back(doodad);
     }
 }
