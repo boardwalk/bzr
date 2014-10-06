@@ -153,12 +153,14 @@ void LandRenderData::initGeometry(const Land& land)
 
             {
                 uint8_t bitfield = 0;
+                uint8_t roadType = 0;
 
                 for(int j = 0; j < 4; j++)
                 {
                     if(road[j])
                     {
                         bitfield |= (1 << j);
+                        roadType = road[j];
                     }
                 }
 
@@ -199,7 +201,10 @@ void LandRenderData::initGeometry(const Land& land)
                     rotationCount++;
                 }
 
-                textures.push_back(0x20);
+                static const uint8_t kCommonRoad = 0x20;
+                static const uint8_t kRareRoad = 0x1F;
+
+                textures.push_back((roadType == 1) ? kCommonRoad : kRareRoad);
                 blendTextures.push_back(blendTex);
                 rotations.push_back(rotationCount);
             }

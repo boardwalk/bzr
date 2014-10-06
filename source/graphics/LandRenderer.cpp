@@ -24,7 +24,9 @@
 #include "Land.h"
 #include "LandcellManager.h"
 #include "ResourceCache.h"
+#include "Region.h"
 #include "Texture.h"
+#include "TextureLookup5.h"
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
@@ -32,46 +34,7 @@
 #include "graphics/shaders/LandVertexShader.h"
 #include "graphics/shaders/LandFragmentShader.h"
 
-static const uint32_t kLandscapeTextures[] =
-{
-    0x06006d6f, // 0x00 BarrenRock
-    0x06006d49, // 0x01 Grassland
-    0x00000000, // 0x02 Ice
-    0x06006d06, // 0x03 LushGrass
-    0x00000000, // 0x04 MarshSparseSwamp
-    0x00000000, // 0x05 MudRichDirt
-    0x00000000, // 0x06 ObsidianPlain
-    0x06006d46, // 0x07 PackedDirt
-    0x00000000, // 0x08 PatchyDirtFx
-    0x06006d3c, // 0x09 PatchyGrassland
-    0x00000000, // 0x0A sand-yellow
-    0x06006d44, // 0x0B sand-grey
-    0x00000000, // 0x0C sand-rockStrewn
-    0x00000000, // 0x0D SedimentaryRock
-    0x06006d41, // 0x0E SemiBarrenRock
-    0x00000000, // 0x0F Snow
-    0x06006d45, // 0x10 WaterRunning
-    0x00000000, // 0x11 WaterStandingFresh
-    0x06006d4f, // 0x12 WaterShallowSea
-    0x00000000, // 0x13 WaterShallowStillSea
-    0x06006d4e, // 0x14 WaterDeepSea
-    0x06006d40, // 0x15 forestfloor
-    0x00000000, // 0x16 FauxWaterRunning
-    0x00000000, // 0x17 SeaSlime
-    0x00000000, // 0x18 Agiland
-    0x00000000, // 0x19 Volcano1
-    0x00000000, // 0x1A Volcano2
-    0x00000000, // 0x1B BlueIce
-    0x00000000, // 0x1C Moss
-    0x00000000, // 0x1D DarkMoss
-    0x00000000, // 0x1E olthoi
-    0x00000000, // 0x1F
-    // road textures below this line
-    0x06006d3f  // 0x20
-};
-
 static const int kTerrainArraySize = 512;
-static const int kTerrainArrayDepth = sizeof(kLandscapeTextures) / sizeof(kLandscapeTextures[0]);
 
 static const uint32_t kBlendTextures[] =
 {
@@ -204,6 +167,10 @@ void LandRenderer::initProgram()
 
 void LandRenderer::initTerrainTexture()
 {
+    const Region& region = Core::get().region();
+
+    GLsizei numTextures = static_cast<GLsizei>(region.terrainTextures.size());
+
     // allocate terrain texture
     glGenTextures(1, &terrainTexture_);
     glBindTexture(GL_TEXTURE_2D_ARRAY, terrainTexture_);
@@ -211,24 +178,14 @@ void LandRenderer::initTerrainTexture()
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, Core::get().renderer().textureMinFilter());
     glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_ANISOTROPY_EXT, Core::get().renderer().textureMaxAnisotropy());
-    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB8, kTerrainArraySize, kTerrainArraySize, kTerrainArrayDepth, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+    glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB8, kTerrainArraySize, kTerrainArraySize, numTextures, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 
     // populate terrain texture
-    for(int i = 0; i < kTerrainArrayDepth; i++)
+    for(GLint i = 0; i < numTextures; i++)
     {
-        Image image;
-
-        if(kLandscapeTextures[i] == 0x00000000)
-        {
-            image.init(ImageFormat::kRGB24, kTerrainArraySize, kTerrainArraySize, nullptr);
-            image.fill(0xFF);
-        }
-        else
-        {
-            ResourcePtr texture = Core::get().resourceCache().get(kLandscapeTextures[i]);
-            image = texture->cast<Texture>().image;
-            image.scale(kTerrainArraySize, kTerrainArraySize);
-        }
+        ResourcePtr textureLookup5 = Core::get().resourceCache().get(region.terrainTextures[i].resourceId);
+        const Image& image = textureLookup5->cast<TextureLookup5>().texture->cast<Texture>().image;
+        assert(image.width() == kTerrainArraySize && image.height() == kTerrainArraySize);
 
         GLenum format;
 
@@ -257,7 +214,7 @@ void LandRenderer::initTerrainTexture()
 
 void LandRenderer::initBlendTexture()
 {
-    // allocate terrain texture
+    // allocate blend texture
     glGenTextures(1, &blendTexture_);
     glBindTexture(GL_TEXTURE_2D_ARRAY, blendTexture_);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -266,7 +223,7 @@ void LandRenderer::initBlendTexture()
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_R8, kBlendArraySize, kBlendArraySize, kBlendArrayDepth, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
 
-    // populate terrain texture
+    // populate blend texture
     for(int i = 0; i < kBlendArrayDepth; i++)
     {
         Image image;
