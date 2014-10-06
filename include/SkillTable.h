@@ -24,8 +24,8 @@ struct SkillCategory
 {
     enum Value
     {
-        kPhysical = 1,
-        kUtility = 2,
+        kWeapon = 1,
+        kNonWeapon = 2,
         kMagic = 3
     };
 };
