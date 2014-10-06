@@ -17,27 +17,42 @@
  */
 #include "DatFile.h"
 #include <algorithm>
- 
-static const size_t kHeaderOffset = 0x140;
-static const uint32_t kHeaderMagicNumber = 0x5442; // 'BT\0\0'
-static const int kMaxNodeCount = 62;
 
-PACK(struct DatHeader
+static const uint32_t kHeaderMagicNumber = 0x5442; // 'BT\0\0'
+static const int kMaxEntries = 61;
+
+PACK(struct DiskFileInfo
 {
     uint32_t magicNumber;
     uint32_t blockSize;
     uint32_t fileSize;
-    uint32_t fileVersion;
-    uint32_t fileVersion2;
-    uint32_t freeHead;
-    uint32_t freeTail;
+    uint32_t dataSet_lm;
+    uint32_t dataSubset_lm;
+    uint32_t firstFree;
+    uint32_t finalFree;
     uint32_t freeBlockCount;
     uint32_t rootPosition;
+    uint32_t youngLRU_lm;
+    uint32_t oldLRU_lm;
+    uint8_t useLRU_fm;
+    uint8_t pad1;
+    uint8_t pad2;
+    uint8_t pad3;
+    uint32_t masterMapId;
+    uint32_t englishPackVersion;
+    uint32_t gamePackVersion;
 });
 
-PACK(struct DatLeaf
+PACK(struct DiskHeaderBlock
 {
-    uint32_t flags;
+    uint8_t acVersionStr[256];
+    uint8_t acTransactionRecord[64];
+    DiskFileInfo fileInfo;
+});
+
+PACK(struct BTEntry
+{
+    uint32_t flags; // comp, resv, ver?
     uint32_t id;
     uint32_t position;
     uint32_t size;
@@ -45,33 +60,31 @@ PACK(struct DatLeaf
     uint32_t version;
 });
 
-PACK(struct DatNode
+PACK(struct BTNode
 {
-    uint32_t internalNodes[kMaxNodeCount];
-    uint32_t nodeCount;
-    DatLeaf leafNodes[kMaxNodeCount];
+    uint32_t nextNode[kMaxEntries + 1];
+    uint32_t numEntries;
+    BTEntry entries[kMaxEntries];
 });
 
 DatFile::DatFile(const string& path) :
     fs_(path.c_str(), ios_base::in|ios_base::binary)
 {
-    DatHeader header;
-
-    fs_.seekg(kHeaderOffset);
-    fs_.read(reinterpret_cast<char*>(&header), sizeof(header));
+    DiskHeaderBlock headerBlock;
+    fs_.read(reinterpret_cast<char*>(&headerBlock), sizeof(headerBlock));
 
     if(!fs_.good())
     {
-        throw runtime_error("Could not read dat file header");
+        throw runtime_error("Could not read header block");
     }
 
-    if(header.magicNumber != kHeaderMagicNumber)
+    if(headerBlock.fileInfo.magicNumber != kHeaderMagicNumber)
     {
-        throw runtime_error("Dat file header has bad magic number");
+        throw runtime_error("Header block has bad magic number");
     }
 
-    blockSize_ = header.blockSize - sizeof(uint32_t); // exclude next block position
-    rootPosition_ = header.rootPosition;
+    blockSize_ = headerBlock.fileInfo.blockSize - sizeof(uint32_t); // exclude next block position
+    rootPosition_ = headerBlock.fileInfo.rootPosition;
 }
 
 vector<uint8_t> DatFile::read(uint32_t id) const
@@ -80,35 +93,35 @@ vector<uint8_t> DatFile::read(uint32_t id) const
 
     for(;;)
     {
-        vector<uint8_t> nodeData = readBlocks(position, sizeof(DatNode));
-        DatNode* node = reinterpret_cast<DatNode*>(nodeData.data());
+        vector<uint8_t> nodeData = readBlocks(position, sizeof(BTNode));
+        BTNode* node = reinterpret_cast<BTNode*>(nodeData.data());
 
-        if(node->nodeCount >= kMaxNodeCount)
+        if(node->numEntries > kMaxEntries)
         {
-            throw runtime_error("Node has bad node count");
+            throw runtime_error("Node has bad entry count");
         }
 
         uint32_t i = 0;
 
-        for(; i < node->nodeCount; i++)
+        for(; i < node->numEntries; i++)
         {
-            if(id <= node->leafNodes[i].id)
+            if(id <= node->entries[i].id)
             {
                 break;
             }
         }
 
-        if(i < node->nodeCount && id == node->leafNodes[i].id)
+        if(i < node->numEntries && id == node->entries[i].id)
         {
-            return readBlocks(node->leafNodes[i].position, node->leafNodes[i].size);
+            return readBlocks(node->entries[i].position, node->entries[i].size);
         }
 
-        if(node->internalNodes[0] == 0)
+        if(node->nextNode[0] == 0)
         {
             return vector<uint8_t>();
         }
 
-        position = node->internalNodes[i];
+        position = node->nextNode[i];
     }
 }
 
@@ -151,27 +164,26 @@ vector<uint8_t> DatFile::readBlocks(uint32_t position, size_t size) const
 
 void DatFile::listDir(uint32_t position, vector<uint32_t>& result) const
 {
-    vector<uint8_t> nodeData = readBlocks(position, sizeof(DatNode));
-    DatNode* node = reinterpret_cast<DatNode*>(nodeData.data());
+    vector<uint8_t> nodeData = readBlocks(position, sizeof(BTNode));
+    BTNode* node = reinterpret_cast<BTNode*>(nodeData.data());
 
-    if(node->nodeCount >= kMaxNodeCount)
+    if(node->numEntries > kMaxEntries)
     {
-        throw runtime_error("Node has bad node count");
+        throw runtime_error("Node has bad entry count");
     }
 
-    for(uint32_t i = 0; i < node->nodeCount; i++)
+    for(uint32_t i = 0; i < node->numEntries; i++)
     {
-        if(node->internalNodes[0] != 0)
+        if(node->nextNode[0] != 0)
         {
-            listDir(node->internalNodes[i], result);
+            listDir(node->nextNode[i], result);
         }
 
-        result.push_back(node->leafNodes[i].id);
+        result.push_back(node->entries[i].id);
     }
 
-    if(node->internalNodes[0] != 0 && node->nodeCount < kMaxNodeCount)
+    if(node->nextNode[0] != 0)
     {
-        listDir(node->internalNodes[node->nodeCount], result);
+        listDir(node->nextNode[node->numEntries], result);
     }
 }
-
