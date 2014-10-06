@@ -96,7 +96,9 @@ void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& view
 
         glm::vec3 blockPosition{dx * Land::kBlockSize, dy * Land::kBlockSize, 0.0};
 
-        glm::mat4 worldMat = glm::translate(glm::mat4{}, blockPosition + object.location().offset) * glm::mat4_cast(object.location().rotation);
+        glm::mat4 rotateMat = glm::mat4_cast(object.location().rotation);
+        glm::mat4 translateMat = glm::translate(glm::mat4{}, blockPosition + object.location().offset);
+        glm::mat4 worldMat = translateMat * rotateMat;
 
         renderOne(object.model(), projectionMat, viewMat, worldMat);
     }
@@ -110,7 +112,10 @@ void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& view
 
         for(const Doodad& doodad : pair.second->doodads())
         {
-            glm::mat4 worldMat = glm::translate(glm::mat4{}, blockPosition + doodad.position) * glm::mat4_cast(doodad.rotation);
+            glm::mat4 scaleMat = glm::scale(glm::mat4{}, glm::vec3(doodad.scale, doodad.scale, doodad.scale));
+            glm::mat4 rotateMat = glm::mat4_cast(doodad.rotation);
+            glm::mat4 translateMat = glm::translate(glm::mat4{}, blockPosition + doodad.position);
+            glm::mat4 worldMat = translateMat * rotateMat * scaleMat;
 
             renderOne(doodad.resource, projectionMat, viewMat, worldMat);
         }

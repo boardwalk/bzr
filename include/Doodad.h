@@ -30,6 +30,7 @@ struct Doodad
     ResourcePtr resource;
     glm::vec3 position;
     glm::quat rotation;
+    fp_t scale;
 };
 
 #endif

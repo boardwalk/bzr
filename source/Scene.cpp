@@ -72,7 +72,7 @@ void Scene::ObjectDesc::read(BinReader& reader)
     isWeenieObj = (intIsWeenieObj != 0);
 }
 
-Scene::Scene(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
+Scene::Scene(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
     BinReader reader(data, size);
 

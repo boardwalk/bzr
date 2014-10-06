@@ -36,4 +36,6 @@ Doodad::Doodad(BinReader& reader)
     rotation.x = reader.readFloat();
     rotation.y = reader.readFloat();
     rotation.z = reader.readFloat();
+
+    scale = 1.0;
 }

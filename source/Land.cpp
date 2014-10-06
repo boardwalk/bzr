@@ -427,8 +427,8 @@ void Land::initScene(int x, int y, const Scene& scene)
         // calculate position within block
         glm::vec3 cellPos = objectDesc.position;
         
-        cellPos.x += static_cast<float>(prng(cellX, cellY, RND_SCENE_DISP_X + i) * objectDesc.displace.x);
-        cellPos.y += static_cast<float>(prng(cellX, cellY, RND_SCENE_DISP_Y + i) * objectDesc.displace.y);
+        cellPos.x += static_cast<fp_t>(prng(cellX, cellY, RND_SCENE_DISP_X + i) * objectDesc.displace.x);
+        cellPos.y += static_cast<fp_t>(prng(cellX, cellY, RND_SCENE_DISP_Y + i) * objectDesc.displace.y);
 
         glm::vec3 tempPos = cellPos;
 
@@ -462,8 +462,10 @@ void Land::initScene(int x, int y, const Scene& scene)
 
         blockPos.z += calcHeight(blockPos.x, blockPos.y);
 
+        // calculate scale
+        double scale = objectDesc.minScale * pow(objectDesc.maxScale / objectDesc.minScale, prng(cellX, cellY, RND_SCENE_SCALE1 + i));
+
         // TODO random (object) rotation
-        // TODO random scale
         // TODO road avoidance
         // TODO slope check
 
@@ -472,6 +474,7 @@ void Land::initScene(int x, int y, const Scene& scene)
         doodad.resource = Core::get().resourceCache().get(objectDesc.resourceId);
         doodad.position = blockPos;
         doodad.rotation = objectDesc.rotation;
+        doodad.scale = static_cast<fp_t>(scale);
         doodads_.push_back(doodad);
     }
 }
