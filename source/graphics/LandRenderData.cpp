@@ -210,12 +210,14 @@ void LandRenderData::initGeometry(const Land& land)
             }
 
             // See LandVertexShader.glsl to see what these are
+            // Terrain textures are tiled twice per quad (this is specified in region)
+            // Hence the dx * 2 and dy *2
 #define V(dx, dy) \
     vertexData.push_back(x + (dx)); \
     vertexData.push_back(y + (dy)); \
     vertexData.push_back(data.heights[x + (dx)][y + (dy)]); \
-    vertexData.push_back(dx); \
-    vertexData.push_back(dy); \
+    vertexData.push_back(dx * 2); \
+    vertexData.push_back(dy * 2); \
     pushRotatedCoord(vertexData, dx, dy, rotations[0], 1); \
     vertexData.push_back(blendTextures[0]); \
     vertexData.push_back(textures[0]); \

@@ -174,8 +174,6 @@ void LandRenderer::initTerrainTexture()
     // allocate terrain texture
     glGenTextures(1, &terrainTexture_);
     glBindTexture(GL_TEXTURE_2D_ARRAY, terrainTexture_);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, Core::get().renderer().textureMinFilter());
     glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_ANISOTROPY_EXT, Core::get().renderer().textureMaxAnisotropy());
     glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB8, kTerrainArraySize, kTerrainArraySize, numTextures, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
