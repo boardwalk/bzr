@@ -72,7 +72,7 @@ struct ResourceType
         kPalette = 0x04000000,
         kTextureLookup5 = 0x05000000,
         kTexture = 0x06000000,
-        kTextureLookup8 = 0x08000000,
+        kSurface = 0x08000000,
         kAnimationSet = 0x09000000,
         kSound = 0x0A000000,
         kStructureGeom = 0x0D000000,

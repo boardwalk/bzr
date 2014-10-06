@@ -24,14 +24,14 @@
 #include "ResourceCache.h"
 #include "Structure.h"
 #include "StructureGeom.h"
+#include "Surface.h"
 #include "Texture.h"
 #include "TextureLookup5.h"
-#include "TextureLookup8.h"
 #include <algorithm>
 
 // FIXME Not the neatest thing in the world
-// Ought to find an existing 0x08 file with a nice transparent texture
-static weak_ptr<const Resource> g_hitTexture;
+// Ought to find an existing 0x08 file with a nice transparent surface
+static weak_ptr<const Resource> g_hitSurface;
 
 struct SortByTexIndex
 {
@@ -76,7 +76,7 @@ void MeshRenderData::render()
     for(Batch& batch : batches_)
     {
         const Texture& texture = batch
-            .texture->cast<TextureLookup8>()
+            .texture->cast<Surface>()
             .textureLookup5->cast<TextureLookup5>()
             .texture->cast<Texture>();
 
@@ -169,17 +169,17 @@ void MeshRenderData::init(
 
     if(Core::get().renderer().renderHitGeometry())
     {
-        ResourcePtr textureLookup8 = g_hitTexture.lock();
+        ResourcePtr surface = g_hitSurface.lock();
 
-        if(!textureLookup8)
+        if(!surface)
         {
             ResourcePtr texture{new Texture{0x800000FF}};
             ResourcePtr textureLookup5{new TextureLookup5{texture}};
-            textureLookup8.reset(new TextureLookup8{textureLookup5});
-            g_hitTexture = textureLookup8;
+            surface.reset(new Surface{textureLookup5});
+            g_hitSurface = surface;
         }
 
-        batches_.push_back({textureLookup8, 0});
+        batches_.push_back({surface, 0});
 
         for(const TriangleFan& triangleFan : hitTriangleFans)
         {

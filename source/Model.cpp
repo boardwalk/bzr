@@ -20,9 +20,9 @@
 #include "BSP.h"
 #include "Core.h"
 #include "ResourceCache.h"
+#include "Surface.h"
 #include "Texture.h"
 #include "TextureLookup5.h"
-#include "TextureLookup8.h"
 
 static vector<TriangleFan> readTriangleFans(BinReader& reader)
 {
@@ -59,7 +59,7 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl{id}, nee
         uint32_t textureId = reader.readInt();
         texture = Core::get().resourceCache().get(textureId);
 
-        bool hasAlpha = texture->cast<TextureLookup8>()
+        bool hasAlpha = texture->cast<Surface>()
             .textureLookup5->cast<TextureLookup5>()
             .texture->cast<Texture>()
             .image.hasAlpha();

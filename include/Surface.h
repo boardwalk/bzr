@@ -15,16 +15,16 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_TEXTURELOOKUP8_H
-#define BZR_TEXTURELOOKUP8_H
+#ifndef BZR_SURFACE_H
+#define BZR_SURFACE_H
 
 #include "Resource.h"
 
 // struct CSurface
-struct TextureLookup8 : public ResourceImpl<ResourceType::kTextureLookup8>
+struct Surface : public ResourceImpl<ResourceType::kSurface>
 {
-    TextureLookup8(uint32_t id, const void* data, size_t size);
-    explicit TextureLookup8(ResourcePtr textureLookup5);
+    Surface(uint32_t id, const void* data, size_t size);
+    explicit Surface(ResourcePtr textureLookup5);
 
     ResourcePtr textureLookup5;
     float translucency;

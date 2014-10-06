@@ -15,7 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "TextureLookup8.h"
+#include "Surface.h"
 #include "BinReader.h"
 #include "Core.h"
 #include "ResourceCache.h"
@@ -39,7 +39,7 @@ enum SurfaceType
     kPerspective  = 0x80000000
 };
 
-TextureLookup8::TextureLookup8(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
+Surface::Surface(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
     BinReader reader(data, size);
 
@@ -72,7 +72,7 @@ TextureLookup8::TextureLookup8(uint32_t id, const void* data, size_t size) : Res
     reader.assertEnd();
 }
 
-TextureLookup8::TextureLookup8(ResourcePtr textureLookup5) : ResourceImpl(ResourceType::kTextureLookup8 | 0xFFFF), textureLookup5(textureLookup5)
+Surface::Surface(ResourcePtr textureLookup5) : ResourceImpl(ResourceType::kSurface | 0xFFFF), textureLookup5(textureLookup5)
 {
     assert(textureLookup5->resourceType() == ResourceType::kTextureLookup5);
 }
