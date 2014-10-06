@@ -22,47 +22,52 @@
 #include "Texture.h"
 #include "TextureLookup5.h"
 
+enum SurfaceType
+{
+    kBase1Solid   = 0x00000001,
+    kBase1Image   = 0x00000002,
+    kBase1Clipmap = 0x00000004,
+    kTranslucent  = 0x00000010,
+    kDiffuse      = 0x00000020,
+    kLuminous     = 0x00000040,
+    kAlpha        = 0x00000100,
+    kInvAlpha     = 0x00000200,
+    kAdditive     = 0x00010000,
+    kDetail       = 0x00020000,
+    kGouraud      = 0x10000000,
+    kStippled     = 0x40000000,
+    kPerspective  = 0x80000000
+};
+
 TextureLookup8::TextureLookup8(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
     BinReader reader(data, size);
 
-    uint8_t flags = reader.readByte();
-    assert(flags == 0x01 || flags == 0x02 || flags == 0x04 || flags == 0x11 || flags == 0x12 || flags == 0x14);
+    uint32_t flags = reader.readInt();
 
-    reader.readByte();
-    reader.readByte();
-    reader.readByte();
-
-    if(flags & 0x01)
+    if(flags & kBase1Solid)
     {
         uint32_t bgra = reader.readInt();
         ResourcePtr texture(new Texture(bgra));
         textureLookup5.reset(new TextureLookup5(texture));
     }
-    else
+    else if(flags & (kBase1Image | kBase1Clipmap))
     {
         uint32_t textureId = reader.readInt();
         textureLookup5 = Core::get().resourceCache().get(textureId);
         assert(textureLookup5->resourceType() == ResourceType::kTextureLookup5);
 
-        uint32_t zero = reader.readInt();
-        assert(zero == 0);
-    }
-
-    // I suspect these may be texture coordinates within the texture
-    float f1 = reader.readFloat();
-
-    if(flags & 0x10)
-    {
-        assert(f1 != 0.0);
+        uint32_t paletteId = reader.readInt();
+        assert(paletteId == 0);
     }
     else
     {
-        assert(f1 == 0.0);
+        assert(false);
     }
 
-    reader.readFloat();
-    reader.readFloat();
+    translucency = reader.readFloat();
+    luminosity = reader.readFloat();
+    diffuse = reader.readFloat();
 
     reader.assertEnd();
 }

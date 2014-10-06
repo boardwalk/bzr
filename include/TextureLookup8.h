@@ -20,12 +20,16 @@
 
 #include "Resource.h"
 
+// struct CSurface
 struct TextureLookup8 : public ResourceImpl<ResourceType::kTextureLookup8>
 {
     TextureLookup8(uint32_t id, const void* data, size_t size);
     explicit TextureLookup8(ResourcePtr textureLookup5);
 
     ResourcePtr textureLookup5;
+    float translucency;
+    float luminosity;
+    float diffuse;
 };
 
 #endif
