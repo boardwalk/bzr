@@ -47,17 +47,17 @@ SkillTable::SkillTable()
 
         skill.trainCost = reader.readInt();
         skill.specCost = reader.readInt();
-        skill.type = (SkillType::Value)reader.readInt();
+        skill.category = (SkillCategory::Value)reader.readInt();
 
         uint32_t unk2 = reader.readInt();
         assert(unk2 == 1);
 
-        uint32_t usableUntrained = reader.readInt();
-        assert(usableUntrained == 1 || usableUntrained == 2);
-        skill.usableUntrained = (usableUntrained == 1);
+        uint32_t charGenUse = reader.readInt();
+        assert(charGenUse == 1 || charGenUse == 2);
+        skill.usableUntrained = (charGenUse == 1);
 
-        uint32_t unk3 = reader.readInt();
-        assert(unk3 == 0);
+        uint32_t minLevel = reader.readInt();
+        assert(minLevel == 0);
 
         uint32_t hasAttrib1 = reader.readInt();
         assert(hasAttrib1 == 0 || hasAttrib1 == 1);
@@ -69,11 +69,11 @@ SkillTable::SkillTable()
         skill.attrib1 = (AttributeType::Value)reader.readInt();
         skill.attrib2 = (AttributeType::Value)reader.readInt();
 
-        reader.readDouble();
-        reader.readDouble();
+        /*double upperBound = */reader.readDouble();
+        /*double lowerBound = */reader.readDouble();
 
-        double unk4 = reader.readDouble();
-        assert(unk4 == 1.0);
+        double learnMod = reader.readDouble();
+        assert(learnMod == 1.0);
     }
 
     reader.assertEnd();

@@ -20,7 +20,7 @@
 
 #include <map>
 
-struct SkillType
+struct SkillCategory
 {
     enum Value
     {
@@ -53,7 +53,7 @@ public:
         uint32_t icon;
         uint32_t trainCost;
         uint32_t specCost;
-        SkillType::Value type;
+        SkillCategory::Value category;
         bool usableUntrained;
         uint32_t attribDivisor;
         AttributeType::Value attrib1;
