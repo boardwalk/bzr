@@ -20,6 +20,7 @@
 #include "Core.h"
 #include "DatFile.h"
 #include "LandcellManager.h"
+#include "PRNG.h"
 #include <algorithm>
 
 const fp_t Land::kCellSize = fp_t(24.0);
@@ -297,10 +298,9 @@ const uint8_t* Land::normalMap() const
 bool Land::isSplitNESW(int x, int y) const
 {
     // credits to Akilla
-    uint32_t tx = id().x() * 8 + x;
-    uint32_t ty = id().y() * 8 + y;
-    uint32_t v = tx * ty * 0x0CCAC033 - tx * 0x421BE3BD + ty * 0x6C1AC587 - 0x519B8F25;
-    return (v & 0x80000000) != 0;
+    uint32_t cell_x = id().x() * 8 + x;
+    uint32_t cell_y = id().y() * 8 + y;
+    return prng(cell_x, cell_y, RND_MID_DIAG) >= 0.5;
 }
 
 void Land::initDoodads()
