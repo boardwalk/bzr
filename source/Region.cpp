@@ -89,7 +89,7 @@ void Region::TerrainTex::read(BinReader& reader)
     assert((detailTexId & 0xFF000000) == 0x05000000);
 }
 
-Region::Region(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
+Region::Region(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
     BinReader reader(data, size);
 
@@ -187,6 +187,12 @@ Region::Region(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
         terrainTextures[i].read(reader);
     }
 
-    reader.readRaw(24);
+    uint32_t unk5 = reader.readInt();
+    assert(unk5 == 1);
+
+    /*uint32_t smallMap = */reader.readInt();
+    /*uint32_t largeMap = */reader.readInt();
+
+    reader.readRaw(12);
     reader.assertEnd();
 }
