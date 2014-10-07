@@ -111,9 +111,9 @@ void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& view
 
         glm::mat4 blockTransform = glm::translate(glm::mat4{}, glm::vec3{dx * Land::kBlockSize, dy * Land::kBlockSize, 0.0});
 
-        for(const Doodad& doodad : pair.second->doodads())
+        for(const StaticObject& staticObject : pair.second->staticObjects())
         {
-            renderOne(doodad.resource, projectionMat, viewMat, blockTransform * doodad.transform);
+            renderOne(staticObject.resource, projectionMat, viewMat, blockTransform * staticObject.transform);
         }
     }
 

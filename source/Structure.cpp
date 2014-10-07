@@ -75,12 +75,12 @@ Structure::Structure(const void* data, size_t size)
 
     if(flags & kHasStaticObjects)
     {
-        uint32_t numDoodads = reader.readInt();
-        doodads_.reserve(numDoodads);
+        uint32_t numStaticObjects = reader.readInt();
+        staticObjects_.reserve(numStaticObjects);
 
-        for(uint32_t i = 0; i < numDoodads; i++)
+        for(uint32_t i = 0; i < numStaticObjects; i++)
         {
-            doodads_.emplace_back(reader);
+            staticObjects_.emplace_back(reader);
         }
     }
 

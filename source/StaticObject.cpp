@@ -15,20 +15,33 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_DOODAD_H
-#define BZR_DOODAD_H
+#include "StaticObject.h"
+#include "BinReader.h"
+#include "Core.h"
+#include "ResourceCache.h"
+#include <glm/gtc/matrix_transform.hpp>
 
-#include "Resource.h"
+StaticObject::StaticObject()
+{}
 
-class BinReader;
-
-struct Doodad
+StaticObject::StaticObject(BinReader& reader)
 {
-    Doodad();
-    Doodad(BinReader& reader);
+    uint32_t modelId = reader.readInt();
+    resource = Core::get().resourceCache().get(modelId);
 
-    ResourcePtr resource;
-    glm::mat4 transform;
-};
+    glm::vec3 position;
+    position.x = reader.readFloat();
+    position.y = reader.readFloat();
+    position.z = reader.readFloat();
 
-#endif
+    glm::quat rotation;
+    rotation.w = reader.readFloat();
+    rotation.x = reader.readFloat();
+    rotation.y = reader.readFloat();
+    rotation.z = reader.readFloat();
+
+    glm::mat4 translateMat = glm::translate(glm::mat4{}, position);
+    glm::mat4 rotateMat = glm::mat4_cast(rotation);
+
+    transform = translateMat * rotateMat;
+}

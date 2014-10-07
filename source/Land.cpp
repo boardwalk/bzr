@@ -67,7 +67,7 @@ void Land::init()
 
     if(data_.flags)
     {
-        initDoodads();
+        initStaticObjects();
     }
 
     initScenes();
@@ -309,7 +309,7 @@ bool Land::isSplitNESW(int x, int y) const
     return prng(cell_x, cell_y, RND_MID_DIAG) >= 0.5;
 }
 
-void Land::initDoodads()
+void Land::initStaticObjects()
 {
     // struct CLandBlockInfo
     vector<uint8_t> blob = Core::get().cellDat().read(data_.fileId - 1);
@@ -321,30 +321,30 @@ void Land::initDoodads()
 
     numStructures_ = reader.readInt();
 
-    uint16_t numDoodads = reader.readShort();
+    uint16_t numStaticObjects = reader.readShort();
 
     uint16_t unk1 = reader.readShort();
     assert(unk1 == 0);
 
-    doodads_.reserve(numDoodads);
+    staticObjects_.reserve(numStaticObjects);
 
-    for(uint16_t di = 0; di < numDoodads; di++)
+    for(uint16_t di = 0; di < numStaticObjects; di++)
     {
-        doodads_.emplace_back(reader);
+        staticObjects_.emplace_back(reader);
     }
 
-    uint16_t numDoodadsEx = reader.readShort();
+    uint16_t numStaticObjectsEx = reader.readShort();
 
     // I don't know what this is, but it means there's more data
     uint16_t unk2 = reader.readShort();
     assert(unk2 == 0 || unk2 == 1);
 
-    doodads_.reserve(numDoodads + numDoodadsEx);
+    staticObjects_.reserve(numStaticObjects + numStaticObjectsEx);
 
-    for(uint16_t di = 0; di < numDoodadsEx; di++)
+    for(uint16_t di = 0; di < numStaticObjectsEx; di++)
     {
         // struct BuildInfo
-        doodads_.emplace_back(reader);
+        staticObjects_.emplace_back(reader);
 
         /*uint32_t numLeaves = */reader.readInt();
         uint32_t numPortals = reader.readInt();
@@ -477,10 +477,10 @@ void Land::initScene(int x, int y, const Scene& scene)
         glm::mat4 rotateMat = glm::mat4_cast(rotation);
         glm::mat4 scaleMat = glm::scale(glm::mat4{}, glm::vec3{scale, scale, scale});
 
-        // add doodad
-        Doodad doodad;
-        doodad.resource = Core::get().resourceCache().get(objectDesc.resourceId);
-        doodad.transform = translateMat * rotateMat * scaleMat;
-        doodads_.push_back(doodad);
+        // add static object
+        StaticObject staticObject;
+        staticObject.resource = Core::get().resourceCache().get(objectDesc.resourceId);
+        staticObject.transform = translateMat * rotateMat * scaleMat;
+        staticObjects_.push_back(staticObject);
     }
 }

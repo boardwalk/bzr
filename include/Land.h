@@ -55,7 +55,7 @@ public:
     bool isSplitNESW(int x, int y) const;
 
 private:
-    void initDoodads();
+    void initStaticObjects();
     void initScenes();
     void initScene(int x, int y, const Scene& scene);
 

@@ -20,9 +20,9 @@
 Landcell::~Landcell()
 {}
 
-const vector<Doodad>& Landcell::doodads() const
+const vector<StaticObject>& Landcell::staticObjects() const
 {
-    return doodads_;
+    return staticObjects_;
 }
 
 unique_ptr<Destructable>& Landcell::renderData() const

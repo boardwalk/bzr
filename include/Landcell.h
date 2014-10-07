@@ -19,7 +19,7 @@
 #define BZR_LANDCELL_H
 
 #include "Destructable.h"
-#include "Doodad.h"
+#include "StaticObject.h"
 #include "LandcellId.h"
 #include "Noncopyable.h"
 
@@ -29,11 +29,11 @@ public:
     virtual ~Landcell();
 
     virtual LandcellId id() const = 0;
-    const vector<Doodad>& doodads() const;
+    const vector<StaticObject>& staticObjects() const;
     unique_ptr<Destructable>& renderData() const;
 
 protected:
-    vector<Doodad> doodads_;
+    vector<StaticObject> staticObjects_;
 
 private:
     mutable unique_ptr<Destructable> renderData_;
