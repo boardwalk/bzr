@@ -74,6 +74,6 @@ private:
     vector<PortalPoly> portalPolys_;
 };
 
-unique_ptr<BSPNode> readBSP(BinReader& reader, BSPTreeType::Value treeType);
+void read(BinReader& reader, unique_ptr<BSPNode>& node, BSPTreeType::Value treeType);
 
 #endif

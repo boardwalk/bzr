@@ -25,11 +25,13 @@ class BinReader;
 
 struct AnimationFrame : Noncopyable
 {
-    AnimationFrame(BinReader& reader, uint32_t numModels);
+    AnimationFrame();
     AnimationFrame(AnimationFrame&&);
     AnimationFrame& operator=(AnimationFrame&&);
 
     vector<Location> locations;
 };
+
+void read(BinReader& reader, AnimationFrame& frame, uint32_t numModels);
 
 #endif

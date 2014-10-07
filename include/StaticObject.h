@@ -24,11 +24,10 @@ class BinReader;
 
 struct StaticObject
 {
-    StaticObject();
-    StaticObject(BinReader& reader);
-
     ResourcePtr resource;
     glm::mat4 transform;
 };
+
+void read(BinReader& reader, StaticObject& staticObject);
 
 #endif

@@ -30,10 +30,40 @@ enum AnimationStripFlags
 AnimationStrip::AnimationStrip()
 {}
 
-void AnimationStrip::read(BinReader& reader)
+AnimationStrip::AnimationStrip(AnimationStrip&& other)
+{
+    animInfos = move(other.animInfos);
+}
+
+AnimationStrip& AnimationStrip::operator=(AnimationStrip&& other)
+{
+    animInfos = move(other.animInfos);
+    return *this;
+}
+
+static void read(BinReader& reader, AnimationStrip::AnimInfo& animInfo)
+{
+    uint32_t animId = reader.readInt();
+    animInfo.resource = Core::get().resourceCache().get(animId);
+    animInfo.firstFrame = reader.readInt();
+    animInfo.lastFrame = reader.readInt();
+    animInfo.framesPerSecond = reader.readFloat();
+
+    if(animInfo.lastFrame == 0xffffffff)
+    {
+        animInfo.lastFrame = static_cast<uint32_t>(animInfo.resource->cast<Animation>().frames.size() - 1);
+    }
+
+    if(animInfo.framesPerSecond < 0.0f && animInfo.firstFrame < animInfo.lastFrame)
+    {
+        swap(animInfo.firstFrame, animInfo.lastFrame);
+    }    
+}
+
+void read(BinReader& reader, AnimationStrip& animStrip)
 {
     uint8_t numAnims = reader.readByte();
-    animInfos.resize(numAnims);
+    animStrip.animInfos.resize(numAnims);
 
     uint8_t unk1 = reader.readByte();
     assert(unk1 == 0 || unk1 == 1 || unk1 == 2);
@@ -44,23 +74,9 @@ void AnimationStrip::read(BinReader& reader)
     uint8_t unk3 = reader.readByte();
     assert(unk3 == 0);
 
-    for(AnimInfo& animInfo : animInfos)
+    for(AnimationStrip::AnimInfo& animInfo : animStrip.animInfos)
     {
-        uint32_t animId = reader.readInt();
-        animInfo.resource = Core::get().resourceCache().get(animId);
-        animInfo.firstFrame = reader.readInt();
-        animInfo.lastFrame = reader.readInt();
-        animInfo.framesPerSecond = reader.readFloat();
-
-        if(animInfo.lastFrame == 0xffffffff)
-        {
-            animInfo.lastFrame = static_cast<uint32_t>(animInfo.resource->cast<Animation>().frames.size() - 1);
-        }
-
-        if(animInfo.framesPerSecond < 0.0f && animInfo.firstFrame < animInfo.lastFrame)
-        {
-            swap(animInfo.firstFrame, animInfo.lastFrame);
-        }
+        read(reader, animInfo);
     }
 
     if(unk2 == 1 || unk2 == 2)
@@ -69,15 +85,4 @@ void AnimationStrip::read(BinReader& reader)
         reader.readFloat();
         reader.readFloat();
     }
-}
-
-AnimationStrip::AnimationStrip(AnimationStrip&& other)
-{
-    animInfos = move(other.animInfos);
-}
-
-AnimationStrip& AnimationStrip::operator=(AnimationStrip&& other)
-{
-    animInfos = move(other.animInfos);
-    return *this;
 }

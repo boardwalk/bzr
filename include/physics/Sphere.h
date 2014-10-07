@@ -22,10 +22,10 @@ class BinReader;
 
 struct Sphere
 {
-    void read(BinReader& reader);
-    
     glm::vec3 center;
     fp_t radius;
 };
+
+void read(BinReader& reader, Sphere& sphere);
 
 #endif

@@ -19,57 +19,57 @@
 #include "BinReader.h"
 #include "Land.h"
 
-Scene::ObjectDesc::ObjectDesc(BinReader& reader)
+static void read(BinReader& reader, Scene::ObjectDesc& objectDesc)
 {
-    resourceId = reader.readInt();
-    assert(resourceId == 0 || (resourceId & 0xFF000000) == ResourceType::kModel || (resourceId & 0xFF000000) == ResourceType::kModelGroup);
+    objectDesc.resourceId = reader.readInt();
+    assert(objectDesc.resourceId == 0 || (objectDesc.resourceId & 0xFF000000) == ResourceType::kModel || (objectDesc.resourceId & 0xFF000000) == ResourceType::kModelGroup);
 
-    position.x = reader.readFloat();
-    assert(position.x >= -Land::kCellSize && position.x <= Land::kCellSize);
+    objectDesc.position.x = reader.readFloat();
+    assert(objectDesc.position.x >= -Land::kCellSize && objectDesc.position.x <= Land::kCellSize);
 
-    position.y = reader.readFloat();
-    assert(position.y >= -Land::kCellSize && position.y <= Land::kCellSize);
+    objectDesc.position.y = reader.readFloat();
+    assert(objectDesc.position.y >= -Land::kCellSize && objectDesc.position.y <= Land::kCellSize);
 
-    position.z = reader.readFloat();
+    objectDesc.position.z = reader.readFloat();
 
-    rotation.w = reader.readFloat();
-    rotation.x = reader.readFloat();
-    rotation.y = reader.readFloat();
-    rotation.z = reader.readFloat();
+    objectDesc.rotation.w = reader.readFloat();
+    objectDesc.rotation.x = reader.readFloat();
+    objectDesc.rotation.y = reader.readFloat();
+    objectDesc.rotation.z = reader.readFloat();
 
-    frequency = reader.readFloat();
-    assert(frequency >= 0.0 && frequency <= 1.0);
+    objectDesc.frequency = reader.readFloat();
+    assert(objectDesc.frequency >= 0.0 && objectDesc.frequency <= 1.0);
 
-    displace.x = reader.readFloat();
-    assert(displace.x >= -Land::kCellSize && displace.x <= Land::kCellSize);
+    objectDesc.displace.x = reader.readFloat();
+    assert(objectDesc.displace.x >= -Land::kCellSize && objectDesc.displace.x <= Land::kCellSize);
 
-    displace.y = reader.readFloat();
-    assert(displace.y >= -Land::kCellSize && displace.y <= Land::kCellSize);
+    objectDesc.displace.y = reader.readFloat();
+    assert(objectDesc.displace.y >= -Land::kCellSize && objectDesc.displace.y <= Land::kCellSize);
 
-    minScale = reader.readFloat();
-    assert(minScale >= 0.0f);
+    objectDesc.minScale = reader.readFloat();
+    assert(objectDesc.minScale >= 0.0f);
 
-    maxScale = reader.readFloat();
-    assert(maxScale >= 0.0f);
-    assert(minScale <= maxScale);
+    objectDesc.maxScale = reader.readFloat();
+    assert(objectDesc.maxScale >= 0.0f);
+    assert(objectDesc.minScale <= objectDesc.maxScale);
 
-    maxRotation = reader.readFloat();
-    assert(maxRotation >= 0.0 && maxRotation <= 360.0);
+    objectDesc.maxRotation = reader.readFloat();
+    assert(objectDesc.maxRotation >= 0.0 && objectDesc.maxRotation <= 360.0);
 
-    minSlope = reader.readFloat();
-    maxSlope = reader.readFloat();
+    objectDesc.minSlope = reader.readFloat();
+    objectDesc.maxSlope = reader.readFloat();
 
     uint32_t intAlign = reader.readInt();
     assert(intAlign == 0 || intAlign == 1);
-    align = (intAlign != 0);
+    objectDesc.align = (intAlign != 0);
 
     uint32_t intOrient = reader.readInt();
     assert(intOrient == 0 || intOrient == 1);
-    orient = (intOrient != 0);
+    objectDesc.orient = (intOrient != 0);
 
     uint32_t intIsWeenieObj = reader.readInt();
     assert(intIsWeenieObj == 0 || intIsWeenieObj == 1);
-    isWeenieObj = (intIsWeenieObj != 0);
+    objectDesc.isWeenieObj = (intIsWeenieObj != 0);
 }
 
 Scene::Scene(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
@@ -80,10 +80,10 @@ Scene::Scene(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
     assert(resourceId == id);
 
     uint32_t numObjects = reader.readInt();
-    objects.reserve(numObjects);
+    objects.resize(numObjects);
 
-    for(uint32_t i = 0; i < numObjects; i++)
+    for(ObjectDesc& objectDesc : objects)
     {
-        objects.emplace_back(reader);
+        read(reader, objectDesc);
     }
 }

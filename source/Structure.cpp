@@ -57,7 +57,7 @@ Structure::Structure(const void* data, size_t size)
     uint16_t environmentId = reader.readShort();
     environment_ = Core::get().resourceCache().get(ResourceType::kEnvironment | environmentId);
     partNum_ = reader.readShort();
-    location_.read(reader);
+    read(reader, location_);
 
     // struct CCellPortal
     for(uint8_t i = 0; i < numConnected; i++)
@@ -76,11 +76,11 @@ Structure::Structure(const void* data, size_t size)
     if(flags & kHasStaticObjects)
     {
         uint32_t numStaticObjects = reader.readInt();
-        staticObjects_.reserve(numStaticObjects);
+        staticObjects_.resize(numStaticObjects);
 
-        for(uint32_t i = 0; i < numStaticObjects; i++)
+        for(StaticObject& staticObject : staticObjects_)
         {
-            staticObjects_.emplace_back(reader);
+            read(reader, staticObject);
         }
     }
 

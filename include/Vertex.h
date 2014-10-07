@@ -23,11 +23,11 @@ class BinReader;
 // struct CSWVertex
 struct Vertex
 {
-    void read(BinReader& reader);
-
     glm::vec3 position;
     glm::vec3 normal;
     vector<glm::vec2> texCoords;
 };
+
+void read(BinReader& reader, Vertex& vertex);
 
 #endif

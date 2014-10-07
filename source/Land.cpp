@@ -326,11 +326,11 @@ void Land::initStaticObjects()
     uint16_t unk1 = reader.readShort();
     assert(unk1 == 0);
 
-    staticObjects_.reserve(numStaticObjects);
+    staticObjects_.resize(numStaticObjects);
 
-    for(uint16_t i = 0; i < numStaticObjects; i++)
+    for(auto& staticObject : staticObjects_)
     {
-        staticObjects_.emplace_back(reader);
+        read(reader, staticObject);
     }
 
     uint16_t numStaticObjectsEx = reader.readShort();
@@ -339,12 +339,12 @@ void Land::initStaticObjects()
     uint16_t unk2 = reader.readShort();
     assert(unk2 == 0 || unk2 == 1);
 
-    staticObjects_.reserve(numStaticObjects + numStaticObjectsEx);
+    staticObjects_.resize(numStaticObjects + numStaticObjectsEx);
 
     for(uint16_t i = 0; i < numStaticObjectsEx; i++)
     {
         // struct BuildInfo
-        staticObjects_.emplace_back(reader);
+        read(reader, staticObjects_[numStaticObjects + i]);
 
         /*uint32_t numLeaves = */reader.readInt();
         uint32_t numPortals = reader.readInt();

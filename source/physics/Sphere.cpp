@@ -18,10 +18,10 @@
 #include "physics/Sphere.h"
 #include "BinReader.h"
 
-void Sphere::read(BinReader& reader)
+void read(BinReader& reader, Sphere& sphere)
 {
-    center.x = reader.readFloat();
-    center.y = reader.readFloat();
-    center.z = reader.readFloat();
-    radius = reader.readFloat();
+    sphere.center.x = reader.readFloat();
+    sphere.center.y = reader.readFloat();
+    sphere.center.z = reader.readFloat();
+    sphere.radius = reader.readFloat();
 }

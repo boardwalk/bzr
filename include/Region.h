@@ -26,22 +26,16 @@ struct Region : public ResourceImpl<ResourceType::kRegion>
 {
     struct SceneType
     {
-        void read(BinReader& reader);
-
         vector<ResourcePtr> scenes;
     };
 
     struct TerrainType
     {
-        void read(BinReader& reader);
-
         vector<uint32_t> sceneTypes;
     };
 
     struct TerrainTex
     {
-        void read(BinReader& reader);
-
         uint32_t resourceId;
     };
 

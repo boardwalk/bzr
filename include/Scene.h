@@ -26,8 +26,6 @@ struct Scene : public ResourceImpl<ResourceType::kScene>
 {
     struct ObjectDesc
     {
-        ObjectDesc(BinReader& reader);
-
         uint32_t resourceId;
         glm::vec3 position;
         glm::quat rotation;

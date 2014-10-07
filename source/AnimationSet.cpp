@@ -73,7 +73,7 @@ AnimationSet::AnimationSet(uint32_t id, const void* data, size_t size) : Resourc
     {
         uint32_t key = reader.readInt();
         assert(cycles.find(key) == cycles.end());
-        cycles[key].read(reader);
+        read(reader, cycles[key]);
     }
 
     uint32_t numModifiers = reader.readInt();
@@ -83,7 +83,7 @@ AnimationSet::AnimationSet(uint32_t id, const void* data, size_t size) : Resourc
     {
         uint32_t key = reader.readInt();
         assert(modifiers.find(key) == modifiers.end());
-        modifiers[key].read(reader);
+        read(reader, modifiers[key]);
     }
 
     uint32_t numLinks = reader.readInt();
@@ -102,7 +102,7 @@ AnimationSet::AnimationSet(uint32_t id, const void* data, size_t size) : Resourc
         {
             uint32_t innerKey = reader.readInt();
             assert(innerLinks.find(innerKey) == innerLinks.end());
-            innerLinks[innerKey].read(reader);
+            read(reader, innerLinks[innerKey]);
         }
     }
 

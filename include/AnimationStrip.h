@@ -39,9 +39,9 @@ struct AnimationStrip : Noncopyable
     AnimationStrip(AnimationStrip&&);
     AnimationStrip& operator=(AnimationStrip&&);
 
-    void read(BinReader& reader);
-
     vector<AnimInfo> animInfos;
 };
+
+void read(BinReader& reader, AnimationStrip& animStrip);
 
 #endif

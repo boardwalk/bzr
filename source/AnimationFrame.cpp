@@ -49,13 +49,27 @@ enum AnimHooks
     kCreateBlockingParticle = 0x001a
 };
 
-AnimationFrame::AnimationFrame(BinReader& reader, uint32_t numModels)
-{
-    locations.resize(numModels);
+AnimationFrame::AnimationFrame()
+{}
 
-    for(uint32_t i = 0 ; i < numModels; i++)
+AnimationFrame::AnimationFrame(AnimationFrame&& other)
+{
+    locations = move(other.locations);
+}
+
+AnimationFrame& AnimationFrame::operator=(AnimationFrame&& other)
+{
+    locations = move(other.locations);
+    return *this;
+}
+
+void read(BinReader& reader, AnimationFrame& frame, uint32_t numModels)
+{
+    frame.locations.resize(numModels);
+
+    for(Location& loc : frame.locations)
     {
-        locations[i].read(reader);
+        read(reader, loc);
     }
 
     uint32_t numHooks = reader.readInt();
@@ -179,15 +193,4 @@ AnimationFrame::AnimationFrame(BinReader& reader, uint32_t numModels)
 
         reader.readRaw(hookSize * sizeof(uint32_t));
     }
-}
-
-AnimationFrame::AnimationFrame(AnimationFrame&& other)
-{
-    locations = move(other.locations);
-}
-
-AnimationFrame& AnimationFrame::operator=(AnimationFrame&& other)
-{
-    locations = move(other.locations);
-    return *this;
 }

@@ -39,15 +39,16 @@ Animation::Animation(uint32_t id, const void* data, size_t size) : ResourceImpl{
     {
         for(uint32_t i = 0; i < numFrames; i++)
         {
-            Location().read(reader);
+            Location posFrame;
+            read(reader, posFrame);
         }
     }
 
-    frames.reserve(numFrames);
+    frames.resize(numFrames);
 
-    for(uint32_t i = 0; i < numFrames; i++)
+    for(AnimationFrame& frame : frames)
     {
-        frames.emplace_back(reader, numModels);
+        read(reader, frame, numModels);
     }
 
     reader.assertEnd();

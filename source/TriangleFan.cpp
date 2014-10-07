@@ -37,29 +37,29 @@ enum SidesType
     kBoth = 2
 };
 
-void TriangleFan::read(BinReader& reader)
+void read(BinReader& reader, TriangleFan& trifan)
 {
     uint8_t numIndices = reader.readByte();
-    indices.resize(numIndices);
+    trifan.indices.resize(numIndices);
 
-    stipplingType = reader.readByte();
-    assert(stipplingType == kNoStippling || stipplingType == kPositiveStippling || stipplingType == kNoPosUVs);
+    trifan.stipplingType = reader.readByte();
+    assert(trifan.stipplingType == kNoStippling || trifan.stipplingType == kPositiveStippling || trifan.stipplingType == kNoPosUVs);
 
     uint32_t sidesType = reader.readInt();
     assert(sidesType == kSingle || sidesType == kDouble || sidesType == kBoth);
 
-    surfaceIndex = reader.readShort();
+    trifan.surfaceIndex = reader.readShort();
 
     reader.readShort();
 
-    for(Index& index : indices)
+    for(TriangleFan::Index& index : trifan.indices)
     {
         index.vertexIndex = reader.readShort();
     }
 
-    if(stipplingType != kNoPosUVs)
+    if(trifan.stipplingType != kNoPosUVs)
     {
-        for(Index& index : indices)
+        for(TriangleFan::Index& index : trifan.indices)
         {
             index.texCoordIndex = reader.readByte();
         }

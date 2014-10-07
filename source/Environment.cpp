@@ -21,10 +21,10 @@
 #include "TriangleFan.h"
 #include "Vertex.h"
 
-Environment::Part::Part()
+EnvironmentPart::EnvironmentPart()
 {}
 
-Environment::Part::Part(Part&& other)
+EnvironmentPart::EnvironmentPart(EnvironmentPart&& other)
 {
     vertices = move(other.vertices);
     triangleFans = move(other.triangleFans);
@@ -32,10 +32,10 @@ Environment::Part::Part(Part&& other)
     hitTree = move(other.hitTree);
 }
 
-Environment::Part::~Part()
+EnvironmentPart::~EnvironmentPart()
 {}
 
-Environment::Part& Environment::Part::operator=(Part&& other)
+EnvironmentPart& EnvironmentPart::operator=(EnvironmentPart&& other)
 {
     vertices = move(other.vertices);
     triangleFans = move(other.triangleFans);
@@ -44,13 +44,13 @@ Environment::Part& Environment::Part::operator=(Part&& other)
     return *this;
 }
 
-void Environment::Part::read(BinReader& reader)
+static void read(BinReader& reader, EnvironmentPart& part)
 {
     uint32_t numTriangleFans = reader.readInt();
-    triangleFans.resize(numTriangleFans);
+    part.triangleFans.resize(numTriangleFans);
 
     uint32_t numHitTriangleFans = reader.readInt();
-    hitTriangleFans.resize(numHitTriangleFans);
+    part.hitTriangleFans.resize(numHitTriangleFans);
 
     uint32_t numPortals = reader.readInt();
 
@@ -58,14 +58,14 @@ void Environment::Part::read(BinReader& reader)
     assert(unk5 == 1);
 
     uint32_t numVertices = reader.readInt();
-    vertices.resize(numVertices);
+    part.vertices.resize(numVertices);
 
     for(uint32_t i = 0; i < numVertices; i++)
     {
         uint16_t vertexNum = reader.readShort();
         assert(vertexNum == i);
 
-        vertices[i].read(reader);
+        read(reader, part.vertices[i]);
     }
 
     for(uint32_t i = 0; i < numTriangleFans; i++)
@@ -73,7 +73,7 @@ void Environment::Part::read(BinReader& reader)
         uint16_t triangleFanNum = reader.readShort();
         assert(triangleFanNum == i);
 
-        triangleFans[i].read(reader);
+        read(reader, part.triangleFans[i]);
     }
 
     for(uint32_t i = 0; i < numPortals; i++)
@@ -82,24 +82,27 @@ void Environment::Part::read(BinReader& reader)
     }
     reader.align();
 
-    readBSP(reader, BSPTreeType::kCell);
+    unique_ptr<BSPNode> cellBSP;
+    read(reader, cellBSP, BSPTreeType::kCell);
 
     for(uint32_t i = 0; i < numHitTriangleFans; i++)
     {
         uint16_t triangleFanNum = reader.readShort();
         assert(triangleFanNum == i);
 
-        hitTriangleFans[i].read(reader);
+        read(reader, part.hitTriangleFans[i]);
     }
-
-    readBSP(reader, BSPTreeType::kPhysics);
+    
+    unique_ptr<BSPNode> physicsBSP;
+    read(reader, physicsBSP, BSPTreeType::kPhysics);
 
     uint32_t hasDrawingBSP = reader.readInt();
     assert(hasDrawingBSP == 0 || hasDrawingBSP == 1);
 
     if(hasDrawingBSP)
     {
-        readBSP(reader, BSPTreeType::kDrawing);
+        unique_ptr<BSPNode> drawingBSP;
+        read(reader, drawingBSP, BSPTreeType::kDrawing);
     }
 
     reader.align();
@@ -120,7 +123,7 @@ Environment::Environment(uint32_t id, const void* data, size_t size) : ResourceI
         uint32_t partNum = reader.readInt();
         assert(partNum == i);
 
-        parts[i].read(reader);
+        read(reader, parts[i]);
     }
 
     reader.assertEnd();

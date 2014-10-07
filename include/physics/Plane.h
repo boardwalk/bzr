@@ -22,10 +22,10 @@ class BinReader;
 
 struct Plane
 {
-    void read(BinReader& reader);
-    
     glm::vec3 normal;
     fp_t dist;
 };
+
+void read(BinReader& reader, Plane& plane);
 
 #endif

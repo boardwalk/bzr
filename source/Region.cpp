@@ -34,14 +34,14 @@ static void readAlphaTex(BinReader& reader)
     }
 }
 
-void Region::SceneType::read(BinReader& reader)
+static void read(BinReader& reader, Region::SceneType& sceneType)
 {
     /*uint32_t sceneTypeUnk = */reader.readInt();
 
     uint32_t sceneCount = reader.readInt();
-    scenes.resize(sceneCount);
+    sceneType.scenes.resize(sceneCount);
 
-    for(ResourcePtr& scene : scenes)
+    for(ResourcePtr& scene : sceneType.scenes)
     {
         uint32_t resourceId = reader.readInt();
         assert((resourceId & 0xFF000000) == 0x12000000);
@@ -50,24 +50,24 @@ void Region::SceneType::read(BinReader& reader)
     }
 }
 
-void Region::TerrainType::read(BinReader& reader)
+static void read(BinReader& reader, Region::TerrainType& terrainType)
 {
     string terrainName = reader.readString();
     /*uint32_t terrainColor = */reader.readInt();
 
     uint32_t numSceneTypes = reader.readInt();
-    sceneTypes.resize(numSceneTypes);
+    terrainType.sceneTypes.resize(numSceneTypes);
 
-    for(uint32_t& sceneType : sceneTypes)
+    for(uint32_t& sceneType : terrainType.sceneTypes)
     {
         sceneType = reader.readInt();
     }
 }
 
-void Region::TerrainTex::read(BinReader& reader)
+static void read(BinReader& reader, Region::TerrainTex& terrainTex)
 {
-    resourceId = reader.readInt();
-    assert((resourceId & 0xFF000000) == 0x05000000);
+    terrainTex.resourceId = reader.readInt();
+    assert((terrainTex.resourceId & 0xFF000000) == 0x05000000);
 
     /*uint32_t texTiling = */reader.readInt();
 
@@ -155,7 +155,7 @@ Region::Region(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 
     for(SceneType& sceneType : sceneTypes)
     {
-        sceneType.read(reader);
+        read(reader, sceneType);
     }
 
     uint32_t numTerrainTypes = reader.readInt();
@@ -163,7 +163,7 @@ Region::Region(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 
     for(TerrainType& terrainType : terrainTypes)
     {
-        terrainType.read(reader);
+        read(reader, terrainType);
     }
 
     uint32_t unk3 = reader.readInt();
@@ -184,7 +184,7 @@ Region::Region(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
         uint32_t terrainTexNum = reader.readInt();
         assert(terrainTexNum == i);
 
-        terrainTextures[i].read(reader);
+        read(reader, terrainTextures[i]);
     }
 
     uint32_t unk5 = reader.readInt();

@@ -87,7 +87,8 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
         /*key*/ reader.readInt();
         /*partIndex*/ reader.readInt();
 
-        Location().read(reader);
+        Location holdingLocation;
+        read(reader, holdingLocation);
     }
 
     uint32_t numConnectionPoints = reader.readInt();
@@ -98,31 +99,34 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
         /*key*/ reader.readInt();
         /*partIndex*/ reader.readInt();
 
-        Location().read(reader);
+        Location connectionPoint;
+        read(reader, connectionPoint);
     }
 
     uint32_t numPlacementFrames = reader.readInt();
-    placementFrames.reserve(numPlacementFrames);
+    placementFrames.resize(numPlacementFrames);
 
-    for(uint32_t i = 0; i < numPlacementFrames; i++)
+    for(AnimationFrame& frame : placementFrames)
     {
         /*key*/ reader.readInt();
 
-        placementFrames.emplace_back(reader, numModels);
+        read(reader, frame, numModels);
     }
 
     uint32_t numCylSpheres = reader.readInt();
 
     for(uint32_t i = 0; i < numCylSpheres; i++)
     {
-        CylSphere().read(reader);
+        CylSphere cylSphere;
+        read(reader, cylSphere);
     }
 
     uint32_t numSpheres = reader.readInt();
 
     for(uint32_t i = 0; i < numSpheres; i++)
     {
-        Sphere().read(reader);
+        Sphere sphere;
+        read(reader, sphere);
     }
 
     /*height*/ reader.readFloat();
@@ -130,11 +134,11 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
     /*stepUpHeight*/ reader.readFloat();
     /*stepDownHeight*/ reader.readFloat();
 
-    // sorting sphere
-    Sphere().read(reader);
+    Sphere sortingSphere;
+    read(reader, sortingSphere);
 
-    // selection sphere
-    Sphere().read(reader);
+    Sphere selectionSphere;
+    read(reader, selectionSphere);
 
     uint32_t numLights = reader.readInt();
 
@@ -143,7 +147,8 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
         uint32_t lightIndex = reader.readInt();
         assert(lightIndex == i);
 
-        Location().read(reader);
+        Location lightLocation;
+        read(reader, lightLocation);
 
         /*color*/ reader.readInt();
         /*intensity*/ reader.readFloat();

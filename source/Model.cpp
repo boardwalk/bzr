@@ -42,7 +42,7 @@ static vector<TriangleFan> readTriangleFans(BinReader& reader)
         uint16_t triangleFanNum = reader.readShort();
         assert(triangleFanNum == i);
 
-        triangleFans[i].read(reader);
+        read(reader, triangleFans[i]);
     }
 
     return triangleFans;
@@ -87,13 +87,13 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl{id}, nee
         uint16_t vertexNum = reader.readShort();
         assert(vertexNum == i);
 
-        vertices[i].read(reader);
+        read(reader, vertices[i]);
     }
 
     if(flags & kHasPhysicsBSP)
     {
         hitTriangleFans = readTriangleFans(reader);
-        hitTree = readBSP(reader, BSPTreeType::kPhysics);
+        read(reader, hitTree, BSPTreeType::kPhysics);
     }
 
     // sort center
@@ -104,7 +104,9 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl{id}, nee
     if(flags & kHasDrawingBSP)
     {
         triangleFans = readTriangleFans(reader);
-        readBSP(reader, BSPTreeType::kDrawing);
+
+        unique_ptr<BSPNode> drawingBSP;
+        read(reader, drawingBSP, BSPTreeType::kDrawing);
     }
 
     if(flags & kHasDegrade)

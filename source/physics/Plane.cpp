@@ -18,10 +18,10 @@
 #include "physics/Plane.h"
 #include "BinReader.h"
 
-void Plane::read(BinReader& reader)
+void read(BinReader& reader, Plane& plane)
 {
-    normal.x = reader.readFloat();
-    normal.y = reader.readFloat();
-    normal.z = reader.readFloat();
-    dist = reader.readFloat();
+    plane.normal.x = reader.readFloat();
+    plane.normal.y = reader.readFloat();
+    plane.normal.z = reader.readFloat();
+    plane.dist = reader.readFloat();
 }

@@ -52,7 +52,7 @@ MeshRenderData::MeshRenderData(const Model& model)
 MeshRenderData::MeshRenderData(const Structure& structure)
 {
     assert(structure.partNum() < structure.environment().parts.size());
-    const Environment::Part& part = structure.environment().parts[structure.partNum()];
+    const EnvironmentPart& part = structure.environment().parts[structure.partNum()];
 
     init(structure.surfaces(),
         part.vertices,

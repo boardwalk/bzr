@@ -35,11 +35,11 @@ struct TriangleFan
     TriangleFan() : surfaceIndex(0)
     {}
 
-    void read(BinReader& reader);
-
     uint8_t stipplingType;
     int surfaceIndex;
     vector<Index> indices;
 };
+
+void read(BinReader& reader, TriangleFan& trifan);
 
 #endif

@@ -22,11 +22,11 @@ class BinReader;
 
 struct CylSphere
 {
-    void read(BinReader& reader);
-    
     glm::vec3 lowPoint;
     float radius;
     float height;
 };
+
+void read(BinReader& reader, CylSphere& cylSphere);
 
 #endif

@@ -18,20 +18,20 @@
 #include "Vertex.h"
 #include "BinReader.h"
 
-void Vertex::read(BinReader& reader)
+void read(BinReader& reader, Vertex& vertex)
 {
     uint16_t numTexCoords = reader.readShort();
-    texCoords.resize(numTexCoords);
+    vertex.texCoords.resize(numTexCoords);
 
-    position.x = reader.readFloat();
-    position.y = reader.readFloat();
-    position.z = reader.readFloat();
+    vertex.position.x = reader.readFloat();
+    vertex.position.y = reader.readFloat();
+    vertex.position.z = reader.readFloat();
 
-    normal.x = reader.readFloat();
-    normal.y = reader.readFloat();
-    normal.z = reader.readFloat();
+    vertex.normal.x = reader.readFloat();
+    vertex.normal.y = reader.readFloat();
+    vertex.normal.z = reader.readFloat();
 
-    for(glm::vec2& texCoord : texCoords)
+    for(glm::vec2& texCoord : vertex.texCoords)
     {
         texCoord.x = reader.readFloat();
         texCoord.y = reader.readFloat();

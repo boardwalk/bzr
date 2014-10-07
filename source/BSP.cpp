@@ -24,25 +24,25 @@ BSPNode::BSPNode()
 
 BSPNode::BSPNode(BinReader& reader, BSPTreeType::Value treeType, uint32_t nodeType)
 {
-    partition_.read(reader);
+    read(reader, partition_);
 
     if(nodeType == 0x42506e6e || nodeType == 0x4250496e) // BPnn, BPIn
     {
-        frontChild_ = readBSP(reader, treeType);
+        read(reader, frontChild_, treeType);
     }
     else if(nodeType == 0x4270494e || nodeType == 0x42706e4e) // BpIN, BpnN
     {
-        backChild_ = readBSP(reader, treeType);
+        read(reader, backChild_ , treeType);
     }
     else if(nodeType == 0x4250494e || nodeType == 0x42506e4e) // BPIN, BPnN
     {
-        frontChild_ = readBSP(reader, treeType);
-        backChild_ = readBSP(reader, treeType);
+        read(reader, frontChild_, treeType);
+        read(reader, backChild_, treeType);
     }
 
     if(treeType == BSPTreeType::kDrawing || treeType == BSPTreeType::kPhysics)
     {
-        bounds_.read(reader);
+        read(reader, bounds_);
     }
 
     if(treeType == BSPTreeType::kDrawing)
@@ -66,7 +66,7 @@ BSPLeaf::BSPLeaf(BinReader& reader, BSPTreeType::Value treeType)
         // if 1, sphere parameters are valid and there are indices
         solid_ = reader.readInt();
 
-        bounds_.read(reader);
+        read(reader, bounds_);
 
         uint32_t triCount = reader.readInt();
         triangleIndices_.resize(triCount);
@@ -80,14 +80,13 @@ BSPLeaf::BSPLeaf(BinReader& reader, BSPTreeType::Value treeType)
 
 BSPPortal::BSPPortal(BinReader& reader, BSPTreeType::Value treeType)
 {
-    partition_.read(reader);
-
-    frontChild_ = readBSP(reader, treeType);
-    backChild_ = readBSP(reader, treeType);
+    read(reader, partition_);
+    read(reader, frontChild_, treeType);
+    read(reader, backChild_, treeType);
 
     if(treeType == BSPTreeType::kDrawing)
     {
-        bounds_.read(reader);
+        read(reader, bounds_);
 
         uint32_t triCount = reader.readInt();
         triangleIndices_.resize(triCount);
@@ -108,20 +107,20 @@ BSPPortal::BSPPortal(BinReader& reader, BSPTreeType::Value treeType)
     }
 }
 
-unique_ptr<BSPNode> readBSP(BinReader& reader, BSPTreeType::Value treeType)
+void read(BinReader& reader, unique_ptr<BSPNode>& node, BSPTreeType::Value treeType)
 {
     uint32_t nodeType = reader.readInt();
 
     if(nodeType == 0x4c454146) // LEAF
     {
-        return unique_ptr<BSPNode>(new BSPLeaf{reader, treeType});
+        node.reset(new BSPLeaf{reader, treeType});
     }
     else if(nodeType == 0x504f5254) // PORT
     {
-        return unique_ptr<BSPNode>(new BSPPortal{reader, treeType});
+        node.reset(new BSPPortal{reader, treeType});
     }
     else
     {
-        return unique_ptr<BSPNode>(new BSPNode{reader, treeType, nodeType});
+        node.reset(new BSPNode{reader, treeType, nodeType});
     }
 }

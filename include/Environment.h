@@ -25,27 +25,25 @@ class BSPNode;
 struct Vertex;
 struct TriangleFan;
 
+// struct CCellStruct
+struct EnvironmentPart
+{
+    EnvironmentPart();
+    EnvironmentPart(EnvironmentPart&&);
+    ~EnvironmentPart();
+    EnvironmentPart& operator=(EnvironmentPart&&);
+
+    vector<Vertex> vertices;
+    vector<TriangleFan> triangleFans;
+    vector<TriangleFan> hitTriangleFans;
+    unique_ptr<BSPNode> hitTree;
+};
+
 struct Environment : public ResourceImpl<ResourceType::kEnvironment>
 {
-    // struct CCellStruct
-    struct Part
-    {
-        Part();
-        Part(Part&&);
-        ~Part();
-        Part& operator=(Part&&);
-
-        void read(BinReader& reader);
-
-        vector<Vertex> vertices;
-        vector<TriangleFan> triangleFans;
-        vector<TriangleFan> hitTriangleFans;
-        unique_ptr<BSPNode> hitTree;
-    };
-
     Environment(uint32_t id, const void* data, size_t size);
 
-    vector<Part> parts;
+    vector<EnvironmentPart> parts;
 };
 
 #endif
