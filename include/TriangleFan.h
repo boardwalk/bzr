@@ -20,7 +20,7 @@
 
 class BinReader;
 
-// struct CPolygon
+// AC: CPolygon
 struct TriangleFan
 {
     struct Index

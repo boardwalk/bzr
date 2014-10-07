@@ -311,7 +311,7 @@ bool Land::isSplitNESW(int x, int y) const
 
 void Land::initStaticObjects()
 {
-    // struct CLandBlockInfo
+    // AC: CLandBlockInfo
     vector<uint8_t> blob = Core::get().cellDat().read(data_.fileId - 1);
 
     BinReader reader(blob.data(), blob.size());
@@ -343,7 +343,7 @@ void Land::initStaticObjects()
 
     for(uint16_t i = 0; i < numStaticObjectsEx; i++)
     {
-        // struct BuildInfo
+        // AC: BuildInfo
         read(reader, staticObjects_[numStaticObjects + i]);
 
         /*uint32_t numLeaves = */reader.readInt();
@@ -351,14 +351,14 @@ void Land::initStaticObjects()
 
         for(uint32_t pi = 0; pi < numPortals; pi++)
         {
-            // struct CBldPortal
+            // AC: CBldPortal
             reader.readInt();
             reader.readShort();
             uint16_t numVisible = reader.readShort();
 
             for(uint16_t vi = 0; vi < numVisible; vi++)
             {
-                reader.readShort(); // structure index
+                /*cellId*/ reader.readShort();
             }
 
             reader.align();

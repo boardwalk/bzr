@@ -59,7 +59,7 @@ Structure::Structure(const void* data, size_t size)
     partNum_ = reader.readShort();
     read(reader, location_);
 
-    // struct CCellPortal
+    // AC: CCellPortal
     for(uint8_t i = 0; i < numConnected; i++)
     {
         /*portalSide*/ reader.readShort();

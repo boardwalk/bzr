@@ -25,7 +25,7 @@ class BSPNode;
 struct Vertex;
 struct TriangleFan;
 
-// struct CCellStruct
+// AC: CCellStruct
 struct EnvironmentPart
 {
     EnvironmentPart();
@@ -39,6 +39,7 @@ struct EnvironmentPart
     unique_ptr<BSPNode> hitTree;
 };
 
+// AC: CEnvironment
 struct Environment : public ResourceImpl<ResourceType::kEnvironment>
 {
     Environment(uint32_t id, const void* data, size_t size);

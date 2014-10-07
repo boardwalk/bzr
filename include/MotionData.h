@@ -23,18 +23,18 @@
 
 class BinReader;
 
-// struct CMotionData
+// AC: AnimSequenceNode
+struct AnimInfo
+{
+    ResourcePtr resource;
+    uint32_t firstFrame;
+    uint32_t lastFrame;
+    float framesPerSecond;
+};
+
+// AC: CMotionData
 struct MotionData : Noncopyable
 {
-    // struct AnimSequenceNode
-    struct AnimInfo
-    {
-        ResourcePtr resource;
-        uint32_t firstFrame;
-        uint32_t lastFrame;
-        float framesPerSecond;
-    };
-
     MotionData();    
     MotionData(MotionData&&);
     MotionData& operator=(MotionData&&);

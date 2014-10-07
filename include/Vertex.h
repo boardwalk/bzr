@@ -20,7 +20,7 @@
 
 class BinReader;
 
-// struct CSWVertex
+// AC: CSWVertex
 struct Vertex
 {
     glm::vec3 position;

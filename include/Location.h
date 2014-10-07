@@ -20,7 +20,7 @@
 
 class BinReader;
 
-// struct LocationType
+// AC: LocationType
 struct Location
 {
     glm::vec3 position;

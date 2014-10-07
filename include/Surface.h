@@ -20,7 +20,7 @@
 
 #include "Resource.h"
 
-// struct CSurface
+// AC: CSurface
 struct Surface : public ResourceImpl<ResourceType::kSurface>
 {
     Surface(uint32_t id, const void* data, size_t size);

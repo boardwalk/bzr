@@ -21,6 +21,7 @@
 #include "AnimationFrame.h"
 #include "Resource.h"
 
+// AC: CAnimation
 struct Animation : public ResourceImpl<ResourceType::kAnimation>
 {
     Animation(uint32_t id, const void* data, size_t size);

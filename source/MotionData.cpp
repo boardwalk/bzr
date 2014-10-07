@@ -41,7 +41,7 @@ MotionData& MotionData::operator=(MotionData&& other)
     return *this;
 }
 
-static void read(BinReader& reader, MotionData::AnimInfo& animInfo)
+static void read(BinReader& reader, AnimInfo& animInfo)
 {
     uint32_t animId = reader.readInt();
     animInfo.resource = Core::get().resourceCache().get(animId);
@@ -74,7 +74,7 @@ void read(BinReader& reader, MotionData& animStrip)
     uint8_t unk3 = reader.readByte();
     assert(unk3 == 0);
 
-    for(MotionData::AnimInfo& animInfo : animStrip.animInfos)
+    for(AnimInfo& animInfo : animStrip.animInfos)
     {
         read(reader, animInfo);
     }

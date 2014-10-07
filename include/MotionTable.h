@@ -22,7 +22,7 @@
 #include "Resource.h"
 #include <unordered_map>
 
-// struct CMotionTable
+// AC: CMotionTable
 struct MotionTable : public ResourceImpl<ResourceType::kMotionTable>
 {
     MotionTable(uint32_t id, const void* data, size_t size);
