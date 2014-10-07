@@ -18,6 +18,12 @@
 #include "Animation.h"
 #include "BinReader.h"
 
+enum AnimationFlags
+{
+    kHasPosFrames = 0x1,
+    kHasHooks = 0x2
+};
+
 Animation::Animation(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
     BinReader reader(data, size);
@@ -25,15 +31,15 @@ Animation::Animation(uint32_t id, const void* data, size_t size) : ResourceImpl{
     uint32_t resourceId = reader.readInt();
     assert(resourceId == id);
 
-    uint32_t type = reader.readInt();
+    uint32_t flags = reader.readInt();
     uint32_t numModels = reader.readInt();
     uint32_t numFrames = reader.readInt();
 
-    if(type == 1 || type == 3)
+    if(flags & kHasPosFrames)
     {
         for(uint32_t fi = 0; fi < numFrames; fi++)
         {
-            reader.readRaw(7 * sizeof(uint32_t));
+            Location{reader};
         }
     }
 
