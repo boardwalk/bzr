@@ -90,25 +90,16 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl{id}, nee
         vertices[i].read(reader);
     }
 
-    if(flags == kHasDrawingBSP || flags == (kHasDrawingBSP|kHasDegrade))
-    {
-        reader.readFloat();
-        reader.readFloat();
-        reader.readFloat();
-    }
-
     if(flags & kHasPhysicsBSP)
     {
         hitTriangleFans = readTriangleFans(reader);
         hitTree = readBSP(reader, BSPTreeType::kPhysics);
     }
 
-    if(flags == (kHasPhysicsBSP|kHasDrawingBSP) || flags == (kHasPhysicsBSP|kHasDrawingBSP|kHasDegrade))
-    {
-       reader.readFloat();
-       reader.readFloat();
-       reader.readFloat();
-    }
+    // sort center
+    /*x*/ reader.readFloat();
+    /*y*/ reader.readFloat();
+    /*z*/ reader.readFloat();
 
     if(flags & kHasDrawingBSP)
     {
