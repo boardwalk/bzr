@@ -15,14 +15,16 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "StructureGeomPart.h"
+#include "Environment.h"
 #include "BinReader.h"
 #include "BSP.h"
+#include "TriangleFan.h"
+#include "Vertex.h"
 
-StructureGeomPart::StructureGeomPart()
+Environment::Part::Part()
 {}
 
-StructureGeomPart::StructureGeomPart(StructureGeomPart&& other)
+Environment::Part::Part(Part&& other)
 {
     vertices = move(other.vertices);
     triangleFans = move(other.triangleFans);
@@ -30,10 +32,10 @@ StructureGeomPart::StructureGeomPart(StructureGeomPart&& other)
     hitTree = move(other.hitTree);
 }
 
-StructureGeomPart::~StructureGeomPart()
+Environment::Part::~Part()
 {}
 
-StructureGeomPart& StructureGeomPart::operator=(StructureGeomPart&& other)
+Environment::Part& Environment::Part::operator=(Part&& other)
 {
     vertices = move(other.vertices);
     triangleFans = move(other.triangleFans);
@@ -42,7 +44,7 @@ StructureGeomPart& StructureGeomPart::operator=(StructureGeomPart&& other)
     return *this;
 }
 
-void StructureGeomPart::read(BinReader& reader)
+void Environment::Part::read(BinReader& reader)
 {
     uint32_t numTriangleFans = reader.readInt();
     triangleFans.resize(numTriangleFans);
@@ -101,4 +103,25 @@ void StructureGeomPart::read(BinReader& reader)
     }
 
     reader.align();
+}
+
+Environment::Environment(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
+{
+    BinReader reader(data, size);
+
+    uint32_t resourceId = reader.readInt();
+    assert(resourceId == id);
+
+    uint32_t numParts = reader.readInt();
+    parts.resize(numParts);
+
+    for(uint32_t pi = 0; pi < numParts; pi++)
+    {
+        uint32_t partNum = reader.readInt();
+        assert(partNum == pi);
+
+        parts[pi].read(reader);
+    }
+
+    reader.assertEnd();
 }

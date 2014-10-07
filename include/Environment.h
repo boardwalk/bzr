@@ -15,29 +15,36 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_STRUCTUREGEOMPART_H
-#define BZR_STRUCTUREGEOMPART_H
+#ifndef BZR_ENVIRONMENT_H
+#define BZR_ENVIRONMENT_H
 
-#include "Noncopyable.h"
-#include "TriangleFan.h"
-#include "Vertex.h"
+#include "Resource.h"
 
 class BinReader;
 class BSPNode;
+struct Vertex;
+struct TriangleFan;
 
-struct StructureGeomPart : Noncopyable
+struct Environment : public ResourceImpl<ResourceType::kEnvironment>
 {
-    StructureGeomPart();
-    StructureGeomPart(StructureGeomPart&&);
-    ~StructureGeomPart();
-    StructureGeomPart& operator=(StructureGeomPart&&);
+    struct Part
+    {
+        Part();
+        Part(Part&&);
+        ~Part();
+        Part& operator=(Part&&);
 
-    void read(BinReader& reader);
+        void read(BinReader& reader);
 
-    vector<Vertex> vertices;
-    vector<TriangleFan> triangleFans;
-    vector<TriangleFan> hitTriangleFans;
-    unique_ptr<BSPNode> hitTree;
+        vector<Vertex> vertices;
+        vector<TriangleFan> triangleFans;
+        vector<TriangleFan> hitTriangleFans;
+        unique_ptr<BSPNode> hitTree;
+    };
+
+    Environment(uint32_t id, const void* data, size_t size);
+
+    vector<Part> parts;
 };
 
 #endif

@@ -18,8 +18,8 @@
 #include "Structure.h"
 #include "BinReader.h"
 #include "Core.h"
+#include "Environment.h"
 #include "ResourceCache.h"
-#include "StructureGeom.h"
 
 Structure::Structure(const void* data, size_t size)
 {
@@ -50,8 +50,8 @@ Structure::Structure(const void* data, size_t size)
         texture = Core::get().resourceCache().get(ResourceType::kSurface | textureId);
     }
 
-    uint16_t geometryId = reader.readShort();
-    geometry_ = Core::get().resourceCache().get(ResourceType::kStructureGeom | geometryId);
+    uint16_t environmentId = reader.readShort();
+    environment_ = Core::get().resourceCache().get(ResourceType::kEnvironment | environmentId);
 
     partNum_ = reader.readShort();
 
@@ -117,9 +117,9 @@ const vector<ResourcePtr>& Structure::textures() const
     return textures_;
 }
 
-const StructureGeom& Structure::geometry() const
+const Environment& Structure::environment() const
 {
-    return geometry_->cast<StructureGeom>();
+    return environment_->cast<Environment>();
 }
 
 uint16_t Structure::partNum() const

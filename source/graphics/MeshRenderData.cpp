@@ -20,10 +20,10 @@
 #include "graphics/TextureRenderData.h"
 #include "Core.h"
 #include "Config.h"
+#include "Environment.h"
 #include "Model.h"
 #include "ResourceCache.h"
 #include "Structure.h"
-#include "StructureGeom.h"
 #include "Surface.h"
 #include "Texture.h"
 #include "TextureLookup5.h"
@@ -51,8 +51,8 @@ MeshRenderData::MeshRenderData(const Model& model)
 
 MeshRenderData::MeshRenderData(const Structure& structure)
 {
-    assert(structure.partNum() < structure.geometry().parts.size());
-    const StructureGeomPart& part = structure.geometry().parts[structure.partNum()];
+    assert(structure.partNum() < structure.environment().parts.size());
+    const Environment::Part& part = structure.environment().parts[structure.partNum()];
 
     init(structure.textures(),
         part.vertices,

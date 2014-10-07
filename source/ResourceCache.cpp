@@ -20,6 +20,7 @@
 #include "AnimationSet.h"
 #include "Core.h"
 #include "DatFile.h"
+#include "Environment.h"
 #include "Palette.h"
 #include "Model.h"
 #include "ModelGroup.h"
@@ -27,7 +28,6 @@
 #include "Scene.h"
 #include "Sound.h"
 #include "Surface.h"
-#include "StructureGeom.h"
 #include "Texture.h"
 #include "TextureLookup5.h"
 
@@ -65,8 +65,8 @@ static const Resource* loadResource(uint32_t resourceId)
             return new AnimationSet{resourceId, data.data(), data.size()};
         case ResourceType::kSound:
             return new Sound{resourceId, data.data(), data.size()};
-        case ResourceType::kStructureGeom:
-            return new StructureGeom{resourceId, data.data(), data.size()};
+        case ResourceType::kEnvironment:
+            return new Environment{resourceId, data.data(), data.size()};
         case ResourceType::kScene:
             return new Scene{resourceId, data.data(), data.size()};
         case ResourceType::kRegion:

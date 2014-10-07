@@ -20,7 +20,7 @@
 
 #include "Landcell.h"
 
-struct StructureGeom;
+struct Environment;
 
 class Structure : public Landcell
 {
@@ -31,7 +31,7 @@ public:
     const glm::vec3& position() const;
     const glm::quat& rotation() const;
     const vector<ResourcePtr>& textures() const;
-    const StructureGeom& geometry() const;
+    const Environment& environment() const;
     uint16_t partNum() const;
 
 private:
@@ -39,7 +39,7 @@ private:
     glm::vec3 position_;
     glm::quat rotation_;
     vector<ResourcePtr> textures_;
-    ResourcePtr geometry_;
+    ResourcePtr environment_;
     uint16_t partNum_;
 };
 
