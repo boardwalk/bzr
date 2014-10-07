@@ -60,13 +60,13 @@ AnimationFrame::AnimationFrame(BinReader& reader, uint32_t numModels)
 
     uint32_t numHooks = reader.readInt();
 
-    for(uint32_t hi = 0; hi < numHooks; hi++)
+    for(uint32_t i = 0; i < numHooks; i++)
     {
         uint32_t hookType = reader.readInt();
         uint32_t hookSize = 0;
 
         // only apply this hook when playing this frame
-        // 1 = forward, -1 = backward, 0 = both, 
+        // 1 = forward, -1 = backward, 0 = both
         uint32_t hookDir = reader.readInt();
         assert(hookDir == 0 || hookDir == 1 || hookDir == 0xFFFFFFFF);
 

@@ -60,23 +60,23 @@ void Environment::Part::read(BinReader& reader)
     uint32_t numVertices = reader.readInt();
     vertices.resize(numVertices);
 
-    for(uint32_t vi = 0; vi < numVertices; vi++)
+    for(uint32_t i = 0; i < numVertices; i++)
     {
         uint16_t vertexNum = reader.readShort();
-        assert(vertexNum == vi);
+        assert(vertexNum == i);
 
-        vertices[vi].read(reader);
+        vertices[i].read(reader);
     }
 
-    for(uint32_t tfi = 0; tfi < numTriangleFans; tfi++)
+    for(uint32_t i = 0; i < numTriangleFans; i++)
     {
         uint16_t triangleFanNum = reader.readShort();
-        assert(triangleFanNum == tfi);
+        assert(triangleFanNum == i);
 
-        triangleFans[tfi].read(reader);
+        triangleFans[i].read(reader);
     }
 
-    for(uint32_t si = 0; si < numShorts; si++)
+    for(uint32_t i = 0; i < numShorts; i++)
     {
         reader.readShort();
     }
@@ -84,12 +84,12 @@ void Environment::Part::read(BinReader& reader)
 
     readBSP(reader, BSPTreeType::kCell);
 
-    for(uint32_t htfi = 0; htfi < numHitTriangleFans; htfi++)
+    for(uint32_t i = 0; i < numHitTriangleFans; i++)
     {
         uint16_t triangleFanNum = reader.readShort();
-        assert(triangleFanNum == htfi);
+        assert(triangleFanNum == i);
 
-        hitTriangleFans[htfi].read(reader);
+        hitTriangleFans[i].read(reader);
     }
 
     readBSP(reader, BSPTreeType::kPhysics);
@@ -115,12 +115,12 @@ Environment::Environment(uint32_t id, const void* data, size_t size) : ResourceI
     uint32_t numParts = reader.readInt();
     parts.resize(numParts);
 
-    for(uint32_t pi = 0; pi < numParts; pi++)
+    for(uint32_t i = 0; i < numParts; i++)
     {
         uint32_t partNum = reader.readInt();
-        assert(partNum == pi);
+        assert(partNum == i);
 
-        parts[pi].read(reader);
+        parts[i].read(reader);
     }
 
     reader.assertEnd();

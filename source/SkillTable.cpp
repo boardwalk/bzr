@@ -34,7 +34,7 @@ SkillTable::SkillTable()
     uint16_t unk1 = reader.readShort();
     assert(unk1 == 0x20);
 
-    for(uint16_t si = 0; si < numSkills; si++)
+    for(uint16_t i = 0; i < numSkills; i++)
     {
         uint32_t id = reader.readInt();
         Skill& skill = skills_[id];

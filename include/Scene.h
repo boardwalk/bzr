@@ -26,7 +26,7 @@ struct Scene : public ResourceImpl<ResourceType::kScene>
 {
     struct ObjectDesc
     {
-        void read(BinReader& reader);
+        ObjectDesc(BinReader& reader);
 
         uint32_t resourceId;
         glm::vec3 position;

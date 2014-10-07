@@ -19,7 +19,7 @@
 #include "BinReader.h"
 #include "Land.h"
 
-void Scene::ObjectDesc::read(BinReader& reader)
+Scene::ObjectDesc::ObjectDesc(BinReader& reader)
 {
     resourceId = reader.readInt();
     assert(resourceId == 0 || (resourceId & 0xFF000000) == ResourceType::kModel || (resourceId & 0xFF000000) == ResourceType::kModelGroup);
@@ -80,10 +80,10 @@ Scene::Scene(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
     assert(resourceId == id);
 
     uint32_t numObjects = reader.readInt();
-    objects.resize(numObjects);
+    objects.reserve(numObjects);
 
-    for(ObjectDesc& object : objects)
+    for(uint32_t i = 0; i < numObjects; i++)
     {
-        object.read(reader);
+        objects.emplace_back(reader);
     }
 }

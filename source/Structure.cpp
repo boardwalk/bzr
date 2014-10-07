@@ -64,7 +64,7 @@ Structure::Structure(const void* data, size_t size)
     rotation_.y = reader.readFloat();
     rotation_.z = reader.readFloat();
 
-    for(uint8_t ci = 0; ci < numConnected; ci++)
+    for(uint8_t i = 0; i < numConnected; i++)
     {
         reader.readShort();
         reader.readShort();
@@ -72,7 +72,7 @@ Structure::Structure(const void* data, size_t size)
         reader.readShort();
     }
 
-    for(uint16_t vi = 0; vi < numVisible; vi++)
+    for(uint16_t i = 0; i < numVisible; i++)
     {
         reader.readShort(); // structure index
     }
@@ -82,7 +82,7 @@ Structure::Structure(const void* data, size_t size)
         uint32_t numDoodads = reader.readInt();
         doodads_.reserve(numDoodads);
 
-        for(uint32_t di = 0; di < numDoodads; di++)
+        for(uint32_t i = 0; i < numDoodads; i++)
         {
             doodads_.emplace_back(reader);
         }
