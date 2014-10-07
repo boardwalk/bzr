@@ -15,17 +15,18 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_PHYSICS_PLANE_H
-#define BZR_PHYSICS_PLANE_H
+#ifndef BZR_PHYSICS_CYLSPHERE_H
+#define BZR_PHYSICS_CYLSPHERE_H
 
 class BinReader;
 
-struct Plane
+struct CylSphere
 {
     void read(BinReader& reader);
     
-    glm::vec3 normal;
-    fp_t dist;
+    glm::vec3 lowPoint;
+    float radius;
+    float height;
 };
 
 #endif

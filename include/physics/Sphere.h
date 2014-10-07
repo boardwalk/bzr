@@ -18,8 +18,12 @@
 #ifndef BZR_PHYSICS_SPHERE_H
 #define BZR_PHYSICS_SPHERE_H
 
+class BinReader;
+
 struct Sphere
 {
+    void read(BinReader& reader);
+    
     glm::vec3 center;
     fp_t radius;
 };

@@ -15,17 +15,13 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_PHYSICS_PLANE_H
-#define BZR_PHYSICS_PLANE_H
+#include "physics/Sphere.h"
+#include "BinReader.h"
 
-class BinReader;
-
-struct Plane
+void Sphere::read(BinReader& reader)
 {
-    void read(BinReader& reader);
-    
-    glm::vec3 normal;
-    fp_t dist;
-};
-
-#endif
+    center.x = reader.readFloat();
+    center.y = reader.readFloat();
+    center.z = reader.readFloat();
+    radius = reader.readFloat();
+}

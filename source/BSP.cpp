@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "BSP.h"
-#include <physics/LineSegment.h>
+#include "physics/Sphere.h"
 #include "BinReader.h"
 
 BSPNode::BSPNode()
@@ -24,10 +24,7 @@ BSPNode::BSPNode()
 
 BSPNode::BSPNode(BinReader& reader, BSPTreeType::Value treeType, uint32_t nodeType)
 {
-    partition_.normal.x = reader.readFloat();
-    partition_.normal.y = reader.readFloat();
-    partition_.normal.z = reader.readFloat();
-    partition_.dist = reader.readFloat();
+    partition_.read(reader);
 
     if(nodeType == 0x42506e6e || nodeType == 0x4250496e) // BPnn, BPIn
     {
@@ -45,10 +42,7 @@ BSPNode::BSPNode(BinReader& reader, BSPTreeType::Value treeType, uint32_t nodeTy
 
     if(treeType == BSPTreeType::kDrawing || treeType == BSPTreeType::kPhysics)
     {
-        bounds_.center.x = reader.readFloat();
-        bounds_.center.y = reader.readFloat();
-        bounds_.center.z = reader.readFloat();
-        bounds_.radius = reader.readFloat();
+        bounds_.read(reader);
     }
 
     if(treeType == BSPTreeType::kDrawing)
@@ -72,10 +66,7 @@ BSPLeaf::BSPLeaf(BinReader& reader, BSPTreeType::Value treeType)
         // if 1, sphere parameters are valid and there are indices
         solid_ = reader.readInt();
 
-        bounds_.center.x = reader.readFloat();
-        bounds_.center.y = reader.readFloat();
-        bounds_.center.z = reader.readFloat();
-        bounds_.radius = reader.readFloat();
+        bounds_.read(reader);
 
         uint32_t triCount = reader.readInt();
         triangleIndices_.resize(triCount);
@@ -89,20 +80,14 @@ BSPLeaf::BSPLeaf(BinReader& reader, BSPTreeType::Value treeType)
 
 BSPPortal::BSPPortal(BinReader& reader, BSPTreeType::Value treeType)
 {
-    partition_.normal.x = reader.readFloat();
-    partition_.normal.y = reader.readFloat();
-    partition_.normal.z = reader.readFloat();
-    partition_.dist = reader.readFloat();
+    partition_.read(reader);
 
     frontChild_ = readBSP(reader, treeType);
     backChild_ = readBSP(reader, treeType);
 
     if(treeType == BSPTreeType::kDrawing)
     {
-        bounds_.center.x = reader.readFloat();
-        bounds_.center.y = reader.readFloat();
-        bounds_.center.z = reader.readFloat();
-        bounds_.radius = reader.readFloat();
+        bounds_.read(reader);
 
         uint32_t triCount = reader.readInt();
         triangleIndices_.resize(triCount);

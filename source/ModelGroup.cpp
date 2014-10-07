@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "ModelGroup.h"
+#include "physics/CylSphere.h"
+#include "physics/Sphere.h"
 #include "BinReader.h"
 #include "Core.h"
 #include "ResourceCache.h"
@@ -113,21 +115,14 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
 
     for(uint32_t i = 0; i < numCylSpheres; i++)
     {
-        /*x*/ reader.readFloat();
-        /*y*/ reader.readFloat();
-        /*z*/ reader.readFloat();
-        /*r*/ reader.readFloat();
-        /*h*/ reader.readFloat();
+        CylSphere().read(reader);
     }
 
     uint32_t numSpheres = reader.readInt();
 
     for(uint32_t i = 0; i < numSpheres; i++)
     {
-        /*x*/ reader.readFloat();
-        /*y*/ reader.readFloat();
-        /*z*/ reader.readFloat();
-        /*r*/ reader.readFloat();
+        Sphere().read(reader);
     }
 
     /*height*/ reader.readFloat();
@@ -136,16 +131,10 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
     /*stepDownHeight*/ reader.readFloat();
 
     // sorting sphere
-    /*x*/ reader.readFloat();
-    /*y*/ reader.readFloat();
-    /*z*/ reader.readFloat();
-    /*r*/ reader.readFloat();
+    Sphere().read(reader);
 
     // selection sphere
-    /*x*/ reader.readFloat();
-    /*y*/ reader.readFloat();
-    /*z*/ reader.readFloat();
-    /*r*/ reader.readFloat();
+    Sphere().read(reader);
 
     uint32_t numLights = reader.readInt();
 

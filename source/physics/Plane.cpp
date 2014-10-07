@@ -15,13 +15,13 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_PHYSICS_LINESEGMENT_H
-#define BZR_PHYSICS_LINESEGMENT_H
+#include "physics/Plane.h"
+#include "BinReader.h"
 
-struct LineSegment
+void Plane::read(BinReader& reader)
 {
-    glm::vec3 begin;
-    glm::vec3 end;
-};
-
-#endif
+    normal.x = reader.readFloat();
+    normal.y = reader.readFloat();
+    normal.z = reader.readFloat();
+    dist = reader.readFloat();
+}
