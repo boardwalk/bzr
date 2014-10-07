@@ -20,6 +20,7 @@
 
 class BinReader;
 
+// struct CSWVertex
 struct Vertex
 {
     void read(BinReader& reader);

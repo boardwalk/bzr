@@ -18,16 +18,35 @@
 #include "TriangleFan.h"
 #include "BinReader.h"
 
+// enum StipplingType
+enum StipplingType
+{
+    kNoStippling = 0,
+    kPositiveStippling = 1,
+    kNegativeStippling = 2,
+    kBothStippling = 3,
+    kNoPosUVs = 4,
+    kNoNegUVs = 8,
+};
+
+// enum SidesType
+enum SidesType
+{
+    kSingle = 0,
+    kDouble = 1,
+    kBoth = 2
+};
+
 void TriangleFan::read(BinReader& reader)
 {
     uint8_t numIndices = reader.readByte();
     indices.resize(numIndices);
 
-    flags = reader.readByte();
-    assert(flags == 0x0 || flags == 0x1 || flags == 0x4);
+    uint8_t stipplingType = reader.readByte();
+    assert(stipplingType == kNoStippling || stipplingType == kPositiveStippling || stipplingType == kNoPosUVs);
 
-    uint32_t flags2 = reader.readInt();
-    assert(flags2 == 0x0 || flags2 == 0x1 || flags2 == 0x2);
+    uint32_t sidesType = reader.readInt();
+    assert(sidesType == kSingle || sidesType == kDouble || sidesType == kBoth);
 
     texIndex = reader.readShort();
 
@@ -38,7 +57,7 @@ void TriangleFan::read(BinReader& reader)
         index.vertexIndex = reader.readShort();
     }
 
-    if(flags != 0x04)
+    if(stipplingType != kNoPosUVs)
     {
         for(Index& index : indices)
         {
@@ -46,9 +65,9 @@ void TriangleFan::read(BinReader& reader)
         }
     }
 
-    if(flags2 == 0x02)
+    if(sidesType == kBoth)
     {
-        for(uint8_t pvi = 0; pvi < numIndices; pvi++)
+        for(uint8_t i = 0; i < numIndices; i++)
         {
             reader.readByte();
         }

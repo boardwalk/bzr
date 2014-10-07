@@ -27,6 +27,7 @@ struct TriangleFan;
 
 struct Environment : public ResourceImpl<ResourceType::kEnvironment>
 {
+    // struct CCellStruct
     struct Part
     {
         Part();

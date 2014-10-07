@@ -52,7 +52,7 @@ void Environment::Part::read(BinReader& reader)
     uint32_t numHitTriangleFans = reader.readInt();
     hitTriangleFans.resize(numHitTriangleFans);
 
-    uint32_t numShorts = reader.readInt();
+    uint32_t numPortals = reader.readInt();
 
     uint32_t unk5 = reader.readInt();
     assert(unk5 == 1);
@@ -76,7 +76,7 @@ void Environment::Part::read(BinReader& reader)
         triangleFans[i].read(reader);
     }
 
-    for(uint32_t i = 0; i < numShorts; i++)
+    for(uint32_t i = 0; i < numPortals; i++)
     {
         reader.readShort();
     }
