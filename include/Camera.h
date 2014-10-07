@@ -40,7 +40,7 @@ public:
     void setSpeed(fp_t newSpeed);
     void setPosition(const glm::vec3& newPosition);
     void setHeadPosition(const glm::vec3& newHeadPosition);
-    void setHeadOrientation(const glm::quat& newHeadOrientation);
+    void setHeadRotation(const glm::quat& newHeadRotation);
 
     const glm::vec3& position() const;
     const glm::quat& rotationQuat() const;
@@ -57,7 +57,7 @@ private:
     fp_t roll_;
     
     glm::vec3 headPosition_;
-    glm::quat headOrientation_;
+    glm::quat headRotation_;
 
     glm::quat rotationQuat_;
     glm::mat4 viewMatrix_;

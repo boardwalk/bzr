@@ -19,6 +19,7 @@
 #define BZR_OBJECT_H
 
 #include "Noncopyable.h"
+#include "LandcellId.h"
 #include "Location.h"
 #include "Resource.h"
 
@@ -26,13 +27,16 @@ class Object : Noncopyable
 {
 public:
     void setModel(ResourcePtr model);
+    void setLandcellId(const LandcellId& landcellId);
     void setLocation(const Location& location);
 
     const ResourcePtr& model() const;
+    const LandcellId& landcellId() const;
     const Location& location() const;
 
 private:
     ResourcePtr model_;
+    LandcellId landcellId_;
     Location location_;
 };
 

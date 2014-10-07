@@ -92,13 +92,13 @@ void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& view
             continue;
         }
 
-        int dx = object.location().landcell.x() - landcellManager.center().x();
-        int dy = object.location().landcell.y() - landcellManager.center().y();
+        int dx = object.landcellId().x() - landcellManager.center().x();
+        int dy = object.landcellId().y() - landcellManager.center().y();
 
         glm::vec3 blockPosition{dx * Land::kBlockSize, dy * Land::kBlockSize, 0.0};
 
         glm::mat4 rotateMat = glm::mat4_cast(object.location().rotation);
-        glm::mat4 translateMat = glm::translate(glm::mat4{}, blockPosition + object.location().offset);
+        glm::mat4 translateMat = glm::translate(glm::mat4{}, blockPosition + object.location().position);
         glm::mat4 worldMat = translateMat * rotateMat;
 
         renderOne(object.model(), projectionMat, viewMat, worldMat);
@@ -161,10 +161,10 @@ void ModelRenderer::renderModelGroup(const ModelGroup& modelGroup,
 
     for(uint32_t i = 0; i < modelGroup.models.size(); i++)
     {
-        const Orientation& orientation = frame.orientations[i];
+        const Location& location = frame.locations[i];
         const glm::vec3& scale = modelGroup.scales[i];
 
-        glm::mat4 subWorldMat = glm::translate(glm::mat4{}, orientation.position) * glm::mat4_cast(orientation.rotation) * glm::scale(glm::mat4(), scale);
+        glm::mat4 subWorldMat = glm::translate(glm::mat4{}, location.position) * glm::mat4_cast(location.rotation) * glm::scale(glm::mat4(), scale);
 
         renderOne(modelGroup.models[i],
             projectionMat,

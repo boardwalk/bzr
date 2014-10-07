@@ -448,8 +448,8 @@ void Renderer::renderOVR(fp_t interp)
         glm::mat4 projectionMat = convertOvrMatrix4f(ovrMatrix4f_Projection(eyeRenderDesc_[eye].Fov, 0.1f, 1000.0f, /*rightHanded*/ true));
 
         eyePose[eye] = ovrHmd_GetEyePose(hmd_, eye);
-        Core::get().camera().setHeadOrientation(glm::conjugate(convertOvrQuatf(eyePose[eye].Orientation)));
         Core::get().camera().setHeadPosition(convertOvrVector3f(eyePose[eye].Position));
+        Core::get().camera().setHeadRotation(glm::conjugate(convertOvrQuatf(eyePose[eye].Orientation)));
 
         glm::mat4 viewMat = glm::translate(glm::mat4{}, convertOvrVector3f(eyeRenderDesc_[eye].ViewAdjust));
         viewMat = viewMat * Core::get().camera().viewMatrix();

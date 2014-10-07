@@ -18,14 +18,15 @@
 #ifndef BZR_LOCATION_H
 #define BZR_LOCATION_H
 
-#include "LandcellId.h"
+class BinReader;
 
+// struct LocationType
 struct Location
 {
-	glm::vec3 normalize() const;
+    Location();
+    Location(BinReader& reader);
 
-    LandcellId landcell;
-    glm::vec3 offset;
+    glm::vec3 position;
     glm::quat rotation;
 };
 

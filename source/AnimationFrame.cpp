@@ -51,11 +51,11 @@ enum AnimHooks
 
 AnimationFrame::AnimationFrame(BinReader& reader, uint32_t numModels)
 {
-    orientations.reserve(numModels);
+    locations.reserve(numModels);
 
     for(uint32_t i = 0 ; i < numModels; i++)
     {
-        orientations.emplace_back(reader);
+        locations.emplace_back(reader);
     }
 
     uint32_t numHooks = reader.readInt();
@@ -183,11 +183,11 @@ AnimationFrame::AnimationFrame(BinReader& reader, uint32_t numModels)
 
 AnimationFrame::AnimationFrame(AnimationFrame&& other)
 {
-    orientations = move(other.orientations);
+    locations = move(other.locations);
 }
 
 AnimationFrame& AnimationFrame::operator=(AnimationFrame&& other)
 {
-    orientations = move(other.orientations);
+    locations = move(other.locations);
     return *this;
 }

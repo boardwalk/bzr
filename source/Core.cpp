@@ -277,10 +277,12 @@ void Core::handleEvents()
 
         object.setModel(resourceCache_->get(modelId_));
 
-        Location loc;
-        loc.landcell = landcellManager_->center();
-        loc.offset = glm::vec3{92.0, 92.0, 0.0};
-        object.setLocation(loc);
+        object.setLandcellId(landcellManager_->center());
+
+        Location location;
+        location.position = glm::vec3{92.0, 92.0, 0.0};
+        location.rotation = glm::quat{1.0, 0.0, 0.0, 0.0};
+        object.setLocation(location);
     }
 #endif
 }

@@ -65,9 +65,9 @@ void Camera::setHeadPosition(const glm::vec3& newHeadPosition)
     updateViewMatrix();
 }
 
-void Camera::setHeadOrientation(const glm::quat& newHeadOrientation)
+void Camera::setHeadRotation(const glm::quat& newHeadRotation)
 {
-    headOrientation_ = newHeadOrientation;
+    headRotation_ = newHeadRotation;
     updateRotationQuat();
 }
 
@@ -92,7 +92,7 @@ void Camera::updateRotationQuat()
     glm::quat yawQuat = glm::angleAxis(yaw_, glm::vec3{0.0, 1.0, 0.0});
     glm::quat pitchQuat = glm::angleAxis(pitch_, glm::vec3{1.0, 0.0, 0.0});
 
-    rotationQuat_ = headOrientation_ * pitchQuat * yawQuat * initialPitchQuat;
+    rotationQuat_ = headRotation_ * pitchQuat * yawQuat * initialPitchQuat;
 
     updateViewMatrix();
 }

@@ -18,8 +18,8 @@
 #ifndef BZR_ANIMATIONFRAME_H
 #define BZR_ANIMATIONFRAME_H
 
+#include "Location.h"
 #include "Noncopyable.h"
-#include "Orientation.h"
 
 class BinReader;
 
@@ -29,7 +29,7 @@ struct AnimationFrame : Noncopyable
     AnimationFrame(AnimationFrame&&);
     AnimationFrame& operator=(AnimationFrame&&);
 
-    vector<Orientation> orientations;
+    vector<Location> locations;
 };
 
 #endif

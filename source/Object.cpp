@@ -22,6 +22,11 @@ void Object::setModel(ResourcePtr model)
     model_ = model;
 }
 
+void Object::setLandcellId(const LandcellId& landcellId)
+{
+    landcellId_ = landcellId;
+}
+
 void Object::setLocation(const Location& location)
 {
     location_ = location;
@@ -30,6 +35,11 @@ void Object::setLocation(const Location& location)
 const ResourcePtr& Object::model() const
 {
     return model_;
+}
+
+const LandcellId& Object::landcellId() const
+{
+    return landcellId_;
 }
 
 const Location& Object::location() const

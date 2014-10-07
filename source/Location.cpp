@@ -16,9 +16,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "Location.h"
+#include "BinReader.h"
+#include <glm/gtx/norm.hpp>
 
-glm::vec3 Location::normalize() const
+Location::Location()
+{}
+
+Location::Location(BinReader& reader)
 {
-    // FIXME
-    return offset;
+    position.x = reader.readFloat();
+    position.y = reader.readFloat();
+    position.z = reader.readFloat();
+
+    rotation.w = reader.readFloat();
+    rotation.x = reader.readFloat();
+    rotation.y = reader.readFloat();
+    rotation.z = reader.readFloat();
+
+    assert(glm::length2(rotation) >= 0.99 && glm::length2(rotation) <= 1.01);
 }
