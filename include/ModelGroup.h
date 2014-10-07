@@ -21,6 +21,7 @@
 #include "AnimationFrame.h"
 #include "Resource.h"
 
+// AC: CSetup
 struct ModelGroup : public ResourceImpl<ResourceType::kModelGroup>
 {
     ModelGroup(uint32_t id, const void* data, size_t size);

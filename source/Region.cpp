@@ -20,6 +20,8 @@
 #include "Core.h"
 #include "ResourceCache.h"
 
+static const uint32_t kRegionVersion = 3;
+
 static void readAlphaTex(BinReader& reader)
 {
     uint32_t numAlphaTex = reader.readInt();
@@ -96,11 +98,11 @@ Region::Region(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
     uint32_t resourceId = reader.readInt();
     assert(resourceId == id);
 
-    uint32_t version = reader.readInt();
-    assert(version == 1);
-
     uint32_t regionNumber = reader.readInt();
-    assert(regionNumber == 3);
+    assert(regionNumber == 1);
+
+    uint32_t regionVersion = reader.readInt();
+    assert(regionVersion == kRegionVersion);
 
     string regionName = reader.readString();
     assert(regionName == "Dereth");
@@ -150,6 +152,7 @@ Region::Region(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 
     reader.readRaw(49400);
 
+    // AC: CSceneDesc
     uint32_t numSceneTypes = reader.readInt();
     sceneTypes.resize(numSceneTypes);
 
@@ -158,6 +161,7 @@ Region::Region(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
         read(reader, sceneType);
     }
 
+    // AC: CTerrainDesc
     uint32_t numTerrainTypes = reader.readInt();
     terrainTypes.resize(numTerrainTypes);
 

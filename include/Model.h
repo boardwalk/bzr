@@ -25,6 +25,7 @@
 
 class BSPNode;
 
+// AC: CGfxObj
 struct Model : public ResourceImpl<ResourceType::kModel>
 {
     Model(uint32_t id, const void* data, size_t size);

@@ -23,6 +23,7 @@
 
 class BinReader;
 
+// AC: AnimFrame
 struct AnimationFrame : Noncopyable
 {
     AnimationFrame();

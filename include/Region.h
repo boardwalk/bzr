@@ -22,13 +22,16 @@
 
 class BinReader;
 
+// AC: CRegionDesc
 struct Region : public ResourceImpl<ResourceType::kRegion>
 {
+    // AC: CSceneType
     struct SceneType
     {
         vector<ResourcePtr> scenes;
     };
 
+    // AC: CTerrainType
     struct TerrainType
     {
         vector<uint32_t> sceneTypes;
