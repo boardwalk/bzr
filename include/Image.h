@@ -21,7 +21,7 @@
 struct Palette;
 
 // enum PixelFormatID
-struct ImageFormat
+struct PixelFormat
 {
     enum Value
     {
@@ -52,14 +52,14 @@ class Image
 public:
     Image();
 
-    void init(ImageFormat::Value newFormat, int newWidth, int newHeight, const void* newData);
+    void init(PixelFormat::Value newFormat, int newWidth, int newHeight, const void* newData);
 
     void applyPalette(const Palette& palette);
     void scale(int newWidth, int newHeight);
     void fill(int value);
     void flipVertical();
 
-    ImageFormat::Value format() const;
+    PixelFormat::Value format() const;
     int width() const;
     int height() const;
     size_t size() const;
@@ -72,7 +72,7 @@ private:
 
     void updateHasAlpha();
 
-    ImageFormat::Value format_;
+    PixelFormat::Value format_;
     int width_;
     int height_;
     vector<uint8_t> data_;

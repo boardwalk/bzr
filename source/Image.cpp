@@ -19,7 +19,7 @@
 #include "Palette.h"
 #include <algorithm>
 
-int ImageFormat::bitsPerPixel(Value format)
+int PixelFormat::bitsPerPixel(Value format)
 {
     switch(format)
     {
@@ -54,25 +54,25 @@ int ImageFormat::bitsPerPixel(Value format)
     throw runtime_error("Invalid format");
 }
 
-bool ImageFormat::isPaletted(Value format)
+bool PixelFormat::isPaletted(Value format)
 {
     return format == kPaletted8 || format == kPaletted16;
 }
 
-bool ImageFormat::isCompressed(Value format)
+bool PixelFormat::isCompressed(Value format)
 {
     return format == kDXT1 || format == kDXT3 || format == kDXT5;
 }
 
-bool ImageFormat::hasAlpha(Value format)
+bool PixelFormat::hasAlpha(Value format)
 {
     return format == kBGRA32 || format == kPaletted8 || format == kPaletted16 || format == kA8 || format == kDXT3 || format == kDXT5;
 }
 
-Image::Image() : format_(ImageFormat::kInvalid), width_(0), height_(0), hasAlpha_(false)
+Image::Image() : format_(PixelFormat::kInvalid), width_(0), height_(0), hasAlpha_(false)
 {}
 
-void Image::init(ImageFormat::Value newFormat, int newWidth, int newHeight, const void* newData)
+void Image::init(PixelFormat::Value newFormat, int newWidth, int newHeight, const void* newData)
 {
     format_ = newFormat;
     width_ = newWidth;
@@ -81,11 +81,11 @@ void Image::init(ImageFormat::Value newFormat, int newWidth, int newHeight, cons
     if(newData == nullptr)
     {
         data_.clear();
-        data_.resize(width_ * height_ * ImageFormat::bitsPerPixel(format_) / 8);
+        data_.resize(width_ * height_ * PixelFormat::bitsPerPixel(format_) / 8);
     }
     else
     {
-        data_.assign((const uint8_t*)newData, (const uint8_t*)newData + width_ * height_ * ImageFormat::bitsPerPixel(format_) / 8);
+        data_.assign((const uint8_t*)newData, (const uint8_t*)newData + width_ * height_ * PixelFormat::bitsPerPixel(format_) / 8);
     }
 
     updateHasAlpha();
@@ -115,18 +115,18 @@ void Image::applyPalette(const Palette& palette)
     }
 
     data_ = move(newData);
-    format_ = ImageFormat::kBGRA32;
+    format_ = PixelFormat::kBGRA32;
     updateHasAlpha();
 }
 
 void Image::applyPalette(const Palette& palette)
 {
-    if(format_ == ImageFormat::kPaletted8)
+    if(format_ == PixelFormat::kPaletted8)
     {
         applyPalette<uint8_t>(palette);
 
     }
-    else if(format_ == ImageFormat::kPaletted16)
+    else if(format_ == PixelFormat::kPaletted16)
     {
         applyPalette<uint16_t>(palette);
     }
@@ -143,12 +143,12 @@ void Image::scale(int newWidth, int newHeight)
         return;
     }
 
-    if(ImageFormat::isCompressed(format_))
+    if(PixelFormat::isCompressed(format_))
     {
         throw runtime_error("Cannot scale compressed image");
     }
 
-    int nchannels = ImageFormat::bitsPerPixel(format_) / 8;
+    int nchannels = PixelFormat::bitsPerPixel(format_) / 8;
 
     vector<uint8_t> newData(newWidth * newHeight * nchannels);
 
@@ -190,12 +190,12 @@ void Image::scale(int newWidth, int newHeight)
 
 void Image::flipVertical()
 {
-    if(ImageFormat::isCompressed(format_))
+    if(PixelFormat::isCompressed(format_))
     {
         throw runtime_error("Cannot flip compressed image");
     }
 
-    int stride = width_ * ImageFormat::bitsPerPixel(format_) / 8;
+    int stride = width_ * PixelFormat::bitsPerPixel(format_) / 8;
 
     vector<uint8_t> rowBuf(stride);
 
@@ -213,7 +213,7 @@ void Image::fill(int value)
     updateHasAlpha();
 }
 
-ImageFormat::Value Image::format() const
+PixelFormat::Value Image::format() const
 {
     return format_;
 }
@@ -250,7 +250,7 @@ void Image::updateHasAlpha()
     uint8_t* input = data_.data();
     uint8_t* inputEnd = data_.data() + data_.size();
 
-    if(format_ == ImageFormat::kBGRA32)
+    if(format_ == PixelFormat::kBGRA32)
     {
         while(input < inputEnd)
         {
@@ -263,7 +263,7 @@ void Image::updateHasAlpha()
             input += 4;
         }
     }
-    else if(format_ == ImageFormat::kDXT1)
+    else if(format_ == PixelFormat::kDXT1)
     {
         while(input < inputEnd)
         {
@@ -288,7 +288,7 @@ void Image::updateHasAlpha()
             input += 8;
         }
     }
-    else if(format_ == ImageFormat::kA8 || format_ == ImageFormat::kDXT3 || format_ == ImageFormat::kDXT5)
+    else if(format_ == PixelFormat::kA8 || format_ == PixelFormat::kDXT3 || format_ == PixelFormat::kDXT5)
     {
         // There's no reason to use these formats unless you have alpha
         // So let's just assume it's they do

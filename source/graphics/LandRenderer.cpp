@@ -187,15 +187,15 @@ void LandRenderer::initTerrainTexture()
 
         GLenum format;
 
-        if(image.format() == ImageFormat::kRGB24)
+        if(image.format() == PixelFormat::kRGB24)
         {
             format = GL_RGB;
         }
-        else if(image.format() == ImageFormat::kBGR24)
+        else if(image.format() == PixelFormat::kBGR24)
         {
             format = GL_BGR;
         }
-        else if(image.format() == ImageFormat::kBGRA32)
+        else if(image.format() == PixelFormat::kBGRA32)
         {
             format = GL_BGRA;
         }
@@ -228,11 +228,11 @@ void LandRenderer::initBlendTexture()
 
         if(kBlendTextures[i] == 0x00000000)
         {
-            image.init(ImageFormat::kA8, kBlendArraySize, kBlendArraySize, nullptr);
+            image.init(PixelFormat::kA8, kBlendArraySize, kBlendArraySize, nullptr);
         }
         else if(kBlendTextures[i] == 0xFFFFFFFF)
         {
-            image.init(ImageFormat::kA8, kBlendArraySize, kBlendArraySize, nullptr);
+            image.init(PixelFormat::kA8, kBlendArraySize, kBlendArraySize, nullptr);
             image.fill(0xFF);
         }
         else
@@ -246,7 +246,7 @@ void LandRenderer::initBlendTexture()
             throw runtime_error("Bad terrain image size");
         }
 
-        if(image.format() != ImageFormat::kA8)
+        if(image.format() != PixelFormat::kA8)
         {
             throw runtime_error("Bad terrain image format");
         }

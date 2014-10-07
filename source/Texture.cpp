@@ -37,19 +37,19 @@ Texture::Texture(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
     uint32_t height = reader.readInt();
     assert(height <= 4096);
 
-    ImageFormat::Value format = static_cast<ImageFormat::Value>(reader.readInt());
+    PixelFormat::Value format = static_cast<PixelFormat::Value>(reader.readInt());
 
-    if(format == ImageFormat::kJPEG)
+    if(format == PixelFormat::kJPEG)
     {
         throw runtime_error("JPEG textures not supported");
     }
 
     uint32_t pixelsSize = reader.readInt();
-    assert(pixelsSize * 8 == width * height * ImageFormat::bitsPerPixel(format));
+    assert(pixelsSize * 8 == width * height * PixelFormat::bitsPerPixel(format));
 
     const uint8_t* pixels = reader.readRaw(pixelsSize);
 
-    if(ImageFormat::isPaletted(format))
+    if(PixelFormat::isPaletted(format))
     {
         uint32_t paletteId = reader.readInt();
         palette = Core::get().resourceCache().get(paletteId);
@@ -67,5 +67,5 @@ Texture::Texture(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 
 Texture::Texture(uint32_t bgra) : ResourceImpl(ResourceType::kTexture | 0xFFFF)
 {
-    image.init(ImageFormat::kBGRA32, 1, 1, &bgra);
+    image.init(PixelFormat::kBGRA32, 1, 1, &bgra);
 }

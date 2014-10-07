@@ -31,19 +31,19 @@ TextureRenderData::TextureRenderData(const Texture& texture)
 
     switch(image.format())
     {
-        case ImageFormat::kBGRA32:
+        case PixelFormat::kBGRA32:
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.width(), image.height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, image.data());
             break;
-        case ImageFormat::kBGR24:
+        case PixelFormat::kBGR24:
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, image.width(), image.height(), 0, GL_BGR, GL_UNSIGNED_BYTE, image.data());
             break;
-        case ImageFormat::kDXT1:
+        case PixelFormat::kDXT1:
             glCompressedTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT1_EXT, image.width(), image.height(), 0, (GLsizei)image.size(), image.data());
             break;
-        case ImageFormat::kDXT3:
+        case PixelFormat::kDXT3:
             glCompressedTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT3_EXT, image.width(), image.height(), 0, (GLsizei)image.size(), image.data());
             break;
-        case ImageFormat::kDXT5:
+        case PixelFormat::kDXT5:
             glCompressedTexImage2D(GL_TEXTURE_2D, 0, GL_COMPRESSED_RGBA_S3TC_DXT5_EXT, image.width(), image.height(), 0, (GLsizei)image.size(), image.data());
             break;
         default:
