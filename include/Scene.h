@@ -20,8 +20,6 @@
 
 #include "Resource.h"
 
-class BinReader;
-
 struct Scene : public ResourceImpl<ResourceType::kScene>
 {
     struct ObjectDesc
