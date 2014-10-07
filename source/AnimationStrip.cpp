@@ -21,11 +21,17 @@
 #include "Core.h"
 #include "ResourceCache.h"
 
-AnimationStrip::AnimationStrip(BinReader& reader)
+enum AnimationStripFlags
 {
-    id = reader.readShort();
-    stanceId = reader.readShort();
+    kNoMods = 1,
+    kFromDefault = 2
+};
 
+AnimationStrip::AnimationStrip()
+{}
+
+void AnimationStrip::read(BinReader& reader)
+{
     uint8_t numAnims = reader.readByte();
     animInfos.resize(numAnims);
 
@@ -67,15 +73,11 @@ AnimationStrip::AnimationStrip(BinReader& reader)
 
 AnimationStrip::AnimationStrip(AnimationStrip&& other)
 {
-    id = other.id;
-    stanceId = other.stanceId;
     animInfos = move(other.animInfos);
 }
 
 AnimationStrip& AnimationStrip::operator=(AnimationStrip&& other)
 {
-    id = other.id;
-    stanceId = other.stanceId;
     animInfos = move(other.animInfos);
     return *this;
 }

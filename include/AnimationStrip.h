@@ -23,8 +23,10 @@
 
 class BinReader;
 
+// struct CMotionData
 struct AnimationStrip : Noncopyable
 {
+    // struct AnimSequenceNode
     struct AnimInfo
     {
         ResourcePtr resource;
@@ -32,13 +34,13 @@ struct AnimationStrip : Noncopyable
         uint32_t lastFrame;
         float framesPerSecond;
     };
-    
-    AnimationStrip(BinReader& reader);
+
+    AnimationStrip();    
     AnimationStrip(AnimationStrip&&);
     AnimationStrip& operator=(AnimationStrip&&);
 
-    uint16_t id;
-    uint16_t stanceId;
+    void read(BinReader& reader);
+
     vector<AnimInfo> animInfos;
 };
 

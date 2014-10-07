@@ -18,6 +18,38 @@
 #include "AnimationSet.h"
 #include "BinReader.h"
 
+struct CombatStyle
+{
+    enum Value
+    {
+        kUndef = 0x0000,
+        kUnarmed = 0x0001,
+        kOneHanded = 0x0002,
+        kOneHandedAndShield = 0x0004,
+        kTwoHanded = 0x0008,
+        kBow = 0x0010,
+        kCrossbow = 0x0020,
+        kSling = 0x0040,
+        kThrownWeapon = 0x0080,
+        kDualWield = 0x0100,
+        kMagic = 0x0200,
+        kAtlatl = 0x0400,
+        kThrownShield = 0x0800,
+        kReserved1 = 0x1000,
+        kReserved2 = 0x2000,
+        kReserved3 = 0x4000,
+        kReserved4 = 0x8000,
+        kStubbornMagic = 0x00010000,
+        kStubbornProjectile = 0x00020000,
+        kStubbornMelee = 0x00040000,
+        kStubbornMissile = 0x00080000,
+        kAllMelee = 0x010f,
+        kAllMissile = 0x0cf0,
+        kAllMagic = 0x0200,
+        kAll = 0xffff,
+    };
+};
+
 AnimationSet::AnimationSet(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
     BinReader reader(data, size);
@@ -25,44 +57,52 @@ AnimationSet::AnimationSet(uint32_t id, const void* data, size_t size) : Resourc
     uint32_t resourceId = reader.readInt();
     assert(resourceId == id);
 
-    reader.readInt();
-    uint32_t numUnknown = reader.readInt();
+    /*defaultStyle*/ reader.readInt();
+    uint32_t numStyles = reader.readInt();
 
-    for(uint32_t ui = 0; ui < numUnknown; ui++)
+    for(uint32_t i = 0; i < numStyles; i++)
     {
         reader.readInt();
         reader.readInt();
     }
 
-    uint32_t numStrips1 = reader.readInt();
-    strips1.reserve(numStrips1);
+    uint32_t numCycles = reader.readInt();
+    cycles.reserve(numCycles);
 
-    for(uint32_t si = 0; si < numStrips1; si++)
+    for(uint32_t i = 0; i < numCycles; i++)
     {
-        strips1.emplace_back(reader);
+        uint32_t key = reader.readInt();
+        assert(cycles.find(key) == cycles.end());
+        cycles[key].read(reader);
     }
 
-    uint32_t numStrips2 = reader.readInt();
-    strips2.reserve(numStrips2);
+    uint32_t numModifiers = reader.readInt();
+    modifiers.reserve(numModifiers);
 
-    for(uint32_t si = 0; si < numStrips2; si++)
+    for(uint32_t i = 0; i < numModifiers; i++)
     {
-        strips2.emplace_back(reader);
+        uint32_t key = reader.readInt();
+        assert(modifiers.find(key) == modifiers.end());
+        modifiers[key].read(reader);
     }
 
-    uint32_t numComboStrips = reader.readInt();
-    comboStrips.resize(numComboStrips);
+    uint32_t numLinks = reader.readInt();
+    links.reserve(numLinks);
 
-    for(vector<AnimationStrip>& comboStrip : comboStrips)
+    for(uint32_t i = 0; i < numLinks; i++)
     {
-        reader.readInt();
+        uint32_t outerKey = reader.readInt();
+        assert(links.find(outerKey) == links.end());
+        auto& innerLinks = links[outerKey];
 
-        uint32_t numStrips3 = reader.readInt();
-        comboStrip.reserve(numStrips3);
+        uint32_t numInnerLinks = reader.readInt();
+        innerLinks.reserve(numInnerLinks);
 
-        for(uint32_t si = 0; si < numStrips3; si++)
+        for(uint32_t j = 0; j < numInnerLinks; j++)
         {
-            comboStrip.emplace_back(reader);
+            uint32_t innerKey = reader.readInt();
+            assert(innerLinks.find(innerKey) == innerLinks.end());
+            innerLinks[innerKey].read(reader);
         }
     }
 

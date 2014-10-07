@@ -20,14 +20,16 @@
 
 #include "AnimationStrip.h"
 #include "Resource.h"
+#include <unordered_map>
 
+// struct CMotionTable
 struct AnimationSet : public ResourceImpl<ResourceType::kAnimationSet>
 {
     AnimationSet(uint32_t id, const void* data, size_t size);
 
-    vector<AnimationStrip> strips1;
-    vector<AnimationStrip> strips2;
-    vector<vector<AnimationStrip>> comboStrips;
+    unordered_map<uint32_t, AnimationStrip> cycles;
+    unordered_map<uint32_t, AnimationStrip> modifiers;
+    unordered_map<uint32_t, unordered_map<uint32_t, AnimationStrip>> links;
 };
 
 #endif
