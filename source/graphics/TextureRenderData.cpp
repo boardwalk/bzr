@@ -31,10 +31,10 @@ TextureRenderData::TextureRenderData(const Texture& texture)
 
     switch(image.format())
     {
-        case PixelFormat::kBGRA32:
+        case PixelFormat::kA8R8G8B8:
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.width(), image.height(), 0, GL_BGRA, GL_UNSIGNED_BYTE, image.data());
             break;
-        case PixelFormat::kBGR24:
+        case PixelFormat::kR8G8B8:
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, image.width(), image.height(), 0, GL_BGR, GL_UNSIGNED_BYTE, image.data());
             break;
         case PixelFormat::kDXT1:

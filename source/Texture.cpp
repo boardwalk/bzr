@@ -39,7 +39,7 @@ Texture::Texture(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 
     PixelFormat::Value format = static_cast<PixelFormat::Value>(reader.readInt());
 
-    if(format == PixelFormat::kJPEG)
+    if(format == PixelFormat::kCustomRawJPEG)
     {
         throw runtime_error("JPEG textures not supported");
     }
@@ -67,5 +67,5 @@ Texture::Texture(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 
 Texture::Texture(uint32_t bgra) : ResourceImpl(ResourceType::kTexture | 0xFFFF)
 {
-    image.init(PixelFormat::kBGRA32, 1, 1, &bgra);
+    image.init(PixelFormat::kA8R8G8B8, 1, 1, &bgra);
 }

@@ -183,28 +183,18 @@ void LandRenderer::initTerrainTexture()
     {
         ResourcePtr textureLookup5 = Core::get().resourceCache().get(region.terrainTextures[i].resourceId);
         const Image& image = textureLookup5->cast<TextureLookup5>().texture->cast<Texture>().image;
-        assert(image.width() == kTerrainArraySize && image.height() == kTerrainArraySize);
 
-        GLenum format;
+        if(image.width() != kTerrainArraySize || image.height() != kTerrainArraySize)
+        {
+            throw runtime_error("Bad terrain image size");
+        }
 
-        if(image.format() == PixelFormat::kRGB24)
-        {
-            format = GL_RGB;
-        }
-        else if(image.format() == PixelFormat::kBGR24)
-        {
-            format = GL_BGR;
-        }
-        else if(image.format() == PixelFormat::kBGRA32)
-        {
-            format = GL_BGRA;
-        }
-        else
+        if(image.format() != PixelFormat::kA8R8G8B8)
         {
             throw runtime_error("Bad terrain image format");
         }
 
-        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, kTerrainArraySize, kTerrainArraySize, 1, format, GL_UNSIGNED_BYTE, image.data());
+        glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, kTerrainArraySize, kTerrainArraySize, 1, GL_BGRA, GL_UNSIGNED_BYTE, image.data());
     }
 
     glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
@@ -228,11 +218,11 @@ void LandRenderer::initBlendTexture()
 
         if(kBlendTextures[i] == 0x00000000)
         {
-            image.init(PixelFormat::kA8, kBlendArraySize, kBlendArraySize, nullptr);
+            image.init(PixelFormat::kCustomLscapeAlpha, kBlendArraySize, kBlendArraySize, nullptr);
         }
         else if(kBlendTextures[i] == 0xFFFFFFFF)
         {
-            image.init(PixelFormat::kA8, kBlendArraySize, kBlendArraySize, nullptr);
+            image.init(PixelFormat::kCustomLscapeAlpha, kBlendArraySize, kBlendArraySize, nullptr);
             image.fill(0xFF);
         }
         else
@@ -243,12 +233,12 @@ void LandRenderer::initBlendTexture()
 
         if(image.width() != kBlendArraySize || image.height() != kBlendArraySize)
         {
-            throw runtime_error("Bad terrain image size");
+            throw runtime_error("Bad alpha image size");
         }
 
-        if(image.format() != PixelFormat::kA8)
+        if(image.format() != PixelFormat::kCustomLscapeAlpha)
         {
-            throw runtime_error("Bad terrain image format");
+            throw runtime_error("Bad alpha image format");
         }
 
         glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, kBlendArraySize, kBlendArraySize, 1, GL_RED, GL_UNSIGNED_BYTE, image.data());
