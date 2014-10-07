@@ -22,40 +22,31 @@
 #include <physics/Sphere.h>
 
 class BinReader;
-struct LineSegment;
 
 class BSPNode
 {
 public:
+    BSPNode(BinReader& reader, int treeType, uint32_t nodeType);
     virtual ~BSPNode() {}
-};
 
-class BSPInternal : public BSPNode
-{
-public:
-    BSPInternal(BinReader& reader, int treeType, uint32_t nodeType);
+protected:
+    BSPNode();
 
-private:
+    Sphere bounds_;
     Plane partition_;
     unique_ptr<BSPNode> frontChild_; // may be null
     unique_ptr<BSPNode> backChild_; // may be null
-    // if treeType == 0 or 1
-    Sphere bounds_;
-    // if treeType == 0
     vector<uint16_t> triangleIndices_;
 };
 
-class BSPExternal : public BSPNode
+class BSPLeaf : public BSPNode
 {
 public:
-    BSPExternal(BinReader& reader, int treeType);
+    BSPLeaf(BinReader& reader, int treeType);
 
 private:
     uint32_t index_;
-    // if treeType == 1
     uint32_t solid_;
-    Sphere bounds_;
-    vector<uint16_t> triangleIndices_;
 };
 
 class BSPPortal : public BSPNode
@@ -66,16 +57,10 @@ public:
 private:
     struct PortalPoly
     {
-        uint16_t index;
-        uint16_t what;
+        uint16_t portalIndex;
+        uint16_t polygonIndex;
     };
 
-    Plane partition_;
-    unique_ptr<BSPNode> frontChild_;
-    unique_ptr<BSPNode> backChild_;
-    // if treeType == 0
-    Sphere bounds_;
-    vector<uint16_t> triangleIndices_;
     vector<PortalPoly> portalPolys_;
 };
 

@@ -19,7 +19,10 @@
 #include <physics/LineSegment.h>
 #include "BinReader.h"
 
-BSPInternal::BSPInternal(BinReader& reader, int treeType, uint32_t nodeType)
+BSPNode::BSPNode()
+{}
+
+BSPNode::BSPNode(BinReader& reader, int treeType, uint32_t nodeType)
 {
     partition_.normal.x = reader.readFloat();
     partition_.normal.y = reader.readFloat();
@@ -62,7 +65,7 @@ BSPInternal::BSPInternal(BinReader& reader, int treeType, uint32_t nodeType)
     }
 }
 
-BSPExternal::BSPExternal(BinReader& reader, int treeType)
+BSPLeaf::BSPLeaf(BinReader& reader, int treeType)
 {
     index_ = reader.readInt();
 
@@ -121,8 +124,8 @@ BSPPortal::BSPPortal(BinReader& reader, int treeType)
 
     for(PortalPoly& poly : portalPolys_)
     {
-        poly.index = reader.readShort();
-        poly.what = reader.readShort();
+        poly.portalIndex = reader.readShort();
+        poly.polygonIndex = reader.readShort();
     }
 }
 
@@ -132,7 +135,7 @@ unique_ptr<BSPNode> readBSP(BinReader& reader, int treeType)
 
     if(nodeType == 0x4c454146) // LEAF
     {
-        return unique_ptr<BSPNode>(new BSPExternal{reader, treeType});
+        return unique_ptr<BSPNode>(new BSPLeaf{reader, treeType});
     }
     else if(nodeType == 0x504f5254) // PORT
     {
@@ -140,6 +143,6 @@ unique_ptr<BSPNode> readBSP(BinReader& reader, int treeType)
     }
     else
     {
-        return unique_ptr<BSPNode>(new BSPInternal{reader, treeType, nodeType});
+        return unique_ptr<BSPNode>(new BSPNode{reader, treeType, nodeType});
     }
 }
