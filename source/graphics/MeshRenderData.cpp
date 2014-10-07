@@ -122,7 +122,7 @@ void MeshRenderData::init(
     for(const TriangleFan* triangleFan : sortedTriangleFans)
     {
         // Skip portal/lighting polygons
-        if(triangleFan->flags == 0x04)
+        if(triangleFan->stipplingType == 0x04)
         {
             continue;
         }

@@ -42,7 +42,7 @@ void TriangleFan::read(BinReader& reader)
     uint8_t numIndices = reader.readByte();
     indices.resize(numIndices);
 
-    uint8_t stipplingType = reader.readByte();
+    stipplingType = reader.readByte();
     assert(stipplingType == kNoStippling || stipplingType == kPositiveStippling || stipplingType == kNoPosUVs);
 
     uint32_t sidesType = reader.readInt();
