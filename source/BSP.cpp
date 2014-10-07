@@ -22,7 +22,7 @@
 BSPNode::BSPNode()
 {}
 
-BSPNode::BSPNode(BinReader& reader, int treeType, uint32_t nodeType)
+BSPNode::BSPNode(BinReader& reader, BSPTreeType::Value treeType, uint32_t nodeType)
 {
     partition_.normal.x = reader.readFloat();
     partition_.normal.y = reader.readFloat();
@@ -43,7 +43,7 @@ BSPNode::BSPNode(BinReader& reader, int treeType, uint32_t nodeType)
         backChild_ = readBSP(reader, treeType);
     }
 
-    if(treeType == 0 || treeType == 1)
+    if(treeType == BSPTreeType::kDrawing || treeType == BSPTreeType::kPhysics)
     {
         bounds_.center.x = reader.readFloat();
         bounds_.center.y = reader.readFloat();
@@ -51,47 +51,43 @@ BSPNode::BSPNode(BinReader& reader, int treeType, uint32_t nodeType)
         bounds_.radius = reader.readFloat();
     }
 
-    if(treeType != 0)
+    if(treeType == BSPTreeType::kDrawing)
     {
-        return;
-    }
+        uint32_t triCount = reader.readInt();
+        triangleIndices_.resize(triCount);
 
-    uint32_t triCount = reader.readInt();
-    triangleIndices_.resize(triCount);
-
-    for(uint16_t& index : triangleIndices_)
-    {
-        index = reader.readShort();
+        for(uint16_t& index : triangleIndices_)
+        {
+            index = reader.readShort();
+        }
     }
 }
 
-BSPLeaf::BSPLeaf(BinReader& reader, int treeType)
+BSPLeaf::BSPLeaf(BinReader& reader, BSPTreeType::Value treeType)
 {
     index_ = reader.readInt();
 
-    if(treeType != 1)
+    if(treeType == BSPTreeType::kPhysics)
     {
-        return;
-    }
+        // if 1, sphere parameters are valid and there are indices
+        solid_ = reader.readInt();
 
-    // if 1, sphere parameters are valid and there are indices
-    solid_ = reader.readInt();
+        bounds_.center.x = reader.readFloat();
+        bounds_.center.y = reader.readFloat();
+        bounds_.center.z = reader.readFloat();
+        bounds_.radius = reader.readFloat();
 
-    bounds_.center.x = reader.readFloat();
-    bounds_.center.y = reader.readFloat();
-    bounds_.center.z = reader.readFloat();
-    bounds_.radius = reader.readFloat();
+        uint32_t triCount = reader.readInt();
+        triangleIndices_.resize(triCount);
 
-    uint32_t triCount = reader.readInt();
-    triangleIndices_.resize(triCount);
-
-    for(uint16_t& index : triangleIndices_)
-    {
-        index = reader.readShort();
+        for(uint16_t& index : triangleIndices_)
+        {
+            index = reader.readShort();
+        }
     }
 }
 
-BSPPortal::BSPPortal(BinReader& reader, int treeType)
+BSPPortal::BSPPortal(BinReader& reader, BSPTreeType::Value treeType)
 {
     partition_.normal.x = reader.readFloat();
     partition_.normal.y = reader.readFloat();
@@ -101,35 +97,33 @@ BSPPortal::BSPPortal(BinReader& reader, int treeType)
     frontChild_ = readBSP(reader, treeType);
     backChild_ = readBSP(reader, treeType);
 
-    if(treeType != 0)
+    if(treeType == BSPTreeType::kDrawing)
     {
-        return;
-    }
+        bounds_.center.x = reader.readFloat();
+        bounds_.center.y = reader.readFloat();
+        bounds_.center.z = reader.readFloat();
+        bounds_.radius = reader.readFloat();
 
-    bounds_.center.x = reader.readFloat();
-    bounds_.center.y = reader.readFloat();
-    bounds_.center.z = reader.readFloat();
-    bounds_.radius = reader.readFloat();
+        uint32_t triCount = reader.readInt();
+        triangleIndices_.resize(triCount);
 
-    uint32_t triCount = reader.readInt();
-    triangleIndices_.resize(triCount);
+        uint32_t polyCount = reader.readInt();
+        portalPolys_.resize(polyCount);
 
-    uint32_t polyCount = reader.readInt();
-    portalPolys_.resize(polyCount);
+        for(uint16_t& index : triangleIndices_)
+        {
+            index = reader.readShort();
+        }
 
-    for(uint16_t& index : triangleIndices_)
-    {
-        index = reader.readShort();
-    }
-
-    for(PortalPoly& poly : portalPolys_)
-    {
-        poly.portalIndex = reader.readShort();
-        poly.polygonIndex = reader.readShort();
+        for(PortalPoly& poly : portalPolys_)
+        {
+            poly.portalIndex = reader.readShort();
+            poly.polygonIndex = reader.readShort();
+        }
     }
 }
 
-unique_ptr<BSPNode> readBSP(BinReader& reader, int treeType)
+unique_ptr<BSPNode> readBSP(BinReader& reader, BSPTreeType::Value treeType)
 {
     uint32_t nodeType = reader.readInt();
 

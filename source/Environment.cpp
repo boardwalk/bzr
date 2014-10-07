@@ -82,7 +82,7 @@ void Environment::Part::read(BinReader& reader)
     }
     reader.align();
 
-    readBSP(reader, 2);
+    readBSP(reader, BSPTreeType::kCell);
 
     for(uint32_t htfi = 0; htfi < numHitTriangleFans; htfi++)
     {
@@ -92,14 +92,14 @@ void Environment::Part::read(BinReader& reader)
         hitTriangleFans[htfi].read(reader);
     }
 
-    readBSP(reader, 1);
+    readBSP(reader, BSPTreeType::kPhysics);
 
-    uint32_t unk7 = reader.readInt();
-    assert(unk7 == 0 || unk7 == 1);
+    uint32_t hasDrawingBSP = reader.readInt();
+    assert(hasDrawingBSP == 0 || hasDrawingBSP == 1);
 
-    if(unk7)
+    if(hasDrawingBSP)
     {
-        readBSP(reader, 0);
+        readBSP(reader, BSPTreeType::kDrawing);
     }
 
     reader.align();

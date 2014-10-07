@@ -93,7 +93,7 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl{id}, nee
     if(flags & 0x1)
     {
         hitTriangleFans = readTriangleFans(reader);
-        hitTree = readBSP(reader, 1);
+        hitTree = readBSP(reader, BSPTreeType::kPhysics);
     }
 
     if(flags == 0x3 || flags == 0xB)
@@ -106,7 +106,7 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl{id}, nee
     if(flags & 0x2)
     {
         triangleFans = readTriangleFans(reader);
-        readBSP(reader, 0);
+        readBSP(reader, BSPTreeType::kDrawing);
     }
 
     if(flags & 0x8)

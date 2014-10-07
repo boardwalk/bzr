@@ -23,10 +23,20 @@
 
 class BinReader;
 
+struct BSPTreeType
+{
+    enum Value
+    {
+        kDrawing = 0,
+        kPhysics = 1,
+        kCell = 2
+    };
+};
+
 class BSPNode
 {
 public:
-    BSPNode(BinReader& reader, int treeType, uint32_t nodeType);
+    BSPNode(BinReader& reader, BSPTreeType::Value treeType, uint32_t nodeType);
     virtual ~BSPNode() {}
 
 protected:
@@ -42,7 +52,7 @@ protected:
 class BSPLeaf : public BSPNode
 {
 public:
-    BSPLeaf(BinReader& reader, int treeType);
+    BSPLeaf(BinReader& reader, BSPTreeType::Value treeType);
 
 private:
     uint32_t index_;
@@ -52,7 +62,7 @@ private:
 class BSPPortal : public BSPNode
 {
 public:
-    BSPPortal(BinReader& reader, int treeType);
+    BSPPortal(BinReader& reader, BSPTreeType::Value treeType);
 
 private:
     struct PortalPoly
@@ -64,6 +74,6 @@ private:
     vector<PortalPoly> portalPolys_;
 };
 
-unique_ptr<BSPNode> readBSP(BinReader& reader, int treeType);
+unique_ptr<BSPNode> readBSP(BinReader& reader, BSPTreeType::Value treeType);
 
 #endif
