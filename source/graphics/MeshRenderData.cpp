@@ -33,11 +33,11 @@
 // Ought to find an existing 0x08 file with a nice transparent surface
 static weak_ptr<const Resource> g_hitSurface;
 
-struct SortByTexIndex
+struct SortByTexSurface
 {
     bool operator()(const TriangleFan* a, const TriangleFan* b)
     {
-        return a->texIndex < b->texIndex;
+        return a->surfaceIndex < b->surfaceIndex;
     }
 };
 
@@ -113,7 +113,7 @@ void MeshRenderData::init(
         sortedTriangleFans.push_back(&triangleFan);
     }
 
-    sort(sortedTriangleFans.begin(), sortedTriangleFans.end(), SortByTexIndex());
+    sort(sortedTriangleFans.begin(), sortedTriangleFans.end(), SortByTexSurface());
 
     // Build batches
     vector<float> vertexData;
@@ -127,10 +127,10 @@ void MeshRenderData::init(
             continue;
         }
 
-        if(batches_.empty() || surfaces[triangleFan->texIndex].get() != batches_.back().surface.get())
+        if(batches_.empty() || surfaces[triangleFan->surfaceIndex].get() != batches_.back().surface.get())
         {
             // Start a new batch
-            batches_.push_back({surfaces[triangleFan->texIndex], 0});
+            batches_.push_back({surfaces[triangleFan->surfaceIndex], 0});
         }
         else if(batches_.back().indexCount != 0)
         {

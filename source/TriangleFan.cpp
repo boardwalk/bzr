@@ -48,7 +48,7 @@ void TriangleFan::read(BinReader& reader)
     uint32_t sidesType = reader.readInt();
     assert(sidesType == kSingle || sidesType == kDouble || sidesType == kBoth);
 
-    texIndex = reader.readShort();
+    surfaceIndex = reader.readShort();
 
     reader.readShort();
 

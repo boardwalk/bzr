@@ -32,13 +32,13 @@ struct TriangleFan
         int texCoordIndex;
     };
 
-    TriangleFan() : texIndex(0)
+    TriangleFan() : surfaceIndex(0)
     {}
 
     void read(BinReader& reader);
 
     int flags;
-    int texIndex;
+    int surfaceIndex;
     vector<Index> indices;
 };
 
