@@ -37,7 +37,7 @@ Animation::Animation(uint32_t id, const void* data, size_t size) : ResourceImpl{
 
     if(flags & kHasPosFrames)
     {
-        for(uint32_t fi = 0; fi < numFrames; fi++)
+        for(uint32_t i = 0; i < numFrames; i++)
         {
             Location().read(reader);
         }
@@ -45,7 +45,7 @@ Animation::Animation(uint32_t id, const void* data, size_t size) : ResourceImpl{
 
     frames.reserve(numFrames);
 
-    for(uint32_t fi = 0; fi < numFrames; fi++)
+    for(uint32_t i = 0; i < numFrames; i++)
     {
         frames.emplace_back(reader, numModels);
     }

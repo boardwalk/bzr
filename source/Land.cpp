@@ -328,7 +328,7 @@ void Land::initStaticObjects()
 
     staticObjects_.reserve(numStaticObjects);
 
-    for(uint16_t di = 0; di < numStaticObjects; di++)
+    for(uint16_t i = 0; i < numStaticObjects; i++)
     {
         staticObjects_.emplace_back(reader);
     }
@@ -341,7 +341,7 @@ void Land::initStaticObjects()
 
     staticObjects_.reserve(numStaticObjects + numStaticObjectsEx);
 
-    for(uint16_t di = 0; di < numStaticObjectsEx; di++)
+    for(uint16_t i = 0; i < numStaticObjectsEx; i++)
     {
         // struct BuildInfo
         staticObjects_.emplace_back(reader);
