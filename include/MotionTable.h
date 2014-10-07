@@ -18,7 +18,7 @@
 #ifndef BZR_MOTIONTABLE_H
 #define BZR_MOTIONTABLE_H
 
-#include "AnimationStrip.h"
+#include "MotionData.h"
 #include "Resource.h"
 #include <unordered_map>
 
@@ -27,9 +27,9 @@ struct MotionTable : public ResourceImpl<ResourceType::kMotionTable>
 {
     MotionTable(uint32_t id, const void* data, size_t size);
 
-    unordered_map<uint32_t, AnimationStrip> cycles;
-    unordered_map<uint32_t, AnimationStrip> modifiers;
-    unordered_map<uint32_t, unordered_map<uint32_t, AnimationStrip>> links;
+    unordered_map<uint32_t, MotionData> cycles;
+    unordered_map<uint32_t, MotionData> modifiers;
+    unordered_map<uint32_t, unordered_map<uint32_t, MotionData>> links;
 };
 
 #endif

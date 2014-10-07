@@ -15,33 +15,33 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "AnimationStrip.h"
+#include "MotionData.h"
 #include "Animation.h"
 #include "BinReader.h"
 #include "Core.h"
 #include "ResourceCache.h"
 
-enum AnimationStripFlags
+enum MotionDataFlags
 {
     kNoMods = 1,
     kFromDefault = 2
 };
 
-AnimationStrip::AnimationStrip()
+MotionData::MotionData()
 {}
 
-AnimationStrip::AnimationStrip(AnimationStrip&& other)
+MotionData::MotionData(MotionData&& other)
 {
     animInfos = move(other.animInfos);
 }
 
-AnimationStrip& AnimationStrip::operator=(AnimationStrip&& other)
+MotionData& MotionData::operator=(MotionData&& other)
 {
     animInfos = move(other.animInfos);
     return *this;
 }
 
-static void read(BinReader& reader, AnimationStrip::AnimInfo& animInfo)
+static void read(BinReader& reader, MotionData::AnimInfo& animInfo)
 {
     uint32_t animId = reader.readInt();
     animInfo.resource = Core::get().resourceCache().get(animId);
@@ -60,7 +60,7 @@ static void read(BinReader& reader, AnimationStrip::AnimInfo& animInfo)
     }    
 }
 
-void read(BinReader& reader, AnimationStrip& animStrip)
+void read(BinReader& reader, MotionData& animStrip)
 {
     uint8_t numAnims = reader.readByte();
     animStrip.animInfos.resize(numAnims);
@@ -74,7 +74,7 @@ void read(BinReader& reader, AnimationStrip& animStrip)
     uint8_t unk3 = reader.readByte();
     assert(unk3 == 0);
 
-    for(AnimationStrip::AnimInfo& animInfo : animStrip.animInfos)
+    for(MotionData::AnimInfo& animInfo : animStrip.animInfos)
     {
         read(reader, animInfo);
     }

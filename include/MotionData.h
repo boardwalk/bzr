@@ -15,8 +15,8 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_ANIMATIONSTRIP_H
-#define BZR_ANIMATIONSTRIP_H
+#ifndef BZR_MOTIONDATA_H
+#define BZR_MOTIONDATA_H
 
 #include "Resource.h"
 #include "Noncopyable.h"
@@ -24,7 +24,7 @@
 class BinReader;
 
 // struct CMotionData
-struct AnimationStrip : Noncopyable
+struct MotionData : Noncopyable
 {
     // struct AnimSequenceNode
     struct AnimInfo
@@ -35,13 +35,13 @@ struct AnimationStrip : Noncopyable
         float framesPerSecond;
     };
 
-    AnimationStrip();    
-    AnimationStrip(AnimationStrip&&);
-    AnimationStrip& operator=(AnimationStrip&&);
+    MotionData();    
+    MotionData(MotionData&&);
+    MotionData& operator=(MotionData&&);
 
     vector<AnimInfo> animInfos;
 };
 
-void read(BinReader& reader, AnimationStrip& animStrip);
+void read(BinReader& reader, MotionData& animStrip);
 
 #endif
