@@ -181,8 +181,7 @@ void ModelRenderer::renderModel(const Model& model,
     }
 
     loadMat4ToUniform(worldMat, program_.getUniform("worldMatrix"));
-    loadMat4ToUniform(viewMat, program_.getUniform("viewMatrix"));
-    loadMat4ToUniform(projectionMat, program_.getUniform("projectionMatrix"));
+    loadMat4ToUniform(projectionMat * viewMat, program_.getUniform("projectionViewMatrix"));
 
     if(!model.renderData)
     {

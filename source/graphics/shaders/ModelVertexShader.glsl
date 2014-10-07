@@ -25,8 +25,7 @@ out vec2 fragTexCoord;
 
 uniform vec4 cameraPosition;
 uniform mat4 worldMatrix;
-uniform mat4 viewMatrix;
-uniform mat4 projectionMatrix;
+uniform mat4 projectionViewMatrix;
 
 const float WORLD_RADIUS = 10000.0;
 
@@ -38,6 +37,6 @@ void main()
     float angle = atan(distance(worldPos.xy, cameraPosition.xy) / WORLD_RADIUS);
     worldPos.z = worldPos.z - WORLD_RADIUS * (1.0 - cos(angle));
 
-    gl_Position = projectionMatrix * viewMatrix * worldPos;
+    gl_Position = projectionViewMatrix * worldPos;
     fragTexCoord = texCoord;
 }

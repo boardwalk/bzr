@@ -85,8 +85,7 @@ void StructureRenderer::renderStructure(
     glm::mat4 worldMat = glm::translate(glm::mat4{}, position) * glm::mat4_cast(rotation);
 
     loadMat4ToUniform(worldMat, program_.getUniform("worldMatrix"));
-    loadMat4ToUniform(viewMat, program_.getUniform("viewMatrix"));
-    loadMat4ToUniform(projectionMat, program_.getUniform("projectionMatrix"));
+    loadMat4ToUniform(projectionMat * viewMat, program_.getUniform("projectionViewMatrix"));
 
     if(!structure.renderData())
     {
