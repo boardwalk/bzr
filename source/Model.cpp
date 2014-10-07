@@ -24,6 +24,13 @@
 #include "Texture.h"
 #include "TextureLookup5.h"
 
+enum ModelFlags
+{
+    kHasPhysicsBSP = 0x1,
+    kHasDrawingBSP = 0x2,
+    kHasDegrade = 0x8
+};
+
 static vector<TriangleFan> readTriangleFans(BinReader& reader)
 {
     uint16_t numTriangleFans = reader.readPackedShort();
@@ -83,33 +90,33 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl{id}, nee
         vertices[i].read(reader);
     }
 
-    if(flags == 0x2 || flags == 0xA)
+    if(flags == kHasDrawingBSP || flags == (kHasDrawingBSP|kHasDegrade))
     {
         reader.readFloat();
         reader.readFloat();
         reader.readFloat();
     }
 
-    if(flags & 0x1)
+    if(flags & kHasPhysicsBSP)
     {
         hitTriangleFans = readTriangleFans(reader);
         hitTree = readBSP(reader, BSPTreeType::kPhysics);
     }
 
-    if(flags == 0x3 || flags == 0xB)
+    if(flags == (kHasPhysicsBSP|kHasDrawingBSP) || flags == (kHasPhysicsBSP|kHasDrawingBSP|kHasDegrade))
     {
        reader.readFloat();
        reader.readFloat();
        reader.readFloat();
     }
 
-    if(flags & 0x2)
+    if(flags & kHasDrawingBSP)
     {
         triangleFans = readTriangleFans(reader);
         readBSP(reader, BSPTreeType::kDrawing);
     }
 
-    if(flags & 0x8)
+    if(flags & kHasDegrade)
     {
         // Seems to be a reference to an 0x11 file? No idea what these are!
         reader.readInt();

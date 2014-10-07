@@ -19,7 +19,14 @@
 #include "BinReader.h"
 #include "Core.h"
 #include "ResourceCache.h"
-#include <glm/gtx/norm.hpp>
+
+enum ModelGroupFlag
+{
+    kHasParentIndex = 0x1,
+    kHasDefaultScale = 0x2,
+    kAllowFreeHeading = 0x4,
+    kHasPhysicsBSP = 0x8
+};
 
 ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
@@ -32,69 +39,134 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
     assert(flags <= 0xF);
 
     uint32_t numModels = reader.readInt();
-    modelInfos.resize(numModels);
 
-    for(ModelInfo& modelInfo : modelInfos)
+    models.reserve(numModels);
+
+    for(uint32_t i = 0; i < numModels; i++)
     {
         uint32_t modelId = reader.readInt();
-        modelInfo.resource = Core::get().resourceCache().get(modelId);
+        models.emplace_back(Core::get().resourceCache().get(modelId));
     }
 
-    if(flags & 1)
+    parents.reserve(numModels);
+
+    for(uint32_t i = 0; i < numModels; i++)
     {
-        for(ModelInfo& modelInfo : modelInfos)
+        uint32_t parent = 0xFFFFFFFF;
+
+        if(flags & kHasParentIndex)
         {
-            modelInfo.parent = reader.readInt();
+            parent = reader.readInt();
         }
+
+        parents.push_back(parent);
     }
 
-    if(flags & 2)
+    scales.reserve(numModels);
+
+    for(uint32_t i = 0; i < numModels; i++)
     {
-        for(ModelInfo& modelInfo : modelInfos)
+        glm::vec3 scale{1.0, 1.0, 1.0};
+
+        if(flags & kHasDefaultScale)
         {
-            modelInfo.scale.x = reader.readFloat();
-            modelInfo.scale.y = reader.readFloat();
-            modelInfo.scale.z = reader.readFloat();
+            scale.x = reader.readFloat();
+            scale.y = reader.readFloat();
+            scale.z = reader.readFloat();
         }
+
+        scales.push_back(scale);
     }
 
-    uint32_t numExtendedLocs = reader.readInt();
+    uint32_t numHoldingLocations = reader.readInt();
 
-    for(uint32_t i = 0; i < numExtendedLocs; i++)
+    for(uint32_t i = 0; i < numHoldingLocations; i++)
     {
-        reader.readInt();
-        reader.readInt();
+        /*key*/ reader.readInt();
+        /*partIndex*/ reader.readInt();
 
-        reader.readFloat();
-        reader.readFloat();
-        reader.readFloat();
-
-        glm::quat q;
-        q.w = reader.readFloat();
-        q.x = reader.readFloat();
-        q.y = reader.readFloat();
-        q.z = reader.readFloat();
-
-        assert(glm::length2(q) >= 0.99 && glm::length2(q) <= 1.01);
+        Orientation{reader};
     }
 
-    uint32_t unk1 = reader.readInt();
-    assert(unk1 == 0);
+    uint32_t numConnectionPoints = reader.readInt();
+    assert(numConnectionPoints == 0);
 
-    reader.readInt();
-    reader.readInt();
-
-    for(ModelInfo& modelInfo : modelInfos)
+    for(uint32_t i = 0; i < numConnectionPoints; i++)
     {
-        modelInfo.position.x = reader.readFloat();
-        modelInfo.position.y = reader.readFloat();
-        modelInfo.position.z = reader.readFloat();
+        /*key*/ reader.readInt();
+        /*partIndex*/ reader.readInt();
 
-        modelInfo.rotation.w = reader.readFloat();
-        modelInfo.rotation.x = reader.readFloat();
-        modelInfo.rotation.y = reader.readFloat();
-        modelInfo.rotation.z = reader.readFloat();
-
-        assert(glm::length2(modelInfo.rotation) >= 0.99 && glm::length2(modelInfo.rotation) <= 1.01);
+        Orientation{reader};
     }
+
+    uint32_t numPlacementFrames = reader.readInt();
+    placementFrames.reserve(numPlacementFrames);
+
+    for(uint32_t i = 0; i < numPlacementFrames; i++)
+    {
+        /*key*/ reader.readInt();
+
+        placementFrames.emplace_back(reader, numModels);
+    }
+
+    uint32_t numCylSpheres = reader.readInt();
+
+    for(uint32_t i = 0; i < numCylSpheres; i++)
+    {
+        /*x*/ reader.readFloat();
+        /*y*/ reader.readFloat();
+        /*z*/ reader.readFloat();
+        /*r*/ reader.readFloat();
+        /*h*/ reader.readFloat();
+    }
+
+    uint32_t numSpheres = reader.readInt();
+
+    for(uint32_t i = 0; i < numSpheres; i++)
+    {
+        /*x*/ reader.readFloat();
+        /*y*/ reader.readFloat();
+        /*z*/ reader.readFloat();
+        /*r*/ reader.readFloat();
+    }
+
+    /*height*/ reader.readFloat();
+    /*radius*/ reader.readFloat();
+    /*stepUpHeight*/ reader.readFloat();
+    /*stepDownHeight*/ reader.readFloat();
+
+    // sorting sphere
+    /*x*/ reader.readFloat();
+    /*y*/ reader.readFloat();
+    /*z*/ reader.readFloat();
+    /*r*/ reader.readFloat();
+
+    // selection sphere
+    /*x*/ reader.readFloat();
+    /*y*/ reader.readFloat();
+    /*z*/ reader.readFloat();
+    /*r*/ reader.readFloat();
+
+    uint32_t numLights = reader.readInt();
+
+    for(uint32_t i = 0; i < numLights; i++)
+    {
+        uint32_t lightIndex = reader.readInt();
+        assert(lightIndex == i);
+
+        Orientation{reader};
+
+        /*color*/ reader.readInt();
+        /*intensity*/ reader.readFloat();
+        /*falloff*/ reader.readFloat();
+        /*coneAngle*/ reader.readFloat(); // junk 0xcdcdcdcd most of the time
+    }
+
+    /*defaultAnimId*/ reader.readInt();
+    /*defaultScriptId*/ reader.readInt();
+    /*defaultMTableId*/ reader.readInt();
+    /*defaultStableId*/ reader.readInt();
+    /*defaultPhstableId*/ reader.readInt();
+
+    reader.assertEnd();
 }

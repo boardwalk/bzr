@@ -15,20 +15,19 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_MODELGROUP_H
-#define BZR_MODELGROUP_H
+#ifndef BZR_ORIENTATION_H
+#define BZR_ORIENTATION_H
 
-#include "AnimationFrame.h"
-#include "Resource.h"
+class BinReader;
 
-struct ModelGroup : public ResourceImpl<ResourceType::kModelGroup>
+// struct LocationType
+// TODO rename me
+struct Orientation
 {
-    ModelGroup(uint32_t id, const void* data, size_t size);
+    Orientation(BinReader& reader);
 
-    vector<ResourcePtr> models;
-    vector<uint32_t> parents;
-    vector<glm::vec3> scales;
-    vector<AnimationFrame> placementFrames;
+    glm::vec3 position;
+    glm::quat rotation;
 };
 
 #endif

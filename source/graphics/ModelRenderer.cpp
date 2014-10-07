@@ -19,6 +19,7 @@
 #include "graphics/MeshRenderData.h"
 #include "graphics/Renderer.h"
 #include "graphics/util.h"
+#include "AnimationFrame.h"
 #include "Camera.h"
 #include "Core.h"
 #include "Land.h"
@@ -156,11 +157,16 @@ void ModelRenderer::renderModelGroup(const ModelGroup& modelGroup,
     const glm::mat4& viewMat,
     const glm::mat4& worldMat)
 {
-    for(const ModelGroup::ModelInfo& modelInfo : modelGroup.modelInfos)
-    {
-        glm::mat4 subWorldMat = glm::translate(glm::mat4{}, modelInfo.position) * glm::mat4_cast(modelInfo.rotation) * glm::scale(glm::mat4(), modelInfo.scale);
+    const AnimationFrame& frame = modelGroup.placementFrames.back();
 
-        renderOne(modelInfo.resource,
+    for(uint32_t i = 0; i < modelGroup.models.size(); i++)
+    {
+        const Orientation& orientation = frame.orientations[i];
+        const glm::vec3& scale = modelGroup.scales[i];
+
+        glm::mat4 subWorldMat = glm::translate(glm::mat4{}, orientation.position) * glm::mat4_cast(orientation.rotation) * glm::scale(glm::mat4(), scale);
+
+        renderOne(modelGroup.models[i],
             projectionMat,
             viewMat,
             worldMat * subWorldMat);

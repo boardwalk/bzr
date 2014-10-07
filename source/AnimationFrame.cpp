@@ -51,18 +51,11 @@ enum AnimHooks
 
 AnimationFrame::AnimationFrame(BinReader& reader, uint32_t numModels)
 {
-    orientations.resize(numModels);
+    orientations.reserve(numModels);
 
-    for(Orientation& orientation : orientations)
+    for(uint32_t i = 0 ; i < numModels; i++)
     {
-        orientation.position.x = reader.readFloat();
-        orientation.position.y = reader.readFloat();
-        orientation.position.z = reader.readFloat();
-
-        orientation.rotation.w = reader.readFloat();
-        orientation.rotation.x = reader.readFloat();
-        orientation.rotation.y = reader.readFloat();
-        orientation.rotation.z = reader.readFloat();
+        orientations.emplace_back(reader);
     }
 
     uint32_t numHooks = reader.readInt();

@@ -15,20 +15,20 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_MODELGROUP_H
-#define BZR_MODELGROUP_H
+#include "Orientation.h"
+#include "BinReader.h"
+#include <glm/gtx/norm.hpp>
 
-#include "AnimationFrame.h"
-#include "Resource.h"
-
-struct ModelGroup : public ResourceImpl<ResourceType::kModelGroup>
+Orientation::Orientation(BinReader& reader)
 {
-    ModelGroup(uint32_t id, const void* data, size_t size);
+    position.x = reader.readFloat();
+    position.y = reader.readFloat();
+    position.z = reader.readFloat();
 
-    vector<ResourcePtr> models;
-    vector<uint32_t> parents;
-    vector<glm::vec3> scales;
-    vector<AnimationFrame> placementFrames;
-};
+    rotation.w = reader.readFloat();
+    rotation.x = reader.readFloat();
+    rotation.y = reader.readFloat();
+    rotation.z = reader.readFloat();
 
-#endif
+    assert(glm::length2(rotation) >= 0.99 && glm::length2(rotation) <= 1.01);
+}

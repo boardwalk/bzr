@@ -19,17 +19,12 @@
 #define BZR_ANIMATIONFRAME_H
 
 #include "Noncopyable.h"
+#include "Orientation.h"
 
 class BinReader;
 
 struct AnimationFrame : Noncopyable
 {
-    struct Orientation
-    {
-        glm::vec3 position;
-        glm::quat rotation;
-    };
-
     AnimationFrame(BinReader& reader, uint32_t numModels);
     AnimationFrame(AnimationFrame&&);
     AnimationFrame& operator=(AnimationFrame&&);
