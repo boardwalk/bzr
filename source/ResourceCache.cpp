@@ -17,13 +17,13 @@
  */
 #include "ResourceCache.h"
 #include "Animation.h"
-#include "AnimationSet.h"
 #include "Core.h"
 #include "DatFile.h"
 #include "Environment.h"
 #include "Palette.h"
 #include "Model.h"
 #include "ModelGroup.h"
+#include "MotionTable.h"
 #include "Region.h"
 #include "Scene.h"
 #include "Sound.h"
@@ -61,8 +61,8 @@ static const Resource* loadResource(uint32_t resourceId)
             return new Texture{resourceId, data.data(), data.size()};
         case ResourceType::kSurface:
             return new Surface{resourceId, data.data(), data.size()};
-        case ResourceType::kAnimationSet:
-            return new AnimationSet{resourceId, data.data(), data.size()};
+        case ResourceType::kMotionTable:
+            return new MotionTable{resourceId, data.data(), data.size()};
         case ResourceType::kSound:
             return new Sound{resourceId, data.data(), data.size()};
         case ResourceType::kEnvironment:

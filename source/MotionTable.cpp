@@ -15,7 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "AnimationSet.h"
+#include "MotionTable.h"
 #include "BinReader.h"
 
 struct CombatStyle
@@ -50,7 +50,7 @@ struct CombatStyle
     };
 };
 
-AnimationSet::AnimationSet(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
+MotionTable::MotionTable(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
     BinReader reader(data, size);
 

@@ -15,17 +15,17 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_ANIMATIONSET_H
-#define BZR_ANIMATIONSET_H
+#ifndef BZR_MOTIONTABLE_H
+#define BZR_MOTIONTABLE_H
 
 #include "AnimationStrip.h"
 #include "Resource.h"
 #include <unordered_map>
 
 // struct CMotionTable
-struct AnimationSet : public ResourceImpl<ResourceType::kAnimationSet>
+struct MotionTable : public ResourceImpl<ResourceType::kMotionTable>
 {
-    AnimationSet(uint32_t id, const void* data, size_t size);
+    MotionTable(uint32_t id, const void* data, size_t size);
 
     unordered_map<uint32_t, AnimationStrip> cycles;
     unordered_map<uint32_t, AnimationStrip> modifiers;
