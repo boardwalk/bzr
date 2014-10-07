@@ -19,6 +19,7 @@
 #include "BinReader.h"
 #include "Core.h"
 #include "ResourceCache.h"
+#include <glm/gtc/matrix_transform.hpp>
 
 Doodad::Doodad()
 {}
@@ -28,14 +29,19 @@ Doodad::Doodad(BinReader& reader)
     uint32_t modelId = reader.readInt();
     resource = Core::get().resourceCache().get(modelId);
 
+    glm::vec3 position;
     position.x = reader.readFloat();
     position.y = reader.readFloat();
     position.z = reader.readFloat();
 
+    glm::quat rotation;
     rotation.w = reader.readFloat();
     rotation.x = reader.readFloat();
     rotation.y = reader.readFloat();
     rotation.z = reader.readFloat();
 
-    scale = 1.0;
+    glm::mat4 translateMat = glm::translate(glm::mat4{}, position);
+    glm::mat4 rotateMat = glm::mat4_cast(rotation);
+
+    transform = translateMat * rotateMat;
 }

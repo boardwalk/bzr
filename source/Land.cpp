@@ -24,6 +24,7 @@
 #include "Region.h"
 #include "ResourceCache.h"
 #include "Scene.h"
+#include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
 
 const fp_t Land::kCellSize = fp_t(24.0);
@@ -472,12 +473,14 @@ void Land::initScene(int x, int y, const Scene& scene)
         // TODO road avoidance
         // TODO slope check
 
+        glm::mat4 translateMat = glm::translate(glm::mat4{}, blockPos);
+        glm::mat4 rotateMat = glm::mat4_cast(rotation);
+        glm::mat4 scaleMat = glm::scale(glm::mat4{}, glm::vec3{scale, scale, scale});
+
         // add doodad
         Doodad doodad;
         doodad.resource = Core::get().resourceCache().get(objectDesc.resourceId);
-        doodad.position = blockPos;
-        doodad.rotation = rotation;
-        doodad.scale = scale;
+        doodad.transform = translateMat * rotateMat * scaleMat;
         doodads_.push_back(doodad);
     }
 }

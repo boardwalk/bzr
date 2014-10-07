@@ -28,9 +28,7 @@ struct Doodad
     Doodad(BinReader& reader);
 
     ResourcePtr resource;
-    glm::vec3 position;
-    glm::quat rotation;
-    fp_t scale;
+    glm::mat4 transform;
 };
 
 #endif

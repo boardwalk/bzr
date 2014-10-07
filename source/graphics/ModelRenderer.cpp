@@ -108,16 +108,11 @@ void ModelRenderer::render(const glm::mat4& projectionMat, const glm::mat4& view
         int dx = pair.first.x() - landcellManager.center().x();
         int dy = pair.first.y() - landcellManager.center().y();
 
-        glm::vec3 blockPosition{dx * Land::kBlockSize, dy * Land::kBlockSize, 0.0};
+        glm::mat4 blockTransform = glm::translate(glm::mat4{}, glm::vec3{dx * Land::kBlockSize, dy * Land::kBlockSize, 0.0});
 
         for(const Doodad& doodad : pair.second->doodads())
         {
-            glm::mat4 scaleMat = glm::scale(glm::mat4{}, glm::vec3(doodad.scale, doodad.scale, doodad.scale));
-            glm::mat4 rotateMat = glm::mat4_cast(doodad.rotation);
-            glm::mat4 translateMat = glm::translate(glm::mat4{}, blockPosition + doodad.position);
-            glm::mat4 worldMat = translateMat * rotateMat * scaleMat;
-
-            renderOne(doodad.resource, projectionMat, viewMat, worldMat);
+            renderOne(doodad.resource, projectionMat, viewMat, blockTransform * doodad.transform);
         }
     }
 
