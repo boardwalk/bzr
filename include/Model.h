@@ -30,7 +30,7 @@ struct Model : public ResourceImpl<ResourceType::kModel>
     Model(uint32_t id, const void* data, size_t size);
     ~Model();
 
-    vector<ResourcePtr> textures;
+    vector<ResourcePtr> surfaces;
     vector<Vertex> vertices;
     vector<TriangleFan> triangleFans;
     vector<TriangleFan> hitTriangleFans;

@@ -39,11 +39,11 @@ public:
 private:
     struct Batch
     {
-        ResourcePtr texture;
+        ResourcePtr surface;
         int indexCount;
     };
 
-    void init(const vector<ResourcePtr>& textures,
+    void init(const vector<ResourcePtr>& surfaces,
         const vector<Vertex>& vertices,
         const vector<TriangleFan>& triangleFans,
         const vector<TriangleFan>& hitTriangleFans);

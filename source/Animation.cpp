@@ -39,7 +39,7 @@ Animation::Animation(uint32_t id, const void* data, size_t size) : ResourceImpl{
     {
         for(uint32_t fi = 0; fi < numFrames; fi++)
         {
-            Location{reader};
+            Location().read(reader);
         }
     }
 

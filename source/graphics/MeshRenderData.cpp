@@ -43,7 +43,7 @@ struct SortByTexIndex
 
 MeshRenderData::MeshRenderData(const Model& model)
 {
-    init(model.textures,
+    init(model.surfaces,
         model.vertices,
         model.triangleFans,
         model.hitTriangleFans);
@@ -54,7 +54,7 @@ MeshRenderData::MeshRenderData(const Structure& structure)
     assert(structure.partNum() < structure.environment().parts.size());
     const Environment::Part& part = structure.environment().parts[structure.partNum()];
 
-    init(structure.textures(),
+    init(structure.surfaces(),
         part.vertices,
         part.triangleFans,
         part.hitTriangleFans);
@@ -76,7 +76,7 @@ void MeshRenderData::render()
     for(Batch& batch : batches_)
     {
         const Texture& texture = batch
-            .texture->cast<Surface>()
+            .surface->cast<Surface>()
             .textureLookup5->cast<TextureLookup5>()
             .texture->cast<Texture>();
 
@@ -97,7 +97,7 @@ void MeshRenderData::render()
 }
 
 void MeshRenderData::init(
-    const vector<ResourcePtr>& textures,
+    const vector<ResourcePtr>& surfaces,
     const vector<Vertex>& vertices,
     const vector<TriangleFan>& triangleFans,
     const vector<TriangleFan>& hitTriangleFans)
@@ -127,10 +127,10 @@ void MeshRenderData::init(
             continue;
         }
 
-        if(batches_.empty() || textures[triangleFan->texIndex].get() != batches_.back().texture.get())
+        if(batches_.empty() || surfaces[triangleFan->texIndex].get() != batches_.back().surface.get())
         {
             // Start a new batch
-            batches_.push_back({textures[triangleFan->texIndex], 0});
+            batches_.push_back({surfaces[triangleFan->texIndex], 0});
         }
         else if(batches_.back().indexCount != 0)
         {

@@ -85,7 +85,7 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
         /*key*/ reader.readInt();
         /*partIndex*/ reader.readInt();
 
-        Location{reader};
+        Location().read(reader);
     }
 
     uint32_t numConnectionPoints = reader.readInt();
@@ -96,7 +96,7 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
         /*key*/ reader.readInt();
         /*partIndex*/ reader.readInt();
 
-        Location{reader};
+        Location().read(reader);
     }
 
     uint32_t numPlacementFrames = reader.readInt();
@@ -154,7 +154,7 @@ ModelGroup::ModelGroup(uint32_t id, const void* data, size_t size) : ResourceImp
         uint32_t lightIndex = reader.readInt();
         assert(lightIndex == i);
 
-        Location{reader};
+        Location().read(reader);
 
         /*color*/ reader.readInt();
         /*intensity*/ reader.readFloat();

@@ -19,6 +19,7 @@
 #define BZR_STRUCTURE_H
 
 #include "Landcell.h"
+#include "Location.h"
 
 struct Environment;
 
@@ -28,17 +29,15 @@ public:
     Structure(const void* data, size_t size);
 
     LandcellId id() const override;
-    const glm::vec3& position() const;
-    const glm::quat& rotation() const;
-    const vector<ResourcePtr>& textures() const;
+    const Location& location() const;
+    const vector<ResourcePtr>& surfaces() const;
     const Environment& environment() const;
     uint16_t partNum() const;
 
 private:
     LandcellId id_;
-    glm::vec3 position_;
-    glm::quat rotation_;
-    vector<ResourcePtr> textures_;
+    Location location_;
+    vector<ResourcePtr> surfaces_;
     ResourcePtr environment_;
     uint16_t partNum_;
 };

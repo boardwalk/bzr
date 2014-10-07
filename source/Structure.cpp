@@ -21,6 +21,14 @@
 #include "Environment.h"
 #include "ResourceCache.h"
 
+enum EnvCellFlags
+{
+    kSeenOutside = 1,
+    kHasStaticObjects = 2,
+    kHasWeenieObjects = 4,
+    kHasRestrictionObject = 8
+};
+
 Structure::Structure(const void* data, size_t size)
 {
     BinReader reader(data, size);
@@ -28,56 +36,44 @@ Structure::Structure(const void* data, size_t size)
     uint32_t resourceId = reader.readInt();
     id_ = LandcellId(resourceId);
 
-    // 0x1 above ground
-    // 0x2 has objects
-    // 0x4 unknown
-    // 0x8 unknown, extra 4 bytes
     uint32_t flags = reader.readInt();
     assert(flags <= 0xF);
 
     uint32_t resourceId2 = reader.readInt();
     assert(resourceId2 == resourceId);
 
-    uint8_t numTextures = reader.readByte();
-    textures_.resize(numTextures);
+    uint8_t numSurfaces = reader.readByte();
+    surfaces_.resize(numSurfaces);
 
     uint8_t numConnected = reader.readByte();
     uint16_t numVisible = reader.readShort();
 
-    for(ResourcePtr& texture : textures_)
+    for(ResourcePtr& surface : surfaces_)
     {
-        uint16_t textureId = reader.readShort();
-        texture = Core::get().resourceCache().get(ResourceType::kSurface | textureId);
+        uint16_t surfaceId = reader.readShort();
+        surface = Core::get().resourceCache().get(ResourceType::kSurface | surfaceId);
     }
 
     uint16_t environmentId = reader.readShort();
     environment_ = Core::get().resourceCache().get(ResourceType::kEnvironment | environmentId);
-
     partNum_ = reader.readShort();
+    location_.read(reader);
 
-    position_.x = reader.readFloat();
-    position_.y = reader.readFloat();
-    position_.z = reader.readFloat();
-
-    rotation_.w = reader.readFloat();
-    rotation_.x = reader.readFloat();
-    rotation_.y = reader.readFloat();
-    rotation_.z = reader.readFloat();
-
+    // struct CCellPortal
     for(uint8_t i = 0; i < numConnected; i++)
     {
-        reader.readShort();
-        reader.readShort();
-        reader.readShort(); // structure index
-        reader.readShort();
+        /*portalSide*/ reader.readShort();
+        /*portalId*/ reader.readShort();
+        /*cellId*/ reader.readShort();
+        /*exactMatch*/ reader.readShort();
     }
 
     for(uint16_t i = 0; i < numVisible; i++)
     {
-        reader.readShort(); // structure index
+        /*cellId*/ reader.readShort();
     }
 
-    if(flags & 2)
+    if(flags & kHasStaticObjects)
     {
         uint32_t numDoodads = reader.readInt();
         doodads_.reserve(numDoodads);
@@ -88,9 +84,8 @@ Structure::Structure(const void* data, size_t size)
         }
     }
 
-    if(flags & 8)
+    if(flags & kHasRestrictionObject)
     {
-        // I'm not sure this is where this is supposed to be
         reader.readInt();
     }
 
@@ -102,19 +97,14 @@ LandcellId Structure::id() const
     return id_;
 }
 
-const glm::vec3& Structure::position() const
+const Location& Structure::location() const
 {
-    return position_;
+    return location_;
 }
 
-const glm::quat& Structure::rotation() const
+const vector<ResourcePtr>& Structure::surfaces() const
 {
-    return rotation_;
-}
-
-const vector<ResourcePtr>& Structure::textures() const
-{
-    return textures_;
+    return surfaces_;
 }
 
 const Environment& Structure::environment() const

@@ -51,11 +51,11 @@ enum AnimHooks
 
 AnimationFrame::AnimationFrame(BinReader& reader, uint32_t numModels)
 {
-    locations.reserve(numModels);
+    locations.resize(numModels);
 
     for(uint32_t i = 0 ; i < numModels; i++)
     {
-        locations.emplace_back(reader);
+        locations[i].read(reader);
     }
 
     uint32_t numHooks = reader.readInt();

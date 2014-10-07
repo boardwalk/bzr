@@ -58,15 +58,15 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl{id}, nee
     uint32_t flags = reader.readInt();
     assert(flags == 0x2 || flags == 0x3 || flags == 0xA || flags == 0xB);
 
-    uint8_t numTextures = reader.readByte();
-    textures.resize(numTextures);
+    uint8_t numSurfaces = reader.readByte();
+    surfaces.resize(numSurfaces);
 
-    for(ResourcePtr& texture : textures)
+    for(ResourcePtr& surface : surfaces)
     {
-        uint32_t textureId = reader.readInt();
-        texture = Core::get().resourceCache().get(textureId);
+        uint32_t surfaceId = reader.readInt();
+        surface = Core::get().resourceCache().get(surfaceId);
 
-        bool hasAlpha = texture->cast<Surface>()
+        bool hasAlpha = surface->cast<Surface>()
             .textureLookup5->cast<TextureLookup5>()
             .texture->cast<Texture>()
             .image.hasAlpha();

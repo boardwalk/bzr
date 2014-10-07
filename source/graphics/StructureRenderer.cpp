@@ -71,7 +71,7 @@ void StructureRenderer::render(const glm::mat4& projectionMat, const glm::mat4& 
 
         const Structure& structure = static_cast<const Structure&>(*pair.second);
 
-        renderStructure(structure, projectionMat, viewMat, blockPosition + structure.position(), structure.rotation());
+        renderStructure(structure, projectionMat, viewMat, blockPosition + structure.location().position, structure.location().rotation);
     }
 }
 

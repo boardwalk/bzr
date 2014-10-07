@@ -19,10 +19,7 @@
 #include "BinReader.h"
 #include <glm/gtx/norm.hpp>
 
-Location::Location()
-{}
-
-Location::Location(BinReader& reader)
+void Location::read(BinReader& reader)
 {
     position.x = reader.readFloat();
     position.y = reader.readFloat();

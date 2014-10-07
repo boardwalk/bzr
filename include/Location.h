@@ -23,8 +23,7 @@ class BinReader;
 // struct LocationType
 struct Location
 {
-    Location();
-    Location(BinReader& reader);
+    void read(BinReader& reader);
 
     glm::vec3 position;
     glm::quat rotation;
