@@ -28,22 +28,12 @@ class BSPNode
 {
 public:
     virtual ~BSPNode() {}
-
-    // Collide a line segment against the BSP tree
-    // If the segment contacts a solid volume, returns true and the point of impact
-    virtual bool collide(const LineSegment& segment, glm::vec3& impact) const = 0;
-
-    virtual const Sphere& bounds() const = 0;
 };
 
 class BSPInternal : public BSPNode
 {
 public:
     BSPInternal(BinReader& reader, int treeType, uint32_t nodeType);
-
-    bool collide(const LineSegment& segment, glm::vec3& impact) const override;
-
-    const Sphere& bounds() const override;
 
 private:
     Plane partition_;
@@ -60,10 +50,6 @@ class BSPExternal : public BSPNode
 public:
     BSPExternal(BinReader& reader, int treeType);
 
-    bool collide(const LineSegment& segment, glm::vec3& impact) const override;
-
-    const Sphere& bounds() const override;
-
 private:
     uint32_t index_;
     // if treeType == 1
@@ -76,10 +62,6 @@ class BSPPortal : public BSPNode
 {
 public:
     BSPPortal(BinReader& reader, int treeType);
-
-    bool collide(const LineSegment& segment, glm::vec3& impact) const override;
-
-    const Sphere& bounds() const override;
 
 private:
     struct PortalPoly

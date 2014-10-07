@@ -62,20 +62,6 @@ BSPInternal::BSPInternal(BinReader& reader, int treeType, uint32_t nodeType)
     }
 }
 
-bool BSPInternal::collide(const LineSegment& segment, glm::vec3& impact) const
-{
-    // TODO
-    (void)segment;
-    (void)impact;
-
-    return false;
-}
-
-const Sphere& BSPInternal::bounds() const
-{
-    return bounds_;
-}
-
 BSPExternal::BSPExternal(BinReader& reader, int treeType)
 {
     index_ = reader.readInt();
@@ -100,22 +86,6 @@ BSPExternal::BSPExternal(BinReader& reader, int treeType)
     {
         index = reader.readShort();
     }
-}
-
-bool BSPExternal::collide(const LineSegment& segment, glm::vec3& impact) const
-{
-    if(solid_)
-    {
-        impact = segment.begin;
-        return true;
-    }
-
-    return false;
-}
-
-const Sphere& BSPExternal::bounds() const
-{
-    return bounds_;
 }
 
 BSPPortal::BSPPortal(BinReader& reader, int treeType)
@@ -154,20 +124,6 @@ BSPPortal::BSPPortal(BinReader& reader, int treeType)
         poly.index = reader.readShort();
         poly.what = reader.readShort();
     }
-}
-
-bool BSPPortal::collide(const LineSegment& segment, glm::vec3& impact) const
-{
-    // TODO
-    (void)segment;
-    (void)impact;
-
-    return false;
-}
-
-const Sphere& BSPPortal::bounds() const
-{
-    return bounds_;
 }
 
 unique_ptr<BSPNode> readBSP(BinReader& reader, int treeType)

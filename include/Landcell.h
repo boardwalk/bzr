@@ -23,15 +23,6 @@
 #include "LandcellId.h"
 #include "Noncopyable.h"
 
-struct LandcellType
-{
-    enum Value
-    {
-        kLand,
-        kStructure
-    };
-};
-
 class Landcell : Noncopyable
 {
 public:
