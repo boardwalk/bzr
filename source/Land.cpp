@@ -385,14 +385,14 @@ void Land::initScenes()
 
             const Region::SceneType& sceneType = region.sceneTypes[sceneTypeNum];
 
-            uint32_t cellX = id().x() * 8 + x;
-            uint32_t cellY = id().y() * 8 + y;
-            uint32_t sceneNum = static_cast<uint32_t>(prng(cellX, cellY, RND_SCENE_PICK) * static_cast<double>(sceneType.scenes.size()));
-
             if(sceneType.scenes.empty())
             {
                 continue;
             }
+
+            uint32_t cellX = id().x() * 8 + x;
+            uint32_t cellY = id().y() * 8 + y;
+            uint32_t sceneNum = static_cast<uint32_t>(prng(cellX, cellY, RND_SCENE_PICK) * static_cast<double>(sceneType.scenes.size()));
 
             if(sceneNum >= sceneType.scenes.size())
             {
@@ -474,9 +474,6 @@ void Land::initScene(int x, int y, const Scene& scene)
         // calculate rotation
         fp_t randRot = static_cast<fp_t>(prng(cellX, cellY, RND_SCENE_OBJROT + i)) * glm::radians(objectDesc.maxRotation);
         glm::quat rotation = glm::angleAxis(randRot, glm::vec3(0.0, 0.0, 1.0)) * objectDesc.rotation;
-
-        // TODO road avoidance
-        // TODO slope check
 
         glm::mat4 translateMat = glm::translate(glm::mat4{}, blockPos);
         glm::mat4 rotateMat = glm::mat4_cast(rotation);

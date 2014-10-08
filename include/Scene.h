@@ -20,8 +20,10 @@
 
 #include "Resource.h"
 
+// AC: Scene
 struct Scene : public ResourceImpl<ResourceType::kScene>
 {
+    // AC: ObjectDesc
     struct ObjectDesc
     {
         uint32_t resourceId;

@@ -50,7 +50,7 @@ void read(BinReader& reader, TriangleFan& trifan)
 
     trifan.surfaceIndex = reader.readShort();
 
-    reader.readShort();
+    /*negSurface*/ reader.readShort();
 
     for(TriangleFan::Index& index : trifan.indices)
     {
