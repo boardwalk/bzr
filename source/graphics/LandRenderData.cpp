@@ -42,7 +42,7 @@ void LandRenderData::render()
     glDrawArrays(GL_TRIANGLES, 0, vertexCount_);
 }
 
-static void pushRotatedCoord(vector<uint8_t>& vertexData, fp_t s, fp_t t, int rotations, uint8_t scale)
+static void pushRotatedCoord(vector<GLfloat>& vertexData, fp_t s, fp_t t, int rotations, int scale)
 {
     fp_t cosine = glm::cos(pi() / fp_t(180.0) * fp_t(90.0) * rotations);
     fp_t sine = glm::sin(pi() / fp_t(180.0) * fp_t(90.0) * rotations);
@@ -50,15 +50,15 @@ static void pushRotatedCoord(vector<uint8_t>& vertexData, fp_t s, fp_t t, int ro
     fp_t ns = (s - fp_t(0.5)) * cosine - (t - fp_t(0.5)) * sine + fp_t(0.5);
     fp_t nt = (s - fp_t(0.5)) * sine + (t - fp_t(0.5)) * cosine + fp_t(0.5);
 
-    vertexData.push_back(static_cast<uint8_t>(ns + fp_t(0.5)) * scale);
-    vertexData.push_back(static_cast<uint8_t>(nt + fp_t(0.5)) * scale);
+    vertexData.push_back(ns * scale);
+    vertexData.push_back(nt * scale);
 }
 
 void LandRenderData::initGeometry(const Land& land)
 {
     const Land::Data& data = land.data();
 
-    vector<uint8_t> vertexData;
+    vector<GLfloat> vertexData;
 
     for(uint8_t y = 0; y < Land::kGridSize - 1; y++)
     {
@@ -213,11 +213,11 @@ void LandRenderData::initGeometry(const Land& land)
             // Terrain textures are tiled twice per quad (this is specified in region)
             // Hence the dx * 2 and dy *2
 #define V(dx, dy) \
-    vertexData.push_back(x + (dx)); \
-    vertexData.push_back(y + (dy)); \
-    vertexData.push_back(data.heights[x + (dx)][y + (dy)]); \
-    vertexData.push_back(dx * 2); \
-    vertexData.push_back(dy * 2); \
+    vertexData.push_back(static_cast<float>((x + (dx)) * 24)); \
+    vertexData.push_back(static_cast<float>((y + (dy)) * 24)); \
+    vertexData.push_back(land.getHeight(x + (dx), y + (dy))); \
+    vertexData.push_back(static_cast<float>((dx) * 2)); \
+    vertexData.push_back(static_cast<float>((dy) * 2)); \
     pushRotatedCoord(vertexData, dx, dy, rotations[0], 1); \
     vertexData.push_back(blendTextures[0]); \
     vertexData.push_back(textures[0]); \
@@ -263,15 +263,15 @@ void LandRenderData::initGeometry(const Land& land)
 
     glGenBuffers(1, &vertexBuffer_);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer_);
-    glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(uint8_t), vertexData.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertexData.size() * sizeof(GLfloat), vertexData.data(), GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_UNSIGNED_BYTE, GL_FALSE, kComponentsPerVertex * sizeof(uint8_t), nullptr);
-    glVertexAttribPointer(1, 2, GL_UNSIGNED_BYTE, GL_FALSE, kComponentsPerVertex * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 3));
-    glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_FALSE, kComponentsPerVertex * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 5));
-    glVertexAttribPointer(3, 4, GL_UNSIGNED_BYTE, GL_FALSE, kComponentsPerVertex * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 9));
-    glVertexAttribPointer(4, 4, GL_UNSIGNED_BYTE, GL_FALSE, kComponentsPerVertex * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 13));
-    glVertexAttribPointer(5, 4, GL_UNSIGNED_BYTE, GL_FALSE, kComponentsPerVertex * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 17));
-    glVertexAttribPointer(6, 4, GL_UNSIGNED_BYTE, GL_FALSE, kComponentsPerVertex * sizeof(uint8_t), reinterpret_cast<GLvoid*>(sizeof(uint8_t) * 21));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, kComponentsPerVertex * sizeof(GLfloat), nullptr);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, kComponentsPerVertex * sizeof(GLfloat), reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3));
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, kComponentsPerVertex * sizeof(GLfloat), reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 5));
+    glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, kComponentsPerVertex * sizeof(GLfloat), reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 9));
+    glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, kComponentsPerVertex * sizeof(GLfloat), reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 13));
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, kComponentsPerVertex * sizeof(GLfloat), reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 17));
+    glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, kComponentsPerVertex * sizeof(GLfloat), reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 21));
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);

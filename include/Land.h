@@ -36,13 +36,16 @@ public:
         uint32_t fileId;
         uint32_t flags;
         uint16_t styles[kGridSize][kGridSize];
-        uint8_t heights[kGridSize][kGridSize];
+        uint8_t heightIndices[kGridSize][kGridSize];
         uint8_t pad;
     });
 
     Land(const void* data, size_t size);
 
     void init();
+
+    fp_t getHeight(int gridX, int gridY) const;
+    bool isSplitNESW(int gridX, int gridY) const;
 
     fp_t calcHeight(fp_t x, fp_t y, fp_t* slope) const;
     fp_t calcHeightUnbounded(fp_t x, fp_t y, fp_t* slope) const;
@@ -52,14 +55,13 @@ public:
     uint32_t numStructures() const;
     const uint8_t* normalMap() const;
 
-    bool isSplitNESW(int x, int y) const;
-
 private:
     void initStaticObjects();
     void initScenes();
     void initScene(int x, int y, const Scene& scene);
 
     Data data_;
+    fp_t heights_[kGridSize][kGridSize];
     uint32_t numStructures_;
 
     vector<uint16_t> offsetMap_;

@@ -19,6 +19,7 @@
 #define BZR_REGION_H
 
 #include "Resource.h"
+#include <array>
 
 class BinReader;
 
@@ -44,6 +45,7 @@ struct Region : public ResourceImpl<ResourceType::kRegion>
 
     Region(uint32_t id, const void* data, size_t size);
 
+    array<fp_t, 256> landHeights;
     vector<SceneType> sceneTypes;
     vector<TerrainType> terrainTypes;
     vector<TerrainTex> terrainTextures;

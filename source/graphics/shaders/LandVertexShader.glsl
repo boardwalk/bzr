@@ -43,7 +43,7 @@ const float WORLD_RADIUS = 10000.0;
 
 void main()
 {
-    vec4 modelPos = vec4(vertexPosition, 1.0) * vec4(24.0, 24.0, 2.0, 1.0);
+    vec4 modelPos = vec4(vertexPosition, 1.0);
     vec4 worldPos = worldMatrix * modelPos;
 
     float angle = atan(distance(worldPos.xy, cameraPosition.xy) / WORLD_RADIUS);

@@ -56,6 +56,16 @@ Land::Land(const void* data, size_t size) : numStructures_(0)
     }
 
     memcpy(&data_, data, sizeof(data_));
+
+    const Region& region = Core::get().region();
+
+    for(int y = 0; y < kGridSize; y++)
+    {
+        for(int x = 0; x < kGridSize; x++)
+        {
+            heights_[x][y] = region.landHeights[data_.heightIndices[x][y]];
+        }
+    }
 }
 
 void Land::init()
@@ -181,6 +191,19 @@ void Land::init()
     }
 }
 
+fp_t Land::getHeight(int gridX, int gridY) const
+{
+    return heights_[gridX][gridY];
+}
+
+bool Land::isSplitNESW(int gridX, int gridY) const
+{
+    // credits to Akilla
+    uint32_t cell_x = id().x() * 8 + gridX;
+    uint32_t cell_y = id().y() * 8 + gridY;
+    return prng(cell_x, cell_y, RND_MID_DIAG) >= 0.5;
+}
+
 fp_t Land::calcHeight(fp_t x, fp_t y, fp_t* slope) const
 {
     assert(x >= 0.0 && x <= kBlockSize);
@@ -194,10 +217,10 @@ fp_t Land::calcHeight(fp_t x, fp_t y, fp_t* slope) const
     fp_t fy = modf(y / kCellSize, &diy);
     int iy = static_cast<int>(diy);
 
-    fp_t h1 = data_.heights[ix][iy] * fp_t(2.0);
-    fp_t h2 = data_.heights[min(ix + 1, kGridSize - 1)][iy] * fp_t(2.0);
-    fp_t h3 = data_.heights[ix][min(iy + 1, kGridSize - 1)] * fp_t(2.0);
-    fp_t h4 = data_.heights[min(ix + 1, kGridSize - 1)][min(iy + 1, kGridSize - 1)] * fp_t(2.0);
+    fp_t h1 = getHeight(ix, iy);
+    fp_t h2 = getHeight(min(ix + 1, kGridSize - 1), iy);
+    fp_t h3 = getHeight(ix, min(iy + 1, kGridSize - 1));
+    fp_t h4 = getHeight(min(ix + 1, kGridSize - 1), min(iy + 1, kGridSize - 1));
 
     if(isSplitNESW(ix, iy))
     {
@@ -307,14 +330,6 @@ uint32_t Land::numStructures() const
 const uint8_t* Land::normalMap() const
 {
     return normalMap_.data();
-}
-
-bool Land::isSplitNESW(int x, int y) const
-{
-    // credits to Akilla
-    uint32_t cell_x = id().x() * 8 + x;
-    uint32_t cell_y = id().y() * 8 + y;
-    return prng(cell_x, cell_y, RND_MID_DIAG) >= 0.5;
 }
 
 void Land::initStaticObjects()

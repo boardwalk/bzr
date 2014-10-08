@@ -113,12 +113,15 @@ Region::Region(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
     uint32_t unk2 = reader.readInt();
     assert(unk2 == 0xFF);
 
-    for(uint32_t i = 0; i < 0xFF; i++)
+    reader.readRaw(24);
+
+    // AC: LandDef's Land_Height_Table
+    for(fp_t& height : landHeights)
     {
-        reader.readInt();
+        height = reader.readFloat();
     }
 
-    reader.readRaw(56);
+    reader.readRaw(28);
 
     uint32_t numHours = reader.readInt();
 
