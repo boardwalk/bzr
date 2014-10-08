@@ -389,6 +389,11 @@ void Land::initScenes()
             uint32_t cellY = id().y() * 8 + y;
             uint32_t sceneNum = static_cast<uint32_t>(prng(cellX, cellY, RND_SCENE_PICK) * static_cast<double>(sceneType.scenes.size()));
 
+            if(sceneType.scenes.empty())
+            {
+                continue;
+            }
+
             if(sceneNum >= sceneType.scenes.size())
             {
                 sceneNum = 0;
