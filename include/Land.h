@@ -44,8 +44,8 @@ public:
 
     void init();
 
-    fp_t calcHeight(fp_t x, fp_t y) const;
-    fp_t calcHeightUnbounded(fp_t x, fp_t y) const;
+    fp_t calcHeight(fp_t x, fp_t y, fp_t* slope) const;
+    fp_t calcHeightUnbounded(fp_t x, fp_t y, fp_t* slope) const;
 
     LandcellId id() const override;
     const Data& data() const;
