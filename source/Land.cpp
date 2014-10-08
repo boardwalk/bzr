@@ -441,8 +441,15 @@ void Land::initScene(int x, int y, const Scene& scene)
         // calculate position within block
         glm::vec3 cellPos = objectDesc.position;
         
-        cellPos.x += static_cast<fp_t>(prng(cellX, cellY, RND_SCENE_DISP_X + i) * objectDesc.displace.x);
-        cellPos.y += static_cast<fp_t>(prng(cellX, cellY, RND_SCENE_DISP_Y + i) * objectDesc.displace.y);
+        if(objectDesc.displace.x > 0.0)
+        {
+            cellPos.x += static_cast<fp_t>(prng(cellX, cellY, RND_SCENE_DISP_X + i) * objectDesc.displace.x);
+        }
+
+        if(objectDesc.displace.y > 0.0)
+        {
+            cellPos.y += static_cast<fp_t>(prng(cellX, cellY, RND_SCENE_DISP_Y + i) * objectDesc.displace.y);
+        }
 
         glm::vec3 tempPos = cellPos;
 
