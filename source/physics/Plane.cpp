@@ -18,6 +18,27 @@
 #include "physics/Plane.h"
 #include "BinReader.h"
 
+static const fp_t kEpsilon = 0.0002;
+
+Plane::Plane()
+{}
+
+Plane::Plane(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c)
+{
+    normal = glm::normalize(glm::cross(b - a, c - a));
+    dist = -(a.x * normal.x + a.y * normal.y + a.z * normal.z);
+}
+
+fp_t Plane::calcZ(fp_t x, fp_t y)
+{
+    if(normal.z <= kEpsilon)
+    {
+        return fp_t(0.0);
+    }
+
+    return -(x * normal.x + y * normal.y + dist) / normal.z;
+}
+
 void read(BinReader& reader, Plane& plane)
 {
     plane.normal.x = reader.readFloat();

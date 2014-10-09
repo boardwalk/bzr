@@ -95,7 +95,7 @@ void Land::init()
         {
             fp_t lx = static_cast<fp_t>(sx - edgeSize) / static_cast<fp_t>(sampleSize - 1) * kBlockSize;
             fp_t ly = static_cast<fp_t>(sy - edgeSize) / static_cast<fp_t>(sampleSize - 1) * kBlockSize;
-            sample[sx + sy * totalSampleSize] = calcHeightUnbounded(lx, ly, nullptr);
+            sample[sx + sy * totalSampleSize] = calcHeightUnbounded(lx, ly);
         }
     }
 
@@ -130,7 +130,7 @@ void Land::init()
             fp_t lx = static_cast<fp_t>(ox) / static_cast<fp_t>(kOffsetMapSize - 1) * kBlockSize;
             fp_t ly = static_cast<fp_t>(oy) / static_cast<fp_t>(kOffsetMapSize - 1) * kBlockSize;
 
-            fp_t offset = bicubic(p, fx, fy) - calcHeight(lx, ly, nullptr);
+            fp_t offset = bicubic(p, fx, fy) - calcHeight(lx, ly);
 
             minOffset = min(minOffset, offset);
             maxOffset = max(maxOffset, offset);
@@ -176,9 +176,9 @@ void Land::init()
             fp_t ly1 = static_cast<fp_t>(oy1) / static_cast<fp_t>(kOffsetMapSize - 1) * kBlockSize;
             fp_t ly2 = static_cast<fp_t>(oy2) / static_cast<fp_t>(kOffsetMapSize - 1) * kBlockSize;
 
-            fp_t h1 = resample[ox1 + oy1 * kOffsetMapSize] + calcHeight(lx1, ly1, nullptr);
-            fp_t h2 = resample[ox2 + oy1 * kOffsetMapSize] + calcHeight(lx2, ly1, nullptr);
-            fp_t h3 = resample[ox1 + oy2 * kOffsetMapSize] + calcHeight(lx1, ly2, nullptr);
+            fp_t h1 = resample[ox1 + oy1 * kOffsetMapSize] + calcHeight(lx1, ly1);
+            fp_t h2 = resample[ox2 + oy1 * kOffsetMapSize] + calcHeight(lx2, ly1);
+            fp_t h3 = resample[ox1 + oy2 * kOffsetMapSize] + calcHeight(lx1, ly2);
 
             glm::vec3 a{lx2 - lx1, 0.0, h2 - h1};
             glm::vec3 b{0.0, ly2 - ly1, h3 - h1};
@@ -204,7 +204,7 @@ bool Land::isSplitNESW(int gridX, int gridY) const
     return prng(cell_x, cell_y, RND_MID_DIAG) >= 0.5;
 }
 
-fp_t Land::calcHeight(fp_t x, fp_t y, fp_t* slope) const
+Plane Land::calcPlane(fp_t x, fp_t y) const
 {
     assert(x >= 0.0 && x <= kBlockSize);
     assert(y >= 0.0 && y <= kBlockSize);
@@ -217,10 +217,10 @@ fp_t Land::calcHeight(fp_t x, fp_t y, fp_t* slope) const
     fp_t fy = modf(y / kCellSize, &diy);
     int iy = static_cast<int>(diy);
 
-    fp_t h1 = getHeight(ix, iy);
-    fp_t h2 = getHeight(min(ix + 1, kGridSize - 1), iy);
-    fp_t h3 = getHeight(ix, min(iy + 1, kGridSize - 1));
-    fp_t h4 = getHeight(min(ix + 1, kGridSize - 1), min(iy + 1, kGridSize - 1));
+    glm::vec3 v1(ix * kCellSize, iy * kCellSize, getHeight(ix, iy));
+    glm::vec3 v2((ix + 1) * kCellSize, iy * kCellSize, getHeight(min(ix + 1, kGridSize - 1), iy));
+    glm::vec3 v3(ix * kCellSize, (iy + 1) * kCellSize, getHeight(ix, min(iy + 1, kGridSize - 1)));
+    glm::vec3 v4((ix + 1) * kCellSize, (iy + 1) * kCellSize, getHeight(min(ix + 1, kGridSize - 1), min(iy + 1, kGridSize - 1)));
 
     if(isSplitNESW(ix, iy))
     {
@@ -232,12 +232,12 @@ fp_t Land::calcHeight(fp_t x, fp_t y, fp_t* slope) const
         if(fy > 1.0 - fx)
         {
             // upper right half
-            h1 = h2 - (h4 - h3);
+            return Plane(v2, v4, v3);
         }
         else
         {
             // lower left half
-            h4 = h2 + (h3 - h1);
+            return Plane(v1, v2, v3);
         }
     }
     else
@@ -250,29 +250,22 @@ fp_t Land::calcHeight(fp_t x, fp_t y, fp_t* slope) const
         if(fy > fx)
         {
             // upper left half
-            h2 = h1 + (h4 - h3);
+            return Plane(v1, v4, v3);
         }
         else
         {
             // lower right half
-            h3 = h4 - (h2 - h1);
+            return Plane(v1, v2, v4);
         }
     }
-
-    if(slope != nullptr)
-    {
-        fp_t s1 = abs(h2 - h1) / kCellSize;
-        fp_t s2 = abs(h3 - h1) / kCellSize;
-        fp_t s3 = abs(h3 - h2) / sqrt(fp_t(2.0) * kCellSize * kCellSize);
-        *slope = max(s1, max(s2, s3));
-    }
-
-    fp_t hb = h1 * (fp_t(1.0) - fx) + h2 * fx;
-    fp_t ht = h3 * (fp_t(1.0) - fx) + h4 * fx;
-    return hb * (fp_t(1.0) - fy) + ht * fy;
 }
 
-fp_t Land::calcHeightUnbounded(fp_t x, fp_t y, fp_t* slope) const
+fp_t Land::calcHeight(fp_t x, fp_t y) const
+{
+    return calcPlane(x, y).calcZ(x, y);
+}
+
+fp_t Land::calcHeightUnbounded(fp_t x, fp_t y) const
 {
     LandcellId thisId = id();
 
@@ -309,7 +302,7 @@ fp_t Land::calcHeightUnbounded(fp_t x, fp_t y, fp_t* slope) const
 
     Land& land = static_cast<Land&>(*it->second);
 
-    return land.calcHeight(x, y, slope);
+    return land.calcHeight(x, y);
 }
 
 LandcellId Land::id() const
@@ -496,7 +489,14 @@ void Land::initScene(int x, int y, const Scene& scene)
             continue;
         }
 
-        blockPos.z += calcHeight(blockPos.x, blockPos.y, nullptr);
+        Plane landPlane = calcPlane(blockPos.x, blockPos.y);
+
+        if(landPlane.normal.z < objectDesc.minSlope || landPlane.normal.z > objectDesc.maxSlope)
+        {
+            continue;
+        }
+
+        blockPos.z += landPlane.calcZ(blockPos.x, blockPos.y);
 
         // calculate scale
         fp_t scale = static_cast<fp_t>(objectDesc.minScale * pow(objectDesc.maxScale / objectDesc.minScale, prng(cellX, cellY, RND_SCENE_SCALE1 + i)));

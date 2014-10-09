@@ -22,6 +22,11 @@ class BinReader;
 
 struct Plane
 {
+    Plane();
+    Plane(const glm::vec3& a, const glm::vec3& b, const glm::vec3& c);
+
+    fp_t calcZ(fp_t x, fp_t y);
+
     glm::vec3 normal;
     fp_t dist;
 };
