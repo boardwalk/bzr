@@ -90,9 +90,14 @@ GLint Program::getUniform(const GLchar* name)
 {
     assert(handle_ != 0);
 
-    GLint loc = glGetUniformLocation(handle_, name);
+    auto it = uniforms_.find(name);
 
-    if(loc < 0)
+    if(it == uniforms_.end())
+    {
+        it = uniforms_.insert({name, glGetUniformLocation(handle_, name)}).first;
+    }
+
+    if(it->second < 0)
     {
         //string err("Uniform does not exist: ");
         //err.append(name);
@@ -100,7 +105,7 @@ GLint Program::getUniform(const GLchar* name)
         //puts(err.c_str());
     }
 
-    return loc;
+    return it->second;
 }
 
 void Program::destroy()

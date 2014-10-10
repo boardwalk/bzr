@@ -15,28 +15,36 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_GRAPHICS_PROGRAM_H
-#define BZR_GRAPHICS_PROGRAM_H
+#ifndef BZR_LITERAL_UNORDERED_MAP_H
+#define BZR_LITERAL_UNORDERED_MAP_H
 
-#include "LiteralUnorderedMap.h"
-#include "Noncopyable.h"
+#include <unordered_map>
 
-class Program : Noncopyable
+struct LiteralHash
 {
-public:
-    Program();
-    ~Program();
+    size_t operator()(const char* s) const
+    {
+        size_t result = 0;
 
-    void create();
-    void attach(GLenum type, const GLchar* source);
-    void link();
-    void use();
-    GLint getUniform(const GLchar* name);
-    void destroy();
+        while(*s != '\0')
+        {
+            result = result * 101 + *s++;
+        }
 
-private:
-    GLuint handle_;
-    LiteralUnorderedMap<GLint> uniforms_;
+        return result;
+    }
 };
+
+struct LiteralPred
+{
+    bool operator()(const char* s1, const char* s2) const
+    {
+        return strcmp(s1, s2) == 0;
+    }
+};
+
+template<class T>
+struct LiteralUnorderedMap : public unordered_map<const char*, T, LiteralHash, LiteralPred>
+{};
 
 #endif
