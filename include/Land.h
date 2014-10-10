@@ -31,6 +31,25 @@ public:
     static const fp_t kBlockSize;
     static const int kOffsetMapSize = 64;
 
+    Land(const void* data, size_t size);
+
+    void init();
+
+    fp_t getHeight(int gridX, int gridY) const;
+    uint8_t getRoad(int gridX, int gridY) const;
+    uint8_t getTerrain(int gridX, int gridY) const;
+    uint8_t getTerrainScene(int gridX, int gridY) const;
+    bool isSplitNESW(int gridX, int gridY) const;
+
+    Plane calcPlane(fp_t x, fp_t y) const;
+    fp_t calcHeight(fp_t x, fp_t y) const;
+    fp_t calcHeightUnbounded(fp_t x, fp_t y) const;
+
+    LandcellId id() const override;
+    uint32_t numStructures() const;
+    const uint8_t* normalMap() const;
+
+private:
     // AC: CLandBlock
     PACK(struct Data
     {
@@ -41,23 +60,6 @@ public:
         uint8_t pad;
     });
 
-    Land(const void* data, size_t size);
-
-    void init();
-
-    fp_t getHeight(int gridX, int gridY) const;
-    bool isSplitNESW(int gridX, int gridY) const;
-
-    Plane calcPlane(fp_t x, fp_t y) const;
-    fp_t calcHeight(fp_t x, fp_t y) const;
-    fp_t calcHeightUnbounded(fp_t x, fp_t y) const;
-
-    LandcellId id() const override;
-    const Data& data() const;
-    uint32_t numStructures() const;
-    const uint8_t* normalMap() const;
-
-private:
     void initStaticObjects();
     void initScenes();
     void initScene(int x, int y, const Scene& scene);

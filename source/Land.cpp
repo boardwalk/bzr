@@ -196,6 +196,21 @@ fp_t Land::getHeight(int gridX, int gridY) const
     return heights_[gridX][gridY];
 }
 
+uint8_t Land::getRoad(int gridX, int gridY) const
+{
+    return static_cast<uint8_t>(data_.styles[gridX][gridY] & 0x3);
+}
+
+uint8_t Land::getTerrain(int gridX, int gridY) const
+{
+    return static_cast<uint8_t>((data_.styles[gridX][gridY] >> 2) & 0x1f);
+}
+
+uint8_t Land::getTerrainScene(int gridX, int gridY) const
+{
+    return static_cast<uint8_t>(data_.styles[gridX][gridY] >> 11);
+}
+
 bool Land::isSplitNESW(int gridX, int gridY) const
 {
     // credits to Akilla
@@ -310,11 +325,6 @@ LandcellId Land::id() const
     return LandcellId(data_.fileId);
 }
 
-const Land::Data& Land::data() const
-{
-    return data_;
-}
-
 uint32_t Land::numStructures() const
 {
     return numStructures_;
@@ -390,8 +400,8 @@ void Land::initScenes()
     {
         for(int y = 0; y < kGridSize; y++)
         {
-            uint32_t terrainTypeNum = (data_.styles[x][y] >> 2) & 0x1F;
-            uint32_t terrainSceneTypeNum = data_.styles[x][y] >> 11;
+            uint32_t terrainTypeNum = getTerrain(x, y);
+            uint32_t terrainSceneTypeNum = getTerrainScene(x, y);
 
             assert(terrainTypeNum < region.terrainTypes.size());
             const vector<uint32_t>& terrainSceneTypes = region.terrainTypes[terrainTypeNum].sceneTypes;
