@@ -49,7 +49,7 @@ Surface::Surface(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
     {
         uint32_t bgra = reader.readInt();
         ResourcePtr imgColor{new ImgColor{bgra}};
-        imgTex.reset{new ImgTex{imgColor}};
+        imgTex.reset(new ImgTex{imgColor});
     }
     else if(flags & (kBase1Image | kBase1Clipmap))
     {

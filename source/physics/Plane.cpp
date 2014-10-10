@@ -18,7 +18,7 @@
 #include "physics/Plane.h"
 #include "BinReader.h"
 
-static const fp_t kEpsilon = 0.0002;
+static const fp_t kEpsilon = fp_t(0.0002);
 
 Plane::Plane()
 {}
