@@ -18,9 +18,9 @@
 #include "Surface.h"
 #include "BinReader.h"
 #include "Core.h"
+#include "ImgColor.h"
 #include "ImgTex.h"
 #include "ResourceCache.h"
-#include "Texture.h"
 
 enum SurfaceType
 {
@@ -48,8 +48,8 @@ Surface::Surface(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
     if(flags & kBase1Solid)
     {
         uint32_t bgra = reader.readInt();
-        ResourcePtr texture(new Texture(bgra));
-        imgTex.reset(new ImgTex(texture));
+        ResourcePtr imgColor{new ImgColor{bgra}};
+        imgTex.reset{new ImgTex{imgColor}};
     }
     else if(flags & (kBase1Image | kBase1Clipmap))
     {

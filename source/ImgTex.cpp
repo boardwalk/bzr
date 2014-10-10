@@ -18,8 +18,8 @@
 #include "ImgTex.h"
 #include "BinReader.h"
 #include "Core.h"
+#include "ImgColor.h"
 #include "ResourceCache.h"
-#include "Texture.h"
 
 ImgTex::ImgTex(uint32_t id,  const void* data, size_t size) : ResourceImpl{id}
 {
@@ -34,17 +34,17 @@ ImgTex::ImgTex(uint32_t id,  const void* data, size_t size) : ResourceImpl{id}
     uint8_t two = reader.readByte();
     assert(two == 2);
 
-    uint32_t numTextures = reader.readInt();
-    assert(numTextures > 0);
+    uint32_t numImgColors = reader.readInt();
+    assert(numImgColors > 0);
 
     // This seems to be a list of textures by decreasing quality, as the first ones in the list are in highres.dat
     // We're just going to pick the first and roll with it
 
-    uint32_t textureId = reader.readInt();
-    texture = Core::get().resourceCache().get(textureId);
-    assert(texture->resourceType() == ResourceType::kTexture);
+    uint32_t imgColorId = reader.readInt();
+    imgColor = Core::get().resourceCache().get(imgColorId);
+    assert(imgColor->resourceType() == ResourceType::kImgColor);
 
-    for(uint32_t i = 1; i < numTextures; i++)
+    for(uint32_t i = 1; i < numImgColors; i++)
     {
         reader.readInt();
     }
@@ -52,7 +52,7 @@ ImgTex::ImgTex(uint32_t id,  const void* data, size_t size) : ResourceImpl{id}
     reader.assertEnd();
 }
 
-ImgTex::ImgTex(ResourcePtr texture) : ResourceImpl{ResourceType::kImgTex | 0xFFFF}, texture{texture}
+ImgTex::ImgTex(ResourcePtr imgColor) : ResourceImpl{ResourceType::kImgTex | 0xFFFF}, imgColor{imgColor}
 {
-    assert(texture->resourceType() == ResourceType::kTexture);
+    assert(imgColor->resourceType() == ResourceType::kImgColor);
 }

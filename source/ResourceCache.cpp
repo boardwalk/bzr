@@ -20,6 +20,7 @@
 #include "Core.h"
 #include "DatFile.h"
 #include "Environment.h"
+#include "ImgColor.h"
 #include "ImgTex.h"
 #include "Palette.h"
 #include "Model.h"
@@ -29,7 +30,6 @@
 #include "Setup.h"
 #include "Sound.h"
 #include "Surface.h"
-#include "Texture.h"
 
 static const Resource* loadResource(uint32_t resourceId)
 {
@@ -57,8 +57,8 @@ static const Resource* loadResource(uint32_t resourceId)
             return new Palette{resourceId, data.data(), data.size()};
         case ResourceType::kImgTex:
             return new ImgTex{resourceId, data.data(), data.size()};
-        case ResourceType::kTexture:
-            return new Texture{resourceId, data.data(), data.size()};
+        case ResourceType::kImgColor:
+            return new ImgColor{resourceId, data.data(), data.size()};
         case ResourceType::kSurface:
             return new Surface{resourceId, data.data(), data.size()};
         case ResourceType::kMotionTable:

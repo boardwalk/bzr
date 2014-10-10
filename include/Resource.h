@@ -71,7 +71,7 @@ struct ResourceType
         kAnimation = 0x03000000,
         kPalette = 0x04000000,
         kImgTex = 0x05000000,
-        kTexture = 0x06000000,
+        kImgColor = 0x06000000,
         kSurface = 0x08000000,
         kMotionTable = 0x09000000,
         kSound = 0x0A000000,

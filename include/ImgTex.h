@@ -26,7 +26,7 @@ struct ImgTex : public ResourceImpl<ResourceType::kImgTex>
     ImgTex(uint32_t id, const void* data, size_t size);
     explicit ImgTex(ResourcePtr texture);
 
-    ResourcePtr texture;
+    ResourcePtr imgColor;
 };
 
 #endif

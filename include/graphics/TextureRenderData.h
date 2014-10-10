@@ -21,12 +21,12 @@
 #include "Destructable.h"
 #include "Noncopyable.h"
 
-struct Texture;
+struct ImgColor;
 
 class TextureRenderData : public Destructable, Noncopyable
 {
 public:
-    TextureRenderData(const Texture& texture);
+    TextureRenderData(const ImgColor& imgColor);
     ~TextureRenderData();
 
     void bind();

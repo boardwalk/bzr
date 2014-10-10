@@ -22,10 +22,10 @@
 #include "Image.h"
 #include "Resource.h"
 
-struct Texture : public ResourceImpl<ResourceType::kTexture>
+struct ImgColor : public ResourceImpl<ResourceType::kImgColor>
 {
-    Texture(uint32_t id, const void* data, size_t size);
-    explicit Texture(uint32_t bgra);
+    ImgColor(uint32_t id, const void* data, size_t size);
+    explicit ImgColor(uint32_t bgra);
 
     Image image;
     ResourcePtr palette;

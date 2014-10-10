@@ -17,12 +17,12 @@
  */
 #include "graphics/TextureRenderData.h"
 #include "graphics/Renderer.h"
+#include "ImgColor.h"
 #include "Core.h"
-#include "Texture.h"
 
-TextureRenderData::TextureRenderData(const Texture& texture)
+TextureRenderData::TextureRenderData(const ImgColor& imgColor)
 {
-    const Image& image = texture.image;
+    const Image& image = imgColor.image;
 
     glGenTextures(1, &handle_);
     glBindTexture(GL_TEXTURE_2D, handle_);

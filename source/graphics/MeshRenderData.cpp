@@ -22,11 +22,11 @@
 #include "Config.h"
 #include "Environment.h"
 #include "ImgTex.h"
+#include "ImgColor.h"
 #include "Model.h"
 #include "ResourceCache.h"
 #include "Structure.h"
 #include "Surface.h"
-#include "Texture.h"
 #include <algorithm>
 
 // FIXME Not the neatest thing in the world
@@ -75,17 +75,17 @@ void MeshRenderData::render()
 
     for(Batch& batch : batches_)
     {
-        const Texture& texture = batch
+        const ImgColor& imgColor = batch
             .surface->cast<Surface>()
             .imgTex->cast<ImgTex>()
-            .texture->cast<Texture>();
+            .imgColor->cast<ImgColor>();
 
-        if(!texture.renderData)
+        if(!imgColor.renderData)
         {
-            texture.renderData.reset(new TextureRenderData{texture});
+            imgColor.renderData.reset(new TextureRenderData{imgColor});
         }
 
-        TextureRenderData& renderData = static_cast<TextureRenderData&>(*texture.renderData);
+        TextureRenderData& renderData = static_cast<TextureRenderData&>(*imgColor.renderData);
 
         glActiveTexture(GL_TEXTURE0);
         renderData.bind();
@@ -173,8 +173,8 @@ void MeshRenderData::init(
 
         if(!surface)
         {
-            ResourcePtr texture{new Texture{0x800000FF}};
-            ResourcePtr imgTex{new ImgTex{texture}};
+            ResourcePtr imgColor{new ImgColor{0x800000FF}};
+            ResourcePtr imgTex{new ImgTex{imgColor}};
             surface.reset(new Surface{imgTex});
             g_hitSurface = surface;
         }

@@ -21,12 +21,12 @@
 #include "graphics/util.h"
 #include "Camera.h"
 #include "Core.h"
+#include "ImgColor.h"
 #include "ImgTex.h"
 #include "Land.h"
 #include "LandcellManager.h"
 #include "ResourceCache.h"
 #include "Region.h"
-#include "Texture.h"
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
@@ -182,7 +182,7 @@ void LandRenderer::initTerrainTexture()
     for(GLint i = 0; i < numTextures; i++)
     {
         ResourcePtr imgTex = Core::get().resourceCache().get(region.terrainTextures[i].resourceId);
-        const Image& image = imgTex->cast<ImgTex>().texture->cast<Texture>().image;
+        const Image& image = imgTex->cast<ImgTex>().imgColor->cast<ImgColor>().image;
 
         if(image.width() != kTerrainArraySize || image.height() != kTerrainArraySize)
         {
@@ -227,8 +227,8 @@ void LandRenderer::initBlendTexture()
         }
         else
         {
-            ResourcePtr texture = Core::get().resourceCache().get(kBlendTextures[i]);
-            image = texture->cast<Texture>().image;
+            ResourcePtr imgColor = Core::get().resourceCache().get(kBlendTextures[i]);
+            image = imgColor->cast<ImgColor>().image;
         }
 
         if(image.width() != kBlendArraySize || image.height() != kBlendArraySize)
