@@ -26,12 +26,12 @@ struct Vertex;
 struct TriangleFan;
 
 // AC: CCellStruct
-struct EnvironmentPart
+struct CellStruct
 {
-    EnvironmentPart();
-    EnvironmentPart(EnvironmentPart&&);
-    ~EnvironmentPart();
-    EnvironmentPart& operator=(EnvironmentPart&&);
+    CellStruct();
+    CellStruct(CellStruct&&);
+    ~CellStruct();
+    CellStruct& operator=(CellStruct&&);
 
     vector<Vertex> vertices;
     vector<TriangleFan> triangleFans;
@@ -44,7 +44,7 @@ struct Environment : public ResourceImpl<ResourceType::kEnvironment>
 {
     Environment(uint32_t id, const void* data, size_t size);
 
-    vector<EnvironmentPart> parts;
+    vector<CellStruct> parts;
 };
 
 #endif

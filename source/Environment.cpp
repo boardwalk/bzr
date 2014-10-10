@@ -21,10 +21,10 @@
 #include "TriangleFan.h"
 #include "Vertex.h"
 
-EnvironmentPart::EnvironmentPart()
+CellStruct::CellStruct()
 {}
 
-EnvironmentPart::EnvironmentPart(EnvironmentPart&& other)
+CellStruct::CellStruct(CellStruct&& other)
 {
     vertices = move(other.vertices);
     triangleFans = move(other.triangleFans);
@@ -32,10 +32,10 @@ EnvironmentPart::EnvironmentPart(EnvironmentPart&& other)
     hitTree = move(other.hitTree);
 }
 
-EnvironmentPart::~EnvironmentPart()
+CellStruct::~CellStruct()
 {}
 
-EnvironmentPart& EnvironmentPart::operator=(EnvironmentPart&& other)
+CellStruct& CellStruct::operator=(CellStruct&& other)
 {
     vertices = move(other.vertices);
     triangleFans = move(other.triangleFans);
@@ -44,7 +44,7 @@ EnvironmentPart& EnvironmentPart::operator=(EnvironmentPart&& other)
     return *this;
 }
 
-static void read(BinReader& reader, EnvironmentPart& part)
+static void read(BinReader& reader, CellStruct& part)
 {
     uint32_t numTriangleFans = reader.readInt();
     part.triangleFans.resize(numTriangleFans);
