@@ -15,16 +15,16 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_TEXTURELOOKUP5_H
-#define BZR_TEXTURELOOKUP5_H
+#ifndef BZR_IMGTEX_H
+#define BZR_IMGTEX_H
 
 #include "Destructable.h"
 #include "Resource.h"
 
-struct TextureLookup5 : public ResourceImpl<ResourceType::kTextureLookup5>
+struct ImgTex : public ResourceImpl<ResourceType::kImgTex>
 {
-    TextureLookup5(uint32_t id, const void* data, size_t size);
-    explicit TextureLookup5(ResourcePtr texture);
+    ImgTex(uint32_t id, const void* data, size_t size);
+    explicit ImgTex(ResourcePtr texture);
 
     ResourcePtr texture;
 };

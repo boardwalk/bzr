@@ -21,12 +21,12 @@
 #include "graphics/util.h"
 #include "Camera.h"
 #include "Core.h"
+#include "ImgTex.h"
 #include "Land.h"
 #include "LandcellManager.h"
 #include "ResourceCache.h"
 #include "Region.h"
 #include "Texture.h"
-#include "TextureLookup5.h"
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
@@ -181,8 +181,8 @@ void LandRenderer::initTerrainTexture()
     // populate terrain texture
     for(GLint i = 0; i < numTextures; i++)
     {
-        ResourcePtr textureLookup5 = Core::get().resourceCache().get(region.terrainTextures[i].resourceId);
-        const Image& image = textureLookup5->cast<TextureLookup5>().texture->cast<Texture>().image;
+        ResourcePtr imgTex = Core::get().resourceCache().get(region.terrainTextures[i].resourceId);
+        const Image& image = imgTex->cast<ImgTex>().texture->cast<Texture>().image;
 
         if(image.width() != kTerrainArraySize || image.height() != kTerrainArraySize)
         {

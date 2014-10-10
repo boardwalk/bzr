@@ -20,6 +20,7 @@
 #include "Core.h"
 #include "DatFile.h"
 #include "Environment.h"
+#include "ImgTex.h"
 #include "Palette.h"
 #include "Model.h"
 #include "MotionTable.h"
@@ -29,7 +30,6 @@
 #include "Sound.h"
 #include "Surface.h"
 #include "Texture.h"
-#include "TextureLookup5.h"
 
 static const Resource* loadResource(uint32_t resourceId)
 {
@@ -55,8 +55,8 @@ static const Resource* loadResource(uint32_t resourceId)
             return new Animation{resourceId, data.data(), data.size()};
         case ResourceType::kPalette:
             return new Palette{resourceId, data.data(), data.size()};
-        case ResourceType::kTextureLookup5:
-            return new TextureLookup5{resourceId, data.data(), data.size()};
+        case ResourceType::kImgTex:
+            return new ImgTex{resourceId, data.data(), data.size()};
         case ResourceType::kTexture:
             return new Texture{resourceId, data.data(), data.size()};
         case ResourceType::kSurface:

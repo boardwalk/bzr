@@ -18,9 +18,9 @@
 #include "Surface.h"
 #include "BinReader.h"
 #include "Core.h"
+#include "ImgTex.h"
 #include "ResourceCache.h"
 #include "Texture.h"
-#include "TextureLookup5.h"
 
 enum SurfaceType
 {
@@ -49,13 +49,13 @@ Surface::Surface(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
     {
         uint32_t bgra = reader.readInt();
         ResourcePtr texture(new Texture(bgra));
-        textureLookup5.reset(new TextureLookup5(texture));
+        imgTex.reset(new ImgTex(texture));
     }
     else if(flags & (kBase1Image | kBase1Clipmap))
     {
         uint32_t textureId = reader.readInt();
-        textureLookup5 = Core::get().resourceCache().get(textureId);
-        assert(textureLookup5->resourceType() == ResourceType::kTextureLookup5);
+        imgTex = Core::get().resourceCache().get(textureId);
+        assert(imgTex->resourceType() == ResourceType::kImgTex);
 
         uint32_t paletteId = reader.readInt();
         assert(paletteId == 0);
@@ -72,7 +72,7 @@ Surface::Surface(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
     reader.assertEnd();
 }
 
-Surface::Surface(ResourcePtr textureLookup5) : ResourceImpl(ResourceType::kSurface | 0xFFFF), textureLookup5(textureLookup5)
+Surface::Surface(ResourcePtr imgTex) : ResourceImpl(ResourceType::kSurface | 0xFFFF), imgTex(imgTex)
 {
-    assert(textureLookup5->resourceType() == ResourceType::kTextureLookup5);
+    assert(imgTex->resourceType() == ResourceType::kImgTex);
 }

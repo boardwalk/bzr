@@ -19,10 +19,10 @@
 #include "BinReader.h"
 #include "BSP.h"
 #include "Core.h"
+#include "ImgTex.h"
 #include "ResourceCache.h"
 #include "Surface.h"
 #include "Texture.h"
-#include "TextureLookup5.h"
 
 enum ModelFlags
 {
@@ -67,7 +67,7 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl{id}, nee
         surface = Core::get().resourceCache().get(surfaceId);
 
         bool hasAlpha = surface->cast<Surface>()
-            .textureLookup5->cast<TextureLookup5>()
+            .imgTex->cast<ImgTex>()
             .texture->cast<Texture>()
             .image.hasAlpha();
         needsDepthSort = needsDepthSort || hasAlpha;

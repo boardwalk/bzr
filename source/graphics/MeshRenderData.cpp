@@ -21,12 +21,12 @@
 #include "Core.h"
 #include "Config.h"
 #include "Environment.h"
+#include "ImgTex.h"
 #include "Model.h"
 #include "ResourceCache.h"
 #include "Structure.h"
 #include "Surface.h"
 #include "Texture.h"
-#include "TextureLookup5.h"
 #include <algorithm>
 
 // FIXME Not the neatest thing in the world
@@ -77,7 +77,7 @@ void MeshRenderData::render()
     {
         const Texture& texture = batch
             .surface->cast<Surface>()
-            .textureLookup5->cast<TextureLookup5>()
+            .imgTex->cast<ImgTex>()
             .texture->cast<Texture>();
 
         if(!texture.renderData)
@@ -174,8 +174,8 @@ void MeshRenderData::init(
         if(!surface)
         {
             ResourcePtr texture{new Texture{0x800000FF}};
-            ResourcePtr textureLookup5{new TextureLookup5{texture}};
-            surface.reset(new Surface{textureLookup5});
+            ResourcePtr imgTex{new ImgTex{texture}};
+            surface.reset(new Surface{imgTex});
             g_hitSurface = surface;
         }
 

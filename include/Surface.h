@@ -24,9 +24,9 @@
 struct Surface : public ResourceImpl<ResourceType::kSurface>
 {
     Surface(uint32_t id, const void* data, size_t size);
-    explicit Surface(ResourcePtr textureLookup5);
+    explicit Surface(ResourcePtr imgTex);
 
-    ResourcePtr textureLookup5;
+    ResourcePtr imgTex;
     float translucency;
     float luminosity;
     float diffuse;

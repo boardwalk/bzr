@@ -15,13 +15,13 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "TextureLookup5.h"
+#include "ImgTex.h"
 #include "BinReader.h"
 #include "Core.h"
 #include "ResourceCache.h"
 #include "Texture.h"
 
-TextureLookup5::TextureLookup5(uint32_t id,  const void* data, size_t size) : ResourceImpl{id}
+ImgTex::ImgTex(uint32_t id,  const void* data, size_t size) : ResourceImpl{id}
 {
     BinReader reader(data, size);
 
@@ -52,7 +52,7 @@ TextureLookup5::TextureLookup5(uint32_t id,  const void* data, size_t size) : Re
     reader.assertEnd();
 }
 
-TextureLookup5::TextureLookup5(ResourcePtr texture) : ResourceImpl{ResourceType::kTextureLookup5 | 0xFFFF}, texture{texture}
+ImgTex::ImgTex(ResourcePtr texture) : ResourceImpl{ResourceType::kImgTex | 0xFFFF}, texture{texture}
 {
     assert(texture->resourceType() == ResourceType::kTexture);
 }
