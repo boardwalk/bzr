@@ -22,8 +22,8 @@
 #include "Noncopyable.h"
 #include "Resource.h"
 
-struct ModelGroup;
 struct Model;
+struct Setup;
 
 class ModelRenderer : Noncopyable
 {
@@ -46,7 +46,7 @@ private:
         const glm::mat4& viewMat,
         const glm::mat4& worldMat);
 
-    void renderModelGroup(const ModelGroup& modelGroup,
+    void renderSetup(const Setup& setup,
         const glm::mat4& projectionMat,
         const glm::mat4& viewMat,
         const glm::mat4& worldMat);

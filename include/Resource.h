@@ -67,7 +67,7 @@ struct ResourceType
     enum Value
     {
         kModel = 0x01000000,
-        kModelGroup = 0x02000000,
+        kSetup = 0x02000000,
         kAnimation = 0x03000000,
         kPalette = 0x04000000,
         kTextureLookup5 = 0x05000000,

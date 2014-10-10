@@ -25,8 +25,8 @@
 #include "Land.h"
 #include "LandcellManager.h"
 #include "Model.h"
-#include "ModelGroup.h"
 #include "ObjectManager.h"
+#include "Setup.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
 
@@ -135,9 +135,9 @@ void ModelRenderer::renderOne(const ResourcePtr& resource,
     const glm::mat4& viewMat,
     const glm::mat4& worldMat)
 {
-    if(resource->resourceType() == ResourceType::kModelGroup)
+    if(resource->resourceType() == ResourceType::kSetup)
     {
-        renderModelGroup(resource->cast<ModelGroup>(),
+        renderSetup(resource->cast<Setup>(),
             projectionMat,
             viewMat,
             worldMat);
@@ -152,21 +152,21 @@ void ModelRenderer::renderOne(const ResourcePtr& resource,
     }
 }
 
-void ModelRenderer::renderModelGroup(const ModelGroup& modelGroup,
+void ModelRenderer::renderSetup(const Setup& setup,
     const glm::mat4& projectionMat,
     const glm::mat4& viewMat,
     const glm::mat4& worldMat)
 {
-    const AnimationFrame& frame = modelGroup.placementFrames.back();
+    const AnimationFrame& frame = setup.placementFrames.back();
 
-    for(uint32_t i = 0; i < modelGroup.models.size(); i++)
+    for(uint32_t i = 0; i < setup.models.size(); i++)
     {
         const Location& location = frame.locations[i];
-        const glm::vec3& scale = modelGroup.scales[i];
+        const glm::vec3& scale = setup.scales[i];
 
         glm::mat4 subWorldMat = glm::translate(glm::mat4{}, location.position) * glm::mat4_cast(location.rotation) * glm::scale(glm::mat4(), scale);
 
-        renderOne(modelGroup.models[i],
+        renderOne(setup.models[i],
             projectionMat,
             viewMat,
             worldMat * subWorldMat);

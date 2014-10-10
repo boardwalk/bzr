@@ -15,16 +15,16 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_MODELGROUP_H
-#define BZR_MODELGROUP_H
+#ifndef BZR_SETUP_H
+#define BZR_SETUP_H
 
 #include "AnimationFrame.h"
 #include "Resource.h"
 
 // AC: CSetup
-struct ModelGroup : public ResourceImpl<ResourceType::kModelGroup>
+struct Setup : public ResourceImpl<ResourceType::kSetup>
 {
-    ModelGroup(uint32_t id, const void* data, size_t size);
+    Setup(uint32_t id, const void* data, size_t size);
 
     vector<ResourcePtr> models;
     vector<uint32_t> parents;

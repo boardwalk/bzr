@@ -22,10 +22,10 @@
 #include "Environment.h"
 #include "Palette.h"
 #include "Model.h"
-#include "ModelGroup.h"
 #include "MotionTable.h"
 #include "Region.h"
 #include "Scene.h"
+#include "Setup.h"
 #include "Sound.h"
 #include "Surface.h"
 #include "Texture.h"
@@ -49,8 +49,8 @@ static const Resource* loadResource(uint32_t resourceId)
     {
         case ResourceType::kModel:
             return new Model{resourceId, data.data(), data.size()};
-        case ResourceType::kModelGroup:
-            return new ModelGroup{resourceId, data.data(), data.size()};
+        case ResourceType::kSetup:
+            return new Setup{resourceId, data.data(), data.size()};
         case ResourceType::kAnimation:
             return new Animation{resourceId, data.data(), data.size()};
         case ResourceType::kPalette:
