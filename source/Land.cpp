@@ -499,6 +499,11 @@ void Land::initScene(int x, int y, const Scene& scene)
             continue;
         }
 
+        if(roadAtPoint(blockPos.x, blockPos.y))
+        {
+            continue;
+        }
+
         Plane landPlane = calcPlane(blockPos.x, blockPos.y);
 
         if(landPlane.normal.z < objectDesc.minSlope || landPlane.normal.z > objectDesc.maxSlope)
@@ -525,4 +530,86 @@ void Land::initScene(int x, int y, const Scene& scene)
         staticObject.transform = translateMat * rotateMat * scaleMat;
         staticObjects_.push_back(staticObject);
     }
+}
+
+bool Land::roadAtPoint(fp_t x, fp_t y) const
+{
+    assert(x >= 0.0 && x < kBlockSize);
+    assert(y >= 0.0 && y < kBlockSize);
+
+    const fp_t kRoadHalfWidth = fp_t(5.0);
+
+    fp_t dix;
+    fp_t fx = modf(x / kCellSize, &dix);
+    int ix = static_cast<int>(dix);
+
+    fp_t diy;
+    fp_t fy = modf(y / kCellSize, &diy);
+    int iy = static_cast<int>(diy);
+
+    int r1 = getRoad(ix, iy);
+    int r2 = getRoad(ix + 1, iy);
+    int r3 = getRoad(ix, iy + 1);
+    int r4 = getRoad(ix + 1, iy + 1);
+
+    if(r1 && r2 && r3 && r4)
+    {
+        return true;
+    }
+
+    if(r1)
+    {
+        if(r2 && fy < kRoadHalfWidth)
+        {
+            return true;
+        }
+
+        if(r3 && fx < kRoadHalfWidth)
+        {
+            return true;
+        }
+
+        if(fx < kRoadHalfWidth && fy < kRoadHalfWidth)
+        {
+            return true;
+        }
+    }
+
+    if(r2)
+    {
+        if(r4 && fx > kCellSize - kRoadHalfWidth)
+        {
+            return true;
+        }
+
+        if(fx > kCellSize - kRoadHalfWidth && fy < kRoadHalfWidth)
+        {
+            return true;
+        }
+    }
+
+    if(r3)
+    {
+        if(r4 && fy > kCellSize - kRoadHalfWidth)
+        {
+            return true;
+        }
+
+        if(fx < kRoadHalfWidth && fy > kCellSize - kRoadHalfWidth)
+        {
+            return true;
+        }
+    }
+
+    if(r4)
+    {
+        if(fx > kCellSize - kRoadHalfWidth && fy > kCellSize - kRoadHalfWidth)
+        {
+            return true;
+        }
+    }
+
+    // TODO diagonals?
+
+    return false;
 }

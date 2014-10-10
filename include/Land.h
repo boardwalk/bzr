@@ -64,6 +64,8 @@ private:
     void initScenes();
     void initScene(int x, int y, const Scene& scene);
 
+    bool roadAtPoint(fp_t x, fp_t y) const;
+
     Data data_;
     fp_t heights_[kGridSize][kGridSize];
     uint32_t numStructures_;
