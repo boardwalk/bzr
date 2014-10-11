@@ -16,9 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "Structure.h"
+#include "resource/Environment.h"
 #include "BinReader.h"
 #include "Core.h"
-#include "Environment.h"
 #include "ResourceCache.h"
 
 enum EnvCellFlags

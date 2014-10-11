@@ -19,13 +19,13 @@
 #ifndef HEADLESS
 #include "graphics/Renderer.h"
 #endif
+#include "resource/Region.h"
 #include "Camera.h"
 #include "Config.h"
 #include "DatFile.h"
 #include "Land.h"
 #include "LandcellManager.h"
 #include "ObjectManager.h"
-#include "Region.h"
 #include "ResourceCache.h"
 #include "util.h"
 

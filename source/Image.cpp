@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "Image.h"
-#include "Palette.h"
+#include "resource/Palette.h"
 #include <algorithm>
 
 int PixelFormat::bitsPerPixel(Value format)

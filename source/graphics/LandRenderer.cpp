@@ -19,14 +19,14 @@
 #include "graphics/LandRenderData.h"
 #include "graphics/Renderer.h"
 #include "graphics/util.h"
+#include "resource/ImgColor.h"
+#include "resource/ImgTex.h"
+#include "resource/Region.h"
 #include "Camera.h"
 #include "Core.h"
-#include "ImgColor.h"
-#include "ImgTex.h"
 #include "Land.h"
 #include "LandcellManager.h"
 #include "ResourceCache.h"
-#include "Region.h"
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>

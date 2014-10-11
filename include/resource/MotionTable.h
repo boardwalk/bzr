@@ -15,27 +15,21 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "PhysicsScript.h"
-#include "AnimationHook.h"
-#include "BinReader.h"
+#ifndef BZR_MOTIONTABLE_H
+#define BZR_MOTIONTABLE_H
 
-PhysicsScript::PhysicsScript(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
+#include "resource/MotionData.h"
+#include "Resource.h"
+#include <unordered_map>
+
+// AC: CMotionTable
+struct MotionTable : public ResourceImpl<ResourceType::kMotionTable>
 {
-    BinReader reader(data, size);
+    MotionTable(uint32_t id, const void* data, size_t size);
 
-    uint32_t resourceId = reader.readInt();
-    assert(resourceId == id);
+    unordered_map<uint32_t, MotionData> cycles;
+    unordered_map<uint32_t, MotionData> modifiers;
+    unordered_map<uint32_t, unordered_map<uint32_t, MotionData>> links;
+};
 
-    uint32_t numHooks = reader.readInt();
-
-    for(uint32_t i = 0; i < numHooks; i++)
-    {
-        // AC: PhysicsScriptData
-        /*startTime*/ reader.readDouble();
-
-        unique_ptr<AnimationHook> hook;
-        read(reader, hook);
-    }
-
-    reader.assertEnd();
-}
+#endif

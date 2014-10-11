@@ -15,44 +15,27 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "ImgTex.h"
+#include "resource/PhysicsScript.h"
+#include "resource/AnimationHook.h"
 #include "BinReader.h"
-#include "Core.h"
-#include "ImgColor.h"
-#include "ResourceCache.h"
 
-ImgTex::ImgTex(uint32_t id,  const void* data, size_t size) : ResourceImpl{id}
+PhysicsScript::PhysicsScript(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 {
     BinReader reader(data, size);
 
     uint32_t resourceId = reader.readInt();
     assert(resourceId == id);
 
-    uint32_t zero = reader.readInt();
-    assert(zero == 0);
+    uint32_t numHooks = reader.readInt();
 
-    uint8_t two = reader.readByte();
-    assert(two == 2);
-
-    uint32_t numImgColors = reader.readInt();
-    assert(numImgColors > 0);
-
-    // This seems to be a list of textures by decreasing quality, as the first ones in the list are in highres.dat
-    // We're just going to pick the first and roll with it
-
-    uint32_t imgColorId = reader.readInt();
-    imgColor = Core::get().resourceCache().get(imgColorId);
-    assert(imgColor->resourceType() == ResourceType::kImgColor);
-
-    for(uint32_t i = 1; i < numImgColors; i++)
+    for(uint32_t i = 0; i < numHooks; i++)
     {
-        reader.readInt();
+        // AC: PhysicsScriptData
+        /*startTime*/ reader.readDouble();
+
+        unique_ptr<AnimationHook> hook;
+        read(reader, hook);
     }
 
     reader.assertEnd();
-}
-
-ImgTex::ImgTex(ResourcePtr imgColor) : ResourceImpl{ResourceType::kImgTex | 0xFFFF}, imgColor{imgColor}
-{
-    assert(imgColor->resourceType() == ResourceType::kImgColor);
 }

@@ -17,7 +17,7 @@
  */
 #include "graphics/TextureRenderData.h"
 #include "graphics/Renderer.h"
-#include "ImgColor.h"
+#include "resource/ImgColor.h"
 #include "Core.h"
 
 TextureRenderData::TextureRenderData(const ImgColor& imgColor)

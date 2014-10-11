@@ -15,7 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "Sound.h"
+#include "resource/Sound.h"
 #include "BinReader.h"
 
 Sound::Sound(uint32_t id, const void* data, size_t size) : ResourceImpl{id}

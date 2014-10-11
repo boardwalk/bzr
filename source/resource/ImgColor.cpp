@@ -15,10 +15,10 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "ImgColor.h"
+#include "resource/ImgColor.h"
+#include "resource/Palette.h"
 #include "BinReader.h"
 #include "Core.h"
-#include "Palette.h"
 #include "ResourceCache.h"
 
 ImgColor::ImgColor(uint32_t id, const void* data, size_t size) : ResourceImpl{id}

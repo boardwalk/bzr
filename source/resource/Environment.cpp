@@ -15,9 +15,9 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "Environment.h"
+#include "resource/Environment.h"
+#include "resource/BSP.h"
 #include "BinReader.h"
-#include "BSP.h"
 #include "TriangleFan.h"
 #include "Vertex.h"
 

@@ -15,18 +15,27 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_ANIMATION_H
-#define BZR_ANIMATION_H
+#include "resource/Palette.h"
+#include "BinReader.h"
 
-#include "AnimationFrame.h"
-#include "Resource.h"
-
-// AC: CAnimation
-struct Animation : public ResourceImpl<ResourceType::kAnimation>
+Palette::Palette(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
-    Animation(uint32_t id, const void* data, size_t size);
+    BinReader reader(data, size);
 
-    vector<AnimationFrame> frames;
-};
+    uint32_t resourceId = reader.readInt();
+    assert(resourceId == id);
 
-#endif
+    uint32_t numColors = reader.readInt();
+    assert(numColors == 2048);
+    colors.resize(numColors);
+
+    for(Color& color : colors)
+    {
+        color.blue = reader.readByte();
+        color.green = reader.readByte();
+        color.red = reader.readByte();
+        color.alpha = reader.readByte();
+    }
+
+    reader.assertEnd();
+}

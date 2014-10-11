@@ -15,11 +15,11 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "Surface.h"
+#include "resource/Surface.h"
+#include "resource/ImgColor.h"
+#include "resource/ImgTex.h"
 #include "BinReader.h"
 #include "Core.h"
-#include "ImgColor.h"
-#include "ImgTex.h"
 #include "ResourceCache.h"
 
 enum SurfaceType

@@ -15,14 +15,14 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "Model.h"
-#include "BinReader.h"
-#include "BSP.h"
-#include "Core.h"
-#include "ImgColor.h"
-#include "ImgTex.h"
+#include "resource/Model.h"
+#include "resource/BSP.h"
+#include "resource/ImgColor.h"
+#include "resource/ImgTex.h"
 #include "ResourceCache.h"
-#include "Surface.h"
+#include "resource/Surface.h"
+#include "BinReader.h"
+#include "Core.h"
 
 enum ModelFlags
 {

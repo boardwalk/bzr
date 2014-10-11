@@ -16,14 +16,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "Land.h"
+#include "resource/Region.h"
+#include "resource/Scene.h"
 #include "BinReader.h"
 #include "Core.h"
 #include "DatFile.h"
 #include "LandcellManager.h"
 #include "PRNG.h"
-#include "Region.h"
 #include "ResourceCache.h"
-#include "Scene.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
 

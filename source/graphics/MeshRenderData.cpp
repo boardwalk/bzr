@@ -18,15 +18,15 @@
 #include "graphics/MeshRenderData.h"
 #include "graphics/Renderer.h"
 #include "graphics/TextureRenderData.h"
+#include "resource/Environment.h"
+#include "resource/ImgTex.h"
+#include "resource/ImgColor.h"
+#include "resource/Model.h"
+#include "resource/Surface.h"
 #include "Core.h"
 #include "Config.h"
-#include "Environment.h"
-#include "ImgTex.h"
-#include "ImgColor.h"
-#include "Model.h"
 #include "ResourceCache.h"
 #include "Structure.h"
-#include "Surface.h"
 #include <algorithm>
 
 // FIXME Not the neatest thing in the world
