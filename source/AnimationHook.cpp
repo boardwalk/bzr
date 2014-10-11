@@ -111,6 +111,13 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
             hookSize = 4;
             break;
 
+        case kScale:
+            /* struct ScaleHook
+               float end;
+               float time; */
+            hookSize = 2;
+            break;
+
         case kCreateParticle:
             /* struct CreateParticleHook
                uint32_t emitter_info_gid;
@@ -122,9 +129,21 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
             hookSize = 10;
             break;
 
+        case kDestroyParticle:
+            /* struct DestroyParticleHook
+               uint32_t emitter_id; */
+            hookSize = 1;
+            break;
+
         case kStopParticle:
             /* struct StopParticleHook
                uint32_t emitter_id; */
+            hookSize = 1;
+            break;
+
+        case kNoDraw:
+            /* struct NoDrawHook
+               uint32_t no_draw; */
             hookSize = 1;
             break;
 
@@ -162,6 +181,30 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
                struct Vector3 axis
                float x, y, z; */
             hookSize = 3;
+            break;
+
+        case kTextureVelocity:
+            /* struct TextureVelocityHook
+               float u_speed;
+               float v_speed; */
+            hookSize = 2;
+            break;
+
+        case kSetLight:
+            /* struct SetLightHook
+               uint32_t lights_on; */
+            hookSize = 1;
+            break;
+
+        case kCreateBlockingParticle:
+            /* struct CreateBlockParticleHook
+               uint32_t emitter_info_gid;
+               uint32_t part_index;
+               struct Frame offset
+               float px, py, pz;
+               float rw, rx, ry, rz;
+               uint32_t emitter_id; */
+            hookSize = 10;
             break;
 
         default:

@@ -16,9 +16,26 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "PhysicsScript.h"
+#include "AnimationHook.h"
+#include "BinReader.h"
 
 PhysicsScript::PhysicsScript(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 {
-    (void)data;
-    (void)size;
+    BinReader reader(data, size);
+
+    uint32_t resourceId = reader.readInt();
+    assert(resourceId == id);
+
+    uint32_t numHooks = reader.readInt();
+
+    for(uint32_t i = 0; i < numHooks; i++)
+    {
+        // AC: PhysicsScriptData
+        /*startTime*/ reader.readDouble();
+
+        unique_ptr<AnimationHook> hook;
+        read(reader, hook);
+    }
+
+    reader.assertEnd();
 }
