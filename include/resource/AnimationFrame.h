@@ -21,6 +21,7 @@
 #include "Location.h"
 #include "Noncopyable.h"
 
+struct AnimationHook;
 class BinReader;
 
 // AC: AnimFrame
@@ -28,9 +29,11 @@ struct AnimationFrame : Noncopyable
 {
     AnimationFrame();
     AnimationFrame(AnimationFrame&&);
+    ~AnimationFrame();
     AnimationFrame& operator=(AnimationFrame&&);
 
     vector<Location> locations;
+    vector<unique_ptr<AnimationHook>> hooks;
 };
 
 void read(BinReader& reader, AnimationFrame& frame, uint32_t numModels);

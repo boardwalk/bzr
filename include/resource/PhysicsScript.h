@@ -20,10 +20,22 @@
 
 #include "Resource.h"
 
+struct AnimationHook;
+
+// AC: PhysicsScriptData
+struct PhysicsScriptData
+{
+    double startTime;
+    unique_ptr<AnimationHook> hook;
+};
+
 // AC: PhysicsScript
 struct PhysicsScript : public ResourceImpl<ResourceType::kPhysicsScript>
 {
     PhysicsScript(uint32_t id, const void* data, size_t size);
+    ~PhysicsScript();
+
+    vector<PhysicsScriptData> hooks;
 };
 
 #endif

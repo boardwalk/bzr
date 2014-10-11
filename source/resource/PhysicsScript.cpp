@@ -19,6 +19,13 @@
 #include "resource/AnimationHook.h"
 #include "BinReader.h"
 
+void read(BinReader& reader, PhysicsScriptData& scriptData)
+{
+    scriptData.startTime = reader.readDouble();
+
+    read(reader, scriptData.hook);
+}
+
 PhysicsScript::PhysicsScript(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 {
     BinReader reader(data, size);
@@ -27,15 +34,15 @@ PhysicsScript::PhysicsScript(uint32_t id, const void* data, size_t size) : Resou
     assert(resourceId == id);
 
     uint32_t numHooks = reader.readInt();
+    hooks.resize(numHooks);
 
-    for(uint32_t i = 0; i < numHooks; i++)
+    for(PhysicsScriptData& hook : hooks)
     {
-        // AC: PhysicsScriptData
-        /*startTime*/ reader.readDouble();
-
-        unique_ptr<AnimationHook> hook;
         read(reader, hook);
     }
 
     reader.assertEnd();
 }
+
+PhysicsScript::~PhysicsScript()
+{}

@@ -27,6 +27,9 @@ AnimationFrame::AnimationFrame(AnimationFrame&& other)
     locations = move(other.locations);
 }
 
+AnimationFrame::~AnimationFrame()
+{}
+
 AnimationFrame& AnimationFrame::operator=(AnimationFrame&& other)
 {
     locations = move(other.locations);
@@ -43,10 +46,10 @@ void read(BinReader& reader, AnimationFrame& frame, uint32_t numModels)
     }
 
     uint32_t numHooks = reader.readInt();
+    frame.hooks.resize(numHooks);
 
-    for(uint32_t i = 0; i < numHooks; i++)
+    for(unique_ptr<AnimationHook>& hook : frame.hooks)
     {
-        unique_ptr<AnimationHook> hook;
         read(reader, hook);
     }
 }
