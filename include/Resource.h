@@ -79,6 +79,8 @@ struct ResourceType
         kScene = 0x12000000,
         kRegion = 0x13000000,
         kSoundTable = 0x20000000,
+        kEnumMapper = 0x22000000,
+        kParticleEmitter = 0x32000000,
         kPhysicsScript = 0x33000000,
         kPhysicsScriptTable = 0x34000000
     };

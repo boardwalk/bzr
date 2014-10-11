@@ -19,6 +19,7 @@
 #include "Animation.h"
 #include "Core.h"
 #include "DatFile.h"
+#include "EnumMapper.h"
 #include "Environment.h"
 #include "ImgColor.h"
 #include "ImgTex.h"
@@ -27,6 +28,7 @@
 #include "Palette.h"
 #include "PhysicsScript.h"
 #include "PhysicsScriptTable.h"
+#include "ParticleEmitter.h"
 #include "Region.h"
 #include "Scene.h"
 #include "Setup.h"
@@ -76,6 +78,10 @@ static const Resource* loadResource(uint32_t resourceId)
             return new Region{resourceId, data.data(), data.size()};
         case ResourceType::kSoundTable:
             return new SoundTable{resourceId, data.data(), data.size()};
+        case ResourceType::kEnumMapper:
+            return new EnumMapper{resourceId, data.data(), data.size()};
+        case ResourceType::kParticleEmitter:
+            return new ParticleEmitter{resourceId, data.data(), data.size()};
         case ResourceType::kPhysicsScript:
             return new PhysicsScript{resourceId, data.data(), data.size()};
         case ResourceType::kPhysicsScriptTable:
