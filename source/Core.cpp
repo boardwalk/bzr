@@ -109,7 +109,11 @@ void Core::setPlayerId(ObjectId playerId)
     playerId_ = playerId;
 }
 
-Core::Core() : done_(false) /* TEMPORARY */, modelId_(0x02000120)
+Core::Core() : done_(false)
+// TEMPORARY
+#ifndef HEADLESS
+, modelId_(0x02000120)
+#endif
 {}
 
 void Core::init()

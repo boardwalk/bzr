@@ -76,7 +76,9 @@ private:
 #endif
     ObjectId playerId_;
     // TEMPORARY
+#ifndef HEADLESS
     uint32_t modelId_;
+#endif
 };
 
 #endif
