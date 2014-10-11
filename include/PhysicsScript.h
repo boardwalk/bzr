@@ -20,6 +20,7 @@
 
 #include "Resource.h"
 
+// AC: PhysicsScript
 struct PhysicsScript : public ResourceImpl<ResourceType::kPhysicsScript>
 {
     PhysicsScript(uint32_t id, const void* data, size_t size);

@@ -57,13 +57,13 @@ SoundTable::SoundTable(uint32_t id, const void* data, size_t size) : ResourceImp
     SoundTableData defaultData;
     read(reader, defaultData);
 
-    uint32_t numSoundTableDatas = reader.readInt();
+    uint32_t soundTableSize = reader.readInt();
 
-    for(uint32_t i = 0; i < numSoundTableDatas; i++)
+    for(uint32_t i = 0; i < soundTableSize; i++)
     {
         uint32_t soundType = reader.readInt();
 
-        read(reader, soundTableDatas[soundType]);
+        read(reader, soundTable[soundType]);
 
         uint32_t unk = reader.readInt();
         assert(unk == 0);

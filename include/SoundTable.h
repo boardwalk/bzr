@@ -38,7 +38,7 @@ struct SoundTable : public ResourceImpl<ResourceType::kSoundTable>
 {
     SoundTable(uint32_t id, const void* data, size_t size);
 
-    unordered_map<uint32_t, SoundTableData> soundTableDatas;
+    unordered_map<uint32_t, SoundTableData> soundTable;
 };
 
 #endif

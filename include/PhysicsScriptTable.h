@@ -19,10 +19,27 @@
 #define BZR_PHYSICSSCRIPTTABLE_H
 
 #include "Resource.h"
+#include <unordered_map>
 
+// AC: ScriptAndModData
+struct ScriptAndModData
+{
+    float mod;
+    uint32_t scriptId;
+};
+
+// AC: PhysicsScriptTableData
+struct PhysicsScriptTableData
+{
+    vector<ScriptAndModData> scripts;
+};
+
+// AC: PhysicsScriptTable
 struct PhysicsScriptTable : public ResourceImpl<ResourceType::kPhysicsScriptTable>
 {
     PhysicsScriptTable(uint32_t id, const void* data, size_t size);
+
+    unordered_map<uint32_t, PhysicsScriptTableData> scriptTable;
 };
 
 #endif
