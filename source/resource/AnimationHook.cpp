@@ -51,10 +51,7 @@ enum AnimationHookType
 
 void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
 {
-    (void)hook;
-
     uint32_t hookType = reader.readInt();
-    uint32_t hookSize = 0;
 
     // only apply this hook when playing this frame
     // 1 = forward, -1 = backward, 0 = both
@@ -64,152 +61,195 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
     switch(hookType)
     {
         case kSound:
-            /* struct SoundHook
-               uint32_t sound_gid; */
-            hookSize = 1;
+            {
+                SoundHook* h = new SoundHook();
+                hook.reset(h);
+                h->soundId = reader.readInt();
+            }
             break;
 
         case kSoundTable:
-            /* struct SoundTableHook
-               uint32_t sound_type; */
-            hookSize = 1;
+            {
+                SoundTableHook* h = new SoundTableHook();
+                hook.reset(h);
+                h->soundType = reader.readInt();
+            }
             break;
 
         case kAttack:
-            /* struct AttackHook
-               struct AttackCone
-               uint32_t part_index;
-               float left_x;
-               float left_y;
-               float right_x;
-               float right_y;
-               float radius;
-               float height; */
-            hookSize = 7;
+            {
+                AttackHook* h = new AttackHook();
+                hook.reset(h);
+                h->partIndex = reader.readInt();
+                h->leftX = reader.readFloat();
+                h->leftY = reader.readFloat();
+                h->rightX = reader.readFloat();
+                h->rightY = reader.readFloat();
+                h->radius = reader.readFloat();
+                h->height = reader.readFloat();
+            }
             break;
 
         case kReplaceObject:
-            /* struct ReplaceObjectHook
-               struct AnimPartChange
-               uint16_t part_index;
-               uint16_t part_gid; */
-            hookSize = 1;
+            {
+                ReplaceObjectHook* h = new ReplaceObjectHook();
+                hook.reset(h);
+                h->partIndex = reader.readShort();
+                h->partId = reader.readShort();
+            }
             break;
 
         case kEthereal:
-            /* struct EtherealHook
-               uint32_t ethereal; */
-            hookSize = 1;
+            {
+                EtherealHook* h = new EtherealHook();
+                hook.reset(h);
+                h->ethereal = (reader.readInt() != 0);
+            }
             break;
 
         case kTransparentPart:
-            /* struct TransparentPartHook
-               uint32_t part_index;
-               float start;
-               float end;
-               float time; */
-            hookSize = 4;
+            {
+                TransparentPartHook* h = new TransparentPartHook();
+                hook.reset(h);
+                h->partIndex = reader.readInt();
+                h->start = reader.readFloat();
+                h->end = reader.readFloat();
+                h->time = reader.readFloat();
+            }
             break;
 
         case kScale:
-            /* struct ScaleHook
-               float end;
-               float time; */
-            hookSize = 2;
+            {
+                ScaleHook* h = new ScaleHook();
+                hook.reset(h);
+                h->end = reader.readFloat();
+                h->time = reader.readFloat();
+            }
             break;
 
         case kCreateParticle:
-            /* struct CreateParticleHook
-               uint32_t emitter_info_gid;
-               uint32_t part_index;
-               struct Frame offset
-               float px, py, pz;
-               float rw, rx, ry, rz;
-               uint32_t emitter_id; */
-            hookSize = 10;
+            {
+                CreateParticleHook* h = new CreateParticleHook();
+                hook.reset(h);
+                h->emitterInfoId = reader.readInt();
+                h->partIndex = reader.readInt();
+                h->position.x = reader.readFloat();
+                h->position.y = reader.readFloat();
+                h->position.z = reader.readFloat();
+                h->rotation.w = reader.readFloat();
+                h->rotation.x = reader.readFloat();
+                h->rotation.y = reader.readFloat();
+                h->rotation.z = reader.readFloat();
+                h->emitterId = reader.readInt();
+            }
             break;
 
         case kDestroyParticle:
-            /* struct DestroyParticleHook
-               uint32_t emitter_id; */
-            hookSize = 1;
+            {
+                DestroyParticleHook* h = new DestroyParticleHook();
+                hook.reset(h);
+                h->emitterId = reader.readInt();
+            }
             break;
 
         case kStopParticle:
-            /* struct StopParticleHook
-               uint32_t emitter_id; */
-            hookSize = 1;
+            {
+                StopParticleHook* h = new StopParticleHook();
+                hook.reset(h);
+                h->emitterId = reader.readInt();
+            }
             break;
 
         case kNoDraw:
-            /* struct NoDrawHook
-               uint32_t no_draw; */
-            hookSize = 1;
+            {
+                NoDrawHook* h = new NoDrawHook();
+                hook.reset(h);
+                h->noDraw = (reader.readInt() != 0);
+            }
             break;
 
         case kDefaultScript:
-            /* struct DefaultScriptHook */
-            hookSize = 0;
+            {
+                DefaultScriptHook* h = new DefaultScriptHook();
+                hook.reset(h);
+            }
             break;
 
         case kCallPES:
-            /* struct CallPESHook
-               uint32_t pes_gid;
-               float pause; */
-            hookSize = 2;
+            {
+                CallPESHook* h = new CallPESHook();
+                hook.reset(h);
+                h->pesId = reader.readInt();
+                h->pause = reader.readFloat();
+            }
             break;
 
         case kTransparent:
-            /* struct TransparentHook
-               float start;
-               float end;
-               float time; */
-            hookSize = 3;
+            {
+                TransparentHook* h = new TransparentHook();
+                hook.reset(h);
+                h->start = reader.readFloat();
+                h->end = reader.readFloat();
+                h->time = reader.readFloat();
+            }
             break;
 
         case kSoundTweaked:
-            /* struct SoundTweakedHook
-               uint32_t sound_gid;
-               float priority;
-               float probability;
-               float volume; */
-            hookSize = 4;
+            {
+                SoundTweakedHook* h = new SoundTweakedHook();
+                hook.reset(h);
+                h->soundId = reader.readInt();
+                h->priority = reader.readFloat();
+                h->probability = reader.readFloat();
+                h->volume = reader.readFloat();
+            }
             break;
 
         case kSetOmega:
-            /* struct SetOmegaHook
-               struct Vector3 axis
-               float x, y, z; */
-            hookSize = 3;
+            {
+                SetOmegaHook* h = new SetOmegaHook();
+                hook.reset(h);
+                h->axis.x = reader.readFloat();
+                h->axis.y = reader.readFloat();
+                h->axis.z = reader.readFloat();
+            }
             break;
 
         case kTextureVelocity:
-            /* struct TextureVelocityHook
-               float u_speed;
-               float v_speed; */
-            hookSize = 2;
+            {
+                TextureVelocityHook* h = new TextureVelocityHook();
+                hook.reset(h);
+                h->uSpeed = reader.readFloat();
+                h->vSpeed = reader.readFloat();
+            }
             break;
 
         case kSetLight:
-            /* struct SetLightHook
-               uint32_t lights_on; */
-            hookSize = 1;
+            {
+                SetLightHook* h = new SetLightHook();
+                hook.reset(h);
+                h->lightsOn = (reader.readInt() != 0);
+            }
             break;
 
         case kCreateBlockingParticle:
-            /* struct CreateBlockParticleHook
-               uint32_t emitter_info_gid;
-               uint32_t part_index;
-               struct Frame offset
-               float px, py, pz;
-               float rw, rx, ry, rz;
-               uint32_t emitter_id; */
-            hookSize = 10;
+            {
+                CreateBlockingParticleHook* h = new CreateBlockingParticleHook();
+                hook.reset(h);
+                h->emitterInfoId = reader.readInt();
+                h->partIndex = reader.readInt();
+                h->position.x = reader.readFloat();
+                h->position.y = reader.readFloat();
+                h->position.z = reader.readFloat();
+                h->rotation.w = reader.readFloat();
+                h->rotation.x = reader.readFloat();
+                h->rotation.y = reader.readFloat();
+                h->rotation.z = reader.readFloat();
+                h->emitterId = reader.readInt();
+            }
             break;
 
         default:
             throw runtime_error("Unknown hookType in animation frame");
     }
-
-    reader.readRaw(hookSize * sizeof(uint32_t));
 }
