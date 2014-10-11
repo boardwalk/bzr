@@ -22,13 +22,16 @@
 #include "Environment.h"
 #include "ImgColor.h"
 #include "ImgTex.h"
-#include "Palette.h"
 #include "Model.h"
 #include "MotionTable.h"
+#include "Palette.h"
+#include "PhysicsScript.h"
+#include "PhysicsScriptTable.h"
 #include "Region.h"
 #include "Scene.h"
 #include "Setup.h"
 #include "Sound.h"
+#include "SoundTable.h"
 #include "Surface.h"
 
 static const Resource* loadResource(uint32_t resourceId)
@@ -71,6 +74,12 @@ static const Resource* loadResource(uint32_t resourceId)
             return new Scene{resourceId, data.data(), data.size()};
         case ResourceType::kRegion:
             return new Region{resourceId, data.data(), data.size()};
+        case ResourceType::kSoundTable:
+            return new SoundTable{resourceId, data.data(), data.size()};
+        case ResourceType::kPhysicsScript:
+            return new PhysicsScript{resourceId, data.data(), data.size()};
+        case ResourceType::kPhysicsScriptTable:
+            return new PhysicsScriptTable{resourceId, data.data(), data.size()};
         default:
             throw runtime_error("Resource type not supported");
     }

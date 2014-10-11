@@ -15,26 +15,10 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_SETUP_H
-#define BZR_SETUP_H
+#include "SoundTable.h"
 
-#include "AnimationFrame.h"
-#include "Resource.h"
-
-// AC: CSetup
-struct Setup : public ResourceImpl<ResourceType::kSetup>
+SoundTable::SoundTable(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 {
-    Setup(uint32_t id, const void* data, size_t size);
-
-    vector<ResourcePtr> models;
-    vector<uint32_t> parents;
-    vector<glm::vec3> scales;
-    vector<AnimationFrame> placementFrames;
-    ResourcePtr defaultAnimation;
-    ResourcePtr defaultPhysScript;
-    ResourcePtr defaultMotionTable;
-    ResourcePtr defaultSoundTable;
-    ResourcePtr defaultPhysScriptTable;
-};
-
-#endif
+    (void)data;
+    (void)size;
+}

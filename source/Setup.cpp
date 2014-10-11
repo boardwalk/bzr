@@ -156,11 +156,42 @@ Setup::Setup(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
         /*coneAngle*/ reader.readFloat(); // junk 0xcdcdcdcd most of the time
     }
 
-    /*defaultAnimId*/ reader.readInt();
-    /*defaultScriptId*/ reader.readInt();
-    /*defaultMTableId*/ reader.readInt();
-    /*defaultStableId*/ reader.readInt();
-    /*defaultPhstableId*/ reader.readInt();
+    ResourceCache& cache = Core::get().resourceCache();
+
+    uint32_t defaultAnimId = reader.readInt();
+
+    if(defaultAnimId)
+    {
+        defaultAnimation = cache.get(defaultAnimId);
+    }
+
+    uint32_t defaultPhysScriptId = reader.readInt();
+
+    if(defaultPhysScriptId)
+    {
+        defaultPhysScript = cache.get(defaultPhysScriptId);
+    }
+
+    uint32_t defaultMotionTableId = reader.readInt();
+
+    if(defaultMotionTableId)
+    {
+        defaultMotionTable = cache.get(defaultMotionTableId);
+    }
+
+    uint32_t defaultSoundTableId = reader.readInt();
+
+    if(defaultSoundTableId)
+    {
+        defaultSoundTable = cache.get(defaultSoundTableId);
+    }
+
+    uint32_t defaultPhysScriptTableId = reader.readInt();
+
+    if(defaultPhysScriptTableId)
+    {
+        defaultPhysScriptTable = cache.get(defaultPhysScriptTableId);
+    }
 
     reader.assertEnd();
 }

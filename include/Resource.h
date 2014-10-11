@@ -77,7 +77,10 @@ struct ResourceType
         kSound = 0x0A000000,
         kEnvironment = 0x0D000000,
         kScene = 0x12000000,
-        kRegion = 0x13000000
+        kRegion = 0x13000000,
+        kSoundTable = 0x20000000,
+        kPhysicsScript = 0x33000000,
+        kPhysicsScriptTable = 0x34000000
     };
 };
 
