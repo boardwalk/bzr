@@ -19,10 +19,26 @@
 #define BZR_SOUNDTABLE_H
 
 #include "Resource.h"
+#include <unordered_map>
+
+struct SoundData
+{
+    uint32_t soundId;
+    fp_t priority;
+    fp_t probability;
+    fp_t volume;
+};
+
+struct SoundTableData
+{
+    vector<SoundData> data;
+};
 
 struct SoundTable : public ResourceImpl<ResourceType::kSoundTable>
 {
     SoundTable(uint32_t id, const void* data, size_t size);
+
+    unordered_map<uint32_t, SoundTableData> soundTableDatas;
 };
 
 #endif

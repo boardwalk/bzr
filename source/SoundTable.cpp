@@ -16,9 +16,58 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "SoundTable.h"
+#include "BinReader.h"
+
+static void read(BinReader& reader, SoundData& soundData)
+{
+    soundData.soundId = reader.readInt();
+    assert(soundData.soundId == 0 || (soundData.soundId & 0xFF000000) == ResourceType::kSound);
+
+    soundData.priority = reader.readFloat();
+    assert(soundData.priority >= 0.0 && soundData.priority <= 1.0);
+
+    soundData.probability = reader.readFloat();
+    assert(soundData.probability >= 0.0 && soundData.probability <= 1.0);
+
+    soundData.volume = reader.readFloat();
+    assert(soundData.volume >= 0.0 && soundData.volume <= 10.0);
+}
+
+static void read(BinReader& reader, SoundTableData& soundTableData)
+{
+    uint32_t numData = reader.readInt();
+    soundTableData.data.resize(numData);
+
+    for(auto& soundData : soundTableData.data)
+    {
+        read(reader, soundData);
+    }
+}
 
 SoundTable::SoundTable(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 {
-    (void)data;
-    (void)size;
+    BinReader reader(data, size);
+
+    uint32_t resourceId = reader.readInt();
+    assert(resourceId == id);
+
+    uint32_t unk1 = reader.readInt();
+    assert(unk1 == 0);
+
+    SoundTableData defaultData;
+    read(reader, defaultData);
+
+    uint32_t numSoundTableDatas = reader.readInt();
+
+    for(uint32_t i = 0; i < numSoundTableDatas; i++)
+    {
+        uint32_t soundType = reader.readInt();
+
+        read(reader, soundTableDatas[soundType]);
+
+        uint32_t unk = reader.readInt();
+        assert(unk == 0);
+    }
+
+    reader.assertEnd();
 }
