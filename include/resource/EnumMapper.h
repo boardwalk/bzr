@@ -19,10 +19,14 @@
 #define BZR_ENUMMAPPER_H
 
 #include "Resource.h"
+#include <unordered_map>
 
 struct EnumMapper : public ResourceImpl<ResourceType::kEnumMapper>
 {
     EnumMapper(uint32_t id, const void* data, size_t size);
+
+    ResourcePtr baseMapper;
+    unordered_map<uint32_t, string> mapping;
 };
 
 #endif
