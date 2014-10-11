@@ -15,38 +15,14 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "AnimationFrame.h"
-#include "AnimationHook.h"
-#include "BinReader.h"
+#ifndef BZR_ANIMATIONHOOK_H
+#define BZR_ANIMATIONHOOK_H
 
-AnimationFrame::AnimationFrame()
-{}
+class BinReader;
 
-AnimationFrame::AnimationFrame(AnimationFrame&& other)
-{
-    locations = move(other.locations);
-}
+struct AnimationHook
+{};
 
-AnimationFrame& AnimationFrame::operator=(AnimationFrame&& other)
-{
-    locations = move(other.locations);
-    return *this;
-}
+void read(BinReader& reader, unique_ptr<AnimationHook>& hook);
 
-void read(BinReader& reader, AnimationFrame& frame, uint32_t numModels)
-{
-    frame.locations.resize(numModels);
-
-    for(Location& loc : frame.locations)
-    {
-        read(reader, loc);
-    }
-
-    uint32_t numHooks = reader.readInt();
-
-    for(uint32_t i = 0; i < numHooks; i++)
-    {
-        unique_ptr<AnimationHook> hook;
-        read(reader, hook);
-    }
-}
+#endif
