@@ -54,7 +54,7 @@ Sound::Sound(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 
     const uint8_t* samplesPtr = reader.readRaw(samplesLen);
 
-    reader.assertEnd();
+    assert(reader.remaining() == 0);
 
     samples.assign(samplesPtr, samplesPtr + samplesLen);
 }

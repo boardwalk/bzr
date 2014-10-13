@@ -28,7 +28,7 @@ BinReader::BinReader(const void* data, size_t size) : data_{data}, size_{size}, 
 
 const uint8_t* BinReader::readRaw(size_t size)
 {
-    if(position_ + size > size_)
+    if(size > remaining())
     {
         throw runtime_error("Read overrun");
     }
@@ -105,10 +105,7 @@ void BinReader::align()
     position_ = (position_ + 3) & ~3;
 }
 
-void BinReader::assertEnd() const
+size_t BinReader::remaining() const
 {
-    if(position_ < size_)
-    {
-       throw runtime_error("Expected end of blob");
-    }
+    return size_ - position_;
 }

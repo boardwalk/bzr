@@ -51,5 +51,5 @@ Animation::Animation(uint32_t id, const void* data, size_t size) : ResourceImpl{
         read(reader, frame, numModels);
     }
 
-    reader.assertEnd();
+    assert(reader.remaining() == 0);
 }

@@ -55,7 +55,7 @@ ImgColor::ImgColor(uint32_t id, const void* data, size_t size) : ResourceImpl{id
         palette = Core::get().resourceCache().get(paletteId);
     }
 
-    reader.assertEnd();
+    assert(reader.remaining() == 0);
 
     image.init(format, width, height, pixels);
 

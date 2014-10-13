@@ -69,7 +69,7 @@ Surface::Surface(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
     luminosity = reader.readFloat();
     diffuse = reader.readFloat();
 
-    reader.assertEnd();
+    assert(reader.remaining() == 0);
 }
 
 Surface::Surface(ResourcePtr imgTex) : ResourceImpl(ResourceType::kSurface | 0xFFFF), imgTex(imgTex)

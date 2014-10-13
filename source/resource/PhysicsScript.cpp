@@ -50,7 +50,7 @@ PhysicsScript::PhysicsScript(uint32_t id, const void* data, size_t size) : Resou
         read(reader, hook);
     }
 
-    reader.assertEnd();
+    assert(reader.remaining() == 0);
 }
 
 PhysicsScript::~PhysicsScript()

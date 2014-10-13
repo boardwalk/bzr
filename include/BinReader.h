@@ -38,7 +38,7 @@ public:
 
     void align();
 
-    void assertEnd() const;
+    size_t remaining() const;
 
 private:
     const void* data_;

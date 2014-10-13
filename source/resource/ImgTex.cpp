@@ -49,7 +49,7 @@ ImgTex::ImgTex(uint32_t id,  const void* data, size_t size) : ResourceImpl{id}
         reader.readInt();
     }
 
-    reader.assertEnd();
+    assert(reader.remaining() == 0);
 }
 
 ImgTex::ImgTex(ResourcePtr imgColor) : ResourceImpl{ResourceType::kImgTex | 0xFFFF}, imgColor{imgColor}

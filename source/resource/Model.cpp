@@ -115,7 +115,7 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl{id}, nee
         reader.readInt();
     }
 
-    reader.assertEnd();
+    assert(reader.remaining() == 0);
 }
 
 Model::~Model()

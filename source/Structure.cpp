@@ -89,7 +89,7 @@ Structure::Structure(const void* data, size_t size)
         reader.readInt();
     }
 
-    reader.assertEnd();
+    assert(reader.remaining() == 0);
 }
 
 LandcellId Structure::id() const

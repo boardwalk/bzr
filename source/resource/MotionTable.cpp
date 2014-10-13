@@ -106,5 +106,5 @@ MotionTable::MotionTable(uint32_t id, const void* data, size_t size) : ResourceI
         }
     }
 
-    reader.assertEnd();
+    assert(reader.remaining() == 0);
 }

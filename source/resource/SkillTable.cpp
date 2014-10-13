@@ -76,5 +76,5 @@ SkillTable::SkillTable()
         assert(learnMod == 1.0);
     }
 
-    reader.assertEnd();
+    assert(reader.remaining() == 0);
 }

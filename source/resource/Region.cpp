@@ -201,5 +201,5 @@ Region::Region(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
     /*uint32_t largeMap = */reader.readInt();
 
     reader.readRaw(12);
-    reader.assertEnd();
+    assert(reader.remaining() == 0);
 }

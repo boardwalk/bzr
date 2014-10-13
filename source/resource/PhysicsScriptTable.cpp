@@ -47,5 +47,5 @@ PhysicsScriptTable::PhysicsScriptTable(uint32_t id, const void* data, size_t siz
         read(reader, scriptTable[scriptType]);
     }
 
-    reader.assertEnd();
+    assert(reader.remaining() == 0);
 }

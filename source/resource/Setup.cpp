@@ -193,5 +193,5 @@ Setup::Setup(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
         defaultPhysScriptTable = cache.get(defaultPhysScriptTableId);
     }
 
-    reader.assertEnd();
+    assert(reader.remaining() == 0);
 }

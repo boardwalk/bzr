@@ -126,5 +126,5 @@ Environment::Environment(uint32_t id, const void* data, size_t size) : ResourceI
         read(reader, parts[i]);
     }
 
-    reader.assertEnd();
+    assert(reader.remaining() == 0);
 }
