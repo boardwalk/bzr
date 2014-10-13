@@ -17,11 +17,10 @@
  */
 #include "physics/Sphere.h"
 #include "BinReader.h"
+#include "util.h"
 
 void read(BinReader& reader, Sphere& sphere)
 {
-    sphere.center.x = reader.readFloat();
-    sphere.center.y = reader.readFloat();
-    sphere.center.z = reader.readFloat();
+    read(reader, sphere.center);
     sphere.radius = reader.readFloat();
 }

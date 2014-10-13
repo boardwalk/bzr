@@ -17,12 +17,11 @@
  */
 #include "physics/CylSphere.h"
 #include "BinReader.h"
+#include "util.h"
 
 void read(BinReader& reader, CylSphere& cylSphere)
 {
-    cylSphere.lowPoint.x = reader.readFloat();
-    cylSphere.lowPoint.y = reader.readFloat();
-    cylSphere.lowPoint.z = reader.readFloat();
+    read(reader, cylSphere.lowPoint);
     cylSphere.radius = reader.readFloat();
     cylSphere.height = reader.readFloat();
 }

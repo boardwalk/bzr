@@ -18,6 +18,7 @@
 #include "resource/Scene.h"
 #include "BinReader.h"
 #include "Land.h"
+#include "util.h"
 
 static void read(BinReader& reader, Scene::ObjectDesc& objectDesc)
 {
@@ -26,18 +27,11 @@ static void read(BinReader& reader, Scene::ObjectDesc& objectDesc)
         (objectDesc.resourceId & 0xFF000000) == static_cast<uint32_t>(ResourceType::kModel) ||
         (objectDesc.resourceId & 0xFF000000) == static_cast<uint32_t>(ResourceType::kSetup));
 
-    objectDesc.position.x = reader.readFloat();
+    read(reader, objectDesc.position);
     assert(objectDesc.position.x >= -Land::kCellSize && objectDesc.position.x <= Land::kCellSize);
-
-    objectDesc.position.y = reader.readFloat();
     assert(objectDesc.position.y >= -Land::kCellSize && objectDesc.position.y <= Land::kCellSize);
 
-    objectDesc.position.z = reader.readFloat();
-
-    objectDesc.rotation.w = reader.readFloat();
-    objectDesc.rotation.x = reader.readFloat();
-    objectDesc.rotation.y = reader.readFloat();
-    objectDesc.rotation.z = reader.readFloat();
+    read(reader, objectDesc.rotation);
 
     objectDesc.frequency = reader.readFloat();
     assert(objectDesc.frequency >= 0.0 && objectDesc.frequency <= 1.0);

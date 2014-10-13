@@ -17,6 +17,7 @@
  */
 #include "physics/Plane.h"
 #include "BinReader.h"
+#include "util.h"
 
 static const fp_t kEpsilon = fp_t(0.0002);
 
@@ -41,8 +42,6 @@ fp_t Plane::calcZ(fp_t x, fp_t y)
 
 void read(BinReader& reader, Plane& plane)
 {
-    plane.normal.x = reader.readFloat();
-    plane.normal.y = reader.readFloat();
-    plane.normal.z = reader.readFloat();
+    read(reader, plane.normal);
     plane.dist = reader.readFloat();
 }

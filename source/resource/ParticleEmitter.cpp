@@ -17,6 +17,7 @@
  */
 #include "resource/ParticleEmitter.h"
 #include "BinReader.h"
+#include "util.h"
 
 enum class EmitterType : uint32_t
 {
@@ -83,28 +84,20 @@ ParticleEmitter::ParticleEmitter(uint32_t id, const void* data, size_t size) : R
     // sorting sphere
     /*r*/ reader.readFloat();
 
-    // offsetDir
-    /*x*/ reader.readFloat();
-    /*y*/ reader.readFloat();
-    /*z*/ reader.readFloat();
+    glm::vec3 offsetDir;
+    read(reader, offsetDir);
 
     /*minOffset*/ reader.readFloat();
     /*maxOffset*/ reader.readFloat();
 
-    // a
-    /*x*/ reader.readFloat();
-    /*y*/ reader.readFloat();
-    /*z*/ reader.readFloat();
+    glm::vec3 a;
+    read(reader, a);
 
-    // b
-    /*x*/ reader.readFloat();
-    /*y*/ reader.readFloat();
-    /*z*/ reader.readFloat();
+    glm::vec3 b;
+    read(reader, b);
 
-    // c
-    /*x*/ reader.readFloat();
-    /*y*/ reader.readFloat();
-    /*z*/ reader.readFloat();
+    glm::vec3 c;
+    read(reader, c);
 
     /*minA*/ reader.readFloat();
     /*maxA*/ reader.readFloat();

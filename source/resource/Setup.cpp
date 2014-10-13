@@ -21,6 +21,7 @@
 #include "BinReader.h"
 #include "Core.h"
 #include "ResourceCache.h"
+#include "util.h"
 
 enum SetupFlag
 {
@@ -73,9 +74,7 @@ Setup::Setup(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 
         if(flags & kHasDefaultScale)
         {
-            scale.x = reader.readFloat();
-            scale.y = reader.readFloat();
-            scale.z = reader.readFloat();
+            read(reader, scale);
         }
 
         scales.push_back(scale);

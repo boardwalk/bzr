@@ -16,6 +16,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "util.h"
+#include "BinReader.h"
+#include <glm/gtx/norm.hpp>
+
+void read(BinReader& reader, glm::vec3& v)
+{
+    v.x = reader.readFloat();
+    v.y = reader.readFloat();
+    v.z = reader.readFloat();
+}
+
+void read(BinReader& reader, glm::quat& q)
+{
+    q.w = reader.readFloat();
+    q.x = reader.readFloat();
+    q.y = reader.readFloat();
+    q.z = reader.readFloat();
+
+    assert(glm::length2(q) >= 0.99 && glm::length2(q) <= 1.01);
+}
 
 void throwSDLError()
 {

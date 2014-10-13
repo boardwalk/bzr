@@ -17,18 +17,10 @@
  */
 #include "Location.h"
 #include "BinReader.h"
-#include <glm/gtx/norm.hpp>
+#include "util.h"
 
 void read(BinReader& reader, Location& loc)
 {
-    loc.position.x = reader.readFloat();
-    loc.position.y = reader.readFloat();
-    loc.position.z = reader.readFloat();
-
-    loc.rotation.w = reader.readFloat();
-    loc.rotation.x = reader.readFloat();
-    loc.rotation.y = reader.readFloat();
-    loc.rotation.z = reader.readFloat();
-
-    assert(glm::length2(loc.rotation) >= 0.99 && glm::length2(loc.rotation) <= 1.01);
+    read(reader, loc.position);
+    read(reader, loc.rotation);
 }

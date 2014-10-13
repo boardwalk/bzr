@@ -23,6 +23,7 @@
 #include "resource/Surface.h"
 #include "BinReader.h"
 #include "Core.h"
+#include "util.h"
 
 enum ModelFlags
 {
@@ -101,10 +102,8 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl{id}, nee
         read(reader, hitTree, BSPTreeType::kPhysics);
     }
 
-    // sort center
-    /*x*/ reader.readFloat();
-    /*y*/ reader.readFloat();
-    /*z*/ reader.readFloat();
+    glm::vec3 sortCenter;
+    read(reader, sortCenter);
 
     if(flags & kHasDrawingBSP)
     {

@@ -17,19 +17,15 @@
  */
 #include "Vertex.h"
 #include "BinReader.h"
+#include "util.h"
 
 void read(BinReader& reader, Vertex& vertex)
 {
     uint16_t numTexCoords = reader.readShort();
     vertex.texCoords.resize(numTexCoords);
 
-    vertex.position.x = reader.readFloat();
-    vertex.position.y = reader.readFloat();
-    vertex.position.z = reader.readFloat();
-
-    vertex.normal.x = reader.readFloat();
-    vertex.normal.y = reader.readFloat();
-    vertex.normal.z = reader.readFloat();
+    read(reader, vertex.position);
+    read(reader, vertex.normal);
 
     for(glm::vec2& texCoord : vertex.texCoords)
     {

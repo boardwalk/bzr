@@ -17,6 +17,7 @@
  */
 #include "resource/AnimationHook.h"
 #include "BinReader.h"
+#include "util.h"
 
 enum class AnimationHookType : uint32_t
 {
@@ -134,13 +135,8 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
                 hook.reset(h);
                 h->emitterInfoId = reader.readInt();
                 h->partIndex = reader.readInt();
-                h->position.x = reader.readFloat();
-                h->position.y = reader.readFloat();
-                h->position.z = reader.readFloat();
-                h->rotation.w = reader.readFloat();
-                h->rotation.x = reader.readFloat();
-                h->rotation.y = reader.readFloat();
-                h->rotation.z = reader.readFloat();
+                read(reader, h->position);
+                read(reader, h->rotation);
                 h->emitterId = reader.readInt();
             }
             break;
@@ -210,9 +206,7 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
             {
                 SetOmegaHook* h = new SetOmegaHook();
                 hook.reset(h);
-                h->axis.x = reader.readFloat();
-                h->axis.y = reader.readFloat();
-                h->axis.z = reader.readFloat();
+                read(reader, h->axis);
             }
             break;
 
@@ -239,13 +233,8 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
                 hook.reset(h);
                 h->emitterInfoId = reader.readInt();
                 h->partIndex = reader.readInt();
-                h->position.x = reader.readFloat();
-                h->position.y = reader.readFloat();
-                h->position.z = reader.readFloat();
-                h->rotation.w = reader.readFloat();
-                h->rotation.x = reader.readFloat();
-                h->rotation.y = reader.readFloat();
-                h->rotation.z = reader.readFloat();
+                read(reader, h->position);
+                read(reader, h->rotation);
                 h->emitterId = reader.readInt();
             }
             break;

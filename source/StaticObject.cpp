@@ -19,6 +19,7 @@
 #include "BinReader.h"
 #include "Core.h"
 #include "ResourceCache.h"
+#include "util.h"
 #include <glm/gtc/matrix_transform.hpp>
 
 void read(BinReader& reader, StaticObject& staticObject)
@@ -27,15 +28,10 @@ void read(BinReader& reader, StaticObject& staticObject)
     staticObject.resource = Core::get().resourceCache().get(modelId);
 
     glm::vec3 position;
-    position.x = reader.readFloat();
-    position.y = reader.readFloat();
-    position.z = reader.readFloat();
+    read(reader, position);
 
     glm::quat rotation;
-    rotation.w = reader.readFloat();
-    rotation.x = reader.readFloat();
-    rotation.y = reader.readFloat();
-    rotation.z = reader.readFloat();
+    read(reader, rotation);
 
     glm::mat4 translateMat = glm::translate(glm::mat4{}, position);
     glm::mat4 rotateMat = glm::mat4_cast(rotation);

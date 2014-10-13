@@ -18,6 +18,11 @@
 #ifndef BZR_UTIL_H
 #define BZR_UTIL_H
 
+class BinReader;
+
+void read(BinReader& reader, glm::vec3& vec);
+void read(BinReader& reader, glm::quat& quat);
+
 void throwSDLError();
 
 #endif
