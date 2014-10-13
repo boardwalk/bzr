@@ -17,6 +17,36 @@
  */
 #include "resource/ParticleEmitter.h"
 
+struct EmitterType
+{
+    enum Value
+    {
+        kUnknown = 0x0000,
+        kBirthratePerSec = 0x0001,
+        kBirthratePerMeter = 0x0002
+    };
+};
+
+struct ParticleType
+{
+    enum Value
+    {
+        kUnknown = 0x0000,
+        kStill = 0x0001,
+        kLocalVelocity = 0x0002,
+        kParabolicLVGA = 0x0003,
+        kParabolicLVGAGR = 0x0004,
+        kSwarm = 0x0005,
+        kExplode = 0x0006,
+        kImplode = 0x0007,
+        kParabolicLVLA = 0x0008,
+        kParabolicLVLALR = 0x0009,
+        kParabolicGVGA = 0x000a,
+        kParabolicGVGAGR = 0x000b,
+        kGlobalVelocity = 0x000c
+    };
+};
+
 ParticleEmitter::ParticleEmitter(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
 {
     (void)data;
