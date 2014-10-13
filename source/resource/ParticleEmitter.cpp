@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "resource/ParticleEmitter.h"
+#include "BinReader.h"
 
 enum class EmitterType : uint32_t
 {
@@ -43,6 +44,84 @@ enum class ParticleType : uint32_t
 
 ParticleEmitter::ParticleEmitter(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
-    UNUSED(data);
-    UNUSED(size);
+    BinReader reader(data, size);
+
+    uint32_t resourceId = reader.readInt();
+    assert(resourceId == id);
+    UNUSED(resourceId);
+
+    uint32_t unk1 = reader.readInt();
+    assert(unk1 == 0);
+    UNUSED(unk1);
+
+    uint32_t emitterType = reader.readInt();
+    assert(emitterType >= 0x1 && emitterType <= 0x2);
+    UNUSED(emitterType);
+
+    uint32_t particleType = reader.readInt();
+    assert(particleType >= 0x1 && particleType <= 0xc);
+    UNUSED(particleType);
+
+    uint32_t gfxobjId = reader.readInt();
+    assert(gfxobjId == 0 || (gfxobjId & 0xFF000000) == static_cast<uint32_t>(ResourceType::kModel));
+    UNUSED(gfxobjId);
+
+    uint32_t hwGfxobjId = reader.readInt();
+    assert(hwGfxobjId == 0 || (hwGfxobjId & 0xFF000000) == static_cast<uint32_t>(ResourceType::kModel));
+    UNUSED(hwGfxobjId);
+
+    /*birthrate*/ reader.readDouble();
+
+    /*maxParticles*/ reader.readInt();
+    /*initialParticles*/ reader.readInt();
+    /*totalParticles*/ reader.readInt();
+
+    /*totalSeconds*/ reader.readDouble();
+    /*lifespanRand*/ reader.readDouble();
+    /*lifespan*/ reader.readDouble();
+
+    // sorting sphere
+    /*r*/ reader.readFloat();
+
+    // offsetDir
+    /*x*/ reader.readFloat();
+    /*y*/ reader.readFloat();
+    /*z*/ reader.readFloat();
+
+    /*minOffset*/ reader.readFloat();
+    /*maxOffset*/ reader.readFloat();
+
+    // a
+    /*x*/ reader.readFloat();
+    /*y*/ reader.readFloat();
+    /*z*/ reader.readFloat();
+
+    // b
+    /*x*/ reader.readFloat();
+    /*y*/ reader.readFloat();
+    /*z*/ reader.readFloat();
+
+    // c
+    /*x*/ reader.readFloat();
+    /*y*/ reader.readFloat();
+    /*z*/ reader.readFloat();
+
+    /*minA*/ reader.readFloat();
+    /*maxA*/ reader.readFloat();
+
+    /*minB*/ reader.readFloat();
+    /*maxB*/ reader.readFloat();
+
+    /*minC*/ reader.readFloat();
+    /*maxC*/ reader.readFloat();
+
+    /*scaleRand*/ reader.readFloat();
+    /*startScale*/ reader.readFloat();
+    /*finalScale*/ reader.readFloat();
+
+    /*transRand*/ reader.readFloat();
+    /*startTrans*/ reader.readFloat();
+    /*finalTrans*/ reader.readFloat();
+
+    assert(reader.remaining() == 0);
 }
