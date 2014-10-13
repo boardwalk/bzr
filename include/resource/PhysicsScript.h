@@ -25,6 +25,9 @@ struct AnimationHook;
 // AC: PhysicsScriptData
 struct PhysicsScriptData
 {
+    PhysicsScriptData();
+    PhysicsScriptData(PhysicsScriptData&&);
+    
     double startTime;
     unique_ptr<AnimationHook> hook;
 };
