@@ -18,36 +18,33 @@
 #include "resource/MotionTable.h"
 #include "BinReader.h"
 
-struct CombatStyle
+enum class CombatStyle : uint32_t
 {
-    enum Value
-    {
-        kUndef = 0x0000,
-        kUnarmed = 0x0001,
-        kOneHanded = 0x0002,
-        kOneHandedAndShield = 0x0004,
-        kTwoHanded = 0x0008,
-        kBow = 0x0010,
-        kCrossbow = 0x0020,
-        kSling = 0x0040,
-        kThrownWeapon = 0x0080,
-        kDualWield = 0x0100,
-        kMagic = 0x0200,
-        kAtlatl = 0x0400,
-        kThrownShield = 0x0800,
-        kReserved1 = 0x1000,
-        kReserved2 = 0x2000,
-        kReserved3 = 0x4000,
-        kReserved4 = 0x8000,
-        kStubbornMagic = 0x00010000,
-        kStubbornProjectile = 0x00020000,
-        kStubbornMelee = 0x00040000,
-        kStubbornMissile = 0x00080000,
-        kAllMelee = 0x010f,
-        kAllMissile = 0x0cf0,
-        kAllMagic = 0x0200,
-        kAll = 0xffff,
-    };
+    kUndef = 0x0000,
+    kUnarmed = 0x0001,
+    kOneHanded = 0x0002,
+    kOneHandedAndShield = 0x0004,
+    kTwoHanded = 0x0008,
+    kBow = 0x0010,
+    kCrossbow = 0x0020,
+    kSling = 0x0040,
+    kThrownWeapon = 0x0080,
+    kDualWield = 0x0100,
+    kMagic = 0x0200,
+    kAtlatl = 0x0400,
+    kThrownShield = 0x0800,
+    kReserved1 = 0x1000,
+    kReserved2 = 0x2000,
+    kReserved3 = 0x4000,
+    kReserved4 = 0x8000,
+    kStubbornMagic = 0x00010000,
+    kStubbornProjectile = 0x00020000,
+    kStubbornMelee = 0x00040000,
+    kStubbornMissile = 0x00080000,
+    kAllMelee = 0x010f,
+    kAllMissile = 0x0cf0,
+    kAllMagic = 0x0200,
+    kAll = 0xffff,
 };
 
 MotionTable::MotionTable(uint32_t id, const void* data, size_t size) : ResourceImpl{id}

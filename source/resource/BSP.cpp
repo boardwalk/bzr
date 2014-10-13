@@ -22,7 +22,7 @@
 BSPNode::BSPNode()
 {}
 
-BSPNode::BSPNode(BinReader& reader, BSPTreeType::Value treeType, uint32_t nodeType)
+BSPNode::BSPNode(BinReader& reader, BSPTreeType treeType, uint32_t nodeType)
 {
     read(reader, partition_);
 
@@ -57,7 +57,7 @@ BSPNode::BSPNode(BinReader& reader, BSPTreeType::Value treeType, uint32_t nodeTy
     }
 }
 
-BSPLeaf::BSPLeaf(BinReader& reader, BSPTreeType::Value treeType)
+BSPLeaf::BSPLeaf(BinReader& reader, BSPTreeType treeType)
 {
     index_ = reader.readInt();
 
@@ -78,7 +78,7 @@ BSPLeaf::BSPLeaf(BinReader& reader, BSPTreeType::Value treeType)
     }
 }
 
-BSPPortal::BSPPortal(BinReader& reader, BSPTreeType::Value treeType)
+BSPPortal::BSPPortal(BinReader& reader, BSPTreeType treeType)
 {
     read(reader, partition_);
     read(reader, frontChild_, treeType);
@@ -107,7 +107,7 @@ BSPPortal::BSPPortal(BinReader& reader, BSPTreeType::Value treeType)
     }
 }
 
-void read(BinReader& reader, unique_ptr<BSPNode>& node, BSPTreeType::Value treeType)
+void read(BinReader& reader, unique_ptr<BSPNode>& node, BSPTreeType treeType)
 {
     uint32_t nodeType = reader.readInt();
 

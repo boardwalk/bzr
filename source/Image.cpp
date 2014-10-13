@@ -19,33 +19,33 @@
 #include "resource/Palette.h"
 #include <algorithm>
 
-int PixelFormat::bitsPerPixel(Value format)
+int bitsPerPixel(PixelFormat format)
 {
     switch(format)
     {
-        case kR8G8B8:
+        case PixelFormat::kR8G8B8:
             return 24;
-        case kA8R8G8B8:
+        case PixelFormat::kA8R8G8B8:
             return 32;
-        case kR5G6B5:
+        case PixelFormat::kR5G6B5:
             return 16;
-        case kA4R4G4B4:
+        case PixelFormat::kA4R4G4B4:
             return 16;
-        case kA8:
+        case PixelFormat::kA8:
             return 8;
-        case kP8:
+        case PixelFormat::kP8:
             return 8;
-        case kIndex16:
+        case PixelFormat::kIndex16:
             return 16;
-        case kCustomLscapeR8G8B8:
+        case PixelFormat::kCustomLscapeR8G8B8:
             return 24;
-        case kCustomLscapeAlpha:
+        case PixelFormat::kCustomLscapeAlpha:
             return 8;
-        case kDXT1:
+        case PixelFormat::kDXT1:
             return 4;
-        case kDXT3:
+        case PixelFormat::kDXT3:
             return 8;
-        case kDXT5:
+        case PixelFormat::kDXT5:
             return 8;
         default:
             break;
@@ -54,25 +54,26 @@ int PixelFormat::bitsPerPixel(Value format)
     throw runtime_error("Invalid format");
 }
 
-bool PixelFormat::isPaletted(Value format)
+bool isPaletted(PixelFormat format)
 {
-    return format == kP8 || format == kIndex16;
+    return format == PixelFormat::kP8 || format == PixelFormat::kIndex16;
 }
 
-bool PixelFormat::isCompressed(Value format)
+bool isCompressed(PixelFormat format)
 {
-    return format == kDXT1 || format == kDXT3 || format == kDXT5;
+    return format == PixelFormat::kDXT1 || format == PixelFormat::kDXT3 || format == PixelFormat::kDXT5;
 }
 
-bool PixelFormat::hasAlpha(Value format)
+bool hasAlpha(PixelFormat format)
 {
-    return format == kA8R8G8B8 || format == kP8 || format == kIndex16 || format == kCustomLscapeAlpha || format == kDXT3 || format == kDXT5;
+    return format == PixelFormat::kA8R8G8B8 || format == PixelFormat::kP8 || format == PixelFormat::kIndex16 ||
+        format == PixelFormat::kCustomLscapeAlpha || format == PixelFormat::kDXT3 || format == PixelFormat::kDXT5;
 }
 
 Image::Image() : format_(PixelFormat::kUnknown), width_(0), height_(0), hasAlpha_(false)
 {}
 
-void Image::init(PixelFormat::Value newFormat, int newWidth, int newHeight, const void* newData)
+void Image::init(PixelFormat newFormat, int newWidth, int newHeight, const void* newData)
 {
     format_ = newFormat;
     width_ = newWidth;
@@ -81,11 +82,11 @@ void Image::init(PixelFormat::Value newFormat, int newWidth, int newHeight, cons
     if(newData == nullptr)
     {
         data_.clear();
-        data_.resize(width_ * height_ * PixelFormat::bitsPerPixel(format_) / 8);
+        data_.resize(width_ * height_ * bitsPerPixel(format_) / 8);
     }
     else
     {
-        data_.assign((const uint8_t*)newData, (const uint8_t*)newData + width_ * height_ * PixelFormat::bitsPerPixel(format_) / 8);
+        data_.assign((const uint8_t*)newData, (const uint8_t*)newData + width_ * height_ * bitsPerPixel(format_) / 8);
     }
 
     updateHasAlpha();
@@ -143,12 +144,12 @@ void Image::scale(int newWidth, int newHeight)
         return;
     }
 
-    if(PixelFormat::isCompressed(format_))
+    if(isCompressed(format_))
     {
         throw runtime_error("Cannot scale compressed image");
     }
 
-    int nchannels = PixelFormat::bitsPerPixel(format_) / 8;
+    int nchannels = bitsPerPixel(format_) / 8;
 
     vector<uint8_t> newData(newWidth * newHeight * nchannels);
 
@@ -190,12 +191,12 @@ void Image::scale(int newWidth, int newHeight)
 
 void Image::flipVertical()
 {
-    if(PixelFormat::isCompressed(format_))
+    if(isCompressed(format_))
     {
         throw runtime_error("Cannot flip compressed image");
     }
 
-    int stride = width_ * PixelFormat::bitsPerPixel(format_) / 8;
+    int stride = width_ * bitsPerPixel(format_) / 8;
 
     vector<uint8_t> rowBuf(stride);
 
@@ -213,7 +214,7 @@ void Image::fill(int value)
     updateHasAlpha();
 }
 
-PixelFormat::Value Image::format() const
+PixelFormat Image::format() const
 {
     return format_;
 }

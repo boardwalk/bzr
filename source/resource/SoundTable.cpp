@@ -21,7 +21,8 @@
 static void read(BinReader& reader, SoundData& soundData)
 {
     soundData.soundId = reader.readInt();
-    assert(soundData.soundId == 0 || (soundData.soundId & 0xFF000000) == ResourceType::kSound);
+    assert(soundData.soundId == 0 ||
+        (soundData.soundId & 0xFF000000) == static_cast<uint32_t>(ResourceType::kSound));
 
     soundData.priority = reader.readFloat();
     assert(soundData.priority >= 0.0 && soundData.priority <= 1.0);
@@ -44,7 +45,7 @@ static void read(BinReader& reader, SoundTableData& soundTableData)
     }
 }
 
-SoundTable::SoundTable(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
+SoundTable::SoundTable(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
     BinReader reader(data, size);
 

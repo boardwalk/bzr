@@ -20,7 +20,7 @@
 #include "Core.h"
 #include "ResourceCache.h"
 
-EnumMapper::EnumMapper(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
+EnumMapper::EnumMapper(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
     BinReader reader(data, size);
 

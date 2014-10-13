@@ -27,11 +27,11 @@ static void read(BinReader& reader, PhysicsScriptTableData& scripts)
     {
         script.mod = reader.readFloat();
         script.scriptId = reader.readInt();
-        assert((script.scriptId & 0xFF000000) == ResourceType::kPhysicsScript);
+        assert((script.scriptId & 0xFF000000) == static_cast<uint32_t>(ResourceType::kPhysicsScript));
     }
 }
 
-PhysicsScriptTable::PhysicsScriptTable(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
+PhysicsScriptTable::PhysicsScriptTable(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
     BinReader reader(data, size);
 

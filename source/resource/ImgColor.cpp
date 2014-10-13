@@ -37,7 +37,7 @@ ImgColor::ImgColor(uint32_t id, const void* data, size_t size) : ResourceImpl{id
     uint32_t height = reader.readInt();
     assert(height <= 4096);
 
-    PixelFormat::Value format = static_cast<PixelFormat::Value>(reader.readInt());
+    PixelFormat format = static_cast<PixelFormat>(reader.readInt());
 
     if(format == PixelFormat::kCustomRawJPEG)
     {
@@ -45,11 +45,11 @@ ImgColor::ImgColor(uint32_t id, const void* data, size_t size) : ResourceImpl{id
     }
 
     uint32_t pixelsSize = reader.readInt();
-    assert(pixelsSize * 8 == width * height * PixelFormat::bitsPerPixel(format));
+    assert(pixelsSize * 8 == width * height * bitsPerPixel(format));
 
     const uint8_t* pixels = reader.readRaw(pixelsSize);
 
-    if(PixelFormat::isPaletted(format))
+    if(isPaletted(format))
     {
         uint32_t paletteId = reader.readInt();
         palette = Core::get().resourceCache().get(paletteId);
@@ -65,7 +65,7 @@ ImgColor::ImgColor(uint32_t id, const void* data, size_t size) : ResourceImpl{id
     }
 }
 
-ImgColor::ImgColor(uint32_t bgra) : ResourceImpl(ResourceType::kImgColor | 0xFFFF)
+ImgColor::ImgColor(uint32_t bgra) : ResourceImpl{static_cast<uint32_t>(ResourceType::kImgColor) | 0xFFFF}
 {
     image.init(PixelFormat::kA8R8G8B8, 1, 1, &bgra);
 }

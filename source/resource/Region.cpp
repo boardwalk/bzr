@@ -32,7 +32,7 @@ static void readAlphaTex(BinReader& reader)
         assert(tcode == 8 || tcode == 9 || tcode == 10);
 
         uint32_t texId = reader.readInt();
-        assert((texId & 0xFF000000) == ResourceType::kImgTex);
+        assert((texId & 0xFF000000) == static_cast<uint32_t>(ResourceType::kImgTex));
     }
 }
 
@@ -46,7 +46,7 @@ static void read(BinReader& reader, Region::SceneType& sceneType)
     for(ResourcePtr& scene : sceneType.scenes)
     {
         uint32_t resourceId = reader.readInt();
-        assert((resourceId & 0xFF000000) == ResourceType::kScene);
+        assert((resourceId & 0xFF000000) == static_cast<uint32_t>(ResourceType::kScene));
 
         scene = Core::get().resourceCache().get(resourceId);
     }
@@ -69,7 +69,7 @@ static void read(BinReader& reader, Region::TerrainType& terrainType)
 static void read(BinReader& reader, Region::TerrainTex& terrainTex)
 {
     terrainTex.resourceId = reader.readInt();
-    assert((terrainTex.resourceId & 0xFF000000) == ResourceType::kImgTex);
+    assert((terrainTex.resourceId & 0xFF000000) == static_cast<uint32_t>(ResourceType::kImgTex));
 
     /*uint32_t texTiling = */reader.readInt();
 
@@ -88,7 +88,7 @@ static void read(BinReader& reader, Region::TerrainTex& terrainTex)
     /*uint32_t detailTexTiling = */reader.readInt();
 
     uint32_t detailTexId = reader.readInt();
-    assert((detailTexId & 0xFF000000) == ResourceType::kImgTex);
+    assert((detailTexId & 0xFF000000) == static_cast<uint32_t>(ResourceType::kImgTex));
 }
 
 Region::Region(uint32_t id, const void* data, size_t size) : ResourceImpl{id}

@@ -35,7 +35,7 @@ PhysicsScriptData::PhysicsScriptData(PhysicsScriptData&& other)
     hook = move(other.hook);
 }
 
-PhysicsScript::PhysicsScript(uint32_t id, const void* data, size_t size) : ResourceImpl(id)
+PhysicsScript::PhysicsScript(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
     BinReader reader(data, size);
 

@@ -18,7 +18,7 @@
 #include "resource/AnimationHook.h"
 #include "BinReader.h"
 
-enum AnimationHookType
+enum class AnimationHookType : uint32_t
 {
     kNoOp = 0x0000,
     kSound = 0x0001,
@@ -60,7 +60,7 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
 
     switch(hookType)
     {
-        case kSound:
+        case AnimationHookType::kSound:
             {
                 SoundHook* h = new SoundHook();
                 hook.reset(h);
@@ -68,7 +68,7 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
             }
             break;
 
-        case kSoundTable:
+        case AnimationHookType::kSoundTable:
             {
                 SoundTableHook* h = new SoundTableHook();
                 hook.reset(h);
@@ -76,7 +76,7 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
             }
             break;
 
-        case kAttack:
+        case AnimationHookType::kAttack:
             {
                 AttackHook* h = new AttackHook();
                 hook.reset(h);
@@ -90,7 +90,7 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
             }
             break;
 
-        case kReplaceObject:
+        case AnimationHookType::kReplaceObject:
             {
                 ReplaceObjectHook* h = new ReplaceObjectHook();
                 hook.reset(h);
@@ -99,7 +99,7 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
             }
             break;
 
-        case kEthereal:
+        case AnimationHookType::kEthereal:
             {
                 EtherealHook* h = new EtherealHook();
                 hook.reset(h);
@@ -107,7 +107,7 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
             }
             break;
 
-        case kTransparentPart:
+        case AnimationHookType::kTransparentPart:
             {
                 TransparentPartHook* h = new TransparentPartHook();
                 hook.reset(h);
@@ -118,7 +118,7 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
             }
             break;
 
-        case kScale:
+        case AnimationHookType::kScale:
             {
                 ScaleHook* h = new ScaleHook();
                 hook.reset(h);
@@ -127,7 +127,7 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
             }
             break;
 
-        case kCreateParticle:
+        case AnimationHookType::kCreateParticle:
             {
                 CreateParticleHook* h = new CreateParticleHook();
                 hook.reset(h);
@@ -144,7 +144,7 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
             }
             break;
 
-        case kDestroyParticle:
+        case AnimationHookType::kDestroyParticle:
             {
                 DestroyParticleHook* h = new DestroyParticleHook();
                 hook.reset(h);
@@ -152,7 +152,7 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
             }
             break;
 
-        case kStopParticle:
+        case AnimationHookType::kStopParticle:
             {
                 StopParticleHook* h = new StopParticleHook();
                 hook.reset(h);
@@ -160,7 +160,7 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
             }
             break;
 
-        case kNoDraw:
+        case AnimationHookType::kNoDraw:
             {
                 NoDrawHook* h = new NoDrawHook();
                 hook.reset(h);
@@ -168,14 +168,14 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
             }
             break;
 
-        case kDefaultScript:
+        case AnimationHookType::kDefaultScript:
             {
                 DefaultScriptHook* h = new DefaultScriptHook();
                 hook.reset(h);
             }
             break;
 
-        case kCallPES:
+        case AnimationHookType::kCallPES:
             {
                 CallPESHook* h = new CallPESHook();
                 hook.reset(h);
@@ -184,7 +184,7 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
             }
             break;
 
-        case kTransparent:
+        case AnimationHookType::kTransparent:
             {
                 TransparentHook* h = new TransparentHook();
                 hook.reset(h);
@@ -194,7 +194,7 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
             }
             break;
 
-        case kSoundTweaked:
+        case AnimationHookType::kSoundTweaked:
             {
                 SoundTweakedHook* h = new SoundTweakedHook();
                 hook.reset(h);
@@ -205,7 +205,7 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
             }
             break;
 
-        case kSetOmega:
+        case AnimationHookType::kSetOmega:
             {
                 SetOmegaHook* h = new SetOmegaHook();
                 hook.reset(h);
@@ -215,7 +215,7 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
             }
             break;
 
-        case kTextureVelocity:
+        case AnimationHookType::kTextureVelocity:
             {
                 TextureVelocityHook* h = new TextureVelocityHook();
                 hook.reset(h);
@@ -224,7 +224,7 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
             }
             break;
 
-        case kSetLight:
+        case AnimationHookType::kSetLight:
             {
                 SetLightHook* h = new SetLightHook();
                 hook.reset(h);
@@ -232,7 +232,7 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
             }
             break;
 
-        case kCreateBlockingParticle:
+        case AnimationHookType::kCreateBlockingParticle:
             {
                 CreateBlockingParticleHook* h = new CreateBlockingParticleHook();
                 hook.reset(h);

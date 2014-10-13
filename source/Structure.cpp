@@ -51,11 +51,11 @@ Structure::Structure(const void* data, size_t size)
     for(ResourcePtr& surface : surfaces_)
     {
         uint16_t surfaceId = reader.readShort();
-        surface = Core::get().resourceCache().get(ResourceType::kSurface | surfaceId);
+        surface = Core::get().resourceCache().get(static_cast<uint32_t>(ResourceType::kSurface) | surfaceId);
     }
 
     uint16_t environmentId = reader.readShort();
-    environment_ = Core::get().resourceCache().get(ResourceType::kEnvironment | environmentId);
+    environment_ = Core::get().resourceCache().get(static_cast<uint32_t>(ResourceType::kEnvironment) | environmentId);
     partNum_ = reader.readShort();
     read(reader, location_);
 

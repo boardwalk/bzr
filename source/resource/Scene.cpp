@@ -22,7 +22,9 @@
 static void read(BinReader& reader, Scene::ObjectDesc& objectDesc)
 {
     objectDesc.resourceId = reader.readInt();
-    assert(objectDesc.resourceId == 0 || (objectDesc.resourceId & 0xFF000000) == ResourceType::kModel || (objectDesc.resourceId & 0xFF000000) == ResourceType::kSetup);
+    assert(objectDesc.resourceId == 0 ||
+        (objectDesc.resourceId & 0xFF000000) == static_cast<uint32_t>(ResourceType::kModel) ||
+        (objectDesc.resourceId & 0xFF000000) == static_cast<uint32_t>(ResourceType::kSetup));
 
     objectDesc.position.x = reader.readFloat();
     assert(objectDesc.position.x >= -Land::kCellSize && objectDesc.position.x <= Land::kCellSize);

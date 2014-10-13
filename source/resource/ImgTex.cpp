@@ -52,7 +52,7 @@ ImgTex::ImgTex(uint32_t id,  const void* data, size_t size) : ResourceImpl{id}
     assert(reader.remaining() == 0);
 }
 
-ImgTex::ImgTex(ResourcePtr imgColor) : ResourceImpl{ResourceType::kImgTex | 0xFFFF}, imgColor{imgColor}
+ImgTex::ImgTex(ResourcePtr imgColor) : ResourceImpl{static_cast<uint32_t>(ResourceType::kImgTex) | 0xFFFF}, imgColor{imgColor}
 {
     assert(imgColor->resourceType() == ResourceType::kImgColor);
 }

@@ -72,7 +72,7 @@ Surface::Surface(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
     assert(reader.remaining() == 0);
 }
 
-Surface::Surface(ResourcePtr imgTex) : ResourceImpl(ResourceType::kSurface | 0xFFFF), imgTex(imgTex)
+Surface::Surface(ResourcePtr imgTex) : ResourceImpl{static_cast<uint32_t>(ResourceType::kSurface) | 0xFFFF}, imgTex{imgTex}
 {
     assert(imgTex->resourceType() == ResourceType::kImgTex);
 }

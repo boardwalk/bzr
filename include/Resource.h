@@ -62,28 +62,25 @@
  * ff ?? (1)
  */
 
-struct ResourceType
+enum class ResourceType : uint32_t
 {
-    enum Value
-    {
-        kModel = 0x01000000,
-        kSetup = 0x02000000,
-        kAnimation = 0x03000000,
-        kPalette = 0x04000000,
-        kImgTex = 0x05000000,
-        kImgColor = 0x06000000,
-        kSurface = 0x08000000,
-        kMotionTable = 0x09000000,
-        kSound = 0x0A000000,
-        kEnvironment = 0x0D000000,
-        kScene = 0x12000000,
-        kRegion = 0x13000000,
-        kSoundTable = 0x20000000,
-        kEnumMapper = 0x22000000,
-        kParticleEmitter = 0x32000000,
-        kPhysicsScript = 0x33000000,
-        kPhysicsScriptTable = 0x34000000
-    };
+    kModel = 0x01000000,
+    kSetup = 0x02000000,
+    kAnimation = 0x03000000,
+    kPalette = 0x04000000,
+    kImgTex = 0x05000000,
+    kImgColor = 0x06000000,
+    kSurface = 0x08000000,
+    kMotionTable = 0x09000000,
+    kSound = 0x0A000000,
+    kEnvironment = 0x0D000000,
+    kScene = 0x12000000,
+    kRegion = 0x13000000,
+    kSoundTable = 0x20000000,
+    kEnumMapper = 0x22000000,
+    kParticleEmitter = 0x32000000,
+    kPhysicsScript = 0x33000000,
+    kPhysicsScriptTable = 0x34000000
 };
 
 class Resource : Noncopyable
@@ -114,25 +111,25 @@ public:
         return resourceId_;
     }
 
-    ResourceType::Value resourceType() const
+    ResourceType resourceType() const
     {
-        return static_cast<ResourceType::Value>(resourceId_ & 0xFF000000);
+        return static_cast<ResourceType>(resourceId_ & 0xFF000000);
     }
 
 private:
     const uint32_t resourceId_;
 };
 
-template<ResourceType::Value RT>
+template<ResourceType RT>
 class ResourceImpl : public Resource
 {
 public:
     ResourceImpl(uint32_t id) : Resource(id)
     {
-        assert((id & 0xFF000000) == RT);
+        assert((id & 0xFF000000) == static_cast<uint32_t>(RT));
     }
 
-    static const ResourceType::Value RESOURCE_TYPE = RT;
+    static const ResourceType RESOURCE_TYPE = RT;
 };
 
 typedef shared_ptr<const Resource> ResourcePtr;
