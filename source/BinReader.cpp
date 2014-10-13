@@ -28,10 +28,7 @@ BinReader::BinReader(const void* data, size_t size) : data_{data}, size_{size}, 
 
 const uint8_t* BinReader::readRaw(size_t size)
 {
-    if(size > remaining())
-    {
-        throw runtime_error("Read overrun");
-    }
+    assert(size <= remaining());
 
     const uint8_t* ptr = reinterpret_cast<const uint8_t*>(data_) + position_;
 
