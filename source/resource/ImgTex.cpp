@@ -27,12 +27,15 @@ ImgTex::ImgTex(uint32_t id,  const void* data, size_t size) : ResourceImpl{id}
 
     uint32_t resourceId = reader.readInt();
     assert(resourceId == id);
+    UNUSED(resourceId);
 
     uint32_t zero = reader.readInt();
     assert(zero == 0);
+    UNUSED(zero);
 
     uint8_t two = reader.readByte();
     assert(two == 2);
+    UNUSED(two);
 
     uint32_t numImgColors = reader.readInt();
     assert(numImgColors > 0);

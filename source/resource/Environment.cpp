@@ -56,6 +56,7 @@ static void read(BinReader& reader, CellStruct& part)
 
     uint32_t unk5 = reader.readInt();
     assert(unk5 == 1);
+    UNUSED(unk5);
 
     uint32_t numVertices = reader.readInt();
     part.vertices.resize(numVertices);
@@ -64,6 +65,7 @@ static void read(BinReader& reader, CellStruct& part)
     {
         uint16_t vertexNum = reader.readShort();
         assert(vertexNum == i);
+        UNUSED(vertexNum);
 
         read(reader, part.vertices[i]);
     }
@@ -72,6 +74,7 @@ static void read(BinReader& reader, CellStruct& part)
     {
         uint16_t triangleFanNum = reader.readShort();
         assert(triangleFanNum == i);
+        UNUSED(triangleFanNum);
 
         read(reader, part.triangleFans[i]);
     }
@@ -89,6 +92,7 @@ static void read(BinReader& reader, CellStruct& part)
     {
         uint16_t triangleFanNum = reader.readShort();
         assert(triangleFanNum == i);
+        UNUSED(triangleFanNum);
 
         read(reader, part.hitTriangleFans[i]);
     }
@@ -114,6 +118,7 @@ Environment::Environment(uint32_t id, const void* data, size_t size) : ResourceI
 
     uint32_t resourceId = reader.readInt();
     assert(resourceId == id);
+    UNUSED(resourceId);
 
     uint32_t numParts = reader.readInt();
     parts.resize(numParts);
@@ -122,6 +127,7 @@ Environment::Environment(uint32_t id, const void* data, size_t size) : ResourceI
     {
         uint32_t partNum = reader.readInt();
         assert(partNum == i);
+        UNUSED(partNum);
 
         read(reader, parts[i]);
     }

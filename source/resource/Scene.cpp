@@ -80,6 +80,7 @@ Scene::Scene(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 
     uint32_t resourceId = reader.readInt();
     assert(resourceId == id);
+    UNUSED(resourceId);
 
     uint32_t numObjects = reader.readInt();
     objects.resize(numObjects);

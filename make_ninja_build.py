@@ -105,7 +105,7 @@ def main():
                     linkflags += r' /libpath:{}\Lib\x64\VS2013 libovr64.lib winmm.lib ws2_32.lib gdi32.lib shell32.lib'.format(ovr_dir)
 
             if args.release:
-                cppflags += ' /O2 /GL'
+                cppflags += ' /O2 /GL /DNDEBUG'
                 linkflags += ' /LTCG'
             else:
                 cppflags += r' /Zi /Fdoutput\bzr.pdb /FS'
@@ -177,7 +177,7 @@ def main():
                     ldflags += ' -L{}/Lib/Mac/Release -lovr -framework CoreFoundation -framework CoreGraphics -framework IOKit'.format(ovr_dir)
 
             if args.release:
-                cppflags += ' -O2 -flto'
+                cppflags += ' -O2 -flto -DNDEBUG'
                 if sys.platform == 'darwin':
                     linkextra = ' && strip $out'
                 else:

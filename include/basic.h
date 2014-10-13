@@ -47,6 +47,8 @@
 #error Implement PACK for this compiler.
 #endif
 
+#define UNUSED(x) ((void)x)
+
 using namespace std;
 
 typedef glm::float_t fp_t;

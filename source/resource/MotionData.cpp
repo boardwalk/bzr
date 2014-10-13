@@ -67,12 +67,14 @@ void read(BinReader& reader, MotionData& animStrip)
 
     uint8_t unk1 = reader.readByte();
     assert(unk1 == 0 || unk1 == 1 || unk1 == 2);
+    UNUSED(unk1);
 
     uint8_t unk2 = reader.readByte();
     assert(unk2 == 0 || unk2 == 1 || unk2 == 2);
 
     uint8_t unk3 = reader.readByte();
     assert(unk3 == 0);
+    UNUSED(unk3);
 
     for(AnimInfo& animInfo : animStrip.animInfos)
     {

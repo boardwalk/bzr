@@ -24,6 +24,7 @@ Palette::Palette(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 
     uint32_t resourceId = reader.readInt();
     assert(resourceId == id);
+    UNUSED(resourceId);
 
     uint32_t numColors = reader.readInt();
     assert(numColors == 2048);

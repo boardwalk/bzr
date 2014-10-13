@@ -344,6 +344,7 @@ void Land::initStaticObjects()
 
     uint32_t fid = reader.readInt();
     assert(fid == data_.fileId - 1);
+    UNUSED(fid);
 
     numStructures_ = reader.readInt();
 
@@ -351,6 +352,7 @@ void Land::initStaticObjects()
 
     uint16_t unk1 = reader.readShort();
     assert(unk1 == 0);
+    UNUSED(unk1);
 
     staticObjects_.resize(numStaticObjects);
 
@@ -364,6 +366,7 @@ void Land::initStaticObjects()
     // I don't know what this is, but it means there's more data
     uint16_t unk2 = reader.readShort();
     assert(unk2 == 0 || unk2 == 1);
+    UNUSED(unk2);
 
     staticObjects_.resize(numStaticObjects + numStaticObjectsEx);
 

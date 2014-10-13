@@ -43,6 +43,6 @@ enum class ParticleType : uint32_t
 
 ParticleEmitter::ParticleEmitter(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 {
-    (void)data;
-    (void)size;
+    UNUSED(data);
+    UNUSED(size);
 }

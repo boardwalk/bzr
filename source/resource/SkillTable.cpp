@@ -28,11 +28,13 @@ SkillTable::SkillTable()
 
     uint32_t resourceId = reader.readInt();
     assert(resourceId == 0x0e000004);
+    UNUSED(resourceId);
 
     uint16_t numSkills = reader.readShort();
 
     uint16_t unk1 = reader.readShort();
     assert(unk1 == 0x20);
+    UNUSED(unk1);
 
     for(uint16_t i = 0; i < numSkills; i++)
     {
@@ -51,6 +53,7 @@ SkillTable::SkillTable()
 
         uint32_t unk2 = reader.readInt();
         assert(unk2 == 1);
+        UNUSED(unk2);
 
         uint32_t charGenUse = reader.readInt();
         assert(charGenUse == 1 || charGenUse == 2);
@@ -58,12 +61,15 @@ SkillTable::SkillTable()
 
         uint32_t minLevel = reader.readInt();
         assert(minLevel == 0);
+        UNUSED(minLevel);
 
         uint32_t hasAttrib1 = reader.readInt();
         assert(hasAttrib1 == 0 || hasAttrib1 == 1);
+        UNUSED(hasAttrib1);
 
         uint32_t hasAttrib2 = reader.readInt();
         assert(hasAttrib2 == 0 || hasAttrib2 == 1);
+        UNUSED(hasAttrib2);
 
         skill.attribDivisor = reader.readInt();
         skill.attrib1 = (AttributeType::Value)reader.readInt();
@@ -74,6 +80,7 @@ SkillTable::SkillTable()
 
         double learnMod = reader.readDouble();
         assert(learnMod == 1.0);
+        UNUSED(learnMod);
     }
 
     assert(reader.remaining() == 0);

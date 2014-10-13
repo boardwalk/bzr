@@ -24,6 +24,7 @@ Sound::Sound(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 
     uint32_t resourceId = reader.readInt();
     assert(resourceId == id);
+    UNUSED(resourceId);
 
     uint32_t type = reader.readInt();
 
@@ -38,12 +39,15 @@ Sound::Sound(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 
     uint16_t unk1 = reader.readShort();
     assert(unk1 == 1);
+    UNUSED(unk1);
 
     uint16_t unk2 = reader.readShort();
     assert(unk2 == 1 || unk2 == 2);
+    UNUSED(unk2);
 
     samplesPerSecond = reader.readInt();
     uint32_t totalSamplesPerSecond = reader.readInt();
+    UNUSED(totalSamplesPerSecond);
 
     numChannels = reader.readShort();
     assert(numChannels == 1 || numChannels == 2 || numChannels == 4);

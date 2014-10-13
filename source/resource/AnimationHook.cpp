@@ -57,6 +57,7 @@ void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
     // 1 = forward, -1 = backward, 0 = both
     uint32_t hookDir = reader.readInt();
     assert(hookDir == 0 || hookDir == 1 || hookDir == 0xFFFFFFFF);
+    UNUSED(hookDir);
 
     switch(hookType)
     {

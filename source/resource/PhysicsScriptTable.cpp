@@ -37,6 +37,7 @@ PhysicsScriptTable::PhysicsScriptTable(uint32_t id, const void* data, size_t siz
 
     uint32_t resourceId = reader.readInt();
     assert(resourceId == id);
+    UNUSED(resourceId);
 
     uint32_t scriptTableSize = reader.readInt();
 

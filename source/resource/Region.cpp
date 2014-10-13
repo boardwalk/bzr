@@ -30,9 +30,11 @@ static void readAlphaTex(BinReader& reader)
     {
         uint32_t tcode = reader.readInt();
         assert(tcode == 8 || tcode == 9 || tcode == 10);
+        UNUSED(tcode);
 
         uint32_t texId = reader.readInt();
         assert((texId & 0xFF000000) == static_cast<uint32_t>(ResourceType::kImgTex));
+        UNUSED(texId);
     }
 }
 
@@ -55,7 +57,7 @@ static void read(BinReader& reader, Region::SceneType& sceneType)
 static void read(BinReader& reader, Region::TerrainType& terrainType)
 {
     string terrainName = reader.readString();
-    /*uint32_t terrainColor = */reader.readInt();
+    /*terrainColor*/ reader.readInt();
 
     uint32_t numSceneTypes = reader.readInt();
     terrainType.sceneTypes.resize(numSceneTypes);
@@ -71,24 +73,31 @@ static void read(BinReader& reader, Region::TerrainTex& terrainTex)
     terrainTex.resourceId = reader.readInt();
     assert((terrainTex.resourceId & 0xFF000000) == static_cast<uint32_t>(ResourceType::kImgTex));
 
-    /*uint32_t texTiling = */reader.readInt();
+    /*texTiling*/ reader.readInt();
 
     uint32_t maxVertBright = reader.readInt();
     uint32_t minVertBright = reader.readInt();
     assert(maxVertBright >= minVertBright);
+    UNUSED(maxVertBright);
+    UNUSED(minVertBright);
 
     uint32_t maxVertSaturate = reader.readInt();
     uint32_t minVertSaturate = reader.readInt();
     assert(maxVertSaturate >= minVertSaturate);
+    UNUSED(maxVertSaturate);
+    UNUSED(minVertSaturate);
 
     uint32_t maxVertHue = reader.readInt();
     uint32_t minVertHue = reader.readInt();
     assert(maxVertHue >= minVertHue);
+    UNUSED(maxVertHue);
+    UNUSED(minVertHue);
 
-    /*uint32_t detailTexTiling = */reader.readInt();
+    /*detailTexTiling*/ reader.readInt();
 
     uint32_t detailTexId = reader.readInt();
     assert((detailTexId & 0xFF000000) == static_cast<uint32_t>(ResourceType::kImgTex));
+    UNUSED(detailTexId);
 }
 
 Region::Region(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
@@ -97,21 +106,26 @@ Region::Region(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 
     uint32_t resourceId = reader.readInt();
     assert(resourceId == id);
+    UNUSED(resourceId);
 
     uint32_t regionNumber = reader.readInt();
     assert(regionNumber == 1);
+    UNUSED(regionNumber);
 
     uint32_t regionVersion = reader.readInt();
     assert(regionVersion == kRegionVersion);
+    UNUSED(regionVersion);
 
     string regionName = reader.readString();
     assert(regionName == "Dereth");
 
     uint32_t unk1 = reader.readInt();
     assert(unk1 == 0xFF);
+    UNUSED(unk1);
 
     uint32_t unk2 = reader.readInt();
     assert(unk2 == 0xFF);
+    UNUSED(unk2);
 
     reader.readRaw(24);
 
@@ -129,9 +143,11 @@ Region::Region(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
     {
         float startTime = reader.readFloat();
         assert(startTime >= 0.0 && startTime <= 1.0);
+        UNUSED(startTime);
 
         uint32_t nightTime = reader.readInt();
         assert(nightTime == 0 || nightTime == 1);
+        UNUSED(nightTime);
 
         string hourName = reader.readString();
     }
@@ -149,6 +165,7 @@ Region::Region(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
     {
         uint32_t startDay = reader.readInt();
         assert(startDay <= 365);
+        UNUSED(startDay);
 
         string seasonName = reader.readString();
     }
@@ -175,9 +192,11 @@ Region::Region(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 
     uint32_t unk3 = reader.readInt();
     assert(unk3 == 0);
+    UNUSED(unk3);
 
     uint32_t unk4 = reader.readInt();
     assert(unk4 == 0x400);
+    UNUSED(unk4);
 
     readAlphaTex(reader);
     readAlphaTex(reader);
@@ -190,15 +209,17 @@ Region::Region(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
     {
         uint32_t terrainTexNum = reader.readInt();
         assert(terrainTexNum == i);
+        UNUSED(terrainTexNum);
 
         read(reader, terrainTextures[i]);
     }
 
     uint32_t unk5 = reader.readInt();
     assert(unk5 == 1);
+    UNUSED(unk5);
 
-    /*uint32_t smallMap = */reader.readInt();
-    /*uint32_t largeMap = */reader.readInt();
+    /*smallMap*/ reader.readInt();
+    /*largeMap*/ reader.readInt();
 
     reader.readRaw(12);
     assert(reader.remaining() == 0);

@@ -41,6 +41,7 @@ Structure::Structure(const void* data, size_t size)
 
     uint32_t resourceId2 = reader.readInt();
     assert(resourceId2 == resourceId);
+    UNUSED(resourceId2);
 
     uint8_t numSurfaces = reader.readByte();
     surfaces_.resize(numSurfaces);

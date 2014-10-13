@@ -53,6 +53,7 @@ MotionTable::MotionTable(uint32_t id, const void* data, size_t size) : ResourceI
 
     uint32_t resourceId = reader.readInt();
     assert(resourceId == id);
+    UNUSED(resourceId);
 
     /*defaultStyle*/ reader.readInt();
     uint32_t numStyles = reader.readInt();

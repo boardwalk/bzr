@@ -23,8 +23,8 @@
 int main(int argc, char* argv[])
 {
     // SDL_main requires we have these arguments
-    (void)argc;
-    (void)argv;
+    UNUSED(argc);
+    UNUSED(argv);
 
     try
     {

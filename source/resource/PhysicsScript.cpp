@@ -41,6 +41,7 @@ PhysicsScript::PhysicsScript(uint32_t id, const void* data, size_t size) : Resou
 
     uint32_t resourceId = reader.readInt();
     assert(resourceId == id);
+    UNUSED(resourceId);
 
     uint32_t numHooks = reader.readInt();
     hooks.resize(numHooks);

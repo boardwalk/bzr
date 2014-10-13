@@ -26,6 +26,7 @@ EnumMapper::EnumMapper(uint32_t id, const void* data, size_t size) : ResourceImp
 
     uint32_t resourceId = reader.readInt();
     assert(resourceId == id);
+    UNUSED(resourceId);
 
     uint32_t baseMapperId = reader.readInt();
 
@@ -37,6 +38,7 @@ EnumMapper::EnumMapper(uint32_t id, const void* data, size_t size) : ResourceImp
 
     uint8_t unk = reader.readByte();
     assert(unk <= 7);
+    UNUSED(unk);
 
     uint16_t numPairs = reader.readPackedShort();
     mapping.reserve(numPairs);

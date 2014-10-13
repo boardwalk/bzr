@@ -51,9 +51,11 @@ SoundTable::SoundTable(uint32_t id, const void* data, size_t size) : ResourceImp
 
     uint32_t resourceId = reader.readInt();
     assert(resourceId == id);
+    UNUSED(resourceId);
 
     uint32_t unk1 = reader.readInt();
     assert(unk1 == 0);
+    UNUSED(unk1);
 
     SoundTableData defaultData;
     read(reader, defaultData);
@@ -66,8 +68,9 @@ SoundTable::SoundTable(uint32_t id, const void* data, size_t size) : ResourceImp
 
         read(reader, soundTable[soundType]);
 
-        uint32_t unk = reader.readInt();
-        assert(unk == 0);
+        uint32_t unk2 = reader.readInt();
+        assert(unk2 == 0);
+        UNUSED(unk2);
     }
 
     assert(reader.remaining() == 0);

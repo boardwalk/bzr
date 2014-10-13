@@ -45,7 +45,7 @@ void Camera::look(fp_t dx, fp_t dy)
 
 void Camera::step(fp_t dt)
 {
-    (void)dt;
+    UNUSED(dt);
 }
 
 void Camera::setSpeed(fp_t newSpeed)

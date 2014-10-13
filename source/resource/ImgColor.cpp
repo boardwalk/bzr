@@ -27,9 +27,11 @@ ImgColor::ImgColor(uint32_t id, const void* data, size_t size) : ResourceImpl{id
 
     uint32_t resourceId = reader.readInt();
     assert(resourceId == id);
+    UNUSED(resourceId);
 
     uint32_t unk1 = reader.readInt();
     assert(unk1 <= 0xA);
+    UNUSED(unk1);
 
     uint32_t width = reader.readInt();
     assert(width <= 4096);

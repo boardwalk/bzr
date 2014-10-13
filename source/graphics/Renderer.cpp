@@ -173,7 +173,7 @@ void Renderer::init()
 
 void Renderer::render(fp_t interp)
 {
-    (void)interp;
+    UNUSED(interp);
 
 #ifdef OCULUSVR
     if(hmd_ != nullptr)
@@ -429,7 +429,7 @@ void Renderer::cleanupOVR()
 
 void Renderer::renderOVR(fp_t interp)
 {
-    (void)interp;
+    UNUSED(interp);
 
     ovrHmd_BeginFrame(hmd_, 0);
 

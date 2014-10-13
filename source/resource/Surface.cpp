@@ -59,6 +59,7 @@ Surface::Surface(uint32_t id, const void* data, size_t size) : ResourceImpl{id}
 
         uint32_t paletteId = reader.readInt();
         assert(paletteId == 0);
+        UNUSED(paletteId);
     }
     else
     {

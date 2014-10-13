@@ -41,6 +41,7 @@ static vector<TriangleFan> readTriangleFans(BinReader& reader)
     {
         uint16_t triangleFanNum = reader.readShort();
         assert(triangleFanNum == i);
+        UNUSED(triangleFanNum);
 
         read(reader, triangleFans[i]);
     }
@@ -54,6 +55,7 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl{id}, nee
 
     uint32_t resourceId = reader.readInt();
     assert(resourceId == id);
+    UNUSED(resourceId);
 
     uint32_t flags = reader.readInt();
     assert(flags == 0x2 || flags == 0x3 || flags == 0xA || flags == 0xB);
@@ -75,17 +77,20 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl{id}, nee
 
     uint32_t one = reader.readInt();
     assert(one == 1);
+    UNUSED(one);
 
     uint16_t numVertices = reader.readShort();
     vertices.resize(numVertices);
 
     uint16_t flags2 = reader.readShort();
     assert(flags2 == 0x0000 || flags2 == 0x8000);
+    UNUSED(flags2);
 
     for(uint16_t i = 0; i < numVertices; i++)
     {
         uint16_t vertexNum = reader.readShort();
         assert(vertexNum == i);
+        UNUSED(vertexNum);
 
         read(reader, vertices[i]);
     }
@@ -111,8 +116,7 @@ Model::Model(uint32_t id, const void* data, size_t size) : ResourceImpl{id}, nee
 
     if(flags & kHasDegrade)
     {
-        // Seems to be a reference to an 0x11 file? No idea what these are!
-        reader.readInt();
+        /*degradeId*/ reader.readInt();
     }
 
     assert(reader.remaining() == 0);
