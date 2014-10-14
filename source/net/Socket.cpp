@@ -16,8 +16,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "net/Socket.h"
+#ifndef _WIN32
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#endif
 
-#ifdef WIN32
+#ifdef _WIN32
 
 struct Startup
 {
@@ -114,7 +119,7 @@ void Socket::write(const Packet& packet)
 
 Socket::Socket()
 {
-    fd_ = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
+    fd_ = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
     if(fd_ < 0)
     {
@@ -131,6 +136,51 @@ Socket::Socket()
 Socket::~Socket()
 {
     close(fd_);
+}
+
+void Socket::read(Packet& packet)
+{
+    sockaddr_in from;
+    socklen_t fromLen = sizeof(from);
+
+    ssize_t recvLen = recvfrom(fd_,
+        packet.data.data(),
+        packet.data.size(),
+        /*flags*/ 0,
+        reinterpret_cast<sockaddr*>(&from),
+        &fromLen);
+
+    if(recvLen < 0)
+    {
+        throw runtime_error("recvfrom failed");
+    }
+
+    packet.remoteIp = htonl(from.sin_addr.s_addr);
+    packet.remotePort = htons(from.sin_port);
+    packet.dataSize = recvLen;
+}
+
+void Socket::write(const Packet& packet)
+{
+    assert(packet.dataSize < packet.data.size());
+
+    sockaddr_in to;
+    memset(&to, 0, sizeof(to));
+    to.sin_family = AF_INET;
+    to.sin_port = htons(packet.remotePort);
+    to.sin_addr.s_addr = htonl(packet.remoteIp);
+
+    ssize_t sendLen = sendto(fd_,
+        packet.data.data(),
+        packet.dataSize,
+        /*flags*/ 0,
+        reinterpret_cast<sockaddr*>(&to),
+        sizeof(to));
+
+    if(sendLen < 0 || static_cast<size_t>(sendLen) != packet.dataSize)
+    {
+        throw runtime_error("sendto failed");
+    }
 }
 
 #endif // ndef _WIN32
