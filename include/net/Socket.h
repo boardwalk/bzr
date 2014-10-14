@@ -31,8 +31,8 @@ struct Packet
 {
     uint32_t remoteIp;
     uint16_t remotePort;
+    size_t size;
     array<uint8_t, kDatagramMaxSize> data;
-    size_t dataSize;
 };
 
 class Socket : Noncopyable

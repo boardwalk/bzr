@@ -31,7 +31,8 @@ struct Startup
         WSAData wsaData;
         int err = WSAStartup(MAKEWORD(2, 2), &wsaData);
 
-        if(err != 0) {
+        if(err != 0)
+        {
             throw runtime_error("WSAStartup failed");
         }
     }
@@ -89,12 +90,12 @@ void Socket::read(Packet& packet)
 
     packet.remoteIp = htonl(from.sin_addr.s_addr);
     packet.remotePort = htons(from.sin_port);
-    packet.dataSize = recvLen;
+    packet.size = recvLen;
 }
 
 void Socket::write(const Packet& packet)
 {
-    assert(packet.dataSize < packet.data.size());
+    assert(packet.size < packet.data.size());
 
     sockaddr_in to;
     memset(&to, 0, sizeof(to));
@@ -104,12 +105,12 @@ void Socket::write(const Packet& packet)
 
     int sendLen = sendto(sock_,
         reinterpret_cast<const char*>(packet.data.data()),
-        static_cast<int>(packet.dataSize),
+        static_cast<int>(packet.size),
         /*flags*/ 0,
         reinterpret_cast<sockaddr*>(&to),
         sizeof(to));
 
-    if(sendLen != packet.dataSize)
+    if(sendLen != packet.size)
     {
         throw runtime_error("sendto failed");
     }
@@ -157,12 +158,12 @@ void Socket::read(Packet& packet)
 
     packet.remoteIp = htonl(from.sin_addr.s_addr);
     packet.remotePort = htons(from.sin_port);
-    packet.dataSize = recvLen;
+    packet.size = recvLen;
 }
 
 void Socket::write(const Packet& packet)
 {
-    assert(packet.dataSize < packet.data.size());
+    assert(packet.size < packet.data.size());
 
     sockaddr_in to;
     memset(&to, 0, sizeof(to));
@@ -172,12 +173,12 @@ void Socket::write(const Packet& packet)
 
     ssize_t sendLen = sendto(fd_,
         packet.data.data(),
-        packet.dataSize,
+        packet.size,
         /*flags*/ 0,
         reinterpret_cast<sockaddr*>(&to),
         sizeof(to));
 
-    if(sendLen < 0 || static_cast<size_t>(sendLen) != packet.dataSize)
+    if(sendLen < 0 || static_cast<size_t>(sendLen) != packet.size)
     {
         throw runtime_error("sendto failed");
     }
