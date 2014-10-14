@@ -237,7 +237,7 @@ void Core::handleEvents()
                 break;
 
             case SDL_KEYDOWN:
-#ifdef WIN32
+#ifdef _WIN32
                 // SDL does not respond normally to alt-f4 on Windows, so handle it ourselves
                 if(event.key.keysym.sym == SDLK_F4 && (event.key.keysym.mod & KMOD_ALT) != 0)
                 {

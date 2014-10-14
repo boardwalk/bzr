@@ -45,7 +45,7 @@ public:
     void write(const Packet& packet);
 
 private:
-#ifdef WIN32
+#ifdef _WIN32
     SOCKET sock_;
 #else
     int fd_;
