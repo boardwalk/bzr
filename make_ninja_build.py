@@ -77,7 +77,7 @@ def main():
             cppflags = '/nologo /EHsc /Iinclude /Ibuild /D_CRT_SECURE_NO_WARNINGS'
             cxxflags = '/FIbasic.h /W4 /WX'
             cflags = ''
-            linkflags = '/nologo'
+            linkflags = '/nologo ws2_32.lib'
 
             sdl_dir = os.path.expanduser(r'~\Documents\SDL2-2.0.3')
             cppflags += r' /MD /I{}\include'.format(sdl_dir)
@@ -102,7 +102,7 @@ def main():
                     # i'm only testing this support with VS 2013 right now
                     # attn! libovr requires atls.lib, which is not provided by VS Express
                     # the version provided in the WDK does *not* work, you need the full version of VS
-                    linkflags += r' /libpath:{}\Lib\x64\VS2013 libovr64.lib winmm.lib ws2_32.lib gdi32.lib shell32.lib'.format(ovr_dir)
+                    linkflags += r' /libpath:{}\Lib\x64\VS2013 libovr64.lib winmm.lib gdi32.lib shell32.lib'.format(ovr_dir)
 
             if args.release:
                 cppflags += ' /O2 /GL /DNDEBUG'
