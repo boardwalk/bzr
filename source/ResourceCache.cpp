@@ -50,7 +50,9 @@ static const Resource* loadResource(uint32_t resourceId)
         }
     }
 
-    switch(resourceId & 0xFF000000)
+    ResourceType resourceType = static_cast<ResourceType>(resourceId & 0xFF000000);
+
+    switch(resourceType)
     {
         case ResourceType::kModel:
             return new Model{resourceId, data.data(), data.size()};

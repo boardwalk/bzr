@@ -52,7 +52,7 @@ enum class AnimationHookType : uint32_t
 
 void read(BinReader& reader, unique_ptr<AnimationHook>& hook)
 {
-    uint32_t hookType = reader.readInt();
+    AnimationHookType hookType = static_cast<AnimationHookType>(reader.readInt());
 
     // only apply this hook when playing this frame
     // 1 = forward, -1 = backward, 0 = both
