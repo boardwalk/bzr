@@ -23,6 +23,8 @@ class BinReader;
 struct AnimationHook
 {
     virtual ~AnimationHook() {}
+
+    uint32_t hookDir;
 };
 
 // AC: SoundHook
