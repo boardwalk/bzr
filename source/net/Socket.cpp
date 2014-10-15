@@ -29,10 +29,13 @@
 #define CLOSE_SOCKET closesocket
 typedef SSIZE_T ssize_t;
 static const SocketType kBadSocket = INVALID_SOCKET;
-
+static const int kSocketError = SOCKET_ERROR;
+static bool wouldBlock() { return WSAGetLastError() == WSAEWOULDBLOCK; }
 #else
 #define CLOSE_SOCKET close
 static const SocketType kBadSocket = -1;
+static const int kSocketError = -1;
+static bool wouldBlock() { return errno == EAGAIN || errno == EWOULDBLOCK; }
 #endif
 
 Socket::Socket()
@@ -74,11 +77,7 @@ Socket::~Socket()
 
 bool Socket::wait(chrono::microseconds timeout)
 {
-#ifdef _WIN32
-    int nfds = 0;
-#else
-    int nfds = sock_ + 1;
-#endif
+    int nfds = static_cast<int>(sock_) + 1;
 
     fd_set readfds;
     FD_ZERO(&readfds);
@@ -90,17 +89,12 @@ bool Socket::wait(chrono::microseconds timeout)
 
     int ret = select(nfds, &readfds, nullptr, nullptr, &tv);
 
-    if(ret == 1)
+    if(ret == kSocketError)
     {
-        return true; // our single fd is available
+        throw runtime_error("select failed");
     }
 
-    if(ret == 0)
-    {
-        return false; // timed out
-    }
-
-    throw runtime_error("select failed");
+    return ret == 1;
 }
 
 void Socket::read(Packet& packet)
@@ -115,17 +109,14 @@ void Socket::read(Packet& packet)
         reinterpret_cast<sockaddr*>(&from),
         &fromLen);
 
-    if(recvLen < 0)
+    if(recvLen == kSocketError)
     {
-#ifdef _WIN32
-        if(WSAGetLastError() == WSAEWOULDBLOCK)
-#else
-        if(errno == EAGAIN || errno == EWOULDBLOCK)
-#endif
+        if(wouldBlock())
         {
             packet.remoteIp = 0;
             packet.remotePort = 0;
             packet.size = 0;
+
             return;
         }
 
@@ -154,8 +145,26 @@ void Socket::write(const Packet& packet)
         reinterpret_cast<sockaddr*>(&to),
         sizeof(to));
 
-    if(sendLen < 0 || static_cast<size_t>(sendLen) != packet.size)
+    if(sendLen == kSocketError)
     {
+        // this should only happen if we somehow fill up the the os's buffers (e.g. never)
+        // we'll just wait until the fd is writable
+        if(wouldBlock())
+        {
+            int nfds = static_cast<int>(sock_) + 1;
+
+            fd_set writefds;
+            FD_ZERO(&writefds);
+            FD_SET(sock_, &writefds);
+
+            if(select(nfds, nullptr, &writefds, nullptr, nullptr) != 1)
+            {
+                throw runtime_error("select failed");
+            }
+
+            return write(packet);
+        }
+
         throw runtime_error("sendto failed");
     }
 }
