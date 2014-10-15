@@ -19,6 +19,7 @@
 #ifdef _WIN32
 #include <ws2tcpip.h>
 #else
+#include <fcntl.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
