@@ -64,48 +64,20 @@ void SessionManager::run()
 
     while(!done_)
     {
-        setReadTimeout();
-
-        Packet packet;
-
+        if(socket_.wait(getReadTimeout()))
         {
-            unlock_guard<mutex> unlock(mutex_);
+            Packet packet;
             socket_.read(packet);
-        }
 
-        if(packet.size != 0)
-        {
-            handle(packet);
+            while(packet.size != 0)
+            {
+                handle(packet);
+                socket_.read(packet);
+            }
         }
 
         tick();
     }
-}
-
-void SessionManager::setReadTimeout()
-{
-    net_time_point now = net_clock::now();
-    net_time_point nextTick = net_time_point::max();
-
-    for(unique_ptr<Session>& session : sessions_)
-    {
-        nextTick = min(nextTick, session->nextTick());
-    }
-
-    chrono::microseconds timeout;
-
-    if(nextTick <= now)
-    {
-        // don't use a negative or zero or timeout, which means "wait forever"
-        timeout = chrono::microseconds(1);
-    }
-    else
-    {
-        // don't use a timeout bigger than kMaxTimeout, so we keep checking values of done_
-        timeout = min(chrono::duration_cast<chrono::microseconds>(nextTick - now), kMaxTimeout);
-    }
-
-    socket_.setReadTimeout(timeout);
 }
 
 void SessionManager::handle(const Packet& packet)
@@ -140,4 +112,30 @@ void SessionManager::tick()
             ++it;
         }
     }
+}
+
+chrono::microseconds SessionManager::getReadTimeout() const
+{
+    net_time_point now = net_clock::now();
+    net_time_point nextTick = net_time_point::max();
+
+    for(const unique_ptr<Session>& session : sessions_)
+    {
+        nextTick = min(nextTick, session->nextTick());
+    }
+
+    chrono::microseconds timeout;
+
+    if(nextTick <= now)
+    {
+        // don't use a negative or zero or timeout, which means "wait forever"
+        timeout = chrono::microseconds(1);
+    }
+    else
+    {
+        // don't use a timeout bigger than kMaxTimeout, so we keep checking values of done_
+        timeout = min(chrono::duration_cast<chrono::microseconds>(nextTick - now), kMaxTimeout);
+    }
+
+    return timeout;
 }

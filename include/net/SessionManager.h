@@ -33,9 +33,10 @@ public:
 
 private:
     void run();
-    void setReadTimeout();
     void handle(const Packet& packet);
     void tick();
+
+    chrono::microseconds getReadTimeout() const;
 
     mutex mutex_; // protects all class variables
     bool done_;

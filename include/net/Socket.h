@@ -47,7 +47,7 @@ public:
     Socket();
     ~Socket();
 
-    void setReadTimeout(chrono::microseconds timeout);
+    bool wait(chrono::microseconds timeout);
     void read(Packet& packet);
     void write(const Packet& packet);
 

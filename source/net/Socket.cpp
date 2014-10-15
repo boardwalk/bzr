@@ -53,6 +53,17 @@ Socket::Socket()
     {
         throw runtime_error("Failed to bind socket");
     }
+
+#ifdef _WIN32
+    u_long nonblock = 1;
+    if(ioctlsocket(sock_, FIONBIO, &nonblock) != 0)
+#else
+    int flags = fcntl(sock_, F_GETFL);
+    if(fcntl(sock_, F_SETFL, flags | O_NONBLOCK) != 0)
+#endif
+    {
+        throw runtime_error("Failed to set nonblocking mode");
+    }
 }
 
 Socket::~Socket()
@@ -60,22 +71,35 @@ Socket::~Socket()
     CLOSE_SOCKET(sock_);
 }
 
-void Socket::setReadTimeout(chrono::microseconds timeout)
+bool Socket::wait(chrono::microseconds timeout)
 {
-    timeout = min(timeout, chrono::microseconds(0));
-
 #ifdef _WIN32
-    DWORD optval = static_cast<DWORD>(timeout.count() / 1000);
+    int nfds = 0;
 #else
-    timeval optval;
-    optval.tv_sec = static_cast<long>(timeout.count() / 1000000);
-    optval.tv_usec = static_cast<long>(timeout.count() % 1000000);
+    int nfds = sock_ + 1;
 #endif
 
-    if(setsockopt(sock_, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast<char*>(&optval), sizeof(optval)) != 0)
+    fd_set readfds;
+    FD_ZERO(&readfds);
+    FD_SET(sock_, &readfds);
+
+    timeval tv;
+    tv.tv_sec = static_cast<long>(timeout.count() / 1000000);
+    tv.tv_usec = static_cast<long>(timeout.count() % 1000000);
+
+    int ret = select(nfds, &readfds, nullptr, nullptr, &tv);
+
+    if(ret == 1)
     {
-        throw runtime_error("Failed to set receive timeout");
+        return true; // our single fd is available
     }
+
+    if(ret == 0)
+    {
+        return false; // timed out
+    }
+
+    throw runtime_error("select failed");
 }
 
 void Socket::read(Packet& packet)
@@ -93,7 +117,7 @@ void Socket::read(Packet& packet)
     if(recvLen < 0)
     {
 #ifdef _WIN32
-        if(WSAGetLastError() == WSAETIMEDOUT)
+        if(WSAGetLastError() == WSAEWOULDBLOCK)
 #else
         if(errno == EAGAIN || errno == EWOULDBLOCK)
 #endif
