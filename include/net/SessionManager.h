@@ -15,44 +15,33 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_NET_SOCKET_H
-#define BZR_NET_SOCKET_H
+#ifndef BZR_NET_SESSIONMANAGER_H
+#define BZR_NET_SESSIONMANAGER_H
 
-#include "Noncopyable.h"
-#ifdef _WIN32
-#include <winsock2.h>
-#endif
-#include <array>
-#include <chrono>
+#include "net/Session.h"
+#include "net/Socket.h"
+#include <mutex>
+#include <thread>
 
-const size_t kDatagramMaxSize = 512;
-
-#ifdef _WIN32
-typedef SOCKET SocketType;
-#else
-typedef int SocketType;
-#endif
-
-struct Packet
-{
-    uint32_t remoteIp;
-    uint16_t remotePort;
-    size_t size;
-    array<uint8_t, kDatagramMaxSize> data;
-};
-
-class Socket : Noncopyable
+class SessionManager : Noncopyable
 {
 public:
-    Socket();
-    ~Socket();
+    SessionManager();
 
-    void setReadTimeout(chrono::microseconds timeout);
-    void read(Packet& packet);
-    void write(const Packet& packet);
+    void add(unique_ptr<Session> session);
+    void stop();
 
 private:
-    SocketType sock_;
+    void run();
+    void setReadTimeout();
+    void handle(const Packet& packet);
+    void tick();
+
+    mutex mutex_; // protects all class variables
+    bool done_;
+    Socket socket_;
+    vector<unique_ptr<Session>> sessions_;
+    thread thread_;
 };
 
 #endif

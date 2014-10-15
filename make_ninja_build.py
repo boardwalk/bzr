@@ -74,7 +74,7 @@ def main():
         n.variable('builddir', 'build')
 
         if sys.platform == 'win32':
-            cppflags = '/nologo /EHsc /Iinclude /Ibuild /D_CRT_SECURE_NO_WARNINGS'
+            cppflags = '/nologo /EHsc /Iinclude /Ibuild /D_CRT_SECURE_NO_WARNINGS /DNOMINMAX'
             cxxflags = '/FIbasic.h /W4 /WX'
             cflags = ''
             linkflags = '/nologo ws2_32.lib'

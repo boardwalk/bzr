@@ -15,44 +15,30 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_NET_SOCKET_H
-#define BZR_NET_SOCKET_H
+#include "net/Session.h"
 
-#include "Noncopyable.h"
-#ifdef _WIN32
-#include <winsock2.h>
-#endif
-#include <array>
-#include <chrono>
+void Session::handle(const Packet&)
+{}
 
-const size_t kDatagramMaxSize = 512;
+void Session::tick(net_time_point /*now*/)
+{}
 
-#ifdef _WIN32
-typedef SOCKET SocketType;
-#else
-typedef int SocketType;
-#endif
-
-struct Packet
+uint32_t Session::remoteIp() const
 {
-    uint32_t remoteIp;
-    uint16_t remotePort;
-    size_t size;
-    array<uint8_t, kDatagramMaxSize> data;
-};
+    return 0;
+}
 
-class Socket : Noncopyable
+uint16_t Session::remotePort() const
 {
-public:
-    Socket();
-    ~Socket();
+    return 0;
+}
 
-    void setReadTimeout(chrono::microseconds timeout);
-    void read(Packet& packet);
-    void write(const Packet& packet);
+bool Session::dead() const
+{
+    return false;
+}
 
-private:
-    SocketType sock_;
-};
-
-#endif
+net_time_point Session::nextTick() const
+{
+    return net_time_point::max();
+}
