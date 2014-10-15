@@ -64,7 +64,14 @@ void SessionManager::run()
 
     while(!done_)
     {
-        if(socket_.wait(getReadTimeout()))
+        bool readable;
+
+        {
+            unlock_guard<mutex> unlock(mutex_);
+            readable = socket_.wait(getReadTimeout());
+        }
+
+        if(readable)
         {
             Packet packet;
             socket_.read(packet);
