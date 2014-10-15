@@ -21,11 +21,16 @@
 #include "Noncopyable.h"
 #ifdef _WIN32
 #include <winsock2.h>
-#include <ws2tcpip.h>
 #endif
 #include <array>
 
 const size_t kDatagramMaxSize = 512;
+
+#ifdef _WIN32
+typedef SOCKET SocketType;
+#else
+typedef int SocketType;
+#endif
 
 struct Packet
 {
@@ -45,11 +50,7 @@ public:
     void write(const Packet& packet);
 
 private:
-#ifdef _WIN32
-    SOCKET sock_;
-#else
-    int fd_;
-#endif
+    SocketType sock_;
 };
 
 #endif
