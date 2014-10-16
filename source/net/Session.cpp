@@ -16,6 +16,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "net/Session.h"
+#include "net/Socket.h"
+#include "BinWriter.h"
+
+enum PacketFlags
+{
+    kLogon = 0x00010000
+};
+
+PACK(struct PacketHeader {
+    uint32_t sequence;
+    uint32_t flags;
+    uint32_t checksum;
+    uint16_t endpoint;
+    uint16_t time;
+    uint16_t size;
+    uint16_t session;
+});
 
 void Session::handle(const Packet&)
 {}
@@ -41,4 +58,25 @@ bool Session::dead() const
 net_time_point Session::nextTick() const
 {
     return net_time_point::max();
+}
+
+void Session::sendLogon(const string& name, const string& key)
+{
+    Packet packet;
+
+    BinWriter writer(packet.data.data(), packet.data.size());
+
+    writer.skip(sizeof(PacketHeader));
+
+    PacketHeader header;
+    header.sequence = 0;
+    header.flags = PacketFlags::kLogon;
+    //header.checksum
+    header.endpoint = 0;
+    header.time = 0;
+    header.size = packet.data.size() - writer.remaining();
+    header.session = 0;
+
+    writer.seek(0);
+    writer.writeRaw(&header, sizeof(header));
 }

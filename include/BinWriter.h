@@ -15,29 +15,37 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_NET_SESSION_H
-#define BZR_NET_SESSION_H
+#ifndef BZR_BINWRITER_H
+#define BZR_BINWRITER_H
 
-#include <chrono>
+#include "Noncopyable.h"
 
-typedef chrono::high_resolution_clock net_clock;
-typedef net_clock::time_point net_time_point;
-
-struct Packet;
-
-class Session
+class BinWriter : Noncopyable
 {
 public:
-    void handle(const Packet& packet);
-    void tick(net_time_point now);
+    BinWriter(void* data, size_t size);
 
-    uint32_t remoteIp() const;
-    uint16_t remotePort() const;
-    bool dead() const;
-    net_time_point nextTick() const;
-    
+    void writeRaw(const void* data, size_t size);
+    void writeByte(uint8_t value);
+    void writeShort(uint16_t value);
+    void writeInt(uint32_t value);
+    void writeLong(uint64_t value);
+    void writeFloat(float value);
+    void writeDouble(double value);
+    //void writePackedShort(uint16_t value);
+    //void writePackedInt(uint32_t value);
+    //void writeString(const string& value);
+
+    void skip(size_t amount);
+    void seek(size_t position);
+    //void align();
+
+    size_t remaining() const;
+
 private:
-    void sendLogon(const string& name, const string& key);
+    void* const data_;
+    const size_t size_;
+    size_t position_;
 };
 
 #endif
