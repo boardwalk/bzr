@@ -131,18 +131,12 @@ chrono::microseconds SessionManager::getReadTimeout() const
         nextTick = min(nextTick, session->nextTick());
     }
 
-    chrono::microseconds timeout;
-
     if(nextTick <= now)
     {
         // don't use a negative or zero or timeout, which means "wait forever"
-        timeout = chrono::microseconds(1);
-    }
-    else
-    {
-        // don't use a timeout bigger than kMaxTimeout, so we keep checking values of done_
-        timeout = min(chrono::duration_cast<chrono::microseconds>(nextTick - now), kMaxTimeout);
+        return chrono::microseconds(1);
     }
 
-    return timeout;
+    // don't use a timeout bigger than kMaxTimeout, so we keep checking values of done_
+    return min(chrono::duration_cast<chrono::microseconds>(nextTick - now), kMaxTimeout);
 }
