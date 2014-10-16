@@ -23,8 +23,8 @@ class BinReader;
 struct CylSphere
 {
     glm::vec3 lowPoint;
-    float radius;
-    float height;
+    fp_t radius;
+    fp_t height;
 };
 
 void read(BinReader& reader, CylSphere& cylSphere);
