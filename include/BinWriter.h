@@ -34,12 +34,13 @@ public:
     void writeDouble(double value);
     //void writePackedShort(uint16_t value);
     //void writePackedInt(uint32_t value);
-    //void writeString(const string& value);
+    void writeString(const string& value);
 
     void skip(size_t amount);
     void seek(size_t position);
-    //void align();
+    void align();
 
+    size_t position() const;
     size_t remaining() const;
 
 private:

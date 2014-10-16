@@ -38,6 +38,7 @@ public:
 
     void align();
 
+    size_t position() const;
     size_t remaining() const;
 
 private:

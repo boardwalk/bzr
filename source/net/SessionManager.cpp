@@ -91,7 +91,7 @@ void SessionManager::handle(const Packet& packet)
 {
     for(unique_ptr<Session>& session : sessions_)
     {
-        if(session->remoteIp() == packet.remoteIp && session->remotePort() == packet.remotePort)
+        if(session->serverIp() == packet.remoteIp && session->serverPort() == packet.remotePort)
         {
             session->handle(packet);
             return;
@@ -99,7 +99,7 @@ void SessionManager::handle(const Packet& packet)
     }
 
     // TODO proper logging
-    printf("WARNING: dropped packet from %08x:%d\n", packet.remoteIp, packet.remotePort);
+    fprintf(stderr, "WARNING: dropped packet from %08x:%d\n", packet.remoteIp, packet.remotePort);
 }
 
 void SessionManager::tick()

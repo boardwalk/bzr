@@ -66,6 +66,22 @@ void BinWriter::writeDouble(double value)
     writePrimitive(*this, value);
 }
 
+void BinWriter::writeString(const string& value)
+{
+    if(value.size() >= 0xFFFF)
+    {
+        writeShort(0xFFFF);
+        writeInt(static_cast<uint32_t>(value.size()));
+    }
+    else
+    {
+        writeShort(static_cast<uint16_t>(value.size()));
+    }
+
+    writeRaw(value.data(), value.size());
+    align();
+}
+
 void BinWriter::skip(size_t amount)
 {
     assert(amount <= remaining());
@@ -78,6 +94,16 @@ void BinWriter::seek(size_t position)
     assert(position <= size_);
 
     position_ = position;
+}
+
+void BinWriter::align()
+{
+    position_ = (position_ + 3) & ~3;
+}
+
+size_t BinWriter::position() const
+{
+    return position_;
 }
 
 size_t BinWriter::remaining() const

@@ -102,6 +102,11 @@ void BinReader::align()
     position_ = (position_ + 3) & ~3;
 }
 
+size_t BinReader::position() const
+{
+    return position_;
+}
+
 size_t BinReader::remaining() const
 {
     return size_ - position_;
