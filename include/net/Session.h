@@ -18,20 +18,29 @@
 #ifndef BZR_NET_SESSION_H
 #define BZR_NET_SESSION_H
 
-#include "ChecksumXorGenerator.h"
+#include "net/ChecksumXorGenerator.h"
 #include <chrono>
-#include <unordered_map>
+#include <map>
 
 typedef chrono::high_resolution_clock net_clock;
 typedef net_clock::time_point net_time_point;
 
+class BinReader;
 struct Packet;
 struct PacketHeader;
 
 class Session
 {
 public:
-    Session(uint32_t ip, uint16_t port);
+    Session(SessionManager& manager,
+        uint32_t serverIp,
+        uint16_t serverPort,
+        const string& accountName,
+        const string& accountKey);
+    Session(SessionManager& manager,
+        uint32_t serverIp,
+        uint16_t serverPort,
+        uint64_t cookie);
 
     void handle(const Packet& packet);
     void tick(net_time_point now);
@@ -46,16 +55,44 @@ private:
     void sendConnectResponse(uint64_t cookie);
     void send(const Packet& packet);
 
+    void handleBlobFragments(const PacketHeader* header, BinReader& reader);
     void handleServerSwitch(const PacketHeader* header, BinReader& reader);
-    void handleReferral(const PacketHeader* header, BinReader& reader);
+    void handleRequestRetransmit(const PacketHeader* header, BinReader& reader);
+    void handleRejectRetransmit(const PacketHeader* header, BinReader& reader);
+    void handleAckSequence(const PacketHeader* header, BinReader& reader);
+    void handleReferral(const PacketHeader* header, BinReader& reader);    
     void handleConnect(const PacketHeader* header, BinReader& reader);
+    void handleTimeSync(const PacketHeader* header, BinReader& reader);
+    void handleEchoResponse(const PacketHeader* header, BinReader& reader);
+    void handleFlow(const PacketHeader* header, BinReader& reader);
 
+    void advanceServerSequence();
+    
+    enum class State
+    {
+        kLogon,
+        kReferred,
+        kConnectResponse,
+        kConnected
+    };
+
+    SessionManager& manager_;
     const uint32_t serverIp_;
     const uint16_t serverPort_;
+    State state_;
 
-    uint32_t serverNextSequence_; // the sequence of the next packet we will process from the server
-    uint32_t clientNextSequence_; // the sequence of the next packet we will send to the server
-    uint32_t clientMinSequence_; // the sequence of the latest packet the server has acked
+    // for State::kLogon
+    string accountName_;
+    string accountKey_;
+
+    // for State::kReferred and State::kConnect
+    uint64_t cookie_;
+
+    net_time_point nextPeriodic_;
+
+    uint32_t serverSequence_;
+    uint32_t clientSequence_;
+    uint32_t clientLeadingSequence_;
     uint16_t serverNetId_;
     uint16_t clientNetId_;
     uint16_t iteration_;
@@ -63,8 +100,11 @@ private:
     ChecksumXorGenerator serverXorGen_;
     ChecksumXorGenerator clientXorGen_;
 
-    unordered_map<uint32_t, unique_ptr<Packet>> serverPackets_; // contains packets with sequence > serverNextSequence
-    unordered_map<uint32_t, unique_ptr<Packet>> clientPackets_; // contains packets with sequence > clientMinSequence
+    double beginTime_;
+    net_time_point beginLocalTime_;
+
+    map<uint32_t, bool> serverPackets_;
+    map<uint32_t, unique_ptr<Packet>> clientPackets_;
 };
 
 #endif

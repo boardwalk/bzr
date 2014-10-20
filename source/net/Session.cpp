@@ -20,19 +20,6 @@
 #include "BinReader.h"
 #include "BinWriter.h"
 
-enum OptionalHeaderFlags
-{
-    kDisposable      = 0x00000001,
-    kExclusive       = 0x00000002,
-    kNotConn         = 0x00000004,
-    kTimeSensitive   = 0x00000008,
-    kShouldPiggyBack = 0x00000010,
-    kHighPriority    = 0x00000020,
-    kCountsAsTouch   = 0x00000040,
-    kEncrypted       = 0x20000000,
-    kSigned          = 0x40000000
-};
-
 enum PacketFlags
 {
     kRetransmission    = 0x00000001,
@@ -76,6 +63,9 @@ PACK(struct BlobHeader {
     uint16_t index;
     uint16_t queueId;
 });
+
+static chrono::milliseconds kLogonPacketDelay(300);
+static chrono::milliseconds kReferredPacketDelay(300);
 
 static uint32_t checksum(const void* data, size_t size)
 {
@@ -190,8 +180,33 @@ static uint32_t checksumPacket(const Packet& packet, ChecksumXorGenerator& xorGe
     return checksumHeader(header) + checksumContent(header, data) ^ xorVal;
 }
 
-Session::Session(uint32_t serverIp, uint16_t serverPort) : serverIp_(serverIp), serverPort_(serverPort)
-{}
+Session::Session(SessionManager& manager,
+    uint32_t serverIp,
+    uint16_t serverPort,
+    const string& accountName,
+    const string& accountKey) :
+    manager_(manager),
+    serverIp_(serverIp),
+    serverPort_(serverPort),
+    state_(State::kLogon),
+    accountName_(accountName),
+    accountKey_(accountKey)
+{
+    sendLogon();
+}
+
+Session::Session(SessionManager& manager,
+    uint32_t serverIp,
+    uint16_t serverPort,
+    uint64_t cookie) :
+    manager_(manager),
+    serverIp_(serverIp),
+    serverPort_(serverPort),
+    state_(State::kReferred),
+    cookie_(cookie)
+{
+    sendReferred();
+}
 
 void Session::handle(const Packet& packet)
 {
@@ -235,37 +250,43 @@ void Session::handle(const Packet& packet)
         if(flags & kRequestRetransmit)
         {
             handleRequestRetransmit(header, reader);
-            flags & ~kRequestRetransmit;
+            flags &= ~kRequestRetransmit;
         }
 
         if(flags & kRejectRetransmit)
         {
             handleRejectRetransmit(header, reader);
-            flags & ~kRejectRetransmit;
+            flags &= ~kRejectRetransmit;
         }
 
         if(flags & kAckSequence)
         {
             handleAckSequence(header, reader);
-            flags & ~kAckSequence;
+            flags &= ~kAckSequence;
         }
 
         if(flags & kTimeSync)
         {
             handleTimeSync(header, reader);
-            flags & ~kTimeSync;
+            flags &= ~kTimeSync;
         }
 
         if(flags & kEchoResponse)
         {
             handleEchoResponse(header, reader);
-            flags & ~kEchoResponse;
+            flags &= ~kEchoResponse;
+        }
+
+        if(flags & kFlow)
+        {
+            handleFlow(header, reader);
+            flags &= ~kFlow;
         }
 
         if(flags & kBlobFragments)
         {
-            handleBlobFragments(header, reader)
-            flags & ~kBlobFragments;
+            handleBlobFragments(header, reader);
+            flags &= ~kBlobFragments;
         }
 
         if(flags != 0)
@@ -273,19 +294,39 @@ void Session::handle(const Packet& packet)
             throw runtime_error("extra flags in packet header");
         }
     }
+
+    assert(reader.remaining() == 0);
 }
 
-void Session::tick(net_time_point /*now*/)
-{}
+void Session::tick(net_time_point now)
+{
+    if(nextPeriodic_ > now)
+    {
+        return;
+    }
+
+    if(state_ == State::kLogon)
+    {
+        sendLogon();
+    }
+    else if(state_ == State::kReferred)
+    {
+        sendReferred();
+    }
+    else if(state_ == State::kConnect)
+    {
+        sendConnectResponse();
+    }
+}
 
 uint32_t Session::serverIp() const
 {
     return serverIp_;
 }
 
-uint16_t Session::remotePort() const
+uint16_t Session::serverPort() const
 {
-    return serverPort_ + (connected_ ? 1 : 0);
+    return serverPort_ + (_state == State::kConnectResponse || _state == State::kConnected) ? 1 : 0;
 }
 
 bool Session::dead() const
@@ -295,14 +336,17 @@ bool Session::dead() const
 
 net_time_point Session::nextTick() const
 {
-    return net_time_point::max();
+    return nextPeriodic_;
 }
 
-void Session::sendLogon(const string& name, const void* key, size_t keyLen)
+void Session::sendLogon()
 {
+    assert(state_ == State::kLogon);
+
     Packet packet;
     BinWriter writer(packet.data.data(), packet.data.size());
 
+    // construct packet
     size_t headerOff = writer.position();
     writer.skip(sizeof(PacketHeader));
     writer.writeString("1802"); // NetVersion
@@ -311,14 +355,12 @@ void Session::sendLogon(const string& name, const void* key, size_t keyLen)
     writer.writeInt(0x40000002); // GLSUserNameTicket_NetAuthType
     writer.writeInt(0);
     writer.writeInt(static_cast<uint32_t>(time(NULL)));
-    writer.writeString(name);
+    writer.writeString(accountName_);
     writer.writeInt(0);
-    writer.writeInt(static_cast<uint32_t>(keyLen));
-    writer.writeRaw(key, keyLen);
+    writer.writeInt(static_cast<uint32_t>(accountKey_.size()));
+    writer.writeRaw(accountKey.data(), accountKey.size());
 
-    packet.size = writer.position();
-
-    /// fill in auth data len
+    // fill in auth data len
     writer.seek(authDataLenOff);
     writer.writeInt(static_cast<uint32_t>(packet.size - writer.position()));
 
@@ -337,70 +379,219 @@ void Session::sendLogon(const string& name, const void* key, size_t keyLen)
     writer.seek(headerOff);
     writer.writeRaw(&header, sizeof(header));
 
-    send(packet);
+    // send packet
+    _manager.send(packet);
+    lastPeriodic_ = net_clock::now();
+}
+
+void Session::sendReferred()
+{
+    assert(state_ == State::kReferred);
+
+    Packet packet;
+    BinWriter writer(packet.data.data(), packet.data.size());
+
+    // construct packet
+    PacketHeader header;
+    memset(&header, 0, sizeof(header));
+    header.flags = kReferred;
+    header.size = sizeof(uint64_t);
+
+    writer.writeRaw(&header, sizeof(header));
+    writer.writeLong(cookie_);
+
+    // calc checksum and rewrite header
+    header.checksum = checksumPacket(packet, clientXorGen_);
+
+    writer.seek(0);
+    writer.writeRaw(&header, sizeof(header));
+
+    // send packet
+    manager_.send(packet);
+    lastPeriodic_ = net_clock::now();
 }
 
 void Session::sendConnectResponse(uint64_t cookie)
 {
+    assert(state_ == State::kConnectResponse);
+
     Packet packet;
     BinWriter writer(packet.data.data(), packet.data.size());
 
+    // construct packet
     PacketHeader header;
-    header.sequence = 0;
+    memset(&header, 0, sizeof(header));
     header.flags = kConnectResponse;
-    header.checksum = 0;
     header.netId = clientNetId_;
-    header.time = 0;
     header.size = sizeof(uint64_t);
     header.iteration = iteration_;
 
-    size_t headerOff = writer.position();
     writer.writeRaw(&header, sizeof(header));
     writer.writeLong(cookie);
 
     // calc checksum and rewrite header
     header.checksum = checksumPacket(packet, clientXorGen_);
 
-    writer.seek(headerOff);
+    writer.seek(0);
     writer.writeRaw(&header, sizeof(header));
 
-    send(packet);
+    // send packet
+    manager_.send(packet);
+    lastPeriodic_ = net_clock::now();
 }
 
-void Session::send(const Packet& /*packet*/)
+void Session::handleBlobFragments(const PacketHeader* header, BinReader& reader)
 {}
 
 void Session::handleServerSwitch(const PacketHeader* header, BinReader& reader)
 {
-    // TODO make ourselves the primary session in the session manager
+    reader.readRaw(8);
+    manager_.makePrimary(*this);
+}
+
+void Session::handleRequestRetransmit(const PacketHeader* header, BinReader& reader)
+{
+    uint32_t numSequence = reader.readInt();
+
+    for(uint32_t i = 0; i < numSequence; i++)
+    {
+        uint32_t sequence = reader.readInt();
+
+        auto it = clientPackets_.find(sequence);
+
+        if(it == clientPackets_.end())
+        {
+            throw runtime_error("Server requested packet that does not exist");
+        }
+
+        send(*it->second);
+    }
+}
+
+void Session::handleRejectRetransmit(const PacketHeader* header, BinReader& reader)
+{
+    uint32_t numSequence = reader.readInt();
+
+    for(uint32_t i = 0; i < numSequence; i++)
+    {
+        uint32_t sequence = reader.readInt();
+
+        if(sequence < serverSequence_)
+        {
+            // don't care!
+            continue;
+        }
+
+        serverPackets_[sequence] = true;
+    }
+
+    advanceServerSequence();
+}
+
+void Session::handleAckSequence(const PacketHeader* header, BinReader& reader)
+{
+    clientSequence_ = max(clientSequence_, reader.readInt());
+
+    for(auto it = clientPackets_.begin(); it != clientPackets_.end(); /**/)
+    {
+        if(it->first > sequence)
+        {
+            break;
+        }
+
+        it = clientPackets_.erase(it);
+    }
 }
 
 void Session::handleReferral(const PacketHeader* header, BinReader& reader)
 {
-    // TODO add a session to the session manager and send a referred packet with the token
+    uint64_t cookie = reader.readLong();
+    uint16_t family = reader.readShort();
+    uint16_t serverPort = htons(reader.readShort());
+    uint32_t serverIp = htonl(reader.readInt());
+    reader.readRaw(8);
+
+    if(manager_.exists(serverIp, serverPort))
+    {
+        return;
+    }
+
+    unique_ptr<Session> session(new Session(
+        manager_,
+        serverPort,
+        serverIp,
+        serverPort,
+        cookie));
+
+    manager_.add(move(session));
 }
 
 void Session::handleConnect(const PacketHeader* header, BinReader& reader)
 {
-    serverSequence_ = 2;
-    clientSequence_ = 2;
-    serverNetId_ = header->netId;
-    iteration_ = header->iteration;
+    if(state_ != State::kLogon && state_ != State::kReferred)
+    {
+        throw runtime_error("Connect received in wrong state");
+    }
 
-    beginTime_ = reader.readDouble();
+    double beginTime = reader.readDouble();
     uint16_t cookie = reader.readLong();
-    clientNetId_ = static_cast<uint16_t>(header->readInt());
-    serverXorGen_.init(reader.readInt());
-    clientXorGen_.init(reader.readInt());
-
+    uint16_t clientNetId = static_cast<uint16_t>(reader.readInt());
+    uint32_t serverSeed = reader.readInt();
+    uint32_t clientSeed = reader.readInt();
     reader.readInt(); // padding
 
-    assert(reader.remaining() == 0);
+    state_ = State::kConnectResponse;
+    serverSequence_ = 2;
+    clientSequence_ = 2;
+    clientLeadingSequence_ = 2;
+    serverNetId_ = header->netId;
+    clientNetId_ = clientNetId;
+    iteration_ = header->iteration;
 
-    serverPort_++;
+    serverXorGen_.init(serverSeed);
+    clientXorGen_.init(clientSeed);
 
-    // TODO we need to send this multiple times
-    // Looks like one every 0.3 seconds
-    // How many times?
-    sendConnectReply(cookie);
+    beginTime_ = beginTime;
+    beginLocalTime_ = net_clock::now();
+
+    serverPackets_.clear();
+    clientPackets_.clear();
+
+    sendConnectResponse(cookie);
+}
+
+void Session::handleTimeSync(const PacketHeader* header, BinReader& reader)
+{
+    beginTime_ = reader.readDouble();
+    beginLocalTime_ = net_clock::now();
+}
+
+void Session::handleEchoResponse(const PacketHeader* header, BinReader& reader)
+{
+    // Ignored for now
+    /*pingTime*/ reader.readFloat();
+    /*pingResult*/ reader.readFloat();
+}
+
+void Session::handleFlow(const PacketHeader* header, BinReader& reader)
+{
+    // Ignored for now
+    /*numBytes*/ reader.readInt();
+    /*time*/ reader.readShort();
+}
+
+void Session::advanceServerSequence()
+{
+    auto it = serverPackets_.begin();
+
+    while(it != serverPackets_.end())
+    {
+        if(it->first != serverSequence_)
+        {
+            break;
+        }
+
+        it = serverPackets_.erase(it);
+        serverSequence_++;
+    }
 }
