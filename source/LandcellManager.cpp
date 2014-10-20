@@ -20,6 +20,7 @@
 #include "Config.h"
 #include "DatFile.h"
 #include "Land.h"
+#include "Log.h"
 #include "Structure.h"
 
 LandcellManager::LandcellManager()
@@ -31,7 +32,7 @@ void LandcellManager::setCenter(LandcellId c)
 {
     if(c != center_)
     {
-        printf("new center: %02x %02x\n", c.x(), c.y());
+        LOG(Info) << "LandcellManager::setCenter(): new center=" << hexn(c.x()) << ", " << hexn(c.y()) << "\n";
         center_ = c;
         load();
     }

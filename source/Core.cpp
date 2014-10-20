@@ -25,6 +25,7 @@
 #include "DatFile.h"
 #include "Land.h"
 #include "LandcellManager.h"
+#include "Log.h"
 #include "ObjectManager.h"
 #include "ResourceCache.h"
 #include "util.h"
@@ -50,6 +51,11 @@ Core& Core::get()
 Config& Core::config()
 {
     return *config_;
+}
+
+Log& Core::log()
+{
+    return *log_;
 }
 
 DatFile& Core::portalDat()
@@ -124,6 +130,7 @@ void Core::init()
     }
 
     config_.reset(new Config{});
+    log_.reset(new Log{});
     portalDat_.reset(new DatFile{"data/client_portal.dat"});
     cellDat_.reset(new DatFile{"data/client_cell_1.dat"});
     highresDat_.reset(new DatFile{"data/client_highres.dat"});
@@ -174,6 +181,7 @@ void Core::cleanup()
     portalDat_.reset();
     cellDat_.reset();
     highresDat_.reset();
+    log_.reset();
     config_.reset();
 
     SDL_Quit();
@@ -275,7 +283,7 @@ void Core::handleEvents()
 #ifndef HEADLESS
     if(newModel)
     {
-        printf("Loading model %08x\n", modelId_);
+        LOG(Info) << "Core::handleEvents: loading model " << hexn(modelId_) << "\n";
 
         Object& object = (*objectManager_)[ObjectId{1}];
 

@@ -25,6 +25,7 @@ class Camera;
 class Config;
 class DatFile;
 class LandcellManager;
+class Log;
 class ObjectManager;
 struct Region;
 class Renderer;
@@ -37,6 +38,7 @@ public:
     static Core& get();
 
     Config& config();
+    Log& log();
     DatFile& portalDat();
     DatFile& cellDat();
     DatFile& highresDat();
@@ -63,6 +65,7 @@ private:
 
     bool done_;
     unique_ptr<Config> config_;
+    unique_ptr<Log> log_;
     unique_ptr<DatFile> portalDat_;
     unique_ptr<DatFile> cellDat_;
     unique_ptr<DatFile> highresDat_;
