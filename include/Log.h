@@ -38,7 +38,7 @@ class Log : Noncopyable
 {
 public:
     Log();
-    ostream& createEntry(LogSeverity sev);
+    ostream& write(LogSeverity sev);
 
 private:
     ostream* os_;
@@ -46,6 +46,6 @@ private:
     int verbosity_;
 };
 
-#define LOG(sev) Core::get().log().createEntry(LogSeverity::k##sev)
+#define LOG(sev) Core::get().log().write(LogSeverity::k##sev)
 
 #endif

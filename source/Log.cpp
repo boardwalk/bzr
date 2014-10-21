@@ -72,7 +72,7 @@ Log::Log()
     }
     if(output == "stderr")
     {
-        os_  = &cerr;
+        os_ = &cerr;
     }
     else
     {
@@ -89,7 +89,7 @@ Log::Log()
     verbosity_ = Core::get().config().getInt("Log.verbosity", static_cast<int>(LogSeverity::kWarn));
 }
 
-ostream& Log::createEntry(LogSeverity sev)
+ostream& Log::write(LogSeverity sev)
 {
     if(static_cast<int>(sev) < verbosity_)
     {
