@@ -98,7 +98,7 @@ bool Socket::wait(chrono::microseconds timeout)
     return ret == 1;
 }
 
-void Socket::read(Packet& packet)
+void Socket::recv(Packet& packet)
 {
     sockaddr_in from;
     socklen_t fromLen = sizeof(from);
@@ -129,7 +129,7 @@ void Socket::read(Packet& packet)
     packet.size = recvLen;
 }
 
-void Socket::write(const Packet& packet)
+void Socket::send(const Packet& packet)
 {
     assert(packet.size < packet.data.size());
 
@@ -163,7 +163,7 @@ void Socket::write(const Packet& packet)
                 throw runtime_error("select failed");
             }
 
-            return write(packet);
+            return send(packet);
         }
 
         throw runtime_error("sendto failed");

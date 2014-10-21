@@ -48,8 +48,8 @@ public:
     ~Socket();
 
     bool wait(chrono::microseconds timeout);
-    void read(Packet& packet);
-    void write(const Packet& packet);
+    void recv(Packet& packet);
+    void send(const Packet& packet);
 
 private:
     SocketType sock_;

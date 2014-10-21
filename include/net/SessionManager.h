@@ -28,8 +28,15 @@ class SessionManager : Noncopyable
 public:
     SessionManager();
 
-    void add(unique_ptr<Session> session);
+    // for external use
+    void addLocked(unique_ptr<Session> session);
     void stop();
+
+    // for internal use
+    void add(unique_ptr<Session> session);
+    bool exists(uint32_t ip, uint16_t port) const;
+    void setPrimary(Session* primary);
+    void send(const Packet& packet);
 
 private:
     void run();
@@ -41,6 +48,7 @@ private:
     mutex mutex_; // protects all class variables
     bool done_;
     Socket socket_;
+    Session* primary_;
     vector<unique_ptr<Session>> sessions_;
     thread thread_;
 };

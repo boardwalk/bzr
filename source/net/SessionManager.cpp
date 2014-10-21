@@ -42,7 +42,7 @@ private:
 SessionManager::SessionManager() : done_(false), thread_(bind(&SessionManager::run, this))
 {}
 
-void SessionManager::add(unique_ptr<Session> session)
+void SessionManager::addLocked(unique_ptr<Session> session)
 {
     lock_guard<mutex> lock(mutex_);
     sessions_.push_back(move(session));
@@ -56,6 +56,34 @@ void SessionManager::stop()
     }
 
     thread_.join();
+}
+
+void SessionManager::add(unique_ptr<Session> session)
+{
+    sessions_.push_back(move(session));
+}
+
+bool SessionManager::exists(uint32_t ip, uint16_t port) const
+{
+    for(const unique_ptr<Session>& session : sessions_)
+    {
+        if(session->serverIp() == ip && session->serverPort() == port)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void SessionManager::setPrimary(Session* primary)
+{
+    primary_ = primary;
+}
+
+void SessionManager::send(const Packet& packet)
+{
+    socket_.send(packet);
 }
 
 void SessionManager::run()
@@ -74,12 +102,12 @@ void SessionManager::run()
         if(readable)
         {
             Packet packet;
-            socket_.read(packet);
+            socket_.recv(packet);
 
             while(packet.size != 0)
             {
                 handle(packet);
-                socket_.read(packet);
+                socket_.recv(packet);
             }
         }
 

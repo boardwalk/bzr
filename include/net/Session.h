@@ -19,6 +19,7 @@
 #define BZR_NET_SESSION_H
 
 #include "net/ChecksumXorGenerator.h"
+#include "Noncopyable.h"
 #include <chrono>
 #include <map>
 
@@ -28,8 +29,9 @@ typedef net_clock::time_point net_time_point;
 class BinReader;
 struct Packet;
 struct PacketHeader;
+class SessionManager;
 
-class Session
+class Session : Noncopyable
 {
 public:
     Session(SessionManager& manager,
@@ -51,20 +53,20 @@ public:
     net_time_point nextTick() const;
     
 private:
-    void sendLogon(const string& name, const void* key, size_t keyLen);
-    void sendConnectResponse(uint64_t cookie);
-    void send(const Packet& packet);
+    void sendLogon();
+    void sendReferred();
+    void sendConnectResponse();
 
-    void handleBlobFragments(const PacketHeader* header, BinReader& reader);
-    void handleServerSwitch(const PacketHeader* header, BinReader& reader);
-    void handleRequestRetransmit(const PacketHeader* header, BinReader& reader);
-    void handleRejectRetransmit(const PacketHeader* header, BinReader& reader);
-    void handleAckSequence(const PacketHeader* header, BinReader& reader);
-    void handleReferral(const PacketHeader* header, BinReader& reader);    
+    void handleBlobFragments(BinReader& reader);
+    void handleServerSwitch(BinReader& reader);
+    void handleRequestRetransmit(BinReader& reader);
+    void handleRejectRetransmit(BinReader& reader);
+    void handleAckSequence(BinReader& reader);
+    void handleReferral(BinReader& reader);
     void handleConnect(const PacketHeader* header, BinReader& reader);
-    void handleTimeSync(const PacketHeader* header, BinReader& reader);
-    void handleEchoResponse(const PacketHeader* header, BinReader& reader);
-    void handleFlow(const PacketHeader* header, BinReader& reader);
+    void handleTimeSync(BinReader& reader);
+    void handleEchoResponse(BinReader& reader);
+    void handleFlow(BinReader& reader);
 
     void advanceServerSequence();
     

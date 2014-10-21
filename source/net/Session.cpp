@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "net/Session.h"
+#include "net/SessionManager.h"
 #include "net/Socket.h"
 #include "BinReader.h"
 #include "BinWriter.h"
@@ -66,6 +67,7 @@ PACK(struct BlobHeader {
 
 static chrono::milliseconds kLogonPacketDelay(300);
 static chrono::milliseconds kReferredPacketDelay(300);
+static chrono::milliseconds kConnectResponsePacketDelay(300);
 
 static uint32_t checksum(const void* data, size_t size)
 {
@@ -235,11 +237,11 @@ void Session::handle(const Packet& packet)
 
     if(flags == kServerSwitch)
     {
-        handleServerSwitch(header, reader);
+        handleServerSwitch(reader);
     }
     else if(flags == kReferral)
     {
-        handleReferral(header, reader);
+        handleReferral(reader);
     }
     else if(flags == kConnectRequest)
     {
@@ -249,43 +251,43 @@ void Session::handle(const Packet& packet)
     {
         if(flags & kRequestRetransmit)
         {
-            handleRequestRetransmit(header, reader);
+            handleRequestRetransmit(reader);
             flags &= ~kRequestRetransmit;
         }
 
         if(flags & kRejectRetransmit)
         {
-            handleRejectRetransmit(header, reader);
+            handleRejectRetransmit(reader);
             flags &= ~kRejectRetransmit;
         }
 
         if(flags & kAckSequence)
         {
-            handleAckSequence(header, reader);
+            handleAckSequence(reader);
             flags &= ~kAckSequence;
         }
 
         if(flags & kTimeSync)
         {
-            handleTimeSync(header, reader);
+            handleTimeSync(reader);
             flags &= ~kTimeSync;
         }
 
         if(flags & kEchoResponse)
         {
-            handleEchoResponse(header, reader);
+            handleEchoResponse(reader);
             flags &= ~kEchoResponse;
         }
 
         if(flags & kFlow)
         {
-            handleFlow(header, reader);
+            handleFlow(reader);
             flags &= ~kFlow;
         }
 
         if(flags & kBlobFragments)
         {
-            handleBlobFragments(header, reader);
+            handleBlobFragments(reader);
             flags &= ~kBlobFragments;
         }
 
@@ -313,9 +315,13 @@ void Session::tick(net_time_point now)
     {
         sendReferred();
     }
-    else if(state_ == State::kConnect)
+    else if(state_ == State::kConnectResponse)
     {
         sendConnectResponse();
+    }
+    else
+    {
+        // TODO send ping, flow, time sync, ack
     }
 }
 
@@ -326,7 +332,7 @@ uint32_t Session::serverIp() const
 
 uint16_t Session::serverPort() const
 {
-    return serverPort_ + (_state == State::kConnectResponse || _state == State::kConnected) ? 1 : 0;
+    return serverPort_ + (state_ == State::kConnectResponse || state_ == State::kConnected) ? 1 : 0;
 }
 
 bool Session::dead() const
@@ -358,7 +364,7 @@ void Session::sendLogon()
     writer.writeString(accountName_);
     writer.writeInt(0);
     writer.writeInt(static_cast<uint32_t>(accountKey_.size()));
-    writer.writeRaw(accountKey.data(), accountKey.size());
+    writer.writeRaw(accountKey_.data(), accountKey_.size());
 
     // fill in auth data len
     writer.seek(authDataLenOff);
@@ -380,8 +386,8 @@ void Session::sendLogon()
     writer.writeRaw(&header, sizeof(header));
 
     // send packet
-    _manager.send(packet);
-    lastPeriodic_ = net_clock::now();
+    manager_.send(packet);
+    nextPeriodic_ = net_clock::now() + kLogonPacketDelay;
 }
 
 void Session::sendReferred()
@@ -408,10 +414,10 @@ void Session::sendReferred()
 
     // send packet
     manager_.send(packet);
-    lastPeriodic_ = net_clock::now();
+    nextPeriodic_ = net_clock::now() + kReferredPacketDelay;
 }
 
-void Session::sendConnectResponse(uint64_t cookie)
+void Session::sendConnectResponse()
 {
     assert(state_ == State::kConnectResponse);
 
@@ -427,7 +433,7 @@ void Session::sendConnectResponse(uint64_t cookie)
     header.iteration = iteration_;
 
     writer.writeRaw(&header, sizeof(header));
-    writer.writeLong(cookie);
+    writer.writeLong(cookie_);
 
     // calc checksum and rewrite header
     header.checksum = checksumPacket(packet, clientXorGen_);
@@ -437,19 +443,22 @@ void Session::sendConnectResponse(uint64_t cookie)
 
     // send packet
     manager_.send(packet);
-    lastPeriodic_ = net_clock::now();
+    nextPeriodic_ = net_clock::now() + kConnectResponsePacketDelay;
 }
 
-void Session::handleBlobFragments(const PacketHeader* header, BinReader& reader)
-{}
+void Session::handleBlobFragments(BinReader& reader)
+{
+    // TODO
+    (void)reader;
+}
 
-void Session::handleServerSwitch(const PacketHeader* header, BinReader& reader)
+void Session::handleServerSwitch(BinReader& reader)
 {
     reader.readRaw(8);
-    manager_.makePrimary(*this);
+    manager_.setPrimary(this);
 }
 
-void Session::handleRequestRetransmit(const PacketHeader* header, BinReader& reader)
+void Session::handleRequestRetransmit(BinReader& reader)
 {
     uint32_t numSequence = reader.readInt();
 
@@ -464,11 +473,11 @@ void Session::handleRequestRetransmit(const PacketHeader* header, BinReader& rea
             throw runtime_error("Server requested packet that does not exist");
         }
 
-        send(*it->second);
+        manager_.send(*it->second);
     }
 }
 
-void Session::handleRejectRetransmit(const PacketHeader* header, BinReader& reader)
+void Session::handleRejectRetransmit(BinReader& reader)
 {
     uint32_t numSequence = reader.readInt();
 
@@ -488,13 +497,13 @@ void Session::handleRejectRetransmit(const PacketHeader* header, BinReader& read
     advanceServerSequence();
 }
 
-void Session::handleAckSequence(const PacketHeader* header, BinReader& reader)
+void Session::handleAckSequence(BinReader& reader)
 {
     clientSequence_ = max(clientSequence_, reader.readInt());
 
     for(auto it = clientPackets_.begin(); it != clientPackets_.end(); /**/)
     {
-        if(it->first > sequence)
+        if(it->first > clientSequence_)
         {
             break;
         }
@@ -503,13 +512,13 @@ void Session::handleAckSequence(const PacketHeader* header, BinReader& reader)
     }
 }
 
-void Session::handleReferral(const PacketHeader* header, BinReader& reader)
+void Session::handleReferral(BinReader& reader)
 {
     uint64_t cookie = reader.readLong();
-    uint16_t family = reader.readShort();
+    /*family*/ reader.readShort();
     uint16_t serverPort = htons(reader.readShort());
     uint32_t serverIp = htonl(reader.readInt());
-    reader.readRaw(8);
+    /*zero*/ reader.readRaw(8);
 
     if(manager_.exists(serverIp, serverPort))
     {
@@ -518,7 +527,6 @@ void Session::handleReferral(const PacketHeader* header, BinReader& reader)
 
     unique_ptr<Session> session(new Session(
         manager_,
-        serverPort,
         serverIp,
         serverPort,
         cookie));
@@ -534,13 +542,14 @@ void Session::handleConnect(const PacketHeader* header, BinReader& reader)
     }
 
     double beginTime = reader.readDouble();
-    uint16_t cookie = reader.readLong();
+    uint64_t cookie = reader.readLong();
     uint16_t clientNetId = static_cast<uint16_t>(reader.readInt());
     uint32_t serverSeed = reader.readInt();
     uint32_t clientSeed = reader.readInt();
     reader.readInt(); // padding
 
     state_ = State::kConnectResponse;
+    cookie_ = cookie;
     serverSequence_ = 2;
     clientSequence_ = 2;
     clientLeadingSequence_ = 2;
@@ -557,23 +566,23 @@ void Session::handleConnect(const PacketHeader* header, BinReader& reader)
     serverPackets_.clear();
     clientPackets_.clear();
 
-    sendConnectResponse(cookie);
+    sendConnectResponse();
 }
 
-void Session::handleTimeSync(const PacketHeader* header, BinReader& reader)
+void Session::handleTimeSync(BinReader& reader)
 {
     beginTime_ = reader.readDouble();
     beginLocalTime_ = net_clock::now();
 }
 
-void Session::handleEchoResponse(const PacketHeader* header, BinReader& reader)
+void Session::handleEchoResponse(BinReader& reader)
 {
     // Ignored for now
     /*pingTime*/ reader.readFloat();
     /*pingResult*/ reader.readFloat();
 }
 
-void Session::handleFlow(const PacketHeader* header, BinReader& reader)
+void Session::handleFlow(BinReader& reader)
 {
     // Ignored for now
     /*numBytes*/ reader.readInt();
