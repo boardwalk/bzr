@@ -71,6 +71,7 @@ static const chrono::milliseconds kLogonPacketDelay(300);
 static const chrono::milliseconds kReferredPacketDelay(300);
 static const chrono::milliseconds kConnectResponsePacketDelay(300);
 static const chrono::milliseconds kPingPacketDelay(2000);
+static const chrono::milliseconds kMissingPacketDelay(300);
 static const size_t kMaxPeriodicSent = 10;
 
 static uint32_t checksum(const void* data, size_t size)
@@ -193,7 +194,8 @@ Session::Session(SessionManager& manager,
     manager_(manager),
     address_(address),
     state_(State::kLogon),
-    nextPeriodic_(net_clock::now() + kLogonPacketDelay),
+    sessionBegin_(net_clock::now()),
+    nextPeriodic_(sessionBegin_ + kLogonPacketDelay),
     numPeriodicSent_(1),
     accountName_(move(accountName)),
     accountKey_(move(accountKey))
@@ -207,7 +209,8 @@ Session::Session(SessionManager& manager,
     manager_(manager),
     address_(address),
     state_(State::kReferred),
-    nextPeriodic_(net_clock::now() + kConnectResponsePacketDelay),
+    sessionBegin_(net_clock::now()),
+    nextPeriodic_(sessionBegin_ + kReferredPacketDelay),
     numPeriodicSent_(1),
     cookie_(cookie)
 {
@@ -280,6 +283,9 @@ void Session::handle(const Packet& packet)
         serverPackets_.insert(header->sequence);
         advanceServerSequence();
 
+        // record that we've received some bytes
+        lastFlowBytes_ += static_cast<uint32_t>(packet.size);
+
         uint32_t flags = header->flags & ~(kRetransmission | kEncryptedChecksum);
 
         if(flags == kServerSwitch)
@@ -341,6 +347,10 @@ void Session::handle(const Packet& packet)
             }
         }
     }
+    else
+    {
+        throw logic_error("bad state");
+    }
 
     if(reader.remaining() != 0)
     {
@@ -351,26 +361,104 @@ void Session::handle(const Packet& packet)
 
 void Session::tick(net_time_point now)
 {
-    if(nextPeriodic_ > now)
-    {
-        return;
-    }
-
     if(state_ == State::kLogon)
     {
-        sendLogon();
+        if(now > nextPeriodic_)
+        {
+            sendLogon();
+        }
     }
     else if(state_ == State::kReferred)
     {
-        sendReferred();
+        if(now > nextPeriodic_)
+        {
+            sendReferred();
+        }
     }
     else if(state_ == State::kConnectResponse)
     {
-        sendConnectResponse();
+        if(now > nextPeriodic_)
+        {
+            sendConnectResponse();
+        }
+    }
+    else if(state_ == State::kConnected)
+    {
+        Packet packet;
+
+        BinWriter writer(packet.data.data(), packet.data.size());
+        writer.skip(sizeof(PacketHeader));
+
+        PacketHeader header;
+        header.sequence = clientLeadingSequence_ + 1;
+        header.flags = 0;
+        header.checksum = 0;
+        header.netId = clientNetId_;
+        header.time = chrono::duration_cast<SessionDuration>(now - sessionBegin_).count();
+        header.size = 0;
+        header.iteration = iteration_;
+
+        if(now > nextRequestMissing_)
+        {
+            header.flags |= kRequestRetransmit;
+
+            writer.writeInt(static_cast<uint32_t>(serverPackets_.size()));
+
+            for(uint32_t sequence : serverPackets_)
+            {
+                writer.writeInt(sequence);
+            }
+
+            nextRequestMissing_ = now + kMissingPacketDelay;
+        }
+
+        if(serverLeadingSequence_ > serverSequence_)
+        {
+            header.flags |= kAckSequence;
+            writer.writeInt(serverLeadingSequence_);
+
+            serverSequence_ = serverLeadingSequence_;
+        }
+
+        if(now > nextPeriodic_)
+        {
+            header.flags |= kTimeSync;
+            writer.writeDouble(beginTime_ + chrono::duration<double>(now - beginLocalTime_).count());
+
+            header.flags |= kEchoRequest;
+            writer.writeFloat(chrono::duration<float>(now - manager_.getClientBegin()).count());
+
+            header.flags |= kFlow;
+            writer.writeInt(lastFlowBytes_);
+            writer.writeShort(lastFlowTime_);
+
+            lastFlowBytes_ = 0;
+            lastFlowTime_ = header.time;
+            nextPeriodic_ = now + kPingPacketDelay;
+        }
+
+        if(header.flags)
+        {
+            header.flags |= kEncryptedChecksum;
+            header.size = static_cast<uint16_t>(writer.position() - sizeof(PacketHeader));
+
+            writer.seek(0);
+            writer.writeRaw(&header, sizeof(header));
+
+            header.checksum = checksumPacket(packet, clientXorGen_);
+
+            writer.seek(0);
+            writer.writeRaw(&header, sizeof(header));
+
+            manager_.send(packet);
+            clientPackets_[header.sequence].reset(new Packet(packet));
+
+            clientLeadingSequence_++;
+        }
     }
     else
     {
-        // TODO send ping, flow, time sync, ack
+        throw logic_error("bad state");
     }
 }
 
@@ -391,7 +479,7 @@ bool Session::dead() const
 
 net_time_point Session::nextTick() const
 {
-    return nextPeriodic_;
+    return min(nextPeriodic_, nextRequestMissing_);
 }
 
 void Session::sendLogon()
@@ -624,6 +712,11 @@ void Session::handleConnect(const PacketHeader* header, BinReader& reader)
     serverPackets_.clear();
     clientPackets_.clear();
 
+    nextRequestMissing_ = net_time_point::max();
+
+    lastFlowTime_ = 0;
+    lastFlowBytes_ = 0;
+
     LOG(Net, Info) << address_ << " received connect\n";
 }
 
@@ -664,4 +757,19 @@ void Session::advanceServerSequence()
     }
 
     serverXorGen_.purge(serverSequence_);
+
+    if(!serverPackets_.empty())
+    {
+        if(nextRequestMissing_ == net_time_point::max())
+        {
+            nextRequestMissing_ == net_clock::now() + kMissingPacketDelay;
+        }
+    }
+    else
+    {
+        if(nextRequestMissing_ != net_time_point::max())
+        {
+            nextRequestMissing_ = net_time_point::max();
+        }
+    }
 }

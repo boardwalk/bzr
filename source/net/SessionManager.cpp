@@ -41,12 +41,22 @@ private:
     Mutex& mutex_;
 };
 
-SessionManager::SessionManager() : done_(false), thread_(bind(&SessionManager::run, this))
+SessionManager::SessionManager() :
+    done_(false),
+    primary_(nullptr),
+    clientBegin_(net_clock::now()),
+    thread_(bind(&SessionManager::run, this))
 {}
 
 void SessionManager::addLocked(unique_ptr<Session> session)
 {
     lock_guard<mutex> lock(mutex_);
+
+    if(primary_ == nullptr)
+    {
+        primary_ = session.get();
+    }
+
     sessions_.push_back(move(session));
 }
 
@@ -78,6 +88,11 @@ void SessionManager::setPrimary(Session* primary)
 void SessionManager::send(const Packet& packet)
 {
     socket_.send(packet);
+}
+
+net_time_point SessionManager::getClientBegin() const
+{
+    return clientBegin_;
 }
 
 void SessionManager::run()

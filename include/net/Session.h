@@ -52,6 +52,8 @@ public:
     net_time_point nextTick() const;
 
 private:
+    typedef chrono::duration<uint16_t, ratio<1, 2>> SessionDuration;
+
     enum class State
     {
         kLogon,
@@ -81,6 +83,9 @@ private:
     const Address address_;
     State state_;
 
+    // the time at which this session was created
+    net_time_point sessionBegin_;
+
     // the time at which the next logon, referred, connect response or ping packet should be sent
     net_time_point nextPeriodic_;
 
@@ -109,7 +114,7 @@ private:
     // serverLeadingSequence_ >= serverSequence_
     uint32_t serverLeadingSequence_;
 
-    // the latest client sequence acknowledge by the server
+    // the latest client sequence acknowledged by the server
     uint32_t clientSequence_;
 
     // the latest contiguous sequence sent by the client, not necessarily acknowledged yet
@@ -137,11 +142,17 @@ private:
     // the local time at which beginTime_ was set
     net_time_point beginLocalTime_;
 
-    // stores the set of all sequences >= serverSequence_ sent by the server
+    // stores the set of all sequences > serverSequence_ sent by the server
     set<uint32_t> serverPackets_;
 
-    // stores all packets with sequence >= clientSequence_ sent by the client
+    // stores all packets with sequence > clientSequence_ sent by the client
     map<uint32_t, unique_ptr<Packet>> clientPackets_;
+
+    net_time_point nextRequestMissing_;
+    //net_time_point nextAckServer_;
+
+    uint16_t lastFlowTime_;
+    uint32_t lastFlowBytes_;
 };
 
 #endif

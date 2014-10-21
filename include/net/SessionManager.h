@@ -37,6 +37,7 @@ public:
     bool exists(Address address) const;
     void setPrimary(Session* primary);
     void send(const Packet& packet);
+    net_time_point getClientBegin() const;
 
 private:
     void run();
@@ -50,6 +51,7 @@ private:
     Socket socket_;
     Session* primary_;
     vector<unique_ptr<Session>> sessions_;
+    net_time_point clientBegin_;
     thread thread_;
 };
 
