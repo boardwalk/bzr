@@ -23,6 +23,7 @@
 #include "Noncopyable.h"
 #include <chrono>
 #include <map>
+#include <set>
 
 typedef chrono::high_resolution_clock net_clock;
 typedef net_clock::time_point net_time_point;
@@ -37,8 +38,8 @@ class Session : Noncopyable
 public:
     Session(SessionManager& manager,
         Address address,
-        const string& accountName,
-        const string& accountKey);
+        string accountName,
+        string accountKey);
     Session(SessionManager& manager,
         Address address,
         uint64_t cookie);
@@ -80,30 +81,66 @@ private:
     const Address address_;
     State state_;
 
-    // for State::kLogon
+    // the time at which the next logon, referred, connect response or ping packet should be sent
+    net_time_point nextPeriodic_;
+
+    // the number of times the periodic packet for this state has been sent without a response
+    size_t numPeriodicSent_;
+
+    //
+    // State::kLogon
+    //
     string accountName_;
     string accountKey_;
 
-    // for State::kReferred and State::kConnect
+    //
+    // State::kReferred, State::kConnectResponse
+    //
     uint64_t cookie_;
 
-    net_time_point nextPeriodic_;
-    size_t numPeriodicSent_;
+    //
+    // State::kConnectResponse, State::kConnected
+    //
 
+    // the latest server sequence acknowledged by the client
     uint32_t serverSequence_;
+
+    // the latest contiguous sequence received by the client, not necessarily acknowledged yet
+    // serverLeadingSequence_ >= serverSequence_
+    uint32_t serverLeadingSequence_;
+
+    // the latest client sequence acknowledge by the server
     uint32_t clientSequence_;
+
+    // the latest contiguous sequence sent by the client, not necessarily acknowledged yet
+    // clientLeadingSequence_ >= clientSequence_
     uint32_t clientLeadingSequence_;
+
+    // the value the server should use in the packet header's net id field
     uint16_t serverNetId_;
+
+    // the value the client should use in the packet header's net id field
     uint16_t clientNetId_;
+
+    // the value both the server and client should use in the packet header's iteration field
     uint16_t iteration_;
 
+    // the rng used to generate xor values for server packets
     ChecksumXorGenerator serverXorGen_;
+
+    // the rng used to generate xor values for client packets
     ChecksumXorGenerator clientXorGen_;
 
+    // the time specified in the last connect packet or time sync header
     double beginTime_;
+
+    // the local time at which beginTime_ was set
     net_time_point beginLocalTime_;
 
-    map<uint32_t, bool> serverPackets_;
+    // stores the set of all sequences >= serverSequence_ sent by the server
+    set<uint32_t> serverPackets_;
+
+    // stores all packets with sequence >= clientSequence_ sent by the client
     map<uint32_t, unique_ptr<Packet>> clientPackets_;
 };
 

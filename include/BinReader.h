@@ -19,6 +19,7 @@
 #define BZR_BINREADER_H
 
 #include "Noncopyable.h"
+#include <type_traits>
 
 class BinReader : Noncopyable
 {
@@ -35,6 +36,12 @@ public:
     uint16_t readPackedShort();
     uint32_t readPackedInt();
     string readString();
+
+    template<class T>
+    const typename enable_if<is_trivial<T>::value, T>::type* readPointer()
+    {
+        return reinterpret_cast<const T*>(readRaw(sizeof(T)));
+    }
 
     void align();
 

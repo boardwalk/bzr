@@ -161,7 +161,7 @@ static uint32_t checksumContent(const PacketHeader* header, const void* data)
         {
             while(reader.remaining() != 0)
             {
-                const BlobHeader* blobHeader = reinterpret_cast<const BlobHeader*>(reader.readRaw(sizeof(BlobHeader)));
+                const BlobHeader* blobHeader = reader.readPointer<BlobHeader>();
 
                 reader.readRaw(blobHeader->size - sizeof(BlobHeader));
 
@@ -188,14 +188,15 @@ static uint32_t checksumPacket(const Packet& packet, ChecksumXorGenerator& xorGe
 
 Session::Session(SessionManager& manager,
     Address address,
-    const string& accountName,
-    const string& accountKey) :
+    string accountName,
+    string accountKey) :
     manager_(manager),
     address_(address),
     state_(State::kLogon),
-    accountName_(accountName),
-    accountKey_(accountKey),
-    numPeriodicSent_(0)
+    nextPeriodic_(net_clock::now() + kLogonPacketDelay),
+    numPeriodicSent_(1),
+    accountName_(move(accountName)),
+    accountKey_(move(accountKey))
 {
     sendLogon();
 }
@@ -206,8 +207,9 @@ Session::Session(SessionManager& manager,
     manager_(manager),
     address_(address),
     state_(State::kReferred),
-    cookie_(cookie),
-    numPeriodicSent_(0)
+    nextPeriodic_(net_clock::now() + kConnectResponsePacketDelay),
+    numPeriodicSent_(1),
+    cookie_(cookie)
 {
     sendReferred();
 }
@@ -216,11 +218,11 @@ void Session::handle(const Packet& packet)
 {
     BinReader reader(packet.data.data(), packet.size);
 
-    const PacketHeader* header = reinterpret_cast<const PacketHeader*>(reader.readRaw(sizeof(PacketHeader)));
+    const PacketHeader* header = reader.readPointer<PacketHeader>();
 
     if(header->size != reader.remaining())
     {
-        LOG(Net, Warn) << address_ << " dropping packet with bad header size " << header->size << ", expected " << reader.remaining() << "\n";
+        LOG(Net, Warn) << address_ << " dropping packet, packet size is " << reader.remaining() << ", packet has " << header->size << "\n";
         return;
     }
 
@@ -228,76 +230,123 @@ void Session::handle(const Packet& packet)
 
     if(header->checksum != calcChecksum)
     {
-        LOG(Net, Warn) << address_ << " dropping packet with bad checksum " << hexn(header->checksum) << ", expected " << hexn(calcChecksum) << "\n";
+        LOG(Net, Warn) << address_ << " dropping packet, calc checksum is " << hexn(calcChecksum) << ", packet has " << hexn(header->checksum) << "\n";
         return;
     }
 
-    uint32_t flags = header->flags;
-    flags &= ~(kRetransmission | kEncryptedChecksum);
+    if(state_ == State::kLogon || state_ == State::kReferred)
+    {
+        if(header->flags != kConnectRequest)
+        {
+            LOG(Net, Warn) << address_ << "dropping packet, flags should be " << hexn(static_cast<uint32_t>(kConnectRequest)) << ", packet has " << hexn(header->flags) << "\n";
+            return;
+        }
 
-    if(flags == kServerSwitch)
-    {
-        handleServerSwitch(reader);
-    }
-    else if(flags == kReferral)
-    {
-        handleReferral(reader);
-    }
-    else if(flags == kConnectRequest)
-    {
         handleConnect(header, reader);
+
+        state_ = State::kConnectResponse;
+        numPeriodicSent_ = 0;
+        sendConnectResponse();
     }
-    else
+    else if(state_ == State::kConnectResponse)
     {
-        if(flags & kRequestRetransmit)
+        LOG(Net, Info) << address_ << " transitioning to connected\n";
+
+        state_ = State::kConnected;
+        numPeriodicSent_ = 0;
+        return handle(packet);
+    }
+    else if(state_ == State::kConnected)
+    {
+        if(header->sequence <= serverSequence_)
         {
-            handleRequestRetransmit(reader);
-            flags &= ~kRequestRetransmit;
+            LOG(Net, Warn) << address_ << " dropping packet, server sequence is " << serverSequence_ << ", packet has " << header->sequence << "\n";
+            return;
         }
 
-        if(flags & kRejectRetransmit)
+        if(header->netId != serverNetId_)
         {
-            handleRejectRetransmit(reader);
-            flags &= ~kRejectRetransmit;
+            LOG(Net, Warn) << address_ << " dropping packet, server net id is " << serverNetId_ << ", packet has " << header->netId << "\n";
+            return;
         }
 
-        if(flags & kAckSequence)
+        if(header->iteration != iteration_)
         {
-            handleAckSequence(reader);
-            flags &= ~kAckSequence;
+            LOG(Net, Warn) << address_ << " dropping packet, iteration is " << iteration_ << ", packet has " << header->iteration << "\n";
+            return;
         }
 
-        if(flags & kTimeSync)
-        {
-            handleTimeSync(reader);
-            flags &= ~kTimeSync;
-        }
+        // record that we've received the packet
+        serverPackets_.insert(header->sequence);
+        advanceServerSequence();
 
-        if(flags & kEchoResponse)
-        {
-            handleEchoResponse(reader);
-            flags &= ~kEchoResponse;
-        }
+        uint32_t flags = header->flags & ~(kRetransmission | kEncryptedChecksum);
 
-        if(flags & kFlow)
+        if(flags == kServerSwitch)
         {
-            handleFlow(reader);
-            flags &= ~kFlow;
+            handleServerSwitch(reader);
         }
-
-        if(flags & kBlobFragments)
+        else if(flags == kReferral)
         {
-            handleBlobFragments(reader);
-            flags &= ~kBlobFragments;
+            handleReferral(reader);
         }
-
-        if(flags != 0)
+        else
         {
-            throw runtime_error("extra flags in packet header");
+            if(flags & kRequestRetransmit)
+            {
+                handleRequestRetransmit(reader);
+                flags &= ~kRequestRetransmit;
+            }
+
+            if(flags & kRejectRetransmit)
+            {
+                handleRejectRetransmit(reader);
+                flags &= ~kRejectRetransmit;
+            }
+
+            if(flags & kAckSequence)
+            {
+                handleAckSequence(reader);
+                flags &= ~kAckSequence;
+            }
+
+            if(flags & kTimeSync)
+            {
+                handleTimeSync(reader);
+                flags &= ~kTimeSync;
+            }
+
+            if(flags & kEchoResponse)
+            {
+                handleEchoResponse(reader);
+                flags &= ~kEchoResponse;
+            }
+
+            if(flags & kFlow)
+            {
+                handleFlow(reader);
+                flags &= ~kFlow;
+            }
+
+            if(flags & kBlobFragments)
+            {
+                handleBlobFragments(reader);
+                flags &= ~kBlobFragments;
+            }
+
+            if(flags != 0)
+            {
+                LOG(Net, Error) << address_ << " unhandled flags " << hexn(flags) << " in packet\n";
+                throw runtime_error("unhandled flags");
+            }
         }
     }
 
-    assert(reader.remaining() == 0);
+    if(reader.remaining() != 0)
+    {
+        LOG(Net, Error) << address_ << " unconsumed data of " << reader.remaining() << " bytes in packet\n";
+        throw runtime_error("unconsumed data");
+    }
 }
 
 void Session::tick(net_time_point now)
@@ -347,13 +396,10 @@ net_time_point Session::nextTick() const
 
 void Session::sendLogon()
 {
-    assert(state_ == State::kLogon);
-
     Packet packet;
     BinWriter writer(packet.data.data(), packet.data.size());
 
     // construct packet
-    size_t headerOff = writer.position();
     writer.skip(sizeof(PacketHeader));
     writer.writeString("1802"); // NetVersion
     size_t authDataLenOff = writer.position();
@@ -372,39 +418,43 @@ void Session::sendLogon()
 
     // fill in packet header
     PacketHeader header;
-    memset(&header, 0, sizeof(header));
+    header.sequence = 0;
     header.flags = PacketFlags::kLogon;
+    header.checksum = 0;
+    header.netId = 0;
+    header.time = 0;
     header.size = static_cast<uint16_t>(packet.size - sizeof(PacketHeader));
+    header.iteration = 0;
 
-    writer.seek(headerOff);
+    writer.seek(0);
     writer.writeRaw(&header, sizeof(header));
 
     // calculate checksum and rewrite header
     header.checksum = checksumPacket(packet, clientXorGen_);
 
-    writer.seek(headerOff);
+    writer.seek(0);
     writer.writeRaw(&header, sizeof(header));
 
     // send packet
     manager_.send(packet);
-    nextPeriodic_ = net_clock::now() + kLogonPacketDelay;
-    numPeriodicSent_++;
 
     LOG(Net, Info) << address_ << " sent logon\n";
 }
 
 void Session::sendReferred()
 {
-    assert(state_ == State::kReferred);
-
     Packet packet;
     BinWriter writer(packet.data.data(), packet.data.size());
 
     // construct packet
     PacketHeader header;
-    memset(&header, 0, sizeof(header));
+    header.sequence = 0;
     header.flags = kReferred;
+    header.checksum = 0;
+    header.netId = 0;
+    header.time = 0;
     header.size = sizeof(uint64_t);
+    header.iteration = 0;
 
     writer.writeRaw(&header, sizeof(header));
     writer.writeLong(cookie_);
@@ -432,9 +482,11 @@ void Session::sendConnectResponse()
 
     // construct packet
     PacketHeader header;
-    memset(&header, 0, sizeof(header));
+    header.sequence = 0;
     header.flags = kConnectResponse;
+    header.checksum = 0;
     header.netId = clientNetId_;
+    header.time = 0;
     header.size = sizeof(uint64_t);
     header.iteration = iteration_;
 
@@ -449,8 +501,6 @@ void Session::sendConnectResponse()
 
     // send packet
     manager_.send(packet);
-    nextPeriodic_ = net_clock::now() + kConnectResponsePacketDelay;
-    numPeriodicSent_++;
 
     LOG(Net, Info) << address_ << " sent connect response\n";
 }
@@ -503,7 +553,7 @@ void Session::handleRejectRetransmit(BinReader& reader)
             continue;
         }
 
-        serverPackets_[sequence] = true;
+        serverPackets_.insert(sequence);
     }
 
     advanceServerSequence();
@@ -549,11 +599,6 @@ void Session::handleReferral(BinReader& reader)
 
 void Session::handleConnect(const PacketHeader* header, BinReader& reader)
 {
-    if(state_ != State::kLogon && state_ != State::kReferred)
-    {
-        throw runtime_error("received connect in wrong state");
-    }
-
     double beginTime = reader.readDouble();
     uint64_t cookie = reader.readLong();
     uint16_t clientNetId = static_cast<uint16_t>(reader.readInt());
@@ -561,11 +606,11 @@ void Session::handleConnect(const PacketHeader* header, BinReader& reader)
     uint32_t clientSeed = reader.readInt();
     reader.readInt(); // padding
 
-    state_ = State::kConnectResponse;
     cookie_ = cookie;
-    serverSequence_ = 2;
-    clientSequence_ = 2;
-    clientLeadingSequence_ = 2;
+    serverSequence_ = 1;
+    serverLeadingSequence_ = 1;
+    clientSequence_ = 1;
+    clientLeadingSequence_ = 1;
     serverNetId_ = header->netId;
     clientNetId_ = clientNetId;
     iteration_ = header->iteration;
@@ -580,9 +625,6 @@ void Session::handleConnect(const PacketHeader* header, BinReader& reader)
     clientPackets_.clear();
 
     LOG(Net, Info) << address_ << " received connect\n";
-
-    numPeriodicSent_ = 0;
-    sendConnectResponse();
 }
 
 void Session::handleTimeSync(BinReader& reader)
@@ -612,7 +654,7 @@ void Session::advanceServerSequence()
 
     while(it != serverPackets_.end())
     {
-        if(it->first != serverSequence_)
+        if(*it != serverSequence_ + 1)
         {
             break;
         }

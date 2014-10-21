@@ -17,12 +17,6 @@
  */
 #include "BinReader.h"
 
-template<class T>
-T readPrimitive(BinReader& reader)
-{
-    return *reinterpret_cast<const T*>(reader.readRaw(sizeof(T)));
-}
-
 BinReader::BinReader(const void* data, size_t size) : data_{data}, size_{size}, position_{0}
 {}
 
@@ -39,32 +33,32 @@ const uint8_t* BinReader::readRaw(size_t size)
 
 uint8_t BinReader::readByte()
 {
-    return readPrimitive<uint8_t>(*this);
+    return *readPointer<uint8_t>();
 }
 
 uint16_t BinReader::readShort()
 {
-    return readPrimitive<uint16_t>(*this);
+    return *readPointer<uint16_t>();
 }
 
 uint32_t BinReader::readInt()
 {
-    return readPrimitive<uint32_t>(*this);
+    return *readPointer<uint32_t>();
 }
 
 uint64_t BinReader::readLong()
 {
-    return readPrimitive<uint64_t>(*this);
+    return *readPointer<uint64_t>();
 }
 
 float BinReader::readFloat()
 {
-    return readPrimitive<float>(*this);
+    return *readPointer<float>();
 }
 
 double BinReader::readDouble()
 {
-    return readPrimitive<double>(*this);
+    return *readPointer<double>();
 }
 
 uint16_t BinReader::readPackedShort()
