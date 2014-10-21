@@ -283,7 +283,7 @@ void Core::handleEvents()
 #ifndef HEADLESS
     if(newModel)
     {
-        LOG(Info) << "Core::handleEvents: loading model " << hexn(modelId_) << "\n";
+        LOG(Misc, Info) << "loading model " << hexn(modelId_) << "\n";
 
         Object& object = (*objectManager_)[ObjectId{1}];
 

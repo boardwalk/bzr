@@ -20,6 +20,8 @@
 #include "net/Socket.h"
 #include "BinReader.h"
 #include "BinWriter.h"
+#include "Core.h"
+#include "Log.h"
 
 enum PacketFlags
 {
@@ -65,9 +67,11 @@ PACK(struct BlobHeader {
     uint16_t queueId;
 });
 
-static chrono::milliseconds kLogonPacketDelay(300);
-static chrono::milliseconds kReferredPacketDelay(300);
-static chrono::milliseconds kConnectResponsePacketDelay(300);
+static const chrono::milliseconds kLogonPacketDelay(300);
+static const chrono::milliseconds kReferredPacketDelay(300);
+static const chrono::milliseconds kConnectResponsePacketDelay(300);
+static const chrono::milliseconds kPingPacketDelay(2000);
+static const size_t kMaxPeriodicSent = 10;
 
 static uint32_t checksum(const void* data, size_t size)
 {
@@ -183,29 +187,27 @@ static uint32_t checksumPacket(const Packet& packet, ChecksumXorGenerator& xorGe
 }
 
 Session::Session(SessionManager& manager,
-    uint32_t serverIp,
-    uint16_t serverPort,
+    Address address,
     const string& accountName,
     const string& accountKey) :
     manager_(manager),
-    serverIp_(serverIp),
-    serverPort_(serverPort),
+    address_(address),
     state_(State::kLogon),
     accountName_(accountName),
-    accountKey_(accountKey)
+    accountKey_(accountKey),
+    numPeriodicSent_(0)
 {
     sendLogon();
 }
 
 Session::Session(SessionManager& manager,
-    uint32_t serverIp,
-    uint16_t serverPort,
+    Address address,
     uint64_t cookie) :
     manager_(manager),
-    serverIp_(serverIp),
-    serverPort_(serverPort),
+    address_(address),
     state_(State::kReferred),
-    cookie_(cookie)
+    cookie_(cookie),
+    numPeriodicSent_(0)
 {
     sendReferred();
 }
@@ -218,8 +220,7 @@ void Session::handle(const Packet& packet)
 
     if(header->size != reader.remaining())
     {
-        // TODO proper logging
-        fprintf(stderr, "WARNING: bad size in packet header\n");
+        LOG(Net, Warn) << address_ << " dropping packet with bad header size " << header->size << ", expected " << reader.remaining() << "\n";
         return;
     }
 
@@ -227,8 +228,7 @@ void Session::handle(const Packet& packet)
 
     if(header->checksum != calcChecksum)
     {
-        // TODO proper logging
-        fprintf(stderr, "WARNING: bad checksum in packet header\n");
+        LOG(Net, Warn) << address_ << " dropping packet with bad checksum " << hexn(header->checksum) << ", expected " << hexn(calcChecksum) << "\n";
         return;
     }
 
@@ -325,19 +325,19 @@ void Session::tick(net_time_point now)
     }
 }
 
-uint32_t Session::serverIp() const
+Address Session::address() const
 {
-    return serverIp_;
-}
+    if(state_ == State::kConnectResponse || state_ == State::kConnected)
+    {
+        return Address(address_.ip(), address_.port() + 1);
+    }
 
-uint16_t Session::serverPort() const
-{
-    return serverPort_ + (state_ == State::kConnectResponse || state_ == State::kConnected) ? 1 : 0;
+    return address_;
 }
 
 bool Session::dead() const
 {
-    return false;
+    return numPeriodicSent_ > kMaxPeriodicSent;
 }
 
 net_time_point Session::nextTick() const
@@ -388,6 +388,9 @@ void Session::sendLogon()
     // send packet
     manager_.send(packet);
     nextPeriodic_ = net_clock::now() + kLogonPacketDelay;
+    numPeriodicSent_++;
+
+    LOG(Net, Info) << address_ << " sent logon\n";
 }
 
 void Session::sendReferred()
@@ -415,6 +418,9 @@ void Session::sendReferred()
     // send packet
     manager_.send(packet);
     nextPeriodic_ = net_clock::now() + kReferredPacketDelay;
+    numPeriodicSent_++;
+
+    LOG(Net, Info) << address_ << " sent referred\n";
 }
 
 void Session::sendConnectResponse()
@@ -444,6 +450,9 @@ void Session::sendConnectResponse()
     // send packet
     manager_.send(packet);
     nextPeriodic_ = net_clock::now() + kConnectResponsePacketDelay;
+    numPeriodicSent_++;
+
+    LOG(Net, Info) << address_ << " sent connect response\n";
 }
 
 void Session::handleBlobFragments(BinReader& reader)
@@ -456,6 +465,8 @@ void Session::handleServerSwitch(BinReader& reader)
 {
     reader.readRaw(8);
     manager_.setPrimary(this);
+
+    LOG(Net, Info) << address_ << " received server switch\n";
 }
 
 void Session::handleRequestRetransmit(BinReader& reader)
@@ -470,7 +481,8 @@ void Session::handleRequestRetransmit(BinReader& reader)
 
         if(it == clientPackets_.end())
         {
-            throw runtime_error("Server requested packet that does not exist");
+            LOG(Net, Warn) << address_ << " ignoring retransmit request of " << sequence << "\n";
+            continue;
         }
 
         manager_.send(*it->second);
@@ -516,20 +528,21 @@ void Session::handleReferral(BinReader& reader)
 {
     uint64_t cookie = reader.readLong();
     /*family*/ reader.readShort();
-    uint16_t serverPort = htons(reader.readShort());
-    uint32_t serverIp = htonl(reader.readInt());
+    uint16_t port = htons(reader.readShort());
+    uint32_t ip = htonl(reader.readInt());
     /*zero*/ reader.readRaw(8);
 
-    if(manager_.exists(serverIp, serverPort))
+    Address referral(ip, port);
+
+    if(manager_.exists(referral))
     {
+        LOG(Net, Warn) << address_ << " received referral for existing session " << referral << "\n";
         return;
     }
 
-    unique_ptr<Session> session(new Session(
-        manager_,
-        serverIp,
-        serverPort,
-        cookie));
+    LOG(Net, Info) << address_ << " received referral to " << referral << "\n";
+
+    unique_ptr<Session> session(new Session(manager_, referral, cookie));
 
     manager_.add(move(session));
 }
@@ -538,7 +551,7 @@ void Session::handleConnect(const PacketHeader* header, BinReader& reader)
 {
     if(state_ != State::kLogon && state_ != State::kReferred)
     {
-        throw runtime_error("Connect received in wrong state");
+        throw runtime_error("received connect in wrong state");
     }
 
     double beginTime = reader.readDouble();
@@ -566,6 +579,9 @@ void Session::handleConnect(const PacketHeader* header, BinReader& reader)
     serverPackets_.clear();
     clientPackets_.clear();
 
+    LOG(Net, Info) << address_ << " received connect\n";
+
+    numPeriodicSent_ = 0;
     sendConnectResponse();
 }
 
@@ -577,6 +593,7 @@ void Session::handleTimeSync(BinReader& reader)
 
 void Session::handleEchoResponse(BinReader& reader)
 {
+    numPeriodicSent_ = 0;
     // Ignored for now
     /*pingTime*/ reader.readFloat();
     /*pingResult*/ reader.readFloat();
@@ -603,4 +620,6 @@ void Session::advanceServerSequence()
         it = serverPackets_.erase(it);
         serverSequence_++;
     }
+
+    serverXorGen_.purge(serverSequence_);
 }

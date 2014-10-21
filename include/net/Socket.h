@@ -18,28 +18,18 @@
 #ifndef BZR_NET_SOCKET_H
 #define BZR_NET_SOCKET_H
 
+#include "net/Packet.h"
 #include "Noncopyable.h"
 #ifdef _WIN32
 #include <winsock2.h>
 #endif
-#include <array>
 #include <chrono>
-
-const size_t kDatagramMaxSize = 512;
 
 #ifdef _WIN32
 typedef SOCKET SocketType;
 #else
 typedef int SocketType;
 #endif
-
-struct Packet
-{
-    uint32_t remoteIp;
-    uint16_t remotePort;
-    size_t size;
-    array<uint8_t, kDatagramMaxSize> data;
-};
 
 class Socket : Noncopyable
 {

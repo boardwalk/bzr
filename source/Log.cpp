@@ -25,6 +25,23 @@ namespace {
 // left unopened intentionally
 ofstream g_nullStream;
 
+ostream& operator<<(ostream& os, LogSubsystem sys)
+{
+    switch(sys)
+    {
+        case LogSubsystem::kMisc:
+            os << "MISC ";
+            break;
+        case LogSubsystem::kNet:
+            os << "NET  ";
+            break;
+        default:
+            throw out_of_range("Bad LogSubsystem");
+    }
+
+    return os;
+}
+
 ostream& operator<<(ostream& os, LogSeverity sev)
 {
     switch(sev)
@@ -86,11 +103,17 @@ Log::Log()
         throw runtime_error("failed to open log file");
     }
 
-    verbosity_ = Core::get().config().getInt("Log.verbosity", static_cast<int>(LogSeverity::kWarn));
+    subsystems_ = Core::get().config().getInt("Log.subsystems", 0x7FFFFFFF);
+    verbosity_ = Core::get().config().getInt("Log.verbosity", static_cast<int>(LogSeverity::kDebug));
 }
 
-ostream& Log::write(LogSeverity sev)
+ostream& Log::write(LogSubsystem sys, LogSeverity sev)
 {
+    if(!(static_cast<int>(sys) & subsystems_))
+    {
+        return g_nullStream;
+    }
+
     if(static_cast<int>(sev) < verbosity_)
     {
         return g_nullStream;

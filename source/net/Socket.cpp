@@ -114,8 +114,7 @@ void Socket::recv(Packet& packet)
     {
         if(wouldBlock())
         {
-            packet.remoteIp = 0;
-            packet.remotePort = 0;
+            packet.address = Address();
             packet.size = 0;
 
             return;
@@ -124,8 +123,7 @@ void Socket::recv(Packet& packet)
         throw runtime_error("recvfrom failed");
     }
 
-    packet.remoteIp = htonl(from.sin_addr.s_addr);
-    packet.remotePort = htons(from.sin_port);
+    packet.address = Address(htonl(from.sin_addr.s_addr), htons(from.sin_port));
     packet.size = recvLen;
 }
 
@@ -136,8 +134,8 @@ void Socket::send(const Packet& packet)
     sockaddr_in to;
     memset(&to, 0, sizeof(to));
     to.sin_family = AF_INET;
-    to.sin_port = htons(packet.remotePort);
-    to.sin_addr.s_addr = htonl(packet.remoteIp);
+    to.sin_port = htons(packet.address.port());
+    to.sin_addr.s_addr = htonl(packet.address.ip());
 
     ssize_t sendLen = sendto(sock_,
         reinterpret_cast<const char*>(packet.data.data()),

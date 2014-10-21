@@ -32,7 +32,7 @@ void LandcellManager::setCenter(LandcellId c)
 {
     if(c != center_)
     {
-        LOG(Info) << "LandcellManager::setCenter(): new center=" << hexn(c.x()) << ", " << hexn(c.y()) << "\n";
+        LOG(Misc, Info) << "new center=" << hexn(c.x()) << ", " << hexn(c.y()) << "\n";
         center_ = c;
         load();
     }

@@ -18,6 +18,7 @@
 #ifndef BZR_NET_SESSION_H
 #define BZR_NET_SESSION_H
 
+#include "net/Address.h"
 #include "net/ChecksumXorGenerator.h"
 #include "Noncopyable.h"
 #include <chrono>
@@ -35,24 +36,29 @@ class Session : Noncopyable
 {
 public:
     Session(SessionManager& manager,
-        uint32_t serverIp,
-        uint16_t serverPort,
+        Address address,
         const string& accountName,
         const string& accountKey);
     Session(SessionManager& manager,
-        uint32_t serverIp,
-        uint16_t serverPort,
+        Address address,
         uint64_t cookie);
 
     void handle(const Packet& packet);
     void tick(net_time_point now);
 
-    uint32_t serverIp() const;
-    uint16_t serverPort() const;
+    Address address() const;
     bool dead() const;
     net_time_point nextTick() const;
-    
+
 private:
+    enum class State
+    {
+        kLogon,
+        kReferred,
+        kConnectResponse,
+        kConnected
+    };
+
     void sendLogon();
     void sendReferred();
     void sendConnectResponse();
@@ -69,18 +75,9 @@ private:
     void handleFlow(BinReader& reader);
 
     void advanceServerSequence();
-    
-    enum class State
-    {
-        kLogon,
-        kReferred,
-        kConnectResponse,
-        kConnected
-    };
 
     SessionManager& manager_;
-    const uint32_t serverIp_;
-    const uint16_t serverPort_;
+    const Address address_;
     State state_;
 
     // for State::kLogon
@@ -91,6 +88,7 @@ private:
     uint64_t cookie_;
 
     net_time_point nextPeriodic_;
+    size_t numPeriodicSent_;
 
     uint32_t serverSequence_;
     uint32_t clientSequence_;

@@ -16,8 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "net/SessionManager.h"
+#include "Core.h"
+#include "Log.h"
 
-static chrono::microseconds kMaxTimeout = chrono::seconds(1);
+static const chrono::microseconds kMaxTimeout = chrono::seconds(1);
 
 template<class Mutex>
 class unlock_guard
@@ -63,17 +65,9 @@ void SessionManager::add(unique_ptr<Session> session)
     sessions_.push_back(move(session));
 }
 
-bool SessionManager::exists(uint32_t ip, uint16_t port) const
+bool SessionManager::exists(Address address) const
 {
-    for(const unique_ptr<Session>& session : sessions_)
-    {
-        if(session->serverIp() == ip && session->serverPort() == port)
-        {
-            return true;
-        }
-    }
-
-    return false;
+    return any_of(sessions_.begin(), sessions_.end(), [=](const unique_ptr<Session>& s) { return s->address() == address; });
 }
 
 void SessionManager::setPrimary(Session* primary)
@@ -117,17 +111,25 @@ void SessionManager::run()
 
 void SessionManager::handle(const Packet& packet)
 {
-    for(unique_ptr<Session>& session : sessions_)
+    for(auto it = sessions_.begin(); it != sessions_.end(); ++it)
     {
-        if(session->serverIp() == packet.remoteIp && session->serverPort() == packet.remotePort)
+        if((*it)->address() == packet.address)
         {
-            session->handle(packet);
+            try
+            {
+                (*it)->handle(packet);
+            }
+            catch(const runtime_error& e)
+            {
+                LOG(Net, Error) << "session at " << (*it)->address() << " threw an error: " << e.what() << "\n";
+                it = sessions_.erase(it);
+            }
+
             return;
         }
     }
 
-    // TODO proper logging
-    fprintf(stderr, "WARNING: dropped packet from %08x:%d\n", packet.remoteIp, packet.remotePort);
+    LOG(Net, Warn) << "dropped a packet from " << packet.address << "\n";
 }
 
 void SessionManager::tick()
@@ -140,6 +142,7 @@ void SessionManager::tick()
 
         if((*it)->dead())
         {
+            LOG(Net, Info) << "session at " << (*it)->address() << " died\n";
             it = sessions_.erase(it);
         }
         else

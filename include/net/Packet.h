@@ -15,42 +15,19 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_NET_SESSIONMANAGER_H
-#define BZR_NET_SESSIONMANAGER_H
+#ifndef BZR_NET_PACKET_H
+#define BZR_NET_PACKET_H
 
-#include "net/Session.h"
-#include "net/Socket.h"
-#include <mutex>
-#include <thread>
+#include "net/Address.h"
+#include <array>
 
-class SessionManager : Noncopyable
+const size_t kDatagramMaxSize = 512;
+
+struct Packet
 {
-public:
-    SessionManager();
-
-    // for external use
-    void addLocked(unique_ptr<Session> session);
-    void stop();
-
-    // for internal use
-    void add(unique_ptr<Session> session);
-    bool exists(Address address) const;
-    void setPrimary(Session* primary);
-    void send(const Packet& packet);
-
-private:
-    void run();
-    void handle(const Packet& packet);
-    void tick();
-
-    chrono::microseconds getReadTimeout() const;
-
-    mutex mutex_; // protects all class variables
-    bool done_;
-    Socket socket_;
-    Session* primary_;
-    vector<unique_ptr<Session>> sessions_;
-    thread thread_;
+    Address address;
+    size_t size;
+    array<uint8_t, kDatagramMaxSize> data;
 };
 
 #endif

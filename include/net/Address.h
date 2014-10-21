@@ -15,42 +15,26 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_NET_SESSIONMANAGER_H
-#define BZR_NET_SESSIONMANAGER_H
+#ifndef NET_ADDRESS_H
+#define NET_ADDRESS_H
 
-#include "net/Session.h"
-#include "net/Socket.h"
-#include <mutex>
-#include <thread>
-
-class SessionManager : Noncopyable
+class Address
 {
 public:
-    SessionManager();
+    Address();
+    Address(uint32_t ip, uint16_t port);
 
-    // for external use
-    void addLocked(unique_ptr<Session> session);
-    void stop();
-
-    // for internal use
-    void add(unique_ptr<Session> session);
-    bool exists(Address address) const;
-    void setPrimary(Session* primary);
-    void send(const Packet& packet);
+    uint32_t ip() const;
+    uint16_t port() const;
 
 private:
-    void run();
-    void handle(const Packet& packet);
-    void tick();
-
-    chrono::microseconds getReadTimeout() const;
-
-    mutex mutex_; // protects all class variables
-    bool done_;
-    Socket socket_;
-    Session* primary_;
-    vector<unique_ptr<Session>> sessions_;
-    thread thread_;
+    uint32_t ip_;
+    uint16_t port_;
 };
+
+bool operator==(Address a, Address b);
+bool operator!=(Address a, Address b);
+
+ostream& operator<<(ostream& os, Address addr);
 
 #endif

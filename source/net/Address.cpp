@@ -15,44 +15,39 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_LOG_H
-#define BZR_LOG_H
+#include "net/Address.h"
 
-#include "ioutil.h"
-#include "Noncopyable.h"
-#include <fstream>
+Address::Address() : ip_(0), port_(0)
+{}
 
-enum class LogSubsystem
+Address::Address(uint32_t ip, uint16_t port) : ip_(ip), port_(port)
+{}
+
+uint32_t Address::ip() const
 {
-    kMisc = 0x1,
-    kNet = 0x2
-};
+    return ip_;
+}
 
-enum class LogSeverity
+uint16_t Address::port() const
 {
-    kDebug,
-    kInfo,
-    kNotice,
-    kWarn,
-    kError,
-    kCrit,
-    kAlert,
-    kEmerg
-};
+    return port_;
+}
 
-class Log : Noncopyable
+bool operator==(Address a, Address b)
 {
-public:
-    Log();
-    ostream& write(LogSubsystem sys, LogSeverity sev);
+    return a.ip() == b.ip() && a.port() == b.port();
+}
 
-private:
-    ostream* os_;
-    fstream fs_;
-    int subsystems_;
-    int verbosity_;
-};
+bool operator!=(Address a, Address b)
+{
+    return a.ip() != b.ip() || a.port() != b.port();
+}
 
-#define LOG(sys, sev) Core::get().log().write(LogSubsystem::k##sys, LogSeverity::k##sev)
-
-#endif
+ostream& operator<<(ostream& os, Address addr)
+{
+    return os << (addr.ip() >> 24) << '.'
+        << ((addr.ip() >> 16) & 0xFF) << '.'
+        << ((addr.ip() >> 8) & 0xFF) << '.'
+        << (addr.ip() & 0xFF) << ':'
+        << addr.port();
+}
