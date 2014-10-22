@@ -150,7 +150,6 @@ private:
     map<uint32_t, unique_ptr<Packet>> clientPackets_;
 
     net_time_point nextRequestMissing_;
-    //net_time_point nextAckServer_;
 
     uint16_t lastFlowTime_;
     uint32_t lastFlowBytes_;
