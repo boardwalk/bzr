@@ -389,19 +389,12 @@ void Session::tick(net_time_point now)
         BinWriter writer(packet.data.data(), packet.data.size());
         writer.skip(sizeof(PacketHeader));
 
-        PacketHeader header;
-        header.sequence = clientLeadingSequence_ + 1;
-        header.flags = 0;
-        header.checksum = 0;
-        header.netId = clientNetId_;
-        header.time = chrono::duration_cast<SessionDuration>(now - sessionBegin_).count();
-        header.size = 0;
-        header.iteration = iteration_;
+        uint32_t flags = 0;
+        uint16_t time = chrono::duration_cast<SessionDuration>(now - sessionBegin_).count();
 
         if(now > nextRequestMissing_)
         {
-            header.flags |= kRequestRetransmit;
-
+            flags |= kRequestRetransmit;
             writer.writeInt(static_cast<uint32_t>(serverPackets_.size()));
 
             for(uint32_t sequence : serverPackets_)
@@ -414,7 +407,7 @@ void Session::tick(net_time_point now)
 
         if(serverLeadingSequence_ > serverSequence_)
         {
-            header.flags |= kAckSequence;
+            flags |= kAckSequence;
             writer.writeInt(serverLeadingSequence_);
 
             serverSequence_ = serverLeadingSequence_;
@@ -422,35 +415,58 @@ void Session::tick(net_time_point now)
 
         if(now > nextPeriodic_)
         {
-            header.flags |= kTimeSync;
+            flags |= kTimeSync;
             writer.writeDouble(beginTime_ + chrono::duration<double>(now - beginLocalTime_).count());
 
-            header.flags |= kEchoRequest;
+            flags |= kEchoRequest;
             writer.writeFloat(chrono::duration<float>(now - manager_.getClientBegin()).count());
 
-            header.flags |= kFlow;
+            flags |= kFlow;
             writer.writeInt(lastFlowBytes_);
             writer.writeShort(lastFlowTime_);
 
             lastFlowBytes_ = 0;
-            lastFlowTime_ = header.time;
+            lastFlowTime_ = time;
             nextPeriodic_ = now + kPingPacketDelay;
         }
 
-        if(header.flags)
+        if(flags != 0)
         {
-            header.flags |= kEncryptedChecksum;
+            // write header
+            PacketHeader header;
+            header.sequence = clientLeadingSequence_;
+            header.flags = flags | kEncryptedChecksum;
+            header.checksum = 0;
+            header.netId = clientNetId_;
+            header.time = time;
             header.size = static_cast<uint16_t>(writer.position() - sizeof(PacketHeader));
+            header.iteration = iteration_;
 
             writer.seek(0);
             writer.writeRaw(&header, sizeof(header));
 
+            // calc checksum and rewrite header
             header.checksum = checksumPacket(packet, clientXorGen_);
 
             writer.seek(0);
             writer.writeRaw(&header, sizeof(header));
 
+            // send packet
             manager_.send(packet);
+
+            // set retransmission flag and rewrite header
+            header.flags = flags | kRetransmission;
+
+            writer.seek(0);
+            writer.writeRaw(&header, sizeof(header));
+
+            // calc checksum and rewrite header
+            header.checksum = checksumPacket(packet, clientXorGen_);
+
+            writer.seek(0);
+            writer.writeRaw(&header, sizeof(header));
+
+            // store packet for retransmit
             clientPackets_[header.sequence].reset(new Packet(packet));
 
             clientLeadingSequence_++;
