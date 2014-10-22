@@ -19,6 +19,7 @@
 #define BZR_IOUTIL_H
 
 #include <iomanip>
+#include <ostream>
 #include <type_traits>
 
 template<class T>

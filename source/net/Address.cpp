@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "net/Address.h"
+#include <ostream>
 
 Address::Address() : ip_(0), port_(0)
 {}

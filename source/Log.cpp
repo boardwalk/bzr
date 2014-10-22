@@ -119,5 +119,5 @@ ostream& Log::write(LogSubsystem sys, LogSeverity sev)
         return g_nullStream;
     }
 
-    return *os_ << sev << " ";
+    return *os_ << sys << " " << sev << " ";
 }
