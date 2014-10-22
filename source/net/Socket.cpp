@@ -56,7 +56,7 @@ Socket::Socket()
     addr.sin_port = 0;
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    if(bind(sock_, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) != 0)
+    if(::bind(sock_, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) != 0)
     {
         throw runtime_error("Failed to bind socket");
     }

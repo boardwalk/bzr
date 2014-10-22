@@ -707,7 +707,7 @@ void Session::advanceServerSequence()
     {
         if(nextRequestMissing_ == net_time_point::max())
         {
-            nextRequestMissing_ == net_clock::now() + kMissingPacketDelay;
+            nextRequestMissing_ = net_clock::now() + kMissingPacketDelay;
         }
     }
     else
