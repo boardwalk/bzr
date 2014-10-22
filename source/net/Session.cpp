@@ -225,6 +225,7 @@ void Session::handle(const Packet& packet)
     if(state_ == State::kConnectResponse)
     {
         state_ = State::kConnected;
+        nextPeriodic_ = net_clock::now() + kPingPacketDelay;
         numPeriodicSent_ = 0;
 
         LOG(Net, Info) << address_ << " transitioned to connected\n";
