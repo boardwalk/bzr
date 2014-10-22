@@ -22,6 +22,7 @@
 #include "BinWriter.h"
 #include "Core.h"
 #include "Log.h"
+#include <algorithm>
 
 enum PacketFlags
 {
@@ -48,16 +49,6 @@ enum PacketFlags
     kEchoResponse      = 0x04000000, // CEchoResponseHeader (?)
     kFlow              = 0x08000000  // CFloatStruct (?)
 };
-
-PACK(struct PacketHeader {
-    uint32_t sequence;
-    uint32_t flags;
-    uint32_t checksum;
-    uint16_t netId;
-    uint16_t time;
-    uint16_t size;
-    uint16_t iteration;
-});
 
 PACK(struct BlobHeader {
     uint64_t id;
@@ -94,71 +85,71 @@ static uint32_t checksum(const void* data, size_t size)
     return result;
 }
 
-static uint32_t checksumHeader(const PacketHeader* header)
+static uint32_t checksumHeader(const PacketHeader& header)
 {
-    PacketHeader* header_nc = const_cast<PacketHeader*>(header);
+    PacketHeader& header_nc = const_cast<PacketHeader&>(header);
 
-    uint32_t origChecksum = header->checksum;
-    header_nc->checksum = 0xBADD70DD;
+    uint32_t origChecksum = header.checksum;
+    header_nc.checksum = 0xBADD70DD;
 
-    uint32_t result = checksum(header, sizeof(PacketHeader));
+    uint32_t result = checksum(&header, sizeof(PacketHeader));
 
-    header_nc->checksum = origChecksum;
+    header_nc.checksum = origChecksum;
 
     return result;
 }
 
-static uint32_t checksumContent(const PacketHeader* header, const void* data)
+static uint32_t checksumContent(const PacketHeader& header, const void* data)
 {
-    if(header->flags & kEncryptedChecksum)
+    if(header.flags & kEncryptedChecksum)
     {
-        BinReader reader(data, header->size);
+        BinReader reader(data, header.size);
 
-        if(header->flags & kServerSwitch)
+        if(header.flags & kServerSwitch)
         {
             reader.readRaw(8);
         }
 
-        if(header->flags & kRequestRetransmit)
+        if(header.flags & kRequestRetransmit)
         {
             uint32_t nseq = reader.readInt();
             reader.readRaw(nseq * sizeof(uint32_t));
         }
 
-        if(header->flags & kRejectRetransmit)
+        if(header.flags & kRejectRetransmit)
         {
             uint32_t nseq = reader.readInt();
             reader.readRaw(nseq * sizeof(uint32_t));
         }
 
-        if(header->flags & kCICMDCommand)
+        if(header.flags & kCICMDCommand)
         {
             reader.readRaw(8);
         }
 
-        if(header->flags & kTimeSync)
+        if(header.flags & kTimeSync)
         {
             reader.readRaw(8);
         }
 
-        if(header->flags & kEchoRequest)
+        if(header.flags & kEchoRequest)
         {
             reader.readRaw(4);
         }
 
-        if(header->flags & kEchoResponse)
+        if(header.flags & kEchoResponse)
         {
             reader.readRaw(8);
         }
 
-        if(header->flags & kFlow)
+        if(header.flags & kFlow)
         {
             reader.readRaw(6);
         }
 
         uint32_t result = checksum(data, reader.position());
 
-        if(header->flags & kBlobFragments)
+        if(header.flags & kBlobFragments)
         {
             while(reader.remaining() != 0)
             {
@@ -175,16 +166,13 @@ static uint32_t checksumContent(const PacketHeader* header, const void* data)
         return result;
     }
 
-    return checksum(data, header->size);
+    return checksum(data, header.size);
 }
 
 static uint32_t checksumPacket(const Packet& packet, ChecksumXorGenerator& xorGen)
 {
-    const PacketHeader* header = reinterpret_cast<const PacketHeader*>(packet.data.data());
-    const void* data = reinterpret_cast<const uint8_t*>(packet.data.data()) + sizeof(PacketHeader);
-
-    uint32_t xorVal = (header->flags & kEncryptedChecksum) ? xorGen.get(header->sequence) : 0;
-    return checksumHeader(header) + checksumContent(header, data) ^ xorVal;
+    uint32_t xorVal = (packet.header.flags & kEncryptedChecksum) ? xorGen.get(packet.header.sequence) : 0;
+    return checksumHeader(packet.header) + checksumContent(packet.header, packet.payload) ^ xorVal;
 }
 
 Session::Session(SessionManager& manager,
@@ -195,11 +183,11 @@ Session::Session(SessionManager& manager,
     address_(address),
     state_(State::kLogon),
     sessionBegin_(net_clock::now()),
-    nextPeriodic_(sessionBegin_ + kLogonPacketDelay),
-    numPeriodicSent_(1),
+    numPeriodicSent_(0),
     accountName_(move(accountName)),
     accountKey_(move(accountKey))
 {
+    LOG(Net, Info) << address_ << " logon session created\n";
     sendLogon();
 }
 
@@ -210,83 +198,80 @@ Session::Session(SessionManager& manager,
     address_(address),
     state_(State::kReferred),
     sessionBegin_(net_clock::now()),
-    nextPeriodic_(sessionBegin_ + kReferredPacketDelay),
-    numPeriodicSent_(1),
+    numPeriodicSent_(0),
     cookie_(cookie)
 {
+    LOG(Net, Info) << address_ << " referred session created\n";
     sendReferred();
+}
+
+Session::~Session()
+{
+    LOG(Net, Info) << address_ << " destroyed\n";
 }
 
 void Session::handle(const Packet& packet)
 {
-    BinReader reader(packet.data.data(), packet.size);
+    uint32_t calcChecksum = checksumPacket(packet, serverXorGen_);
 
-    const PacketHeader* header = reader.readPointer<PacketHeader>();
-
-    if(header->size != reader.remaining())
+    if(packet.header.checksum != calcChecksum)
     {
-        LOG(Net, Warn) << address_ << " dropping packet, packet size is " << reader.remaining() << ", packet has " << header->size << "\n";
+        LOG(Net, Warn) << address_ << " dropping packet, calc checksum is " << hexn(calcChecksum) << ", packet has " << hexn(packet.header.checksum) << "\n";
         return;
     }
 
-    const uint32_t calcChecksum = checksumPacket(packet, serverXorGen_);
+    BinReader reader(packet.payload, sizeof(packet.payload));
 
-    if(header->checksum != calcChecksum)
+    if(state_ == State::kConnectResponse)
     {
-        LOG(Net, Warn) << address_ << " dropping packet, calc checksum is " << hexn(calcChecksum) << ", packet has " << hexn(header->checksum) << "\n";
-        return;
+        state_ = State::kConnected;
+        numPeriodicSent_ = 0;
+
+        LOG(Net, Info) << address_ << " transitioned to connected\n";
     }
 
     if(state_ == State::kLogon || state_ == State::kReferred)
     {
-        if(header->flags != kConnectRequest)
+        if(packet.header.flags != kConnectRequest)
         {
-            LOG(Net, Warn) << address_ << "dropping packet, flags should be " << hexn(static_cast<uint32_t>(kConnectRequest)) << ", packet has " << hexn(header->flags) << "\n";
+            LOG(Net, Warn) << address_ << "dropping packet, flags should be " << hexn(static_cast<uint32_t>(kConnectRequest)) << ", packet has " << hexn(packet.header.flags) << "\n";
             return;
         }
 
-        handleConnect(header, reader);
+        handleConnect(reader, packet.header);
 
         state_ = State::kConnectResponse;
         numPeriodicSent_ = 0;
         sendConnectResponse();
     }
-    else if(state_ == State::kConnectResponse)
-    {
-        LOG(Net, Info) << address_ << " transitioning to connected\n";
-
-        state_ = State::kConnected;
-        numPeriodicSent_ = 0;
-        return handle(packet);
-    }
     else if(state_ == State::kConnected)
     {
-        if(header->sequence <= serverSequence_)
+        if(packet.header.sequence <= serverSequence_ || serverPackets_.find(packet.header.sequence) != serverPackets_.end())
         {
-            LOG(Net, Warn) << address_ << " dropping packet, server sequence is " << serverSequence_ << ", packet has " << header->sequence << "\n";
+            LOG(Net, Warn) << address_ << " dropping packet, already received sequence " << packet.header.sequence << "\n";
             return;
         }
 
-        if(header->netId != serverNetId_)
+        if(packet.header.netId != serverNetId_)
         {
-            LOG(Net, Warn) << address_ << " dropping packet, server net id is " << serverNetId_ << ", packet has " << header->netId << "\n";
+            LOG(Net, Warn) << address_ << " dropping packet, server net id is " << serverNetId_ << ", packet has " << packet.header.netId << "\n";
             return;
         }
 
-        if(header->iteration != iteration_)
+        if(packet.header.iteration != iteration_)
         {
-            LOG(Net, Warn) << address_ << " dropping packet, iteration is " << iteration_ << ", packet has " << header->iteration << "\n";
+            LOG(Net, Warn) << address_ << " dropping packet, iteration is " << iteration_ << ", packet has " << packet.header.iteration << "\n";
             return;
         }
 
         // record that we've received the packet
-        serverPackets_.insert(header->sequence);
+        serverPackets_.insert(packet.header.sequence);
         advanceServerSequence();
 
         // record that we've received some bytes
-        lastFlowBytes_ += static_cast<uint32_t>(packet.size);
+        lastFlowBytes_ += static_cast<uint32_t>(sizeof(PacketHeader) + packet.header.size);
 
-        uint32_t flags = header->flags & ~(kRetransmission | kEncryptedChecksum);
+        uint32_t flags = packet.header.flags & ~(kRetransmission | kEncryptedChecksum);
 
         if(flags == kServerSwitch)
         {
@@ -386,11 +371,10 @@ void Session::tick(net_time_point now)
     {
         Packet packet;
 
-        BinWriter writer(packet.data.data(), packet.data.size());
-        writer.skip(sizeof(PacketHeader));
+        BinWriter writer(packet.payload, sizeof(packet.payload));
 
-        uint32_t flags = 0;
         uint16_t time = chrono::duration_cast<SessionDuration>(now - sessionBegin_).count();
+        uint32_t flags = 0;
 
         if(now > nextRequestMissing_)
         {
@@ -432,42 +416,18 @@ void Session::tick(net_time_point now)
 
         if(flags != 0)
         {
-            // write header
-            PacketHeader header;
-            header.sequence = clientLeadingSequence_;
-            header.flags = flags | kEncryptedChecksum;
-            header.checksum = 0;
-            header.netId = clientNetId_;
-            header.time = time;
-            header.size = static_cast<uint16_t>(writer.position() - sizeof(PacketHeader));
-            header.iteration = iteration_;
-
-            writer.seek(0);
-            writer.writeRaw(&header, sizeof(header));
-
-            // calc checksum and rewrite header
-            header.checksum = checksumPacket(packet, clientXorGen_);
-
-            writer.seek(0);
-            writer.writeRaw(&header, sizeof(header));
-
-            // send packet
+            packet.header.sequence = clientLeadingSequence_ + 1;
+            packet.header.flags = kEncryptedChecksum;
+            packet.header.netId = clientNetId_;
+            packet.header.time = time;
+            packet.header.size = static_cast<uint16_t>(writer.position());
+            packet.header.iteration = iteration_;
+            packet.header.checksum = checksumPacket(packet, clientXorGen_); // must be done last
             manager_.send(packet);
 
-            // set retransmission flag and rewrite header
-            header.flags = flags | kRetransmission;
-
-            writer.seek(0);
-            writer.writeRaw(&header, sizeof(header));
-
-            // calc checksum and rewrite header
-            header.checksum = checksumPacket(packet, clientXorGen_);
-
-            writer.seek(0);
-            writer.writeRaw(&header, sizeof(header));
-
-            // store packet for retransmit
-            clientPackets_[header.sequence].reset(new Packet(packet));
+            packet.header.flags = flags | kRetransmission;
+            packet.header.checksum = checksumPacket(packet, clientXorGen_); // must be done last
+            clientPackets_[packet.header.sequence].reset(new Packet(packet));
 
             clientLeadingSequence_++;
         }
@@ -501,10 +461,11 @@ net_time_point Session::nextTick() const
 void Session::sendLogon()
 {
     Packet packet;
-    BinWriter writer(packet.data.data(), packet.data.size());
 
-    // construct packet
-    writer.skip(sizeof(PacketHeader));
+    memset(&packet.header, 0, sizeof(packet.header));
+    packet.header.flags = kLogon;
+
+    BinWriter writer(packet.payload, sizeof(packet.payload));
     writer.writeString("1802"); // NetVersion
     size_t authDataLenOff = writer.position();
     writer.skip(sizeof(uint32_t));
@@ -516,31 +477,15 @@ void Session::sendLogon()
     writer.writeInt(static_cast<uint32_t>(accountKey_.size()));
     writer.writeRaw(accountKey_.data(), accountKey_.size());
 
-    // fill in auth data len
     writer.seek(authDataLenOff);
-    writer.writeInt(static_cast<uint32_t>(packet.size - writer.position()));
+    writer.writeInt(static_cast<uint32_t>(writer.position() - authDataLenOff));
 
-    // fill in packet header
-    PacketHeader header;
-    header.sequence = 0;
-    header.flags = PacketFlags::kLogon;
-    header.checksum = 0;
-    header.netId = 0;
-    header.time = 0;
-    header.size = static_cast<uint16_t>(packet.size - sizeof(PacketHeader));
-    header.iteration = 0;
-
-    writer.seek(0);
-    writer.writeRaw(&header, sizeof(header));
-
-    // calculate checksum and rewrite header
-    header.checksum = checksumPacket(packet, clientXorGen_);
-
-    writer.seek(0);
-    writer.writeRaw(&header, sizeof(header));
-
-    // send packet
+    packet.header.size = static_cast<uint16_t>(writer.position());
+    packet.header.checksum = checksumPacket(packet, clientXorGen_); // must be done last
     manager_.send(packet);
+
+    nextPeriodic_ = net_clock::now() + kLogonPacketDelay;
+    numPeriodicSent_++;
 
     LOG(Net, Info) << address_ << " sent logon\n";
 }
@@ -548,29 +493,17 @@ void Session::sendLogon()
 void Session::sendReferred()
 {
     Packet packet;
-    BinWriter writer(packet.data.data(), packet.data.size());
 
-    // construct packet
-    PacketHeader header;
-    header.sequence = 0;
-    header.flags = kReferred;
-    header.checksum = 0;
-    header.netId = 0;
-    header.time = 0;
-    header.size = sizeof(uint64_t);
-    header.iteration = 0;
+    memset(&packet.header, 0, sizeof(packet.header));
+    packet.header.flags = kReferred;
+    packet.header.size = sizeof(uint64_t);
 
-    writer.writeRaw(&header, sizeof(header));
+    BinWriter writer(packet.payload, sizeof(packet.payload));
     writer.writeLong(cookie_);
 
-    // calc checksum and rewrite header
-    header.checksum = checksumPacket(packet, clientXorGen_);
-
-    writer.seek(0);
-    writer.writeRaw(&header, sizeof(header));
-
-    // send packet
+    packet.header.checksum = checksumPacket(packet, clientXorGen_); // must be done last
     manager_.send(packet);
+
     nextPeriodic_ = net_clock::now() + kReferredPacketDelay;
     numPeriodicSent_++;
 
@@ -579,32 +512,22 @@ void Session::sendReferred()
 
 void Session::sendConnectResponse()
 {
-    assert(state_ == State::kConnectResponse);
-
     Packet packet;
-    BinWriter writer(packet.data.data(), packet.data.size());
 
-    // construct packet
-    PacketHeader header;
-    header.sequence = 0;
-    header.flags = kConnectResponse;
-    header.checksum = 0;
-    header.netId = clientNetId_;
-    header.time = 0;
-    header.size = sizeof(uint64_t);
-    header.iteration = iteration_;
+    memset(&packet.header, 0, sizeof(packet.header));
+    packet.header.flags = kConnectResponse;
+    packet.header.netId = clientNetId_;
+    packet.header.size = sizeof(uint64_t);
+    packet.header.iteration = iteration_;
 
-    writer.writeRaw(&header, sizeof(header));
+    BinWriter writer(packet.payload, sizeof(packet.payload));
     writer.writeLong(cookie_);
 
-    // calc checksum and rewrite header
-    header.checksum = checksumPacket(packet, clientXorGen_);
-
-    writer.seek(0);
-    writer.writeRaw(&header, sizeof(header));
-
-    // send packet
+    packet.header.checksum = checksumPacket(packet, clientXorGen_); // must be done last
     manager_.send(packet);
+
+    nextPeriodic_ = net_clock::now() + kConnectResponsePacketDelay;
+    numPeriodicSent_++;
 
     LOG(Net, Info) << address_ << " sent connect response\n";
 }
@@ -617,7 +540,9 @@ void Session::handleBlobFragments(BinReader& reader)
 
 void Session::handleServerSwitch(BinReader& reader)
 {
-    reader.readRaw(8);
+    /*sequence*/ reader.readInt();
+    /*type*/ reader.readInt();
+
     manager_.setPrimary(this);
 
     LOG(Net, Info) << address_ << " received server switch\n";
@@ -641,6 +566,8 @@ void Session::handleRequestRetransmit(BinReader& reader)
 
         manager_.send(*it->second);
     }
+
+    LOG(Net, Debug) << address_ << " received request retransmit for " << numSequence << " packets\n";
 }
 
 void Session::handleRejectRetransmit(BinReader& reader)
@@ -651,16 +578,15 @@ void Session::handleRejectRetransmit(BinReader& reader)
     {
         uint32_t sequence = reader.readInt();
 
-        if(sequence < serverSequence_)
+        if(sequence > serverSequence_)
         {
-            // don't care!
-            continue;
+            serverPackets_.insert(sequence);
         }
-
-        serverPackets_.insert(sequence);
     }
 
     advanceServerSequence();
+
+    LOG(Net, Debug) << address_ << " received reject retransmit for " << numSequence << " packets\n";
 }
 
 void Session::handleAckSequence(BinReader& reader)
@@ -676,6 +602,8 @@ void Session::handleAckSequence(BinReader& reader)
 
         it = clientPackets_.erase(it);
     }
+
+    LOG(Net, Debug) << address_ << " received ack sequence " << clientSequence_ << "\n";
 }
 
 void Session::handleReferral(BinReader& reader)
@@ -694,14 +622,14 @@ void Session::handleReferral(BinReader& reader)
         return;
     }
 
-    LOG(Net, Info) << address_ << " received referral to " << referral << "\n";
-
     unique_ptr<Session> session(new Session(manager_, referral, cookie));
 
     manager_.add(move(session));
+
+    LOG(Net, Info) << address_ << " received referral to " << referral << "\n";
 }
 
-void Session::handleConnect(const PacketHeader* header, BinReader& reader)
+void Session::handleConnect(BinReader& reader, const PacketHeader& header)
 {
     double beginTime = reader.readDouble();
     uint64_t cookie = reader.readLong();
@@ -715,9 +643,9 @@ void Session::handleConnect(const PacketHeader* header, BinReader& reader)
     serverLeadingSequence_ = 1;
     clientSequence_ = 1;
     clientLeadingSequence_ = 1;
-    serverNetId_ = header->netId;
+    serverNetId_ = header.netId;
     clientNetId_ = clientNetId;
-    iteration_ = header->iteration;
+    iteration_ = header.iteration;
 
     serverXorGen_.init(serverSeed);
     clientXorGen_.init(clientSeed);

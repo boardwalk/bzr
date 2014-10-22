@@ -18,6 +18,7 @@
 #include "net/SessionManager.h"
 #include "Core.h"
 #include "Log.h"
+#include <algorithm>
 
 static const chrono::microseconds kMaxTimeout = chrono::seconds(1);
 
@@ -77,7 +78,15 @@ void SessionManager::add(unique_ptr<Session> session)
 
 bool SessionManager::exists(Address address) const
 {
-    return any_of(sessions_.begin(), sessions_.end(), [=](const unique_ptr<Session>& s) { return s->address() == address; });
+    for(const unique_ptr<Session>& session : sessions_)
+    {
+        if(session->address() == address)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void SessionManager::setPrimary(Session* primary)
@@ -113,7 +122,7 @@ void SessionManager::run()
             Packet packet;
             socket_.recv(packet);
 
-            while(packet.size != 0)
+            while(packet.address.ip() != 0)
             {
                 handle(packet);
                 socket_.recv(packet);
@@ -157,8 +166,12 @@ void SessionManager::tick()
 
         if((*it)->dead())
         {
-            LOG(Net, Info) << "session at " << (*it)->address() << " died\n";
             it = sessions_.erase(it);
+
+            if(primary_ == it->get())
+            {
+                primary_ = nullptr;
+            }
         }
         else
         {

@@ -19,15 +19,24 @@
 #define BZR_NET_PACKET_H
 
 #include "net/Address.h"
-#include <array>
 
-const size_t kDatagramMaxSize = 512;
+const size_t kPayloadMaxSize = 464;
 
-struct Packet
+PACK(struct PacketHeader {
+    uint32_t sequence;
+    uint32_t flags;
+    uint32_t checksum;
+    uint16_t netId;
+    uint16_t time;
+    uint16_t size;
+    uint16_t iteration;
+});
+
+PACK(struct Packet
 {
     Address address;
-    size_t size;
-    array<uint8_t, kDatagramMaxSize> data;
-};
+    PacketHeader header;
+    uint8_t payload[kPayloadMaxSize];
+});
 
 #endif

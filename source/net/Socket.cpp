@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "net/Socket.h"
+#include "Core.h"
+#include "Log.h"
 #ifdef _WIN32
 #include <ws2tcpip.h>
 #else
@@ -100,12 +102,13 @@ bool Socket::wait(chrono::microseconds timeout)
 
 void Socket::recv(Packet& packet)
 {
+BEGIN:
     sockaddr_in from;
     socklen_t fromLen = sizeof(from);
 
     ssize_t recvLen = recvfrom(sock_,
-        reinterpret_cast<char*>(packet.data.data()),
-        static_cast<int>(packet.data.size()),
+        reinterpret_cast<char*>(&packet.header),
+        static_cast<int>(sizeof(packet.header) + sizeof(packet.payload)),
         /*flags*/ 0,
         reinterpret_cast<sockaddr*>(&from),
         &fromLen);
@@ -115,8 +118,6 @@ void Socket::recv(Packet& packet)
         if(wouldBlock())
         {
             packet.address = Address();
-            packet.size = 0;
-
             return;
         }
 
@@ -124,13 +125,25 @@ void Socket::recv(Packet& packet)
     }
 
     packet.address = Address(htonl(from.sin_addr.s_addr), htons(from.sin_port));
-    packet.size = recvLen;
+
+    if(recvLen < static_cast<ssize_t>(sizeof(PacketHeader)))
+    {
+        LOG(Net, Warn) << packet.address << " dropping packet smaller than header\n";
+        goto BEGIN;
+    }
+
+    if(recvLen != static_cast<ssize_t>(sizeof(PacketHeader) + packet.header.size))
+    {
+        LOG(Net, Warn) << packet.address << " dropping packet with bad size in header\n";
+        goto BEGIN;
+    }
 }
 
 void Socket::send(const Packet& packet)
 {
-    assert(packet.size < packet.data.size());
+    assert(packet.header.size <= sizeof(packet.payload));
 
+BEGIN:
     sockaddr_in to;
     memset(&to, 0, sizeof(to));
     to.sin_family = AF_INET;
@@ -138,8 +151,8 @@ void Socket::send(const Packet& packet)
     to.sin_addr.s_addr = htonl(packet.address.ip());
 
     ssize_t sendLen = sendto(sock_,
-        reinterpret_cast<const char*>(packet.data.data()),
-        static_cast<int>(packet.size),
+        reinterpret_cast<const char*>(&packet.header),
+        static_cast<int>(sizeof(packet.header) + sizeof(packet.payload)),
         /*flags*/ 0,
         reinterpret_cast<sockaddr*>(&to),
         sizeof(to));
@@ -161,7 +174,7 @@ void Socket::send(const Packet& packet)
                 throw runtime_error("select failed");
             }
 
-            return send(packet);
+            goto BEGIN;
         }
 
         throw runtime_error("sendto failed");

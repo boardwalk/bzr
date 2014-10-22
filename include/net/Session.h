@@ -43,6 +43,7 @@ public:
     Session(SessionManager& manager,
         Address address,
         uint64_t cookie);
+    ~Session();
 
     void handle(const Packet& packet);
     void tick(net_time_point now);
@@ -72,7 +73,7 @@ private:
     void handleRejectRetransmit(BinReader& reader);
     void handleAckSequence(BinReader& reader);
     void handleReferral(BinReader& reader);
-    void handleConnect(const PacketHeader* header, BinReader& reader);
+    void handleConnect(BinReader& reader, const PacketHeader& header);
     void handleTimeSync(BinReader& reader);
     void handleEchoResponse(BinReader& reader);
     void handleFlow(BinReader& reader);
