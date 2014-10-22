@@ -32,11 +32,14 @@ PACK(struct PacketHeader {
     uint16_t iteration;
 });
 
-PACK(struct Packet
+struct Packet
 {
     Address address;
     PacketHeader header;
     uint8_t payload[kPayloadMaxSize];
-});
+};
+
+static_assert(offsetof(Packet, header) + sizeof(PacketHeader) == offsetof(Packet, payload),
+        "Padding between header and payload");
 
 #endif

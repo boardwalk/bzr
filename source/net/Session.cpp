@@ -23,6 +23,9 @@
 #include "Core.h"
 #include "Log.h"
 #include <algorithm>
+#ifndef _WIN32
+#include <arpa/inet.h>
+#endif
 
 enum PacketFlags
 {
@@ -172,7 +175,7 @@ static uint32_t checksumContent(const PacketHeader& header, const void* data)
 static uint32_t checksumPacket(const Packet& packet, ChecksumXorGenerator& xorGen)
 {
     uint32_t xorVal = (packet.header.flags & kEncryptedChecksum) ? xorGen.get(packet.header.sequence) : 0;
-    return checksumHeader(packet.header) + checksumContent(packet.header, packet.payload) ^ xorVal;
+    return checksumHeader(packet.header) + (checksumContent(packet.header, packet.payload) ^ xorVal);
 }
 
 Session::Session(SessionManager& manager,
