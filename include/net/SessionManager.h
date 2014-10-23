@@ -52,6 +52,7 @@ private:
     Session* primary_;
     vector<unique_ptr<Session>> sessions_;
     net_time_point clientBegin_;
+    vector<BlobPtr> blobs_;
     thread thread_;
 };
 

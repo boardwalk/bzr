@@ -454,6 +454,11 @@ net_time_point Session::nextTick() const
     return min(nextPeriodic_, nextRequestMissing_);
 }
 
+BlobAssembler& Session::blobAssembler()
+{
+    return blobAssembler_;
+}
+
 void Session::sendLogon()
 {
     Packet packet;

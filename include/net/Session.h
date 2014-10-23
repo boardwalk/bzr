@@ -52,6 +52,7 @@ public:
     Address address() const;
     bool dead() const;
     net_time_point nextTick() const;
+    BlobAssembler& blobAssembler();
 
 private:
     typedef chrono::duration<uint16_t, ratio<1, 2>> SessionDuration;

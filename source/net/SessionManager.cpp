@@ -164,6 +164,13 @@ void SessionManager::tick()
     {
         (*it)->tick(now);
 
+        for(BlobPtr& blob : (*it)->blobAssembler())
+        {
+            blobs_.push_back(move(blob));
+        }
+
+        (*it)->blobAssembler().clear();
+
         if((*it)->dead())
         {
             it = sessions_.erase(it);
