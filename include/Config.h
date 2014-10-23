@@ -38,6 +38,8 @@ public:
     fp_t getFloat(const char* name, fp_t defaultValue);
     string getString(const char* name, const string& defaultValue);
 
+    void erase(const char* name);
+
 private:
     void set(const char* name, json_t* value);
     json_t* get(const char* name) const;

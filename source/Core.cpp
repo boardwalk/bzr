@@ -19,6 +19,7 @@
 #ifndef HEADLESS
 #include "graphics/Renderer.h"
 #endif
+#include "net/SessionManager.h"
 #include "resource/Region.h"
 #include "Camera.h"
 #include "Config.h"
@@ -34,7 +35,7 @@ static const fp_t kStepRate = 60.0;
 
 static unique_ptr<Core> g_singleton;
 
-void Core::go()
+void Core::execute()
 {
     assert(!g_singleton);
     g_singleton.reset(new Core{});
@@ -46,6 +47,11 @@ void Core::go()
 Core& Core::get()
 {
     return *g_singleton;
+}
+
+void Core::stop()
+{
+    done_ = true;
 }
 
 Config& Core::config()
@@ -137,6 +143,7 @@ void Core::init()
     resourceCache_.reset(new ResourceCache{});
     landcellManager_.reset(new LandcellManager{});
     objectManager_.reset(new ObjectManager{});
+    sessionManager_.reset(new SessionManager{});
     region_ = resourceCache_->get(0x13000000);
     camera_.reset(new Camera{});
 #ifndef HEADLESS
@@ -175,6 +182,7 @@ void Core::cleanup()
     renderer_.reset();
 #endif
     camera_.reset();
+    sessionManager_.reset();
     objectManager_.reset();
     landcellManager_.reset();
     resourceCache_.reset();

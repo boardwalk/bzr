@@ -30,12 +30,14 @@ class ObjectManager;
 struct Region;
 class Renderer;
 class ResourceCache;
+class SessionManager;
 
 class Core
 {
 public:
-    static void go();
+    static void execute();
     static Core& get();
+    void stop();
 
     Config& config();
     Log& log();
@@ -72,6 +74,7 @@ private:
     unique_ptr<ResourceCache> resourceCache_;
     unique_ptr<LandcellManager> landcellManager_;
     unique_ptr<ObjectManager> objectManager_;
+    unique_ptr<SessionManager> sessionManager_;
     ResourcePtr region_;
     unique_ptr<Camera> camera_;
 #ifndef HEADLESS

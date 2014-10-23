@@ -163,6 +163,30 @@ string Config::getString(const char* name, const string& defaultValue)
     }
 }
 
+void Config::erase(const char* name)
+{
+    vector<string> nameParts = splitName(name);
+
+    string lastPart = nameParts.back();
+    nameParts.pop_back();
+
+    json_t* node = root_;
+
+    for(string& part : nameParts)
+    {
+        json_t* childNode = json_object_get(node, part.c_str());
+
+        if(!json_is_object(childNode))
+        {
+            return;
+        }
+
+        node = childNode;
+    }
+
+    json_object_del(node, lastPart.c_str());
+}
+
 void Config::set(const char* name, json_t* value)
 {
     vector<string> nameParts = splitName(name);

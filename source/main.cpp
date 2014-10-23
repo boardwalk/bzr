@@ -17,8 +17,14 @@
  */
 #include "Core.h"
 #include <SDL_main.h>
+#include <signal.h>
 #include <cstdio>
 #include <cstdlib>
+
+static void sighandler(int)
+{
+    Core::get().stop();
+}
 
 int main(int argc, char* argv[])
 {
@@ -26,9 +32,11 @@ int main(int argc, char* argv[])
     UNUSED(argc);
     UNUSED(argv);
 
+    signal(SIGINT, sighandler);
+
     try
     {
-        Core::go();
+        Core::execute();
     }
     catch(const runtime_error& e)
     {

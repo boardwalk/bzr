@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "net/SessionManager.h"
+#include "Config.h"
 #include "Core.h"
 #include "Log.h"
 #include <algorithm>
@@ -47,21 +48,30 @@ SessionManager::SessionManager() :
     primary_(nullptr),
     clientBegin_(net_clock::now()),
     thread_(bind(&SessionManager::run, this))
-{}
-
-void SessionManager::addLocked(unique_ptr<Session> session)
 {
-    lock_guard<mutex> lock(mutex_);
+    Config& config = Core::get().config();
 
-    if(primary_ == nullptr)
+    int serverIp = config.getInt("SessionManager.serverIp", 0);
+    int serverPort = config.getInt("SessionManager.serverPort", 0);
+    string accountName = config.getString("SessionManager.accountName", "");
+    string accountKey = config.getString("SessionManager.accountKey", "");
+
+    config.erase("SessionManager");
+
+    if(serverIp == 0)
     {
-        primary_ = session.get();
+        LOG(Net, Warn) << "no login info in configuration\n";
+        return;
     }
 
+    Address address(serverIp, static_cast<uint16_t>(serverPort));
+
+    lock_guard<mutex> lock(mutex_);
+    unique_ptr<Session> session(new Session(*this, address, move(accountName), move(accountKey)));
     sessions_.push_back(move(session));
 }
 
-void SessionManager::stop()
+SessionManager::~SessionManager()
 {
     {
         lock_guard<mutex> lock(mutex_);

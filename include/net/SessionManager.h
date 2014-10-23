@@ -27,10 +27,9 @@ class SessionManager : Noncopyable
 {
 public:
     SessionManager();
+    ~SessionManager();
 
     // for external use
-    void addLocked(unique_ptr<Session> session);
-    void stop();
     void getBlobs(BlobAssembler::container& blobs);
 
     // for internal use
