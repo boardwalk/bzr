@@ -441,6 +441,8 @@ void Session::tick(net_time_point now)
             clientPackets_[packet.header.sequence].reset(new Packet(packet));
 
             clientLeadingSequence_++;
+            // since we already generated the retransmission checksum, we can purge right away
+            clientXorGen_.purge(clientLeadingSequence_);
         }
     }
     else
@@ -713,16 +715,16 @@ void Session::advanceServerSequence()
 
     while(it != serverPackets_.end())
     {
-        if(*it != serverSequence_ + 1)
+        if(*it != serverLeadingSequence_ + 1)
         {
             break;
         }
 
         it = serverPackets_.erase(it);
-        serverSequence_++;
+        serverLeadingSequence_++;
     }
 
-    serverXorGen_.purge(serverSequence_);
+    serverXorGen_.purge(serverLeadingSequence_);
 
     if(!serverPackets_.empty())
     {
