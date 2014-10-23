@@ -148,11 +148,11 @@ static uint32_t checksumContent(const PacketHeader& header, const void* data)
         {
             while(reader.remaining() != 0)
             {
-                const FragmentHeader* fragHeader = reader.readPointer<FragmentHeader>();
+                const FragmentHeader* fragment = reader.readPointer<FragmentHeader>();
 
-                reader.readRaw(fragHeader->size - sizeof(FragmentHeader));
+                reader.readRaw(fragment->size - sizeof(FragmentHeader));
 
-                result += checksum(fragHeader, fragHeader->size);
+                result += checksum(fragment, fragment->size);
             }
         }
 
@@ -530,8 +530,14 @@ void Session::sendConnectResponse()
 
 void Session::handleBlobFragments(BinReader& reader)
 {
-    // TODO
-    (void)reader;
+    while(reader.remaining() != 0)
+    {
+        const FragmentHeader* fragment = reader.readPointer<FragmentHeader>();
+
+        reader.readRaw(fragment->size - sizeof(FragmentHeader));
+
+        blobAssembler_.add(fragment);
+    }
 }
 
 void Session::handleServerSwitch(BinReader& reader)

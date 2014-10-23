@@ -154,6 +154,8 @@ private:
 
     uint16_t lastFlowTime_;
     uint32_t lastFlowBytes_;
+
+    BlobAssembler blobAssembler_;
 };
 
 #endif

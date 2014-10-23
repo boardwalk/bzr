@@ -45,7 +45,7 @@ class BlobAssembler : Noncopyable
 public:
     typedef vector<BlobPtr>::iterator iterator;
 
-    void add(const FragmentHeader* header);
+    void add(const FragmentHeader* fragment);
     void clear();
 
     iterator begin();
