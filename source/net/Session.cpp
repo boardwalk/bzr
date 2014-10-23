@@ -375,9 +375,24 @@ void Session::tick(net_time_point now)
         if(now > nextRequestMissing_)
         {
             flags |= kRequestRetransmit;
-            writer.writeInt(static_cast<uint32_t>(serverPackets_.size()));
+
+            vector<uint32_t> missingPackets;
+
+            uint32_t previousSequence = serverLeadingSequence_;
 
             for(uint32_t sequence : serverPackets_)
+            {
+                for(uint32_t missingSequence = previousSequence + 1; missingSequence < sequence; missingSequence++)
+                {
+                    missingPackets.push_back(missingSequence);
+                }
+
+                previousSequence = sequence;
+            }
+
+            writer.writeInt(static_cast<uint32_t>(missingPackets.size()));
+
+            for(uint32_t sequence : missingPackets)
             {
                 writer.writeInt(sequence);
             }
