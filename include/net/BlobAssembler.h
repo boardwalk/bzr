@@ -18,9 +18,18 @@
 #ifndef BZR_NET_BLOBASSEMBLER_H
 #define BZR_NET_BLOBASSEMBLER_H
 
-#include "net/Blob.h"
 #include "Noncopyable.h"
 #include <unordered_map>
+
+const size_t kMaxFragmentSize = 448; // excludes header
+
+PACK(struct FragmentHeader {
+    uint64_t id;
+    uint16_t count;
+    uint16_t size;
+    uint16_t index;
+    uint16_t queueId;
+});
 
 struct Blob
 {
