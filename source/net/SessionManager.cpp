@@ -71,6 +71,22 @@ void SessionManager::stop()
     thread_.join();
 }
 
+
+void SessionManager::getBlobs(BlobAssembler::container& blobs)
+{
+    lock_guard<mutex> lock(mutex_);
+
+    if(primary_ != nullptr)
+    {
+        primary_->blobAssembler().getBlobs(blobs);
+    }
+    else
+    {
+        blobs.clear();
+    }
+}
+
+
 void SessionManager::add(unique_ptr<Session> session)
 {
     sessions_.push_back(move(session));
@@ -163,13 +179,6 @@ void SessionManager::tick()
     for(auto it = sessions_.begin(); it != sessions_.end(); /**/)
     {
         (*it)->tick(now);
-
-        for(BlobPtr& blob : (*it)->blobAssembler())
-        {
-            blobs_.push_back(move(blob));
-        }
-
-        (*it)->blobAssembler().clear();
 
         if((*it)->dead())
         {

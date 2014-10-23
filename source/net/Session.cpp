@@ -541,7 +541,7 @@ void Session::handleBlobFragments(BinReader& reader)
 
         reader.readRaw(fragment->size - sizeof(FragmentHeader));
 
-        blobAssembler_.add(fragment);
+        blobAssembler_.addFragment(fragment);
     }
 }
 

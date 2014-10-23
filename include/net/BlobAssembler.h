@@ -43,17 +43,14 @@ typedef unique_ptr<Blob, FreeDeleter> BlobPtr;
 class BlobAssembler : Noncopyable
 {
 public:
-    typedef vector<BlobPtr>::iterator iterator;
+    typedef vector<BlobPtr> container;
 
-    void add(const FragmentHeader* fragment);
-    void clear();
-
-    iterator begin();
-    iterator end();
+    void addFragment(const FragmentHeader* fragment);
+    void getBlobs(container& blobs);
 
 private:
     unordered_map<uint64_t, BlobPtr> partialBlobs_;
-    vector<BlobPtr> completeBlobs_;
+    container completeBlobs_;
 };
 
 #endif

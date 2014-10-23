@@ -34,7 +34,7 @@ enum NetQueue
     kMax
 };
 
-void BlobAssembler::add(const FragmentHeader* fragment)
+void BlobAssembler::addFragment(const FragmentHeader* fragment)
 {
     // shortcut common case
     if(fragment->count == 1 && fragment->index == 0)
@@ -110,24 +110,15 @@ void BlobAssembler::add(const FragmentHeader* fragment)
 
     memcpy(dest, source, fragment->size - sizeof(FragmentHeader));
 
-    if(blob->fragmentsReceived == (1 << fragment->count) - 1)
+    if(blob->fragmentsReceived == (1u << fragment->count) - 1u)
     {
         completeBlobs_.push_back(move(blob));
         partialBlobs_.erase(fragment->id);
     }
 }
 
-void BlobAssembler::clear()
+void BlobAssembler::getBlobs(container& blobs)
 {
+    completeBlobs_.swap(blobs);
     completeBlobs_.clear();
-}
-
-BlobAssembler::iterator BlobAssembler::begin()
-{
-    return completeBlobs_.begin();
-}
-
-BlobAssembler::iterator BlobAssembler::end()
-{
-    return completeBlobs_.end();
 }

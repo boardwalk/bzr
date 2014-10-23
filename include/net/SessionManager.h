@@ -31,6 +31,7 @@ public:
     // for external use
     void addLocked(unique_ptr<Session> session);
     void stop();
+    void getBlobs(BlobAssembler::container& blobs);
 
     // for internal use
     void add(unique_ptr<Session> session);
@@ -52,7 +53,6 @@ private:
     Session* primary_;
     vector<unique_ptr<Session>> sessions_;
     net_time_point clientBegin_;
-    vector<BlobPtr> blobs_;
     thread thread_;
 };
 
