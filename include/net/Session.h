@@ -19,6 +19,7 @@
 #define BZR_NET_SESSION_H
 
 #include "net/Address.h"
+#include "net/BlobAssembler.h"
 #include "net/ChecksumXorGenerator.h"
 #include "Noncopyable.h"
 #include <chrono>

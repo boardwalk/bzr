@@ -53,14 +53,6 @@ enum PacketFlags
     kFlow              = 0x08000000  // CFloatStruct (?)
 };
 
-PACK(struct BlobHeader {
-    uint64_t id;
-    uint16_t count;
-    uint16_t size;
-    uint16_t index;
-    uint16_t queueId;
-});
-
 static const chrono::milliseconds kLogonPacketDelay(300);
 static const chrono::milliseconds kReferredPacketDelay(300);
 static const chrono::milliseconds kConnectResponsePacketDelay(300);
@@ -156,11 +148,11 @@ static uint32_t checksumContent(const PacketHeader& header, const void* data)
         {
             while(reader.remaining() != 0)
             {
-                const BlobHeader* blobHeader = reader.readPointer<BlobHeader>();
+                const FragmentHeader* fragHeader = reader.readPointer<FragmentHeader>();
 
-                reader.readRaw(blobHeader->size - sizeof(BlobHeader));
+                reader.readRaw(fragHeader->size - sizeof(FragmentHeader));
 
-                result += checksum(blobHeader, blobHeader->size);
+                result += checksum(fragHeader, fragHeader->size);
             }
         }
 
