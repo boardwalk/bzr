@@ -33,7 +33,7 @@ enum OptionalHeaderFlags
     kExclusive       = 0x00000002, // a packet with this header has its own sequence number
     kNotConn         = 0x00000004, // this header is sent before connect request/reply handshake completes
     kTimeSensitive   = 0x00000008,
-    kShouldPiggyBack = 0x00000010, // this header may coexist with other headers
+    kShouldPiggyBack = 0x00000010, // this header should ride along in a packet with others headers and content
     kHighPriority    = 0x00000020,
     kCountsAsTouch   = 0x00000040,
     kEncrypted       = 0x20000000, // a packet with this header has its checksum encrypted
@@ -412,6 +412,7 @@ void Session::tick(net_time_point now)
     }
     else if(state_ == State::kConnected)
     {
+        /*
         Packet packet;
         packet.address = address();
 
@@ -498,6 +499,7 @@ void Session::tick(net_time_point now)
             // since we already generated the retransmission checksum, we can purge right away
             clientXorGen_.purge(clientLeadingSequence_);
         }
+        */
     }
     else
     {
@@ -614,6 +616,8 @@ void Session::handleBlobFragments(BinReader& reader)
 
         blobAssembler_.addFragment(fragment);
     }
+
+    LOG(Net, Info) << address_ << " received blob fragments\n";
 }
 
 void Session::handleServerSwitch(BinReader& reader)

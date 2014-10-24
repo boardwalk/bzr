@@ -60,8 +60,6 @@ void BlobAssembler::addFragment(const FragmentHeader* fragment)
         memcpy(dest, source, fragment->size - sizeof(FragmentHeader));
 
         completeBlobs_.push_back(move(blob));
-
-        LOG(Net, Debug) << "completed contiguous blob " << hexn(fragment->id) << "\n";
         return;
     }
 
@@ -124,8 +122,6 @@ void BlobAssembler::addFragment(const FragmentHeader* fragment)
     {
         completeBlobs_.push_back(move(blob));
         partialBlobs_.erase(fragment->id);
-
-        LOG(Net, Debug) << "completed fragmented blob " << hexn(fragment->id) << "\n";
     }
 }
 
