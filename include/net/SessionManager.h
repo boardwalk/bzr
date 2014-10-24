@@ -18,6 +18,7 @@
 #ifndef BZR_NET_SESSIONMANAGER_H
 #define BZR_NET_SESSIONMANAGER_H
 
+#include "net/BlobHandler.h"
 #include "net/Session.h"
 #include "net/Socket.h"
 #include <mutex>
@@ -30,7 +31,7 @@ public:
     ~SessionManager();
 
     // for external use
-    void getBlobs(BlobAssembler::container& blobs);
+    void handleBlobs();
 
     // for internal use
     void add(unique_ptr<Session> session);
@@ -46,7 +47,9 @@ private:
 
     chrono::microseconds getReadTimeout() const;
 
-    mutex mutex_; // protects all class variables
+    BlobHandler blobHandler_;
+    mutex mutex_; // protects class variables after this point, except thread_
+
     bool done_;
     Socket socket_;
     vector<unique_ptr<Session>> sessions_;

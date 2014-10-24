@@ -54,6 +54,11 @@ void BlobAssembler::addFragment(const FragmentHeader* fragment)
         blob->queueId = fragment->queueId;
         blob->fragmentsReceived = 1;
 
+        const void* source = reinterpret_cast<const uint8_t*>(fragment) + sizeof(FragmentHeader);
+        void* dest = reinterpret_cast<uint8_t*>(blob.get()) + sizeof(Blob);
+
+        memcpy(dest, source, fragment->size - sizeof(FragmentHeader));
+
         completeBlobs_.push_back(move(blob));
 
         LOG(Net, Debug) << "completed contiguous blob " << hexn(fragment->id) << "\n";
@@ -124,7 +129,7 @@ void BlobAssembler::addFragment(const FragmentHeader* fragment)
     }
 }
 
-void BlobAssembler::getBlobs(container& blobs)
+void BlobAssembler::getBlobs(vector<BlobPtr>& blobs)
 {
     completeBlobs_.swap(blobs);
     completeBlobs_.clear();

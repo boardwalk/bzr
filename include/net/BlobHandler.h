@@ -15,33 +15,32 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_NET_BLOBASSEMBLER_H
-#define BZR_NET_BLOBASSEMBLER_H
+#ifndef BZR_NET_BLOBHANDLER_H
+#define BZR_NET_BLOBHANDLER_H
 
 #include "net/Blob.h"
 #include "Noncopyable.h"
-#include <unordered_map>
+#include <map>
 
-const size_t kMaxFragmentSize = 448; // excludes header
+class BinReader;
 
-// AC: BlobFragHeader_t
-PACK(struct FragmentHeader {
-    uint64_t id;
-    uint16_t count;
-    uint16_t size;
-    uint16_t index;
-    uint16_t queueId;
-});
-
-class BlobAssembler : Noncopyable
+class BlobHandler : Noncopyable
 {
 public:
-    void addFragment(const FragmentHeader* fragment);
-    void getBlobs(vector<BlobPtr>& blobs);
+    BlobHandler();
+
+    void handle(BlobPtr blob);
 
 private:
-    unordered_map<uint64_t, BlobPtr> partialBlobs_;
-    vector<BlobPtr> completeBlobs_;
+    void pumpOrderedBlobs();
+    void handle(uint32_t messageType, BinReader& reader);
+
+    // sequence of the next WEENIE_ORDERED blob
+    // starts at 1, persistent across sessions
+    uint32_t sequence_;
+
+    // contains WEENIE_ORDERED blobs with sequence >= sequence_ keyed by sequence
+    map<uint32_t, BlobPtr> orderedBlobs_;
 };
 
 #endif

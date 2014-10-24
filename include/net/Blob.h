@@ -15,33 +15,26 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_NET_BLOBASSEMBLER_H
-#define BZR_NET_BLOBASSEMBLER_H
+#ifndef BZR_NET_BLOB_H
+#define BZR_NET_BLOB_H
 
-#include "net/Blob.h"
-#include "Noncopyable.h"
-#include <unordered_map>
-
-const size_t kMaxFragmentSize = 448; // excludes header
-
-// AC: BlobFragHeader_t
-PACK(struct FragmentHeader {
-    uint64_t id;
-    uint16_t count;
-    uint16_t size;
-    uint16_t index;
-    uint16_t queueId;
-});
-
-class BlobAssembler : Noncopyable
+struct Blob
 {
-public:
-    void addFragment(const FragmentHeader* fragment);
-    void getBlobs(vector<BlobPtr>& blobs);
-
-private:
-    unordered_map<uint64_t, BlobPtr> partialBlobs_;
-    vector<BlobPtr> completeBlobs_;
+    uint16_t count;
+    uint16_t queueId;
+    uint32_t fragmentsReceived;
+    size_t size; // not set until last fragment by index is received
+    // followed by blob data
 };
+
+struct FreeDeleter
+{
+    void operator()(void* p) const
+    {
+        free(p);
+    }
+};
+
+typedef unique_ptr<Blob, FreeDeleter> BlobPtr;
 
 #endif

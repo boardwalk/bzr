@@ -214,6 +214,7 @@ void Core::run()
         while(loopTime >= stepTime + fixedStep)
         {
             handleEvents();
+            sessionManager_->handleBlobs();
             step(fp_t(1.0) / kStepRate);
             stepTime += fixedStep;
         }

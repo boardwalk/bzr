@@ -27,20 +27,33 @@
 #include <arpa/inet.h>
 #endif
 
+enum OptionalHeaderFlags
+{
+    kDisposable      = 0x00000001, // this header may be removed from a retransmission
+    kExclusive       = 0x00000002, // a packet with this header has its own sequence number
+    kNotConn         = 0x00000004, // this header is sent before connect request/reply handshake completes
+    kTimeSensitive   = 0x00000008,
+    kShouldPiggyBack = 0x00000010, // this header may coexist with other headers
+    kHighPriority    = 0x00000020,
+    kCountsAsTouch   = 0x00000040,
+    kEncrypted       = 0x20000000, // a packet with this header has its checksum encrypted
+    kSigned          = 0x40000000
+};
+
 enum PacketFlags
 {
     kRetransmission    = 0x00000001,
     kEncryptedChecksum = 0x00000002,
     kBlobFragments     = 0x00000004,
-    kServerSwitch      = 0x00000100, // CServerSwitchStruct (?)
-    kUnknown1          = 0x00000200, // sockaddr_in (7, kDisposable|kExclusive|kNotConn)
+    kServerSwitch      = 0x00000100, // CServerSwitchStruct (60, kHighPriority|kCountsAsTouch)
+    kUnknown1          = 0x00000200, // CLogonRouteHeader (sockaddr_in) (7, kDisposable|kExclusive|kNotConn)
     kUnknown2          = 0x00000400, // EmptyHeader (7, kDisposable|kExclusive|kNotConn)
-    kReferral          = 0x00000800, // CReferralStruct (?)
+    kReferral          = 0x00000800, // CReferralStruct (40000062, kExclusive|kHighPriority|kCountsAsTouch|kSigned)
     kRequestRetransmit = 0x00001000, // SeqIDList (33, kDisposable|kExclusive|kShouldPiggyBack|kHighPriority)
     kRejectRetransmit  = 0x00002000, // SeqIDList (33, kDisposable|kExclusive|kShouldPiggyBack|kHighPriority)
-    kAckSequence       = 0x00004000, // unsigned long (1, kDisposable)
+    kAckSequence       = 0x00004000, // CPakHeader (unsigned long) (1, kDisposable)
     kDisconnect        = 0x00008000, // EmptyHeader (3, kDisposable|kExclusive)
-    kLogon             = 0x00010000,
+    kLogon             = 0x00010000, // CLogonHeader (?)
     kReferred          = 0x00020000, // uint64_t (7, kDisposable|kExclusive|kNotConn)
     kConnectRequest    = 0x00040000, // CConnectHeader (?)
     kConnectResponse   = 0x00080000, // uint64_t (20000007, kDisposable|kExclusive|kNotConn|kEncrypted)
@@ -50,7 +63,13 @@ enum PacketFlags
     kTimeSync          = 0x01000000, // CTimeSyncHeader (?)
     kEchoRequest       = 0x02000000, // CEchoRequestHeader (?)
     kEchoResponse      = 0x04000000, // CEchoResponseHeader (?)
-    kFlow              = 0x08000000  // CFloatStruct (?)
+    kFlow              = 0x08000000  // CFlowStruct (10, kShouldPiggyBack)
+};
+
+enum class ServerSwitchType
+{
+    WorldSwitch,
+    LogonSwitch,
 };
 
 static const chrono::milliseconds kLogonPacketDelay(300);

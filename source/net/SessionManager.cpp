@@ -80,15 +80,29 @@ SessionManager::~SessionManager()
     thread_.join();
 }
 
-
-void SessionManager::getBlobs(BlobAssembler::container& blobs)
+void SessionManager::handleBlobs()
 {
-    lock_guard<mutex> lock(mutex_);
+    vector<BlobPtr> blobs;
 
-    // FIXME
-    blobs.clear();
+    {
+        lock_guard<mutex> lock(mutex_);
+
+        for(unique_ptr<Session>& session : sessions_)
+        {
+            session->blobAssembler().getBlobs(blobs);
+
+            if(!blobs.empty())
+            {
+                break;
+            }
+        }
+    }
+
+    for(BlobPtr& blob : blobs)
+    {
+        blobHandler_.handle(move(blob));
+    }
 }
-
 
 void SessionManager::add(unique_ptr<Session> session)
 {
