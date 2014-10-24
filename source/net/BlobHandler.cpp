@@ -20,12 +20,6 @@
 #include "Log.h"
 #include "BinReader.h"
 
-enum MessageType
-{
-    kWEENIE_ORDERED = 0xF7B0,
-    kORDERED = 0xF7B1
-};
-
 BlobHandler::BlobHandler() : sequence_(1)
 {}
 
@@ -33,9 +27,9 @@ void BlobHandler::handle(BlobPtr blob)
 {
     BinReader reader(blob.get() + 1, blob->size);
 
-    uint32_t messageType = reader.readInt();
+    MessageType messageType = static_cast<MessageType>(reader.readInt());
 
-    if(messageType == kWEENIE_ORDERED)
+    if(messageType == MessageType::kWeenie_Ordered)
     {
         /*objectId*/ reader.readInt();
         uint32_t messageSequence = reader.readInt();
@@ -43,10 +37,10 @@ void BlobHandler::handle(BlobPtr blob)
         orderedBlobs_[messageSequence] = move(blob);
         pumpOrderedBlobs();
     }
-    else if(messageType == kORDERED)
+    else if(messageType == MessageType::kOrdered)
     {
         // the server doesn't send these
-        throw runtime_error("unexpected ORDERED blob");
+        throw runtime_error("unexpected ordered blob");
     }
     else
     {
@@ -68,16 +62,16 @@ void BlobHandler::pumpOrderedBlobs()
         /*messageType*/ reader.readInt();
         /*objectId*/ reader.readInt();
         /*messageSequence*/ reader.readInt();
-        uint32_t actualMessageType = reader.readInt();
+        MessageType actualMessageType = static_cast<MessageType>(reader.readInt());
 
         handle(actualMessageType, reader);
         sequence_++;
     }
 }
 
-void BlobHandler::handle(uint32_t messageType, BinReader& reader)
+void BlobHandler::handle(MessageType messageType, BinReader& reader)
 {
-    LOG(Net, Info) << "received blob " << hexn(messageType) << "\n";
+    LOG(Net, Info) << "received blob " << hexn(static_cast<uint32_t>(messageType)) << " " << getMessageName(messageType) << "\n";
 
     (void)reader;
 }

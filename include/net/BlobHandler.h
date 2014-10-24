@@ -19,6 +19,7 @@
 #define BZR_NET_BLOBHANDLER_H
 
 #include "net/Blob.h"
+#include "net/MessageType.h"
 #include "Noncopyable.h"
 #include <map>
 
@@ -33,7 +34,7 @@ public:
 
 private:
     void pumpOrderedBlobs();
-    void handle(uint32_t messageType, BinReader& reader);
+    void handle(MessageType messageType, BinReader& reader);
 
     // sequence of the next WEENIE_ORDERED blob
     // starts at 1, persistent across sessions
