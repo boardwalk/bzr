@@ -100,7 +100,7 @@ bool Socket::wait(chrono::microseconds timeout)
     return ret == 1;
 }
 
-void Socket::recv(Packet& packet)
+bool Socket::recv(Packet& packet)
 {
 BEGIN:
     sockaddr_in from;
@@ -117,8 +117,7 @@ BEGIN:
     {
         if(wouldBlock())
         {
-            packet.address = Address();
-            return;
+            return false;
         }
 
         throw runtime_error("recvfrom failed");
@@ -137,6 +136,8 @@ BEGIN:
         LOG(Net, Warn) << packet.address << " dropping packet with bad size in header\n";
         goto BEGIN;
     }
+
+    return true;
 }
 
 void Socket::send(const Packet& packet)

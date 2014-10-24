@@ -139,12 +139,10 @@ void SessionManager::run()
         if(readable)
         {
             Packet packet;
-            socket_.recv(packet);
 
-            while(packet.address.ip() != 0)
+            while(socket_.recv(packet))
             {
                 handle(packet);
-                socket_.recv(packet);
             }
         }
 

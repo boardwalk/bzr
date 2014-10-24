@@ -38,7 +38,7 @@ public:
     ~Socket();
 
     bool wait(chrono::microseconds timeout);
-    void recv(Packet& packet);
+    bool recv(Packet& packet);
     void send(const Packet& packet);
 
 private:
