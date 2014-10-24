@@ -37,11 +37,6 @@ void BlobHandler::handle(BlobPtr blob)
         orderedBlobs_[messageSequence] = move(blob);
         pumpOrderedBlobs();
     }
-    else if(messageType == MessageType::kOrdered)
-    {
-        // the server doesn't send these
-        throw runtime_error("unexpected ordered blob");
-    }
     else
     {
         handle(messageType, reader);
