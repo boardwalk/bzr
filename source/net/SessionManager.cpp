@@ -45,7 +45,6 @@ private:
 
 SessionManager::SessionManager() :
     done_(false),
-    primary_(nullptr),
     clientBegin_(net_clock::now()),
     thread_(bind(&SessionManager::run, this))
 {
@@ -54,7 +53,7 @@ SessionManager::SessionManager() :
     int serverIp = config.getInt("SessionManager.serverIp", 0);
     int serverPort = config.getInt("SessionManager.serverPort", 0);
     string accountName = config.getString("SessionManager.accountName", "");
-    string accountKey = config.getString("SessionManager.accountKey", "");
+    string accountKey = config.getString("SessionManager.accountTicket", "");
 
     config.erase("SessionManager");
 
@@ -86,14 +85,8 @@ void SessionManager::getBlobs(BlobAssembler::container& blobs)
 {
     lock_guard<mutex> lock(mutex_);
 
-    if(primary_ != nullptr)
-    {
-        primary_->blobAssembler().getBlobs(blobs);
-    }
-    else
-    {
-        blobs.clear();
-    }
+    // FIXME
+    blobs.clear();
 }
 
 
@@ -115,9 +108,9 @@ bool SessionManager::exists(Address address) const
     return false;
 }
 
-void SessionManager::setPrimary(Session* primary)
+void SessionManager::setPrimary(Session*)
 {
-    primary_ = primary;
+    // FIXME
 }
 
 void SessionManager::send(const Packet& packet)
@@ -161,25 +154,31 @@ void SessionManager::run()
 
 void SessionManager::handle(const Packet& packet)
 {
-    for(auto it = sessions_.begin(); it != sessions_.end(); ++it)
+    auto it = sessions_.begin();
+
+    for(/**/; it != sessions_.end(); ++it)
     {
         if((*it)->address() == packet.address)
         {
-            try
-            {
-                (*it)->handle(packet);
-            }
-            catch(const runtime_error& e)
-            {
-                LOG(Net, Error) << "session at " << (*it)->address() << " threw an error: " << e.what() << "\n";
-                it = sessions_.erase(it);
-            }
-
-            return;
+            break;
         }
     }
 
-    LOG(Net, Warn) << "dropped a packet from " << packet.address << "\n";
+    if(it == sessions_.end())
+    {
+        LOG(Net, Warn) << packet.address << " packet matches no session\n";
+        return;
+    }
+
+    try
+    {
+        (*it)->handle(packet);
+    }
+    catch(const runtime_error& e)
+    {
+        LOG(Net, Error) << (*it)->address() << " threw an error: " << e.what() << "\n";
+        sessions_.erase(it);
+    }
 }
 
 void SessionManager::tick()
@@ -188,21 +187,18 @@ void SessionManager::tick()
 
     for(auto it = sessions_.begin(); it != sessions_.end(); /**/)
     {
-        (*it)->tick(now);
-
-        if((*it)->dead())
+        try
         {
+            (*it)->tick(now);
+        }
+        catch(const runtime_error& e)
+        {
+            LOG(Net, Error) << (*it)->address() << " threw an error: " << e.what() << "\n";
             it = sessions_.erase(it);
+            continue;
+        }
 
-            if(primary_ == it->get())
-            {
-                primary_ = nullptr;
-            }
-        }
-        else
-        {
-            ++it;
-        }
+        ++it;
     }
 }
 

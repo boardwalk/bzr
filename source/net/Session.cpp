@@ -60,6 +60,18 @@ static const chrono::milliseconds kPingPacketDelay(2000);
 static const chrono::milliseconds kMissingPacketDelay(300);
 static const size_t kMaxPeriodicSent = 10;
 
+static ostream& operator<<(ostream& os, const PacketHeader& header)
+{
+    os << "sequence=" << hexn(header.sequence)
+        << " flags=" << hexn(header.flags)
+        << " checksum=" << hexn(header.checksum)
+        << " netId=" << hexn(header.netId)
+        << " time=" << hexn(header.time)
+        << " size=" << hexn(header.size)
+        << " iteration=" << hexn(header.iteration);
+    return os;
+}
+
 static uint32_t checksum(const void* data, size_t size)
 {
     uint32_t result = static_cast<uint32_t>(size) << 16;
@@ -115,6 +127,11 @@ static uint32_t checksumContent(const PacketHeader& header, const void* data)
         {
             uint32_t nseq = reader.readInt();
             reader.readRaw(nseq * sizeof(uint32_t));
+        }
+
+        if(header.flags & kAckSequence)
+        {
+            reader.readRaw(4);
         }
 
         if(header.flags & kCICMDCommand)
@@ -178,12 +195,12 @@ Session::Session(SessionManager& manager,
     address_(address),
     state_(State::kLogon),
     sessionBegin_(net_clock::now()),
+    nextPeriodic_(sessionBegin_),
     numPeriodicSent_(0),
     accountName_(move(accountName)),
     accountKey_(move(accountKey))
 {
     LOG(Net, Info) << address_ << " logon session created\n";
-    sendLogon();
 }
 
 Session::Session(SessionManager& manager,
@@ -193,11 +210,11 @@ Session::Session(SessionManager& manager,
     address_(address),
     state_(State::kReferred),
     sessionBegin_(net_clock::now()),
+    nextPeriodic_(sessionBegin_),
     numPeriodicSent_(0),
     cookie_(cookie)
 {
     LOG(Net, Info) << address_ << " referred session created\n";
-    sendReferred();
 }
 
 Session::~Session()
@@ -215,7 +232,9 @@ void Session::handle(const Packet& packet)
         return;
     }
 
-    BinReader reader(packet.payload, sizeof(packet.payload));
+    LOG(Net, Debug) << address_ << " received packet, " << packet.header << "\n";
+
+    BinReader reader(packet.payload, packet.header.size);
 
     if(state_ == State::kConnectResponse)
     {
@@ -228,9 +247,10 @@ void Session::handle(const Packet& packet)
 
     if(state_ == State::kLogon || state_ == State::kReferred)
     {
+        // TODO Handle kNetError1 here
         if(packet.header.flags != kConnectRequest)
         {
-            LOG(Net, Warn) << address_ << "dropping packet, flags should be " << hexn(static_cast<uint32_t>(kConnectRequest)) << ", packet has " << hexn(packet.header.flags) << "\n";
+            LOG(Net, Warn) << address_ << " dropping packet, flags should be " << hexn(static_cast<uint32_t>(kConnectRequest)) << ", packet has " << hexn(packet.header.flags) << "\n";
             return;
         }
 
@@ -242,10 +262,13 @@ void Session::handle(const Packet& packet)
     }
     else if(state_ == State::kConnected)
     {
-        if(packet.header.sequence <= serverSequence_ || serverPackets_.find(packet.header.sequence) != serverPackets_.end())
+        if(packet.header.flags != kAckSequence) // AckSequence alone does not get it's own sequence
         {
-            LOG(Net, Warn) << address_ << " dropping packet, already received sequence " << packet.header.sequence << "\n";
-            return;
+            if(packet.header.sequence <= serverSequence_ || serverPackets_.find(packet.header.sequence) != serverPackets_.end())
+            {
+                LOG(Net, Warn) << address_ << " dropping packet, already received sequence " << packet.header.sequence << "\n";
+                return;
+            }
         }
 
         if(packet.header.netId != serverNetId_)
@@ -342,6 +365,11 @@ void Session::handle(const Packet& packet)
 
 void Session::tick(net_time_point now)
 {
+    if(numPeriodicSent_ > kMaxPeriodicSent)
+    {
+        throw runtime_error("session timed out");
+    }
+
     if(state_ == State::kLogon)
     {
         if(now > nextPeriodic_)
@@ -366,6 +394,7 @@ void Session::tick(net_time_point now)
     else if(state_ == State::kConnected)
     {
         Packet packet;
+        packet.address = address();
 
         BinWriter writer(packet.payload, sizeof(packet.payload));
 
@@ -406,6 +435,8 @@ void Session::tick(net_time_point now)
             writer.writeInt(serverLeadingSequence_);
 
             serverSequence_ = serverLeadingSequence_;
+
+            LOG(Net, Debug) << address_ << " sending ack sequence " << serverLeadingSequence_ << "\n";
         }
 
         if(now > nextPeriodic_)
@@ -423,17 +454,21 @@ void Session::tick(net_time_point now)
             lastFlowBytes_ = 0;
             lastFlowTime_ = time;
             nextPeriodic_ = now + kPingPacketDelay;
+
+            LOG(Net, Debug) << address_ << " sending time sync, echo request, flow\n";
         }
 
         if(flags != 0)
         {
             packet.header.sequence = clientLeadingSequence_ + 1;
-            packet.header.flags = kEncryptedChecksum;
+            packet.header.flags = flags | kEncryptedChecksum;
             packet.header.netId = clientNetId_;
             packet.header.time = time;
             packet.header.size = static_cast<uint16_t>(writer.position());
             packet.header.iteration = iteration_;
             packet.header.checksum = checksumPacket(packet, clientXorGen_); // must be done last
+
+            LOG(Net, Debug) << address_ << " sending packet " << packet.header << "\n";
             manager_.send(packet);
 
             packet.header.flags = flags | kRetransmission;
@@ -461,11 +496,6 @@ Address Session::address() const
     return address_;
 }
 
-bool Session::dead() const
-{
-    return numPeriodicSent_ > kMaxPeriodicSent;
-}
-
 net_time_point Session::nextTick() const
 {
     return min(nextPeriodic_, nextRequestMissing_);
@@ -479,6 +509,7 @@ BlobAssembler& Session::blobAssembler()
 void Session::sendLogon()
 {
     Packet packet;
+    packet.address = address();
 
     memset(&packet.header, 0, sizeof(packet.header));
     packet.header.flags = kLogon;
@@ -492,13 +523,15 @@ void Session::sendLogon()
     writer.writeInt(static_cast<uint32_t>(time(NULL)));
     writer.writeString(accountName_);
     writer.writeInt(0);
-    writer.writeInt(static_cast<uint32_t>(accountKey_.size()));
+    writer.writeInt(static_cast<uint32_t>(sizeof(uint16_t) + accountKey_.size()));
+    writer.writeShort(0xF480);
     writer.writeRaw(accountKey_.data(), accountKey_.size());
 
-    writer.seek(authDataLenOff);
-    writer.writeInt(static_cast<uint32_t>(writer.position() - authDataLenOff));
-
     packet.header.size = static_cast<uint16_t>(writer.position());
+
+    writer.seek(authDataLenOff);
+    writer.writeInt(static_cast<uint32_t>(packet.header.size - (authDataLenOff + sizeof(uint32_t))));
+    
     packet.header.checksum = checksumPacket(packet, clientXorGen_); // must be done last
     manager_.send(packet);
 
@@ -511,6 +544,7 @@ void Session::sendLogon()
 void Session::sendReferred()
 {
     Packet packet;
+    packet.address = address();
 
     memset(&packet.header, 0, sizeof(packet.header));
     packet.header.flags = kReferred;
@@ -531,6 +565,7 @@ void Session::sendReferred()
 void Session::sendConnectResponse()
 {
     Packet packet;
+    packet.address = address();
 
     memset(&packet.header, 0, sizeof(packet.header));
     packet.header.flags = kConnectResponse;
@@ -692,6 +727,8 @@ void Session::handleTimeSync(BinReader& reader)
 {
     beginTime_ = reader.readDouble();
     beginLocalTime_ = net_clock::now();
+
+    LOG(Net, Debug) << address_ << " received time sync\n";
 }
 
 void Session::handleEchoResponse(BinReader& reader)
@@ -700,6 +737,8 @@ void Session::handleEchoResponse(BinReader& reader)
     // Ignored for now
     /*pingTime*/ reader.readFloat();
     /*pingResult*/ reader.readFloat();
+
+    LOG(Net, Debug) << address_ << " received echo response\n";
 }
 
 void Session::handleFlow(BinReader& reader)
@@ -707,6 +746,8 @@ void Session::handleFlow(BinReader& reader)
     // Ignored for now
     /*numBytes*/ reader.readInt();
     /*time*/ reader.readShort();
+
+    LOG(Net, Debug) << address_ << " received flow\n";
 }
 
 void Session::advanceServerSequence()

@@ -152,7 +152,7 @@ BEGIN:
 
     ssize_t sendLen = sendto(sock_,
         reinterpret_cast<const char*>(&packet.header),
-        static_cast<int>(sizeof(packet.header) + sizeof(packet.payload)),
+        static_cast<int>(sizeof(packet.header) + packet.header.size),
         /*flags*/ 0,
         reinterpret_cast<sockaddr*>(&to),
         sizeof(to));
@@ -176,6 +176,8 @@ BEGIN:
 
             goto BEGIN;
         }
+
+        LOG(Net, Error) << "sendto failed with " << WSAGetLastError() << "\n";
 
         throw runtime_error("sendto failed");
     }

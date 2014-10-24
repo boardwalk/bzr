@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "net/BlobAssembler.h"
+#include "Core.h"
+#include "Log.h"
 
 enum NetQueue
 {
@@ -53,6 +55,9 @@ void BlobAssembler::addFragment(const FragmentHeader* fragment)
         blob->fragmentsReceived = 1;
 
         completeBlobs_.push_back(move(blob));
+
+        LOG(Net, Debug) << "completed contiguous blob " << hexn(fragment->id) << "\n";
+        return;
     }
 
     BlobPtr& blob = partialBlobs_[fragment->id];
@@ -114,6 +119,8 @@ void BlobAssembler::addFragment(const FragmentHeader* fragment)
     {
         completeBlobs_.push_back(move(blob));
         partialBlobs_.erase(fragment->id);
+
+        LOG(Net, Debug) << "completed fragmented blob " << hexn(fragment->id) << "\n";
     }
 }
 

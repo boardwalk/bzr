@@ -50,7 +50,6 @@ public:
     void tick(net_time_point now);
 
     Address address() const;
-    bool dead() const;
     net_time_point nextTick() const;
     BlobAssembler& blobAssembler();
 

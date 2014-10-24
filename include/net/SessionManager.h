@@ -49,7 +49,6 @@ private:
     mutex mutex_; // protects all class variables
     bool done_;
     Socket socket_;
-    Session* primary_;
     vector<unique_ptr<Session>> sessions_;
     net_time_point clientBegin_;
     thread thread_;
