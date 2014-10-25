@@ -47,6 +47,7 @@ public:
     ResourceCache& resourceCache();
     LandcellManager& landcellManager();
     ObjectManager& objectManager();
+    SessionManager& sessionManager();
     const Region& region() const;
     Camera& camera();
 #ifndef HEADLESS

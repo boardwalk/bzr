@@ -18,6 +18,8 @@
 #ifndef BZR_NET_BLOB_H
 #define BZR_NET_BLOB_H
 
+const size_t kMaxFragmentSize = 448; // excludes header
+
 struct Blob
 {
     uint16_t count;

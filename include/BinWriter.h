@@ -43,9 +43,11 @@ public:
     size_t position() const;
     size_t remaining() const;
 
-private:
-    void* const data_;
-    const size_t size_;
+protected:
+    BinWriter();
+
+    void* data_;
+    size_t size_;
     size_t position_;
 };
 

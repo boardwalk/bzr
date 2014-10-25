@@ -15,31 +15,22 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_NET_BLOBASSEMBLER_H
-#define BZR_NET_BLOBASSEMBLER_H
+#ifndef BZR_NET_BLOBWRITER_H
+#define BZR_NET_BLOBWRITER_H
 
 #include "net/Blob.h"
-#include "Noncopyable.h"
-#include <unordered_map>
+#include "net/MessageType.h"
+#include "net/NetQueueId.h"
+#include "BinWriter.h"
 
-// AC: BlobFragHeader_t
-PACK(struct FragmentHeader {
-    uint64_t id;
-    uint16_t count;
-    uint16_t size;
-    uint16_t index;
-    uint16_t queueId;
-});
-
-class BlobAssembler : Noncopyable
+class BlobWriter : public BinWriter
 {
 public:
-    void addFragment(const FragmentHeader* fragment);
-    void getBlobs(vector<BlobPtr>& blobs);
+    BlobWriter(MessageType messageType, NetQueueId queueId);
+    ~BlobWriter();
 
 private:
-    unordered_map<uint64_t, BlobPtr> partialBlobs_;
-    vector<BlobPtr> completeBlobs_;
+    BlobPtr blob_;
 };
 
 #endif

@@ -45,6 +45,7 @@ private:
 
 SessionManager::SessionManager() :
     done_(false),
+    primary_(nullptr),
     clientBegin_(net_clock::now()),
     thread_(bind(&SessionManager::run, this))
 {
@@ -104,6 +105,17 @@ void SessionManager::handleBlobs()
     }
 }
 
+void SessionManager::sendBlob(BlobPtr blob)
+{
+    if(primary_ == nullptr)
+    {
+        LOG(Net, Warn) << "no primary session, dropping outgoing blob\n";
+        return;
+    }
+
+    primary_->sendBlob(move(blob));
+}
+
 void SessionManager::add(unique_ptr<Session> session)
 {
     sessions_.push_back(move(session));
@@ -122,9 +134,9 @@ bool SessionManager::exists(Address address) const
     return false;
 }
 
-void SessionManager::setPrimary(Session*)
+void SessionManager::setPrimary(Session* primary)
 {
-    // FIXME
+    primary_ = primary;
 }
 
 void SessionManager::send(const Packet& packet)
@@ -189,6 +201,12 @@ void SessionManager::handle(const Packet& packet)
     catch(const runtime_error& e)
     {
         LOG(Net, Error) << (*it)->address() << " threw an error: " << e.what() << "\n";
+
+        if(it->get() == primary_)
+        {
+            primary_ = nullptr;
+        }
+
         sessions_.erase(it);
     }
 }
@@ -206,6 +224,12 @@ void SessionManager::tick()
         catch(const runtime_error& e)
         {
             LOG(Net, Error) << (*it)->address() << " threw an error: " << e.what() << "\n";
+
+            if(it->get() == primary_)
+            {
+                primary_ = nullptr;
+            }
+
             it = sessions_.erase(it);
             continue;
         }

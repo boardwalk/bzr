@@ -507,6 +507,13 @@ void Session::tick(net_time_point now)
     }
 }
 
+void Session::sendBlob(BlobPtr blob)
+{
+    LOG(Net, Info) << address_ << " send blob!\n";
+    
+    (void)blob;
+}
+
 Address Session::address() const
 {
     if(state_ == State::kConnectResponse || state_ == State::kConnected)

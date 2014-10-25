@@ -48,6 +48,7 @@ public:
 
     void handle(const Packet& packet);
     void tick(net_time_point now);
+    void sendBlob(BlobPtr blob);
 
     Address address() const;
     net_time_point nextTick() const;

@@ -15,31 +15,23 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BZR_NET_BLOBASSEMBLER_H
-#define BZR_NET_BLOBASSEMBLER_H
+#include "net/BlobWriter.h"
+#include "net/SessionManager.h"
+#include "Core.h"
 
-#include "net/Blob.h"
-#include "Noncopyable.h"
-#include <unordered_map>
-
-// AC: BlobFragHeader_t
-PACK(struct FragmentHeader {
-    uint64_t id;
-    uint16_t count;
-    uint16_t size;
-    uint16_t index;
-    uint16_t queueId;
-});
-
-class BlobAssembler : Noncopyable
+BlobWriter::BlobWriter(MessageType messageType, NetQueueId queueId)
 {
-public:
-    void addFragment(const FragmentHeader* fragment);
-    void getBlobs(vector<BlobPtr>& blobs);
+    void* p = malloc(sizeof(Blob) + kMaxFragmentSize);
+    blob_.reset(reinterpret_cast<Blob*>(p));
+    blob_->count = 1;
+    blob_->queueId = static_cast<uint16_t>(queueId);
 
-private:
-    unordered_map<uint64_t, BlobPtr> partialBlobs_;
-    vector<BlobPtr> completeBlobs_;
-};
+    data_ = blob_.get();
+    size_ = kMaxFragmentSize;
+}
 
-#endif
+BlobWriter::~BlobWriter()
+{
+    blob_->size = position_;
+    Core::get().sessionManager().sendBlob(move(blob_));
+}

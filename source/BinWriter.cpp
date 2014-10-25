@@ -23,6 +23,9 @@ void writePrimitive(BinWriter& writer, T value)
     writer.writeRaw(&value, sizeof(value));
 }
 
+BinWriter::BinWriter() : data_{nullptr}, size_{0}, position_{0}
+{}
+
 BinWriter::BinWriter(void* data, size_t size) : data_{data}, size_{size}, position_{0}
 {}
 

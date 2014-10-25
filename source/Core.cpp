@@ -94,6 +94,11 @@ ObjectManager& Core::objectManager()
     return *objectManager_;
 }
 
+SessionManager& Core::sessionManager()
+{
+    return *sessionManager_;
+}
+
 const Region& Core::region() const
 {
     return region_->cast<Region>();

@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "net/BlobHandler.h"
+#include "net/BlobWriter.h"
 #include "Core.h"
 #include "Log.h"
 #include "BinReader.h"
@@ -89,5 +90,25 @@ void BlobHandler::handle(MessageType messageType, BinReader& reader)
         string server = reader.readString();
 
         LOG(Net, Debug) << "  playerCount=" << playerCount << " unknown=" << hexn(unknown) << " server=" << server << "\n";
+    }
+    else if(messageType == MessageType::kDDD_Interrogation)
+    {
+        /*serversRegion*/ reader.readInt();
+        /*nameRuleLanguage*/ reader.readInt();
+        /*productId*/ reader.readInt();
+        uint32_t numSupportedLanguages = reader.readInt();
+
+        for(uint32_t i = 0; i < numSupportedLanguages; i++)
+        {
+            /*supportedLanguage*/ reader.readInt();
+        }
+
+        assert(reader.remaining() == 0);
+
+        BlobWriter writer(MessageType::kDDD_InterrogationResponse, NetQueueId::kDatabase);
+        /*clientLanguage*/ writer.writeInt(1);
+        /*numItersWithKeys*/ writer.writeInt(0);
+        /*numItersWithoutKeys*/ writer.writeInt(0);
+        /*flags*/ writer.writeInt(0);
     }
 }

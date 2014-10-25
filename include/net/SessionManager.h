@@ -32,6 +32,7 @@ public:
 
     // for external use
     void handleBlobs();
+    void sendBlob(BlobPtr blob);
 
     // for internal use
     void add(unique_ptr<Session> session);
@@ -53,6 +54,7 @@ private:
     bool done_;
     Socket socket_;
     vector<unique_ptr<Session>> sessions_;
+    Session* primary_;
     net_time_point clientBegin_;
     thread thread_;
 };
