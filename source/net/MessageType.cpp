@@ -592,16 +592,14 @@ static const unordered_map<uint32_t, string> kMessageNames
     {0xf7eb, "DDD_Pending"},
 };
 
-static const string kUnknown = "unknown";
-
 const string& getMessageName(MessageType messageType)
 {
     auto it = kMessageNames.find(static_cast<uint32_t>(messageType));
 
-    if(it != kMessageNames.end())
+    if(it == kMessageNames.end())
     {
-        return it->second;
+        throw runtime_error("unknown message type");
     }
 
-    return kUnknown;
+    return it->second;
 }
