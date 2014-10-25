@@ -33,12 +33,14 @@
 typedef SSIZE_T ssize_t;
 static const SocketType kBadSocket = INVALID_SOCKET;
 static const int kSocketError = SOCKET_ERROR;
-static bool wouldBlock() { return WSAGetLastError() == WSAEWOULDBLOCK; }
+static int getError() { return WSAGetLastError(); }
+static bool isWouldBlockError(int err) { return err == WSAEWOULDBLOCK; }
 #else
 #define CLOSE_SOCKET close
 static const SocketType kBadSocket = -1;
 static const int kSocketError = -1;
-static bool wouldBlock() { return errno == EAGAIN || errno == EWOULDBLOCK; }
+static int getError() { return errno; }
+static bool isWouldBlockError(int err) { return errno == EAGAIN || errno == EWOULDBLOCK; }
 #endif
 
 Socket::Socket()
@@ -115,7 +117,9 @@ BEGIN:
 
     if(recvLen == kSocketError)
     {
-        if(wouldBlock())
+        int err = getError();
+
+        if(isWouldBlockError(err))
         {
             return false;
         }
@@ -160,9 +164,11 @@ BEGIN:
 
     if(sendLen == kSocketError)
     {
+        int err = getError();
+
         // this should only happen if we somehow fill up the the os's buffers (e.g. never)
         // we'll just wait until the fd is writable
-        if(wouldBlock())
+        if(isWouldBlockError(err))
         {
             int nfds = static_cast<int>(sock_) + 1;
 
@@ -178,7 +184,7 @@ BEGIN:
             goto BEGIN;
         }
 
-        LOG(Net, Error) << "sendto failed with " << WSAGetLastError() << "\n";
+        LOG(Net, Error) << "sendto failed with " << err << "\n";
 
         throw runtime_error("sendto failed");
     }
