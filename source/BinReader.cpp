@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "BinReader.h"
+#include "Core.h"
+#include "Log.h"
 
 BinReader::BinReader(const void* data, size_t size) : data_{data}, size_{size}, position_{0}
 {}
@@ -73,7 +75,17 @@ uint16_t BinReader::readPackedShort()
     return val;
 }
 
-// TODO readPackedInt
+uint32_t BinReader::readPackedInt()
+{
+    uint32_t val = readShort();
+
+    if(val == 0xFFFF)
+    {
+        val = readInt();
+    }
+
+    return val;
+}
 
 string BinReader::readString()
 {
@@ -94,6 +106,42 @@ string BinReader::readString()
 void BinReader::align()
 {
     position_ = (position_ + 3) & ~3;
+}
+
+void BinReader::dump(size_t maxLen) const
+{
+    const size_t kBytesPerLine = 32;
+
+    string hexPart;
+    string asciiPart;
+
+    for(size_t i = 0; i < maxLen && position_ + i < size_; i++)
+    {
+        if(i != 0 && i % kBytesPerLine == 0)
+        {
+            LOG(Misc, Debug) << hexPart << " " << asciiPart << "\n";
+            hexPart.clear();
+            asciiPart.clear();
+        }
+
+        uint8_t val = reinterpret_cast<const uint8_t*>(data_)[position_ + i];
+
+        char buf[4];
+        sprintf(buf, "%02x ", val);
+        hexPart += buf;
+        asciiPart += (isprint(val) ? val : '.');
+    }
+
+    if(!asciiPart.empty())
+    {
+        while(asciiPart.size() < kBytesPerLine)
+        {
+            hexPart += "   ";
+            asciiPart += ' ';
+        }
+
+        LOG(Misc, Debug) << hexPart << " " << asciiPart << "\n";
+    }
 }
 
 size_t BinReader::position() const

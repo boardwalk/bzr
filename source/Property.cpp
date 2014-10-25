@@ -75,13 +75,15 @@ static const unordered_map<uint32_t, string> kAttribute2ndProperties
 #include "properties/Attribute2ndProperty.inc"
 };
 
+static const string kUnknown = "(unknown)";
+
 #define IMPLEMENT_GET(t) \
     const string& get##t##PropertyName(t##Property property) \
     { \
         auto it = k##t##Properties.find(static_cast<uint32_t>(property)); \
         if(it == k##t##Properties.end()) \
         { \
-            throw runtime_error("unknown property"); \
+            return kUnknown; \
         } \
         return it->second; \
     }

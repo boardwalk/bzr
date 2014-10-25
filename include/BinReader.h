@@ -45,6 +45,8 @@ public:
 
     void align();
 
+    void dump(size_t maxLen = SIZE_MAX) const;
+
     size_t position() const;
     size_t remaining() const;
 

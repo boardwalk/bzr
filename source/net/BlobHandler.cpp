@@ -17,9 +17,10 @@
  */
 #include "net/BlobHandler.h"
 #include "net/BlobWriter.h"
+#include "BinReader.h"
 #include "Core.h"
 #include "Log.h"
-#include "BinReader.h"
+#include "Property.h"
 
 BlobHandler::BlobHandler() : sequence_(1)
 {}
@@ -64,6 +65,9 @@ void BlobHandler::pumpOrderedBlobs()
         sequence_++;
     }
 }
+
+// CreateObject.cpp
+void handleCreateObject(BinReader& reader);
 
 void BlobHandler::handle(MessageType messageType, BinReader& reader)
 {
@@ -122,5 +126,159 @@ void BlobHandler::handle(MessageType messageType, BinReader& reader)
     {
         BlobWriter writer(MessageType::kDDD_EndDDD, NetQueueId::kDatabase);
         // empty body
+
+        BlobWriter writer2(MessageType::kClient_Request_Enter_Game, NetQueueId::kLogon);
+        // empty body
+    }
+    else if(messageType == MessageType::kCharacter_EnterGame_ServerReady)
+    {
+        //NET   DEBUG    objectId=500F4D79h name=Aeriin deleteTimeout=0
+        //NET   DEBUG    objectId=500F4CFBh name=Madlyn deleteTimeout=0
+        //NET   DEBUG    objectId=500F4D7Ah name=Madds deleteTimeout=0
+
+        BlobWriter writer(MessageType::kCharacter_Enter_Game, NetQueueId::kLogon);
+        writer.writeInt(0x500F4CFB);
+        writer.writeString("md9nq9m3njxjlpdcwy4anqdnq");
+    }
+    else if(messageType == MessageType::kQualities_PrivateUpdateBool)
+    {
+        /*sequence*/ reader.readByte();
+        BoolProperty property = BoolProperty(reader.readInt());
+        uint32_t value = reader.readInt();
+        LOG(Net, Debug) << " set bool " << getBoolPropertyName(property) << " to " << (value ? "true" : "false") << "\n";
+    }
+    else if(messageType == MessageType::kQualities_PrivateUpdateInt)
+    {
+        /*sequence*/ reader.readByte();
+        IntProperty property = IntProperty(reader.readInt());
+        uint32_t value = reader.readInt();
+        LOG(Net, Debug) << " set int " << getIntPropertyName(property) << " to " << value << "\n";
+    }
+    else if(messageType == MessageType::kPlayer_Description)
+    {
+        uint32_t flags = reader.readInt();
+        /*unknown1*/ reader.readInt();
+
+        enum PlayerDescFlags
+        {
+            Packed_IntHashTable = 0x0001,
+            Packed_BoolHashTable = 0x0002,
+            Packed_FloatStats = 0x0004,
+            Packed_DataIDHashTable = 0x0008,
+            Packed_StringHashTable = 0x0010,
+            Packed_PositionHashTable = 0x0020,
+            Packed_InstanceIDHashTable = 0x0040,
+            Packed_Int64HashTable = 0x0080
+        };
+
+        if(flags & Packed_IntHashTable)
+        {
+            uint16_t numInt = reader.readShort();
+            /*unknown*/ reader.readShort();
+
+            for(uint16_t i = 0; i < numInt; i++)
+            {
+                IntProperty property = IntProperty(reader.readInt());
+                uint32_t value = reader.readInt();
+                LOG(Net, Debug) << " set int " << getIntPropertyName(property) << " to " << hexn(value) << "\n";
+            }
+        }
+
+        if(flags & Packed_Int64HashTable)
+        {
+            uint16_t numInt64 = reader.readShort();
+            /*unknown*/ reader.readShort();
+
+            for(uint16_t i = 0; i < numInt64; i++)
+            {
+                Int64Property property = Int64Property(reader.readInt());
+                uint64_t value = reader.readLong();
+                LOG(Net, Debug) << " set int64 " << getInt64PropertyName(property) << " to " << hexn(value) << "\n";
+            }   
+        }
+
+        if(flags & Packed_BoolHashTable)
+        {
+            uint16_t numBool = reader.readShort();
+            /*unknown*/ reader.readShort();
+
+            for(uint16_t i = 0; i < numBool; i++)
+            {
+                BoolProperty property = BoolProperty(reader.readInt());
+                uint32_t value = reader.readInt();
+                LOG(Net, Debug) << " set bool " << getBoolPropertyName(property) << " to " << (value ? "true" : "false") << "\n";
+            }   
+        }
+
+        if(flags & Packed_FloatStats)
+        {
+            uint16_t numFloat = reader.readShort();
+            /*unknown*/ reader.readShort();
+
+            for(uint16_t i = 0; i < numFloat; i++)
+            {
+                FloatProperty property = FloatProperty(reader.readInt());
+                double value = reader.readDouble();
+                LOG(Net, Debug) << " set float " << getFloatPropertyName(property) << " to " << value << "\n";
+            }
+        }
+
+        if(flags & Packed_StringHashTable)
+        {
+            uint16_t numString = reader.readShort();
+            /*unknown*/ reader.readShort();
+
+            for(uint16_t i = 0; i < numString; i++)
+            {
+                StringProperty property = StringProperty(reader.readInt());
+                string value = reader.readString();
+                LOG(Net, Debug) << " set string " << getStringPropertyName(property) << " to " << value << "\n";
+            }
+        }
+
+        if(flags & Packed_DataIDHashTable)
+        {
+            uint16_t numDID = reader.readShort();
+            /*unknown*/ reader.readShort();
+
+            for(uint16_t i = 0; i < numDID; i++)
+            {
+                DIDProperty property = DIDProperty(reader.readInt());
+                uint32_t value = reader.readInt();
+                LOG(Net, Debug) << " set DID " << getDIDPropertyName(property) << " to " << hexn(value) << "\n";
+            }
+        }
+
+        if(flags & Packed_InstanceIDHashTable)
+        {
+            uint16_t numIID = reader.readShort();
+            /*unknown*/ reader.readShort();
+
+            for(uint16_t i = 0; i < numIID; i++)
+            {
+                IIDProperty property = IIDProperty(reader.readInt());
+                uint32_t value = reader.readInt();
+                LOG(Net, Debug) << " set IID " << getIIDPropertyName(property) << " to " << hexn(value) << "\n";
+            }
+        }
+
+        if(flags & Packed_PositionHashTable)
+        {
+            uint16_t numPosition = reader.readShort();
+            /*unknown*/ reader.readShort();
+
+            for(uint16_t i = 0; i < numPosition; i++)
+            {
+                PositionProperty property = PositionProperty(reader.readInt());
+                reader.readRaw(32);
+                LOG(Net, Debug) << " set position " << getPositionPropertyName(property) << "\n";
+            }
+        }
+
+        // TODO more to do
+    }
+    else if(messageType == MessageType::kPhysics_CreateObject)
+    {
+        handleCreateObject(reader);
     }
 }

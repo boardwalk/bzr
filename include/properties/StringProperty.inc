@@ -1,5 +1,4 @@
 ENTRY(Undef, 0x0000)
-ENTRY(TimeStampFormat, 0x0001)
 ENTRY(Name, 0x0001)
 ENTRY(Title, 0x0002)
 ENTRY(Sex, 0x0003)
@@ -41,8 +40,8 @@ ENTRY(QuestRestriction, 0x0025)
 ENTRY(AppraisalPortalDestination, 0x0026)
 ENTRY(TinkerName, 0x0027)
 ENTRY(ImbuerName, 0x0028)
-ENTRY(HouseOwnerAccount, 0x0029)
-ENTRY(DbType, 0x0029)
+ENTRY(HouseOwnerAccount, 0x0029) // FIXME DUPLICATE
+ENTRY(DbType, 0x0029) // FIXME DUPLICATE
 ENTRY(DisplayName, 0x002a)
 ENTRY(DateOfBirth, 0x002b)
 ENTRY(ThirdPartyAPI, 0x002c)

@@ -137,7 +137,7 @@ static uint32_t checksumHeader(const PacketHeader& header)
 
 static uint32_t checksumContent(const PacketHeader& header, const void* data)
 {
-    if(header.flags & kEncryptedChecksum)
+    if(header.flags & kBlobFragments)
     {
         BinReader reader(data, header.size);
 
@@ -190,16 +190,13 @@ static uint32_t checksumContent(const PacketHeader& header, const void* data)
 
         uint32_t result = checksum(data, reader.position());
 
-        if(header.flags & kBlobFragments)
+        while(reader.remaining() != 0)
         {
-            while(reader.remaining() != 0)
-            {
-                const FragmentHeader* fragment = reader.readPointer<FragmentHeader>();
+            const FragmentHeader* fragment = reader.readPointer<FragmentHeader>();
 
-                reader.readRaw(fragment->size - sizeof(FragmentHeader));
+            reader.readRaw(fragment->size - sizeof(FragmentHeader));
 
-                result += checksum(fragment, fragment->size);
-            }
+            result += checksum(fragment, fragment->size);
         }
 
         assert(reader.remaining() == 0);
@@ -387,11 +384,7 @@ void Session::handle(const Packet& packet)
         throw logic_error("bad state");
     }
 
-    if(reader.remaining() != 0)
-    {
-        LOG(Net, Error) << address_ << " unconsumed data of " << reader.remaining() << " bytes in packet\n";
-        throw runtime_error("unconsumed data");
-    }
+    assert(reader.remaining() == 0);
 }
 
 void Session::tick(net_time_point now)
@@ -770,6 +763,8 @@ void Session::handleReferral(BinReader& reader)
     uint16_t port = htons(reader.readShort());
     uint32_t ip = htonl(reader.readInt());
     /*zero*/ reader.readRaw(8);
+    /*serverId*/ reader.readShort();
+    /*padding*/ reader.readRaw(6);
 
     Address referral(ip, port);
 
