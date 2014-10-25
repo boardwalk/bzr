@@ -53,8 +53,8 @@ private:
 
     bool done_;
     Socket socket_;
-    vector<unique_ptr<Session>> sessions_;
     Session* primary_;
+    vector<unique_ptr<Session>> sessions_;
     net_time_point clientBegin_;
     thread thread_;
 };

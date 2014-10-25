@@ -53,6 +53,7 @@ void BlobAssembler::addFragment(const FragmentHeader* fragment)
         blob->count = 1;
         blob->queueId = fragment->queueId;
         blob->fragmentsReceived = 1;
+        blob->size = fragment->size - sizeof(FragmentHeader);
 
         const void* source = reinterpret_cast<const uint8_t*>(fragment) + sizeof(FragmentHeader);
         void* dest = reinterpret_cast<uint8_t*>(blob.get()) + sizeof(Blob);
@@ -106,7 +107,7 @@ void BlobAssembler::addFragment(const FragmentHeader* fragment)
         throw runtime_error("bad fragment size before last fragment");
     }
 
-    if(fragment->count == fragment->index - 1)
+    if(fragment->index == fragment->count - 1)
     {
         blob->size = kMaxFragmentSize * (fragment->count - 1) + (fragment->size - sizeof(FragmentHeader));
     }

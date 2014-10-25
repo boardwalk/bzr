@@ -91,6 +91,16 @@ static ostream& operator<<(ostream& os, const PacketHeader& header)
     return os;
 }
 
+static ostream& operator<<(ostream& os, const FragmentHeader& header)
+{
+    os << "id=" << hexn(header.id)
+        << " count=" << hexn(header.count)
+        << " size=" << hexn(header.size)
+        << " index=" << hexn(header.index)
+        << " queueId=" << hexn(header.queueId);
+    return os;
+}
+
 static uint32_t checksum(const void* data, size_t size)
 {
     uint32_t result = static_cast<uint32_t>(size) << 16;
@@ -217,7 +227,8 @@ Session::Session(SessionManager& manager,
     nextPeriodic_(sessionBegin_),
     numPeriodicSent_(0),
     accountName_(move(accountName)),
-    accountKey_(move(accountKey))
+    accountKey_(move(accountKey)),
+    blobId_(0)
 {
     LOG(Net, Info) << address_ << " logon session created\n";
 }
@@ -231,7 +242,8 @@ Session::Session(SessionManager& manager,
     sessionBegin_(net_clock::now()),
     nextPeriodic_(sessionBegin_),
     numPeriodicSent_(0),
-    cookie_(cookie)
+    cookie_(cookie),
+    blobId_(0)
 {
     LOG(Net, Info) << address_ << " referred session created\n";
 }
@@ -412,15 +424,15 @@ void Session::tick(net_time_point now)
     }
     else if(state_ == State::kConnected)
     {
-        /*
         Packet packet;
-        packet.address = address();
+        packet.address = sendAddress();
 
         BinWriter writer(packet.payload, sizeof(packet.payload));
 
         uint16_t time = chrono::duration_cast<SessionDuration>(now - sessionBegin_).count();
         uint32_t flags = 0;
 
+/*
         if(now > nextRequestMissing_)
         {
             flags |= kRequestRetransmit;
@@ -448,7 +460,9 @@ void Session::tick(net_time_point now)
 
             nextRequestMissing_ = now + kMissingPacketDelay;
         }
+*/
 
+/*
         if(serverLeadingSequence_ > serverSequence_)
         {
             flags |= kAckSequence;
@@ -458,6 +472,7 @@ void Session::tick(net_time_point now)
 
             LOG(Net, Debug) << address_ << " sending ack sequence " << serverLeadingSequence_ << "\n";
         }
+*/
 
         if(now > nextPeriodic_)
         {
@@ -491,7 +506,7 @@ void Session::tick(net_time_point now)
             LOG(Net, Debug) << address_ << " sending packet " << packet.header << "\n";
             manager_.send(packet);
 
-            packet.header.flags = flags | kRetransmission;
+            packet.header.flags |= kRetransmission;
             packet.header.checksum = checksumPacket(packet, clientXorGen_); // must be done last
             clientPackets_[packet.header.sequence].reset(new Packet(packet));
 
@@ -499,7 +514,6 @@ void Session::tick(net_time_point now)
             // since we already generated the retransmission checksum, we can purge right away
             clientXorGen_.purge(clientLeadingSequence_);
         }
-        */
     }
     else
     {
@@ -509,19 +523,73 @@ void Session::tick(net_time_point now)
 
 void Session::sendBlob(BlobPtr blob)
 {
-    LOG(Net, Info) << address_ << " send blob!\n";
-    
-    (void)blob;
+    Packet packet;
+    packet.address = sendAddress();
+
+    packet.header.sequence = clientLeadingSequence_ + 1;
+    packet.header.flags = kEncryptedChecksum | kBlobFragments;
+    packet.header.netId = clientNetId_;
+    packet.header.time = chrono::duration_cast<SessionDuration>(net_clock::now() - sessionBegin_).count();
+    packet.header.iteration = iteration_;
+
+    BinWriter writer(packet.payload, sizeof(packet.payload));
+
+    // HACK
+    //packet.header.flags |= kAckSequence;
+    //writer.writeInt(2);
+
+    FragmentHeader fragment;
+    fragment.id = blobId_++;
+    fragment.count = 1;
+    fragment.size = static_cast<uint16_t>(sizeof(FragmentHeader) + blob->size);
+    fragment.index = 0;
+    fragment.queueId = blob->queueId;
+
+    writer.writeRaw(&fragment, sizeof(fragment));
+    writer.writeRaw(blob.get() + 1, blob->size);
+
+    packet.header.size = static_cast<uint16_t>(writer.position());
+    packet.header.checksum = checksumPacket(packet, clientXorGen_);
+    manager_.send(packet);
+
+    LOG(Net, Debug) << address_ << " sending " << packet.header << "\n";
+    LOG(Net, Debug) << "  fragment " << fragment << "\n";
+
+    packet.header.flags |= kRetransmission;
+    packet.header.checksum = checksumPacket(packet, clientXorGen_);
+    clientPackets_[packet.header.sequence].reset(new Packet(packet));
+
+    clientLeadingSequence_++;
+    clientXorGen_.purge(clientLeadingSequence_);
 }
 
-Address Session::address() const
+Address Session::baseAddress() const
 {
-    if(state_ == State::kConnectResponse || state_ == State::kConnected)
+    return address_;
+}
+
+Address Session::sendAddress() const
+{
+    if(state_ == State::kConnectResponse)
     {
         return Address(address_.ip(), address_.port() + 1);
     }
+    else
+    {
+        return address_;
+    }
+}
 
-    return address_;
+Address Session::recvAddress() const
+{
+    if(state_ == State::kLogon || state_ == State::kReferred)
+    {
+        return address_;
+    }
+    else
+    {
+        return Address(address_.ip(), address_.port() + 1);
+    }
 }
 
 net_time_point Session::nextTick() const
@@ -537,7 +605,7 @@ BlobAssembler& Session::blobAssembler()
 void Session::sendLogon()
 {
     Packet packet;
-    packet.address = address();
+    packet.address = sendAddress();
 
     memset(&packet.header, 0, sizeof(packet.header));
     packet.header.flags = kLogon;
@@ -572,7 +640,7 @@ void Session::sendLogon()
 void Session::sendReferred()
 {
     Packet packet;
-    packet.address = address();
+    packet.address = sendAddress();
 
     memset(&packet.header, 0, sizeof(packet.header));
     packet.header.flags = kReferred;
@@ -593,7 +661,7 @@ void Session::sendReferred()
 void Session::sendConnectResponse()
 {
     Packet packet;
-    packet.address = address();
+    packet.address = sendAddress();
 
     memset(&packet.header, 0, sizeof(packet.header));
     packet.header.flags = kConnectResponse;
@@ -758,7 +826,7 @@ void Session::handleTimeSync(BinReader& reader)
     beginTime_ = reader.readDouble();
     beginLocalTime_ = net_clock::now();
 
-    LOG(Net, Debug) << address_ << " received time sync\n";
+    LOG(Net, Debug) << address_ << " received time sync " << beginTime_ << "\n";
 }
 
 void Session::handleEchoResponse(BinReader& reader)

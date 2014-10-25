@@ -93,10 +93,17 @@ void BlobHandler::handle(MessageType messageType, BinReader& reader)
     }
     else if(messageType == MessageType::kDDD_Interrogation)
     {
-        /*serversRegion*/ reader.readInt();
-        /*nameRuleLanguage*/ reader.readInt();
-        /*productId*/ reader.readInt();
+        uint32_t serversRegion = reader.readInt();
+        assert(serversRegion == 1);
+
+        uint32_t nameRuleLanguage = reader.readInt();
+        assert(nameRuleLanguage == 1);
+
+        uint32_t productId = reader.readInt();
+        assert(productId == 1);
+
         uint32_t numSupportedLanguages = reader.readInt();
+        assert(numSupportedLanguages == 2);
 
         for(uint32_t i = 0; i < numSupportedLanguages; i++)
         {
@@ -110,5 +117,10 @@ void BlobHandler::handle(MessageType messageType, BinReader& reader)
         /*numItersWithKeys*/ writer.writeInt(0);
         /*numItersWithoutKeys*/ writer.writeInt(0);
         /*flags*/ writer.writeInt(0);
+    }
+    else if(messageType == MessageType::kDDD_EndDDD)
+    {
+        BlobWriter writer(MessageType::kDDD_EndDDD, NetQueueId::kDatabase);
+        // empty body
     }
 }

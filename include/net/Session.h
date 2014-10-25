@@ -50,7 +50,9 @@ public:
     void tick(net_time_point now);
     void sendBlob(BlobPtr blob);
 
-    Address address() const;
+    Address baseAddress() const;
+    Address sendAddress() const;
+    Address recvAddress() const;
     net_time_point nextTick() const;
     BlobAssembler& blobAssembler();
 
@@ -157,6 +159,8 @@ private:
     uint32_t lastFlowBytes_;
 
     BlobAssembler blobAssembler_;
+
+    uint64_t blobId_;
 };
 
 #endif

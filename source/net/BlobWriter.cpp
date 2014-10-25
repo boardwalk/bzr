@@ -26,8 +26,10 @@ BlobWriter::BlobWriter(MessageType messageType, NetQueueId queueId)
     blob_->count = 1;
     blob_->queueId = static_cast<uint16_t>(queueId);
 
-    data_ = blob_.get();
+    data_ = blob_.get() + 1;
     size_ = kMaxFragmentSize;
+
+    writeInt(static_cast<uint32_t>(messageType));
 }
 
 BlobWriter::~BlobWriter()

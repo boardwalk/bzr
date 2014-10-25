@@ -68,6 +68,7 @@ SessionManager::SessionManager() :
 
     lock_guard<mutex> lock(mutex_);
     unique_ptr<Session> session(new Session(*this, address, move(accountName), move(accountKey)));
+    primary_ = session.get();
     sessions_.push_back(move(session));
 }
 
@@ -125,7 +126,7 @@ bool SessionManager::exists(Address address) const
 {
     for(const unique_ptr<Session>& session : sessions_)
     {
-        if(session->address() == address)
+        if(session->baseAddress() == address)
         {
             return true;
         }
@@ -182,7 +183,7 @@ void SessionManager::handle(const Packet& packet)
 
     for(/**/; it != sessions_.end(); ++it)
     {
-        if((*it)->address() == packet.address)
+        if((*it)->recvAddress() == packet.address)
         {
             break;
         }
@@ -200,7 +201,7 @@ void SessionManager::handle(const Packet& packet)
     }
     catch(const runtime_error& e)
     {
-        LOG(Net, Error) << (*it)->address() << " threw an error: " << e.what() << "\n";
+        LOG(Net, Error) << (*it)->baseAddress() << " threw an error: " << e.what() << "\n";
 
         if(it->get() == primary_)
         {
@@ -223,7 +224,7 @@ void SessionManager::tick()
         }
         catch(const runtime_error& e)
         {
-            LOG(Net, Error) << (*it)->address() << " threw an error: " << e.what() << "\n";
+            LOG(Net, Error) << (*it)->baseAddress() << " threw an error: " << e.what() << "\n";
 
             if(it->get() == primary_)
             {
