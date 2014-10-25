@@ -1,0 +1,7 @@
+ENTRY(Undef, 0x0000)
+ENTRY(Strength, 0x0001)
+ENTRY(Endurance, 0x0002)
+ENTRY(Quickness, 0x0003)
+ENTRY(Coordination, 0x0004)
+ENTRY(Focus, 0x0005)
+ENTRY(Self, 0x0006)
