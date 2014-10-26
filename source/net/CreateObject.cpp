@@ -19,6 +19,8 @@
 #include "Core.h"
 #include "Log.h"
 #include "ObjectManager.h"
+#include "ResourceCache.h"
+#include "util.h"
 
 enum PhysicsDescFlags
 {
@@ -159,7 +161,7 @@ static void handleObjDesc(BinReader& reader, Object&)
 }
 
 // AC: PhysicsDesc
-static void handlePhysicsDesc(BinReader& reader, Object&)
+static void handlePhysicsDesc(BinReader& reader, Object& object)
 {
     uint32_t flags = reader.readInt();
     /*unknown*/ reader.readInt();
@@ -178,7 +180,12 @@ static void handlePhysicsDesc(BinReader& reader, Object&)
 
     if(flags & kPosition)
     {
-        /*position*/ reader.readRaw(32);
+        object.setLandcellId(LandcellId(reader.readInt()));
+
+        Location location;
+        read(reader, location.position);
+        read(reader, location.rotation);
+        object.setLocation(location);
     }
 
     if(flags & kMTable)
@@ -198,7 +205,8 @@ static void handlePhysicsDesc(BinReader& reader, Object&)
 
     if(flags & kCSetup)
     {
-        /*setup*/ reader.readInt();
+        uint32_t setup = reader.readInt();
+        object.setModel(Core::get().resourceCache().get(setup));
     }
 
     if(flags & kParent)

@@ -22,6 +22,7 @@
 #include "Noncopyable.h"
 #include "LandcellId.h"
 #include "Location.h"
+#include "ObjectId.h"
 #include "Resource.h"
 #include <unordered_map>
 
@@ -35,6 +36,8 @@ struct Position
 class Object : Noncopyable
 {
 public:
+    Object(ObjectId id);
+
     void setProperty(BoolProperty property, bool value);
     void setProperty(StringProperty property, string value);
     void setProperty(IntProperty property, uint32_t value);
@@ -51,11 +54,14 @@ public:
     void setLandcellId(const LandcellId& landcellId);
     void setLocation(const Location& location);
 
+    ObjectId id() const;
     const ResourcePtr& model() const;
     const LandcellId& landcellId() const;
     const Location& location() const;
 
 private:
+    const ObjectId id_;
+
     unordered_map<BoolProperty, bool> boolProperties_;
     unordered_map<StringProperty, string> stringProperties_;
     unordered_map<IntProperty, uint32_t> intProperties_;

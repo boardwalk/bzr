@@ -17,7 +17,12 @@
  */
 #include "Object.h"
 #include "Core.h"
+#include "LandcellManager.h"
 #include "Log.h"
+#include "ObjectManager.h"
+
+Object::Object(ObjectId id) : id_(id)
+{}
 
 void Object::setProperty(BoolProperty property, bool value)
 {
@@ -74,12 +79,22 @@ void Object::setModel(ResourcePtr model)
 
 void Object::setLandcellId(const LandcellId& landcellId)
 {
+    if(id_ == Core::get().objectManager().playerId())
+    {
+        Core::get().landcellManager().setCenter(landcellId);
+    }
+
     landcellId_ = landcellId;
 }
 
 void Object::setLocation(const Location& location)
 {
     location_ = location;
+}
+
+ObjectId Object::id() const
+{
+    return id_;
 }
 
 const ResourcePtr& Object::model() const

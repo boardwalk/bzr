@@ -30,6 +30,7 @@ public:
     typedef container_type::iterator iterator;
 
     void setPlayerId(ObjectId id);
+    ObjectId playerId() const;
     Object& player();
 
     Object& operator[](ObjectId id);

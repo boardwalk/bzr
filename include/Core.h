@@ -18,7 +18,6 @@
 #ifndef BZR_CORE_H
 #define BZR_CORE_H
 
-#include "ObjectId.h"
 #include "Resource.h"
 
 class Camera;
@@ -53,8 +52,6 @@ public:
 #ifndef HEADLESS
     Renderer& renderer();
 #endif
-    ObjectId playerId() const;
-    void setPlayerId(ObjectId playerId);
 
 private:
     Core();
@@ -80,11 +77,6 @@ private:
     unique_ptr<Camera> camera_;
 #ifndef HEADLESS
     unique_ptr<Renderer> renderer_;
-#endif
-    ObjectId playerId_;
-    // TEMPORARY
-#ifndef HEADLESS
-    uint32_t modelId_;
 #endif
 };
 

@@ -116,21 +116,7 @@ Renderer& Core::renderer()
 }
 #endif
 
-ObjectId Core::playerId() const
-{
-    return playerId_;
-}
-
-void Core::setPlayerId(ObjectId playerId)
-{
-    playerId_ = playerId;
-}
-
 Core::Core() : done_(false)
-// TEMPORARY
-#ifndef HEADLESS
-, modelId_(0x02000120)
-#endif
 {}
 
 void Core::init()
@@ -177,8 +163,6 @@ void Core::init()
         }
     }
 #endif
-
-    setPlayerId(ObjectId{1});
 }
 
 void Core::cleanup()
@@ -238,10 +222,6 @@ void Core::handleEvents()
 {
     SDL_Event event;
 
-#ifndef HEADLESS
-    bool newModel = false; // TEMPORARY
-#endif
-
     while(SDL_PollEvent(&event) != 0)
     {
         switch(event.type)
@@ -258,59 +238,9 @@ void Core::handleEvents()
                     done_ = true;
                 }
 #endif
-                // TEMPORARY
-#ifndef HEADLESS
-                if(event.key.keysym.sym == SDLK_z)
-                {
-                    while(modelId_ > 0x02000000)
-                    {
-                        modelId_--;
-
-                        if(!portalDat_->read(modelId_).empty())
-                        {
-                            newModel = true;
-                            break;
-                        }
-                    }
-                }
-
-                if(event.key.keysym.sym == SDLK_x)
-                {
-                    while(modelId_ < 0x02005000)
-                    {
-                        modelId_++;
-
-                        if(!portalDat_->read(modelId_).empty())
-                        {
-                            newModel = true;
-                            break;
-                        }
-                    }
-                }
-#endif
-
                 break;
         }
     }
-
-    // TEMPORARY
-#ifndef HEADLESS
-    if(newModel)
-    {
-        LOG(Misc, Info) << "loading model " << hexn(modelId_) << "\n";
-
-        Object& object = (*objectManager_)[ObjectId{1}];
-
-        object.setModel(resourceCache_->get(modelId_));
-
-        object.setLandcellId(landcellManager_->center());
-
-        Location location;
-        location.position = glm::vec3{92.0, 92.0, 0.0};
-        location.rotation = glm::quat{1.0, 0.0, 0.0, 0.0};
-        object.setLocation(location);
-    }
-#endif
 }
 
 void Core::step(fp_t dt)

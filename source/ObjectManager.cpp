@@ -22,6 +22,11 @@ void ObjectManager::setPlayerId(ObjectId playerId)
     playerId_ = playerId;
 }
 
+ObjectId ObjectManager::playerId() const
+{
+    return playerId_;
+}
+
 Object& ObjectManager::player()
 {
     if(playerId_.value() == 0)
@@ -38,7 +43,7 @@ Object& ObjectManager::operator[](ObjectId id)
 
     if(!ptr)
     {
-        ptr.reset(new Object());
+        ptr.reset(new Object(id));
     }
 
     return *ptr;
