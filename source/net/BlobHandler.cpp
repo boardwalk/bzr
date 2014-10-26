@@ -20,6 +20,7 @@
 #include "BinReader.h"
 #include "Core.h"
 #include "Log.h"
+#include "ObjectManager.h"
 #include "Property.h"
 
 BlobHandler::BlobHandler() : sequence_(1)
@@ -74,8 +75,6 @@ void handleCreateObject(BinReader& reader);
 
 void BlobHandler::handle(MessageType messageType, BinReader& reader)
 {
-    LOG(Net, Info) << "received blob " << hexn(static_cast<uint32_t>(messageType)) << " " << getMessageName(messageType) << "\n";
-
     if(messageType == MessageType::kLogin_CharacterSet)
     {
         /*unknown1*/ reader.readInt();
@@ -142,27 +141,12 @@ void BlobHandler::handle(MessageType messageType, BinReader& reader)
         BlobWriter writer(MessageType::kCharacter_Enter_Game, NetQueueId::kLogon);
         writer.writeInt(0x500F4CFB);
         writer.writeString("md9nq9m3njxjlpdcwy4anqdnq");
+        Core::get().objectManager().setPlayerId(ObjectId{0x500F4CFB});
     }
-    else if(messageType == MessageType::kQualities_PrivateUpdateBool)
+    else if(messageType == MessageType::kPhysics_CreatePlayer)
     {
-        /*sequence*/ reader.readByte();
-        BoolProperty property = BoolProperty(reader.readInt());
-        uint32_t value = reader.readInt();
-        LOG(Net, Debug) << " set bool " << getBoolPropertyName(property) << " to " << (value ? "true" : "false") << "\n";
-    }
-    else if(messageType == MessageType::kQualities_PrivateUpdateInt)
-    {
-        /*sequence*/ reader.readByte();
-        IntProperty property = IntProperty(reader.readInt());
-        uint32_t value = reader.readInt();
-        LOG(Net, Debug) << " set int " << getIntPropertyName(property) << " to " << value << "\n";
-    }
-    else if(messageType == MessageType::kQualities_PrivateUpdateFloat)
-    {
-        /*sequence*/ reader.readByte();
-        FloatProperty property = FloatProperty(reader.readInt());
-        double value = reader.readDouble();
-        LOG(Net, Debug) << " set float " << getFloatPropertyName(property) << " to " << value << "\n";
+        ObjectId playerId = ObjectId{reader.readInt()};
+        Core::get().objectManager().setPlayerId(playerId);
     }
     else if(messageType == MessageType::kPlayer_Description)
     {
@@ -171,5 +155,54 @@ void BlobHandler::handle(MessageType messageType, BinReader& reader)
     else if(messageType == MessageType::kPhysics_CreateObject)
     {
         handleCreateObject(reader);
+    }
+    else if(messageType == MessageType::kQualities_PrivateUpdateBool)
+    {
+        /*sequence*/ reader.readByte();
+        BoolProperty property = BoolProperty(reader.readInt());
+        uint32_t value = reader.readInt();
+        Core::get().objectManager().player().setProperty(property, value != 0);
+    }
+    else if(messageType == MessageType::kQualities_PrivateUpdateInt)
+    {
+        /*sequence*/ reader.readByte();
+        IntProperty property = IntProperty(reader.readInt());
+        uint32_t value = reader.readInt();
+        Core::get().objectManager().player().setProperty(property, value);
+    }
+    else if(messageType == MessageType::kQualities_PrivateUpdateFloat)
+    {
+        /*sequence*/ reader.readByte();
+        FloatProperty property = FloatProperty(reader.readInt());
+        double value = reader.readDouble();
+        Core::get().objectManager().player().setProperty(property, value);
+    }
+    else if(messageType == MessageType::kQualities_UpdateDataID)
+    {
+        /*sequence*/ reader.readByte();
+        ObjectId objectId = ObjectId{reader.readInt()};
+        DIDProperty property = DIDProperty(reader.readInt());
+        uint32_t value = reader.readInt();
+        Core::get().objectManager()[objectId].setProperty(property, value);
+    }
+    else if(messageType == MessageType::kPhysics_ObjDescEvent)
+    {
+        // ignore for now
+    }
+    else if(messageType == MessageType::kMovement_UpdatePosition)
+    {
+        // ignore for now
+    }
+    else if(messageType == MessageType::kMovement_MovementEvent)
+    {
+        // ignore for now
+    }
+    else if(messageType == MessageType::kPhysics_PlayScriptType)
+    {
+        // ignore for now
+    }
+    else
+    {
+        LOG(Net, Info) << "received blob " << hexn(static_cast<uint32_t>(messageType)) << " " << getMessageName(messageType) << "\n";
     }
 }

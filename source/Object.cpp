@@ -21,42 +21,50 @@
 
 void Object::setProperty(BoolProperty property, bool value)
 {
-    LOG(Misc, Debug) << " bool " << getBoolPropertyName(property) << " = " << (value ? "true" : "false") << "\n";
+    //LOG(Misc, Debug) << " bool " << getBoolPropertyName(property) << " = " << (value ? "true" : "false") << "\n";
+    boolProperties_[property] = value;
 }
 
 void Object::setProperty(StringProperty property, string value)
 {
-    LOG(Misc, Debug) << " string " << getStringPropertyName(property) << " = " << value << "\n";
+    //LOG(Misc, Debug) << " string " << getStringPropertyName(property) << " = " << value << "\n";
+    stringProperties_[property] = value;
 }
 
 void Object::setProperty(IntProperty property, uint32_t value)
 {
-    LOG(Misc, Debug) << " int " << getIntPropertyName(property) << " = " << value << "\n";
+    //LOG(Misc, Debug) << " int " << getIntPropertyName(property) << " = " << value << "\n";
+    intProperties_[property] = value;
 }
 
 void Object::setProperty(Int64Property property, uint64_t value)
 {
-    LOG(Misc, Debug) << " int64 " << getInt64PropertyName(property) << " = " << value << "\n";
+    //LOG(Misc, Debug) << " int64 " << getInt64PropertyName(property) << " = " << value << "\n";
+    int64Properties_[property] = value;
 }
 
 void Object::setProperty(FloatProperty property, double value)
 {
-    LOG(Misc, Debug) << " float " << getFloatPropertyName(property) << " = " << value << "\n";
+    //LOG(Misc, Debug) << " float " << getFloatPropertyName(property) << " = " << value << "\n";
+    floatProperties_[property] = value;
 }
 
-void Object::setProperty(PositionProperty property, Position)
+void Object::setProperty(PositionProperty property, Position value)
 {
-    LOG(Misc, Debug) << " location " << getPositionPropertyName(property) << "\n";
+    //LOG(Misc, Debug) << " location " << getPositionPropertyName(property) << "\n";
+    positionProperties_[property] = value;
 }
 
 void Object::setProperty(IIDProperty property, uint32_t value)
 {
-    LOG(Misc, Debug) << " IID " << getIIDPropertyName(property) << " = " << hexn(value) << "\n";
+    //LOG(Misc, Debug) << " IID " << getIIDPropertyName(property) << " = " << hexn(value) << "\n";
+    iidProperties_[property] = value;
 }
 
 void Object::setProperty(DIDProperty property, uint32_t value)
 {
-    LOG(Misc, Debug) << " DID " << getDIDPropertyName(property) << " = " << hexn(value) << "\n";
+    //LOG(Misc, Debug) << " DID " << getDIDPropertyName(property) << " = " << hexn(value) << "\n";
+    didProperties_[property] = value;
 }
 
 void Object::setModel(ResourcePtr model)

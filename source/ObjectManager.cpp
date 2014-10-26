@@ -17,6 +17,21 @@
  */
 #include "ObjectManager.h"
 
+void ObjectManager::setPlayerId(ObjectId playerId)
+{
+    playerId_ = playerId;
+}
+
+Object& ObjectManager::player()
+{
+    if(playerId_.value() == 0)
+    {
+        throw runtime_error("player id not set");
+    }
+
+    return (*this)[playerId_];
+}
+
 Object& ObjectManager::operator[](ObjectId id)
 {
     unique_ptr<Object>& ptr = data_[id];

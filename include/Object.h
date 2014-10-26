@@ -23,6 +23,7 @@
 #include "LandcellId.h"
 #include "Location.h"
 #include "Resource.h"
+#include <unordered_map>
 
 struct Position
 {
@@ -55,6 +56,15 @@ public:
     const Location& location() const;
 
 private:
+    unordered_map<BoolProperty, bool> boolProperties_;
+    unordered_map<StringProperty, string> stringProperties_;
+    unordered_map<IntProperty, uint32_t> intProperties_;
+    unordered_map<Int64Property, uint64_t> int64Properties_;
+    unordered_map<FloatProperty, double> floatProperties_;
+    unordered_map<PositionProperty, Position> positionProperties_;
+    unordered_map<IIDProperty, uint32_t> iidProperties_;
+    unordered_map<DIDProperty, uint32_t> didProperties_;
+
     ResourcePtr model_;
     LandcellId landcellId_;
     Location location_;

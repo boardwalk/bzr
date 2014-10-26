@@ -18,7 +18,7 @@
 #include "BinReader.h"
 #include "Core.h"
 #include "Log.h"
-#include "Object.h"
+#include "ObjectManager.h"
 
 enum PhysicsDescFlags
 {
@@ -120,7 +120,8 @@ enum PublicWeenieDescFlags2
     kPetOwner = 0x0008
 };
 
-static void handleVisualDesc(BinReader& reader, Object&)
+// AC: ObjDesc
+static void handleObjDesc(BinReader& reader, Object&)
 {
     uint8_t eleven = reader.readByte();
     assert(eleven == 0x11);
@@ -157,6 +158,7 @@ static void handleVisualDesc(BinReader& reader, Object&)
     reader.align();
 }
 
+// AC: PhysicsDesc
 static void handlePhysicsDesc(BinReader& reader, Object&)
 {
     uint32_t flags = reader.readInt();
@@ -272,6 +274,7 @@ static void handlePhysicsDesc(BinReader& reader, Object&)
     reader.align();
 }
 
+// AC: PublicWeenieDesc
 static void handleWeenieDesc(BinReader& reader, Object& object)
 {
     uint32_t flags = reader.readInt();
@@ -536,12 +539,11 @@ static void handleWeenieDesc(BinReader& reader, Object& object)
 
 void handleCreateObject(BinReader& reader)
 {
-    unique_ptr<Object> objectPtr(new Object());
+    ObjectId objectId = ObjectId{reader.readInt()};
 
-    /*iid*/ reader.readInt();
+    Object& object = Core::get().objectManager()[objectId];
 
-    handleVisualDesc(reader, *objectPtr);
-    handlePhysicsDesc(reader, *objectPtr);
-    handleWeenieDesc(reader, *objectPtr);
+    handleObjDesc(reader, object);
+    handlePhysicsDesc(reader, object);
+    handleWeenieDesc(reader, object);
 }
-

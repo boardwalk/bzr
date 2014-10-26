@@ -18,7 +18,7 @@
 #include "BinReader.h"
 #include "Core.h"
 #include "Log.h"
-#include "Object.h"
+#include "ObjectManager.h"
 #include "util.h"
 
 enum PlayerDescFlags
@@ -35,8 +35,7 @@ enum PlayerDescFlags
 
 void handlePlayerDescription(BinReader& reader)
 {
-    unique_ptr<Object> objectPtr(new Object());
-    Object& object = *objectPtr;
+    Object& player = Core::get().objectManager().player();
 
     uint32_t flags = reader.readInt();
     /*unknown1*/ reader.readInt();
@@ -50,7 +49,7 @@ void handlePlayerDescription(BinReader& reader)
         {
             IntProperty property = IntProperty(reader.readInt());
             uint32_t value = reader.readInt();
-            object.setProperty(property, value);
+            player.setProperty(property, value);
         }
     }
 
@@ -63,7 +62,7 @@ void handlePlayerDescription(BinReader& reader)
         {
             Int64Property property = Int64Property(reader.readInt());
             uint64_t value = reader.readLong();
-            object.setProperty(property, value);
+            player.setProperty(property, value);
         }   
     }
 
@@ -76,7 +75,7 @@ void handlePlayerDescription(BinReader& reader)
         {
             BoolProperty property = BoolProperty(reader.readInt());
             uint32_t value = reader.readInt();
-            object.setProperty(property, value != 0);
+            player.setProperty(property, value != 0);
         }   
     }
 
@@ -89,7 +88,7 @@ void handlePlayerDescription(BinReader& reader)
         {
             FloatProperty property = FloatProperty(reader.readInt());
             double value = reader.readDouble();
-            object.setProperty(property, value);
+            player.setProperty(property, value);
         }
     }
 
@@ -102,7 +101,7 @@ void handlePlayerDescription(BinReader& reader)
         {
             StringProperty property = StringProperty(reader.readInt());
             string value = reader.readString();
-            object.setProperty(property, value);
+            player.setProperty(property, value);
         }
     }
 
@@ -115,7 +114,7 @@ void handlePlayerDescription(BinReader& reader)
         {
             DIDProperty property = DIDProperty(reader.readInt());
             uint32_t value = reader.readInt();
-            object.setProperty(property, value);
+            player.setProperty(property, value);
         }
     }
 
@@ -128,7 +127,7 @@ void handlePlayerDescription(BinReader& reader)
         {
             IIDProperty property = IIDProperty(reader.readInt());
             uint32_t value = reader.readInt();
-            object.setProperty(property, value);
+            player.setProperty(property, value);
         }
     }
 
@@ -144,7 +143,7 @@ void handlePlayerDescription(BinReader& reader)
             value.landcell = LandcellId(reader.readInt());
             read(reader, value.position);
             read(reader, value.rotation);
-            object.setProperty(property, value);
+            player.setProperty(property, value);
         }
     }
 

@@ -29,6 +29,9 @@ public:
     typedef unordered_map<ObjectId, unique_ptr<Object>> container_type;
     typedef container_type::iterator iterator;
 
+    void setPlayerId(ObjectId id);
+    Object& player();
+
     Object& operator[](ObjectId id);
     iterator find(ObjectId id);
     iterator begin();
@@ -36,6 +39,7 @@ public:
 
 private:
     container_type data_;
+    ObjectId playerId_;
 };
 
 #endif
