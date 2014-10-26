@@ -127,6 +127,7 @@ static void handleObjDesc(BinReader& reader, Object&)
 {
     uint8_t eleven = reader.readByte();
     assert(eleven == 0x11);
+    UNUSED(eleven);
 
     uint8_t paletteCount = reader.readByte();
     uint8_t textureCount = reader.readByte();

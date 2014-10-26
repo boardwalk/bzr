@@ -22,6 +22,7 @@
 #include "Log.h"
 #include "ObjectManager.h"
 #include "Property.h"
+#include "util.h"
 
 BlobHandler::BlobHandler() : sequence_(1)
 {}
@@ -101,12 +102,15 @@ void BlobHandler::handle(MessageType messageType, BinReader& reader)
     {
         uint32_t serversRegion = reader.readInt();
         assert(serversRegion == 1);
+        UNUSED(serversRegion);
 
         uint32_t nameRuleLanguage = reader.readInt();
         assert(nameRuleLanguage == 1);
+        UNUSED(nameRuleLanguage);
 
         uint32_t productId = reader.readInt();
         assert(productId == 1);
+        UNUSED(productId);
 
         uint32_t numSupportedLanguages = reader.readInt();
         assert(numSupportedLanguages == 2);
@@ -191,7 +195,48 @@ void BlobHandler::handle(MessageType messageType, BinReader& reader)
     }
     else if(messageType == MessageType::kMovement_UpdatePosition)
     {
-        // ignore for now
+        enum PositionFlags
+        {
+            kVelocity = 0x1,
+            kPlacementId = 0x2,
+            kContact = 0x4,
+            kZeroQW = 0x8,
+            kZeroQX = 0x10,
+            kZeroQY = 0x20,
+            kZeroQZ = 0x40
+        };
+
+        ObjectId objectId = ObjectId{reader.readInt()};
+        Object& object = Core::get().objectManager()[objectId];
+
+        uint32_t flags = reader.readInt();
+        
+        object.setLandcellId(LandcellId{reader.readInt()});
+
+        Location location;
+        read(reader, location.position);
+
+        if(!(flags & kZeroQW))
+        {
+            location.rotation.w = reader.readFloat();
+        }
+
+        if(!(flags & kZeroQX))
+        {
+            location.rotation.x = reader.readFloat();
+        }
+
+        if(!(flags & kZeroQY))
+        {
+            location.rotation.y = reader.readFloat();
+        }
+
+        if(!(flags & kZeroQZ))
+        {
+            location.rotation.z = reader.readFloat();
+        }
+
+        object.setLocation(location);
     }
     else if(messageType == MessageType::kMovement_MovementEvent)
     {
