@@ -18,6 +18,7 @@
 #include "BinReader.h"
 #include "Core.h"
 #include "Log.h"
+#include "Object.h"
 
 enum PhysicsDescFlags
 {
@@ -77,6 +78,40 @@ enum PublicWeenieDescFlags
     kMaterialType = 0x80000000
 };
 
+enum BitfieldIndex
+{
+    kOpenable = 0x0001,
+    kInscribable = 0x0002,
+    kStuck = 0x0004,
+    kPlayer = 0x0008,
+    kAttackable = 0x0010,
+    kPlayerKiller = 0x0020,
+    kHiddenAdmin = 0x0040,
+    kUIHidden = 0x0080,
+    kBook = 0x0100,
+    kVendor = 0x0200,
+    kPkswitch = 0x0400,
+    kNpkswitch = 0x0800,
+    kDoor = 0x1000,
+    kCorpse = 0x2000,
+    kLifestone = 0x4000,
+    kFood = 0x8000,
+    kHealer = 0x00010000,
+    kLockpick = 0x00020000,
+    kPortal = 0x00040000,
+    kAdmin = 0x00100000,
+    kFreePkstatus = 0x00200000,
+    kImmuneCellRestrictions = 0x00400000,
+    kRequiresPackslot = 0x00800000,
+    kRetained = 0x01000000,
+    kPklitePkstatus = 0x02000000,
+    kIncludesSecondHeader = 0x04000000,
+    kBindstone = 0x08000000,
+    kVolatileRare = 0x10000000,
+    kWieldOnUse = 0x20000000,
+    kWieldLeft = 0x40000000
+};
+
 enum PublicWeenieDescFlags2
 {
     kIconUnderlay = 0x0001,
@@ -85,7 +120,7 @@ enum PublicWeenieDescFlags2
     kPetOwner = 0x0008
 };
 
-static void handleVisualDesc(BinReader& reader)
+static void handleVisualDesc(BinReader& reader, Object&)
 {
     uint8_t eleven = reader.readByte();
     assert(eleven == 0x11);
@@ -122,7 +157,7 @@ static void handleVisualDesc(BinReader& reader)
     reader.align();
 }
 
-static void handlePhysicsDesc(BinReader& reader)
+static void handlePhysicsDesc(BinReader& reader, Object&)
 {
     uint32_t flags = reader.readInt();
     /*unknown*/ reader.readInt();
@@ -237,21 +272,276 @@ static void handlePhysicsDesc(BinReader& reader)
     reader.align();
 }
 
-static void handleWeenieDesc(BinReader& reader)
+static void handleWeenieDesc(BinReader& reader, Object& object)
 {
-    /*uint32_t flags = */reader.readInt();
+    uint32_t flags = reader.readInt();
+    uint32_t flags2 = 0;
 
-    string name = reader.readString();
-    LOG(Misc, Debug) << "  name=" << name << "\n";
+    object.setProperty(StringProperty::kName, reader.readString());
+    /*weenieClassId*/ reader.readPackedInt();
+    object.setProperty(DIDProperty::kIcon, reader.readPackedInt());
+    object.setProperty(IntProperty::kItemType, reader.readInt()); // ITEM_TYPE enum, prefixed with TYPE_
+
+    uint32_t bitfield = reader.readInt(); // PublicWeenieDesc::BitfieldIndex enum, prefixed with BF_
+
+    reader.align();
+
+    if(bitfield & kInscribable)
+    {
+        object.setProperty(BoolProperty::kInscribable, true);
+    }
+
+    if(bitfield & kStuck)
+    {
+        object.setProperty(BoolProperty::kStuck, true);
+    }
+
+    if(bitfield & kAttackable)
+    {
+        object.setProperty(BoolProperty::kAttackable, true);
+    }
+
+    if(bitfield & kHiddenAdmin)
+    {
+        object.setProperty(BoolProperty::kHiddenAdmin, true);
+    }
+
+    if(bitfield & kUIHidden)
+    {
+        object.setProperty(BoolProperty::kUIHidden, true);
+    }
+
+    if(bitfield & kAdmin)
+    {
+        object.setProperty(BoolProperty::kIsAdmin, true);
+    }
+
+    if(bitfield & kRequiresPackslot)
+    {
+        object.setProperty(BoolProperty::kRequiresBackpackSlot, true);
+    }
+
+    if(bitfield & kRetained)
+    {
+        object.setProperty(BoolProperty::kRetained, true);
+    }
+
+    if(bitfield & kWieldOnUse)
+    {
+        object.setProperty(BoolProperty::kWieldOnUse, true);
+    }
+
+    if(bitfield & kIncludesSecondHeader)
+    {
+        flags2 = reader.readInt();
+    }
+
+    if(flags & kPluralName)
+    {
+        object.setProperty(StringProperty::kPluralName, reader.readString());
+    }
+
+    if(flags & kItemsCapacity)
+    {
+        object.setProperty(IntProperty::kItemsCapacity, reader.readByte());
+    }
+
+    if(flags & kContainersCapacity)
+    {
+        object.setProperty(IntProperty::kContainersCapacity, reader.readByte());
+    }
+
+    if(flags & kAmmoType)
+    {
+        object.setProperty(IntProperty::kAmmoType, reader.readShort());
+    }
+
+    if(flags & kValue)
+    {
+        object.setProperty(IntProperty::kValue, reader.readInt());
+    }
+
+    if(flags & kUseability)
+    {
+        object.setProperty(IntProperty::kItemUseable, reader.readInt());
+    }
+
+    if(flags & kUseRadius)
+    {
+        object.setProperty(FloatProperty::kUseRadius, reader.readFloat());
+    }
+
+    if(flags & kTargetType)
+    {
+        object.setProperty(IntProperty::kTargetType, reader.readInt());
+    }
+
+    if(flags & kUIEffects)
+    {
+        object.setProperty(IntProperty::kUIEffects, reader.readInt());
+    }
+
+    if(flags & kCombatUse)
+    {
+        object.setProperty(IntProperty::kCombatUse, reader.readByte());
+    }
+
+    if(flags & kStructure)
+    {
+        object.setProperty(IntProperty::kStructure, reader.readShort());
+    }
+
+    if(flags & kMaxStructure)
+    {
+        object.setProperty(IntProperty::kMaxStructure, reader.readShort());
+    }
+
+    if(flags & kStackSize)
+    {
+        object.setProperty(IntProperty::kStackSize, reader.readShort());
+    }
+
+    if(flags & kMaxStackSize)
+    {
+        object.setProperty(IntProperty::kMaxStackSize, reader.readShort());
+    }
+
+    if(flags & kContainerID)
+    {
+        object.setProperty(IIDProperty::kContainer, reader.readInt());
+    }
+
+    if(flags & kWielderID)
+    {
+        object.setProperty(IIDProperty::kWielder, reader.readInt());
+    }
+
+    if(flags & kValidLocations)
+    {
+        object.setProperty(IntProperty::kLocations, reader.readInt());
+    }
+
+    if(flags & kLocation)
+    {
+        object.setProperty(IntProperty::kCurrentWieldedLocation, reader.readInt());
+    }
+
+    if(flags & kPriority)
+    {
+        object.setProperty(IntProperty::kClothingPriority, reader.readInt());
+    }
+
+    if(flags & kBlipColor)
+    {
+        object.setProperty(IntProperty::kRadarblipColor, reader.readByte());
+    }
+
+    if(flags & kRadarEnum)
+    {
+        object.setProperty(IntProperty::kShowableOnRadar, reader.readByte());
+    }
+
+    if(flags & kPScript)
+    {
+        object.setProperty(DIDProperty::kPhysicsScript, reader.readPackedInt());
+    }
+
+    if(flags & kRadarDistance)
+    {
+        object.setProperty(FloatProperty::kObviousRadarRange, reader.readFloat());
+    }
+
+    if(flags & kBurden)
+    {
+        object.setProperty(IntProperty::kEncumbVal, reader.readShort());
+    }
+
+    if(flags & kSpellID)
+    {
+        object.setProperty(DIDProperty::kSpell, reader.readShort()); // A short?
+    }
+
+    if(flags & kHouseOwner)
+    {
+        object.setProperty(IIDProperty::kHouseOwner, reader.readInt());
+    }
+
+    if(flags & kHouseRestrictions)
+    {
+        /*flags*/ reader.readInt();
+        /*open*/ reader.readInt();
+        /*allegiance*/ reader.readInt();
+        uint16_t guestCount = reader.readShort();
+        /*guestLimit*/ reader.readShort();
+
+        for(uint16_t i = 0; i < guestCount; i++)
+        {
+            /*guest*/ reader.readInt();
+            /*storage*/ reader.readInt();
+        }
+    }
+
+    if(flags & kHookItemTypes)
+    {
+        object.setProperty(IntProperty::kHookPlacement, reader.readShort());
+        object.setProperty(IntProperty::kHookItemType, reader.readShort());
+    }
+
+    if(flags & kMonarch)
+    {
+        object.setProperty(IIDProperty::kMonarch, reader.readInt());
+    }
+
+    if(flags & kHookType)
+    {
+        object.setProperty(IntProperty::kHookType, reader.readShort());
+    }
+
+    if(flags & kIconOverlay)
+    {
+        object.setProperty(DIDProperty::kIconOverlay, reader.readPackedInt());
+    }
+
+    if(flags2 & kIconUnderlay)
+    {
+        object.setProperty(DIDProperty::kIconUnderlay, reader.readPackedInt());
+    }
+
+    if(flags & kMaterialType)
+    {
+        object.setProperty(IntProperty::kMaterialType, reader.readInt());
+    }
+
+    // properties beyond here are a guess
+
+    if(flags2 & kCooldownID)
+    {
+        object.setProperty(IntProperty::kSharedCooldown, reader.readInt());
+    }
+
+    if(flags2 & kCooldownDuration)
+    {
+        object.setProperty(FloatProperty::kCooldownDuration, reader.readDouble());
+    }
+
+    if(flags2 & kPetOwner)
+    {
+        object.setProperty(IIDProperty::kPetOwner, reader.readInt());
+    }
+
+    reader.align();
+
+    assert(reader.remaining() == 0);
 }
 
 void handleCreateObject(BinReader& reader)
 {
-    //reader.dump();
+    unique_ptr<Object> object(new Object());
 
-    /*uint32_t objectId = */reader.readInt();
+    /*iid*/ reader.readInt();
 
-    handleVisualDesc(reader);
-    handlePhysicsDesc(reader);
-    handleWeenieDesc(reader);
+    handleVisualDesc(reader, *object);
+    handlePhysicsDesc(reader, *object);
+    handleWeenieDesc(reader, *object);
 }
+

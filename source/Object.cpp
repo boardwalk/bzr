@@ -16,6 +16,43 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "Object.h"
+#include "Core.h"
+#include "Log.h"
+
+void Object::setProperty(BoolProperty property, bool value)
+{
+    LOG(Misc, Debug) << " bool " << getBoolPropertyName(property) << " = " << (value ? "true" : "false") << "\n";
+}
+
+void Object::setProperty(StringProperty property, string value)
+{
+    LOG(Misc, Debug) << " string " << getStringPropertyName(property) << " = " << value << "\n";
+}
+
+void Object::setProperty(IntProperty property, uint32_t value)
+{
+    LOG(Misc, Debug) << " int " << getIntPropertyName(property) << " = " << value << "\n";
+}
+
+void Object::setProperty(Int64Property property, uint64_t value)
+{
+    LOG(Misc, Debug) << " int64 " << getInt64PropertyName(property) << " = " << value << "\n";
+}
+
+void Object::setProperty(FloatProperty property, double value)
+{
+    LOG(Misc, Debug) << " float " << getFloatPropertyName(property) << " = " << value << "\n";
+}
+
+void Object::setProperty(IIDProperty property, uint32_t value)
+{
+    LOG(Misc, Debug) << " IID " << getIIDPropertyName(property) << " = " << hexn(value) << "\n";
+}
+
+void Object::setProperty(DIDProperty property, uint32_t value)
+{
+    LOG(Misc, Debug) << " DID " << getDIDPropertyName(property) << " = " << hexn(value) << "\n";
+}
 
 void Object::setModel(ResourcePtr model)
 {

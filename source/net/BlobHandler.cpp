@@ -154,6 +154,13 @@ void BlobHandler::handle(MessageType messageType, BinReader& reader)
         uint32_t value = reader.readInt();
         LOG(Net, Debug) << " set int " << getIntPropertyName(property) << " to " << value << "\n";
     }
+    else if(messageType == MessageType::kQualities_PrivateUpdateFloat)
+    {
+        /*sequence*/ reader.readByte();
+        FloatProperty property = FloatProperty(reader.readInt());
+        double value = reader.readDouble();
+        LOG(Net, Debug) << " set float " << getFloatPropertyName(property) << " to " << value << "\n";
+    }
     else if(messageType == MessageType::kPlayer_Description)
     {
         uint32_t flags = reader.readInt();

@@ -79,9 +79,9 @@ uint32_t BinReader::readPackedInt()
 {
     uint32_t val = readShort();
 
-    if(val == 0xFFFF)
+    if(val & 0x8000)
     {
-        val = readInt();
+        val = (val & 0x7FFF) << 16 | readShort();
     }
 
     return val;

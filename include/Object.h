@@ -18,6 +18,7 @@
 #ifndef BZR_OBJECT_H
 #define BZR_OBJECT_H
 
+#include "Property.h"
 #include "Noncopyable.h"
 #include "LandcellId.h"
 #include "Location.h"
@@ -26,6 +27,18 @@
 class Object : Noncopyable
 {
 public:
+    void setProperty(BoolProperty property, bool value);
+    void setProperty(StringProperty property, string value);
+    void setProperty(IntProperty property, uint32_t value);
+    void setProperty(Int64Property property, uint64_t value);
+    void setProperty(FloatProperty property, double value);
+    // Position
+    void setProperty(IIDProperty property, uint32_t value);
+    void setProperty(DIDProperty property, uint32_t value);
+    // Skill
+    // Attribute
+    // Attribute2nd
+
     void setModel(ResourcePtr model);
     void setLandcellId(const LandcellId& landcellId);
     void setLocation(const Location& location);
