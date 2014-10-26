@@ -22,6 +22,7 @@
 #include "Land.h"
 #include "Log.h"
 #include "Structure.h"
+#include <algorithm>
 
 LandcellManager::LandcellManager()
 {
@@ -32,7 +33,7 @@ void LandcellManager::setCenter(LandcellId c)
 {
     if(c != center_)
     {
-        LOG(Misc, Info) << "new center=" << hexn(c.x()) << ", " << hexn(c.y()) << "\n";
+        LOG(Misc, Info) << "new center=" << c.x() << ", " << c.y() << "\n";
         center_ = c;
         load();
     }
@@ -62,11 +63,11 @@ void LandcellManager::load()
 {
     // we grab more landblocks than we need so the ones that actually
     // get initialized have all their neighbors
-    uint8_t sloppyRadius = static_cast<uint8_t>(radius_) + 2;
+    int sloppyRadius = radius_ + 2;
 
-    for(uint8_t x = center_.x() - sloppyRadius; x <= center_.x() + sloppyRadius; x++)
+    for(int x = max(center_.x() - sloppyRadius, 0); x <= min(center_.x() + sloppyRadius, 0xFF); x++)
     {
-        for(uint8_t y = center_.y() - sloppyRadius; y <= center_.y() + sloppyRadius; y++)
+        for(int y = max(center_.y() - sloppyRadius, 0); y <= min(center_.y() + sloppyRadius, 0xFF); y++)
         {
             LandcellId landId(x, y);
 
@@ -84,7 +85,7 @@ void LandcellManager::load()
 
             if(data.empty())
             {
-                 continue;
+                continue;
             }
 
             data_[landId].reset(new Land(data.data(), data.size()));

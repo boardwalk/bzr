@@ -282,37 +282,43 @@ fp_t Land::calcHeight(fp_t x, fp_t y) const
 
 fp_t Land::calcHeightUnbounded(fp_t x, fp_t y) const
 {
-    LandcellId thisId = id();
+    int lx = id().x();
+    int ly = id().y();
 
     while(x < 0.0)
     {
-        thisId = LandcellId(thisId.x() - 1, thisId.y());
+        lx--;
         x += kBlockSize;
     }
 
     while(x >= kBlockSize)
     {
-        thisId = LandcellId(thisId.x() + 1, thisId.y());
+        lx++;
         x -= kBlockSize;
     }
 
     while(y < 0.0)
     {
-        thisId = LandcellId(thisId.x(), thisId.y() - 1);
+        ly--;
         y += kBlockSize;
     }
 
     while(y >= kBlockSize)
     {
-        thisId = LandcellId(thisId.x(), thisId.y() + 1);
+        ly++;
         y -= kBlockSize;
     }
 
-    auto it = Core::get().landcellManager().find(thisId);
+    if(lx < 0x00 || lx > 0xFF || ly < 0x00 || ly > 0xFF)
+    {
+        return fp_t(0.0);
+    }
+
+    auto it = Core::get().landcellManager().find(LandcellId(lx, ly));
 
     if(it == Core::get().landcellManager().end())
     {
-        throw logic_error("Landcell not found");
+        return fp_t(0.0);
     }
 
     Land& land = static_cast<Land&>(*it->second);

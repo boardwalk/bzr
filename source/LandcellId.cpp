@@ -25,13 +25,20 @@ LandcellId::LandcellId(uint32_t value) :
     value_(value)
 {}
 
-LandcellId::LandcellId(uint8_t x, uint8_t y) :
-    value_((uint32_t{x} << 24) | (uint32_t{y} << 16) | 0xFFFF)
-{}
+LandcellId::LandcellId(int x, int y) :
+    value_((x << 24) | (y << 16) | 0xFFFFu)
+{
+    assert(x >= 0 && x <= 0xFF);
+    assert(y >= 0 && y <= 0xFF);
+}
 
-LandcellId::LandcellId(uint8_t x, uint8_t y, uint16_t n) :
-    value_((uint32_t{x} << 24) | (uint32_t{y} << 16) | n)
-{}
+LandcellId::LandcellId(int x, int y, int n) :
+    value_((x << 24) | (y << 16) | n)
+{
+    assert(x >= 0 && x <= 0xFF);
+    assert(y >= 0 && y <= 0xFF);
+    assert(n >= 0 && n <= 0xFFFF);
+}
 
 int LandcellId::calcSquareDistance(LandcellId other) const
 {
@@ -40,19 +47,19 @@ int LandcellId::calcSquareDistance(LandcellId other) const
     return dx * dx + dy * dy;
 }
 
-uint8_t LandcellId::x() const
+int LandcellId::x() const
 {
-    return static_cast<uint8_t>(value_ >> 24);
+    return value_ >> 24;
 }
 
-uint8_t LandcellId::y() const
+int LandcellId::y() const
 {
-    return static_cast<uint8_t>(value_ >> 16);
+    return (value_ >> 16) & 0xFF;
 }
 
-uint16_t LandcellId::n() const
+int LandcellId::n() const
 {
-    return static_cast<uint16_t>(value_);
+    return value_ & 0xFFFF;
 }
 
 uint32_t LandcellId::value() const
