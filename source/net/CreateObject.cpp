@@ -536,12 +536,12 @@ static void handleWeenieDesc(BinReader& reader, Object& object)
 
 void handleCreateObject(BinReader& reader)
 {
-    unique_ptr<Object> object(new Object());
+    unique_ptr<Object> objectPtr(new Object());
 
     /*iid*/ reader.readInt();
 
-    handleVisualDesc(reader, *object);
-    handlePhysicsDesc(reader, *object);
-    handleWeenieDesc(reader, *object);
+    handleVisualDesc(reader, *objectPtr);
+    handlePhysicsDesc(reader, *objectPtr);
+    handleWeenieDesc(reader, *objectPtr);
 }
 

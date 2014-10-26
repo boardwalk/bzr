@@ -24,6 +24,13 @@
 #include "Location.h"
 #include "Resource.h"
 
+struct Position
+{
+    LandcellId landcell;
+    glm::vec3 position;
+    glm::quat rotation;
+};
+
 class Object : Noncopyable
 {
 public:
@@ -32,7 +39,7 @@ public:
     void setProperty(IntProperty property, uint32_t value);
     void setProperty(Int64Property property, uint64_t value);
     void setProperty(FloatProperty property, double value);
-    // Position
+    void setProperty(PositionProperty property, Position value);
     void setProperty(IIDProperty property, uint32_t value);
     void setProperty(DIDProperty property, uint32_t value);
     // Skill

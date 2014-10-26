@@ -44,6 +44,11 @@ void Object::setProperty(FloatProperty property, double value)
     LOG(Misc, Debug) << " float " << getFloatPropertyName(property) << " = " << value << "\n";
 }
 
+void Object::setProperty(PositionProperty property, Position)
+{
+    LOG(Misc, Debug) << " location " << getPositionPropertyName(property) << "\n";
+}
+
 void Object::setProperty(IIDProperty property, uint32_t value)
 {
     LOG(Misc, Debug) << " IID " << getIIDPropertyName(property) << " = " << hexn(value) << "\n";
