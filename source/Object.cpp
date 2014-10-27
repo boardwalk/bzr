@@ -16,6 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "Object.h"
+#include "Camera.h"
 #include "Core.h"
 #include "LandcellManager.h"
 #include "Log.h"
@@ -89,6 +90,11 @@ void Object::setLandcellId(const LandcellId& landcellId)
 
 void Object::setLocation(const Location& location)
 {
+    if(id_ == Core::get().objectManager().playerId())
+    {
+        Core::get().camera().setPosition(location.position);
+    }
+
     location_ = location;
 }
 
