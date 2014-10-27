@@ -475,12 +475,16 @@ void Session::tick(net_time_point now)
             flags |= kEchoRequest;
             writer.writeFloat(chrono::duration<float>(now - manager_.getClientBegin()).count());
 
-            flags |= kFlow;
-            writer.writeInt(lastFlowBytes_);
-            writer.writeShort(lastFlowTime_);
+            if(lastFlowBytes_ != 0)
+            {
+                flags |= kFlow;
+                writer.writeInt(lastFlowBytes_);
+                writer.writeShort(lastFlowTime_);
 
-            lastFlowBytes_ = 0;
-            lastFlowTime_ = time;
+                lastFlowBytes_ = 0;
+                lastFlowTime_ = time;
+            }
+
             nextPeriodic_ = now + kPingPacketDelay;
 
             LOG(Net, Debug) << address_ << " sending time sync, echo request, flow\n";
