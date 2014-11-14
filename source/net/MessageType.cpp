@@ -22,7 +22,7 @@
 
 static const unordered_map<uint32_t, string> kMessageNames
 {
-#include "net/MessageTypeData.inc"
+#include "net/MessageType.inc"
 };
 
 const string& getMessageName(MessageType messageType)

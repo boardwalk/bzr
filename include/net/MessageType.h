@@ -22,7 +22,7 @@
 
 enum class MessageType : uint32_t
 {
-#include "net/MessageTypeData.inc"
+#include "net/MessageType.inc"
 };
 
 #undef ENTRY
