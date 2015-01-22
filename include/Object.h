@@ -26,6 +26,28 @@
 #include "Resource.h"
 #include <unordered_map>
 
+#define DEFINE_HASHER(type) \
+    template<> \
+    struct hash<type> \
+    { \
+        size_t operator()(type value) const \
+        { return static_cast<size_t>(value); } \
+    };
+
+namespace std
+{
+    DEFINE_HASHER(BoolProperty)
+    DEFINE_HASHER(StringProperty)
+    DEFINE_HASHER(IntProperty)
+    DEFINE_HASHER(Int64Property)
+    DEFINE_HASHER(FloatProperty)
+    DEFINE_HASHER(PositionProperty)
+    DEFINE_HASHER(IIDProperty)
+    DEFINE_HASHER(DIDProperty)
+}
+
+#undef DEFINE_HASHER
+
 struct Position
 {
     LandcellId landcell;
