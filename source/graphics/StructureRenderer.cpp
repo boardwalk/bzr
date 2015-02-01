@@ -21,8 +21,8 @@
 #include "graphics/util.h"
 #include "Camera.h"
 #include "Core.h"
-#include "LandcellManager.h"
 #include "Landcell.h"
+#include "LandcellManager.h"
 #include "Structure.h"
 #include <glm/gtc/matrix_transform.hpp>
 

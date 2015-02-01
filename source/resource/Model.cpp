@@ -19,10 +19,10 @@
 #include "resource/BSP.h"
 #include "resource/ImgColor.h"
 #include "resource/ImgTex.h"
-#include "ResourceCache.h"
 #include "resource/Surface.h"
 #include "BinReader.h"
 #include "Core.h"
+#include "ResourceCache.h"
 #include "util.h"
 
 enum ModelFlags

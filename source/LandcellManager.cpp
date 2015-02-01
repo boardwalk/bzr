@@ -16,8 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include "LandcellManager.h"
-#include "Core.h"
 #include "Config.h"
+#include "Core.h"
 #include "DatFile.h"
 #include "Land.h"
 #include "Log.h"

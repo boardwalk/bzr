@@ -20,12 +20,12 @@
 #include "graphics/Renderer.h"
 #include "graphics/util.h"
 #include "resource/AnimationFrame.h"
+#include "resource/Model.h"
 #include "resource/Setup.h"
 #include "Camera.h"
 #include "Core.h"
 #include "Land.h"
 #include "LandcellManager.h"
-#include "resource/Model.h"
 #include "ObjectManager.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
