@@ -18,6 +18,7 @@
 #include "net/BlobAssembler.h"
 #include "Core.h"
 #include "Log.h"
+#include <climits>
 
 enum NetQueue
 {

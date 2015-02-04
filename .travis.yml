@@ -1,0 +1,11 @@
+language: cpp
+compiler: g++
+before_install:
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  - sudo apt-get update -qq
+install:
+  - sudo apt-get install -y ninja-build g++-4.9
+  - ./install-deps.sh
+script:
+  - ./make_ninja_build.py
+  - ninja

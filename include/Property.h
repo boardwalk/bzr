@@ -80,17 +80,17 @@ enum class Attribute2ndProperty : uint32_t
 #define DECLARE_GET(t) \
   const string& get##t##PropertyName(t##Property property);
 
-DECLARE_GET(Bool);
-DECLARE_GET(String);
-DECLARE_GET(Int);
-DECLARE_GET(Int64);
-DECLARE_GET(Float);
-DECLARE_GET(Position);
-DECLARE_GET(IID);
-DECLARE_GET(DID);
-DECLARE_GET(Skill);
-DECLARE_GET(Attribute);
-DECLARE_GET(Attribute2nd);
+DECLARE_GET(Bool)
+DECLARE_GET(String)
+DECLARE_GET(Int)
+DECLARE_GET(Int64)
+DECLARE_GET(Float)
+DECLARE_GET(Position)
+DECLARE_GET(IID)
+DECLARE_GET(DID)
+DECLARE_GET(Skill)
+DECLARE_GET(Attribute)
+DECLARE_GET(Attribute2nd)
 
 #undef DECLARE_GET
 
