@@ -19,30 +19,9 @@
 #include "Core.h"
 #include "Log.h"
 #include "ObjectManager.h"
+#include "PhysicsDesc.h"
 #include "ResourceCache.h"
 #include "util.h"
-
-enum PhysicsDescFlags
-{
-    kCSetup = 0x00000001,
-    kMTable = 0x00000002,
-    kVelocity = 0x00000004,
-    kAcceleration = 0x00000008,
-    kOmega = 0x00000010,
-    kParent = 0x00000020,
-    kChildren = 0x00000040,
-    kObjScale = 0x00000080,
-    kFriction = 0x00000100,
-    kElasticity = 0x00000200,
-    kSTable = 0x00000800,
-    kPETable = 0x00001000,
-    kDefaultScript = 0x00002000,
-    kDefaultScriptIntensity = 0x00004000,
-    kPosition = 0x00008000,
-    kMovement = 0x00010000,
-    kAnimFrameId = 0x00020000,
-    kTranslucency = 0x00040000
-};
 
 enum PublicWeenieDescFlags
 {
@@ -157,128 +136,6 @@ static void handleObjDesc(BinReader& reader, Object&)
         /*index*/ reader.readByte();
         /*model*/ reader.readPackedInt();
     }
-
-    reader.align();
-}
-
-// AC: PhysicsDesc
-static void handlePhysicsDesc(BinReader& reader, Object& object)
-{
-    uint32_t flags = reader.readInt();
-    /*unknown*/ reader.readInt();
-
-    if(flags & kMovement)
-    {
-        uint32_t movementSize = reader.readInt();
-        reader.readRaw(movementSize);
-        /*autonomousMovement*/ reader.readInt();
-    }
-
-    if(flags & kAnimFrameId)
-    {
-        /*animFrameId*/ reader.readInt();
-    }
-
-    if(flags & kPosition)
-    {
-        object.setLandcellId(LandcellId(reader.readInt()));
-
-        Location location;
-        read(reader, location.position);
-        read(reader, location.rotation);
-        object.setLocation(location);
-    }
-
-    if(flags & kMTable)
-    {
-        /*motionTable*/ reader.readInt();
-    }
-
-    if(flags & kSTable)
-    {
-        /*soundTable*/ reader.readInt();
-    }
-
-    if(flags & kPETable)
-    {
-        /*particleEmitterTable*/ reader.readInt();
-    }
-
-    if(flags & kCSetup)
-    {
-        uint32_t setup = reader.readInt();
-        object.setModel(Core::get().resourceCache().get(setup));
-    }
-
-    if(flags & kParent)
-    {
-        /*parent*/ reader.readInt();
-        /*parentSlot*/ reader.readInt();
-    }
-
-    if(flags & kChildren)
-    {
-        uint32_t numChildren = reader.readInt();
-
-        for(uint32_t i = 0; i < numChildren; i++)
-        {
-            /*child*/ reader.readInt();
-            /*childSlot*/ reader.readInt();
-        }
-    }
-
-    if(flags & kObjScale)
-    {
-        /*scale*/ reader.readFloat();
-    }
-
-    if(flags & kFriction)
-    {
-        /*friction*/ reader.readFloat();
-    }
-
-    if(flags & kElasticity)
-    {
-        /*elasticity*/ reader.readFloat();
-    }
-
-    if(flags & kTranslucency)
-    {
-        /*translucency*/ reader.readFloat();
-    }
-
-    if(flags & kVelocity)
-    {
-        /*vx*/ reader.readFloat();
-        /*vy*/ reader.readFloat();
-        /*vz*/ reader.readFloat();
-    }
-
-    if(flags & kAcceleration)
-    {
-        /*ax*/ reader.readFloat();
-        /*ay*/ reader.readFloat();
-        /*az*/ reader.readFloat();
-    }
-
-    if(flags & kOmega)
-    {
-        /*avx*/ reader.readFloat();
-        /*avy*/ reader.readFloat();
-        /*avz*/ reader.readFloat();
-    }
-
-    if(flags & kDefaultScript)
-    {
-        /*defaultScript*/ reader.readInt();
-    }
-
-    if(flags & kDefaultScriptIntensity)
-    {
-        /*defaultScriptIntensity*/ reader.readFloat();
-    }
-
-    /*timestamps*/ reader.readRaw(sizeof(uint16_t) * 9);
 
     reader.align();
 }
@@ -553,6 +410,9 @@ void handleCreateObject(BinReader& reader)
     Object& object = Core::get().objectManager()[objectId];
 
     handleObjDesc(reader, object);
-    handlePhysicsDesc(reader, object);
+
+    PhysicsDesc physicsDesc;
+    read(reader, physicsDesc);
+
     handleWeenieDesc(reader, object);
 }
