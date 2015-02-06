@@ -6,6 +6,8 @@
 
 ## System requirements
 
+[![Join the chat at https://gitter.im/boardwalk/bzr](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/boardwalk/bzr?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 *  Linux, Mac or Windows
 *  OpenGL 4.1+
 
