@@ -1,9 +1,5 @@
 [![Build Status](https://travis-ci.org/boardwalk/bzr.svg?branch=master)](https://travis-ci.org/boardwalk/bzr)
 
-[Design document](http://ersatsz.com/2014/07/07/baelzharons-respite/)
-
-[Technical documentation](http://ersatsz.com/2014/07/04/asherons-call/)
-
 ## System requirements
 
 *  Linux, Mac or Windows
