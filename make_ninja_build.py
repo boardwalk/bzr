@@ -81,9 +81,9 @@ def main():
 
             sdl_dir = os.path.expanduser(r'~\Documents\SDL2-2.0.3')
             cppflags += r' /MD /I{}\include'.format(sdl_dir)
-            linkflags += r' /libpath:{}\lib\x64 SDL2.lib SDL2main.lib'.format(sdl_dir)
+            linkflags += r' /libpath:{0}\VisualC\SDL\x64\Release /libpath:{0}\VisualC\SDLmain\x64\Release SDL2.lib SDL2main.lib'.format(sdl_dir)
 
-            jansson_dir = os.path.expanduser(r'~\Documents\jansson-2.6\VisualStudioSolution')
+            jansson_dir = os.path.expanduser(r'~\Documents\jansson-2.7\VisualStudioSolution')
             cppflags += r' /I{}\include'.format(jansson_dir)
             linkflags += r' /libpath:{}\x64\Release jansson.lib advapi32.lib'.format(jansson_dir)
 
@@ -91,7 +91,7 @@ def main():
             cppflags += r' /I{}'.format(glm_dir)
 
             if not args.headless:
-                glew_dir = os.path.expanduser(r'~\Documents\glew-1.10.0')
+                glew_dir = os.path.expanduser(r'~\Documents\glew-1.12.0')
                 cppflags += r' /I{}\include'.format(glew_dir)
                 linkflags += r' /libpath:{}\lib\Release\x64 OpenGL32.lib glew32.lib'.format(glew_dir)
 
@@ -131,7 +131,7 @@ def main():
             n.rule('header', 'python make_include_file.py $in $out')
             n.rule('copy', 'cmd /c copy $in $out')
 
-            n.build(r'output\SDL2.dll', 'copy', r'{}\lib\x64\SDL2.dll'.format(sdl_dir))
+            n.build(r'output\SDL2.dll', 'copy', r'{}\VisualC\SDL\x64\Release\SDL2.dll'.format(sdl_dir))
             n.default(r'output\SDL2.dll')
 
             if not args.headless:
