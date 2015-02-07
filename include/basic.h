@@ -30,10 +30,14 @@
 #endif
 
 #define GLM_FORCE_RADIANS
+#ifdef _MSC_VER
 #pragma warning(push)
 #pragma warning(disable : 4201)
+#endif
 #include <glm/gtc/quaternion.hpp> // includes mat3, mat4, vec3, vec4
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif
 
 #include <cassert>
 #include <cstdint>
